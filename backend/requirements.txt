@@ -1,0 +1,39 @@
+# requirements.txt (alternative to poetry)
+# --- Core ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# --- Database ---
+SQLAlchemy==2.0.36
+alembic==1.14.0
+psycopg2-binary==2.9.9  # PostgreSQL driver
+
+# --- Validation & Utils ---
+pydantic==2.9.2
+pydantic-settings==2.7.1   # For config from env vars
+
+# --- Security / Auth ---
+python-jose[cryptography]==3.3.0  # JWT
+passlib[bcrypt]==1.7.4            # Password hashing
+
+# --- Caching / Async ---
+redis==5.0.7
+aioredis==2.0.1                   # Async Redis client
+
+# --- Observability ---
+sentry-sdk==2.16.0
+structlog==24.4.0                 # Structured logging
+
+# --- Testing ---
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2                     # Async HTTP client for tests
+factory-boy==3.3.1                # Test data factories
+
+# --- Optional (only if using Elasticsearch later) ---
+elasticsearch==8.15.1
+
+# --- Dev Tools ---
+black==24.8.0
+flake8==7.1.1
+isort==5.13.2
