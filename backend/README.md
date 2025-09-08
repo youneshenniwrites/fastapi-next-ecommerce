@@ -31,11 +31,11 @@ backend/
 │   ├── db/                  # Database layer
 │   │   ├── __init__.py
 │   │   ├── session.py       # SQLAlchemy session
-│   │   ├── base.py          # Base class for models
 │   │   └── init_db.py       # Seeding, initial setup
 │   │
 │   ├── models/              # SQLAlchemy models
 │   │   ├── __init__.py
+│   │   ├── base.py          # Base class for models
 │   │   ├── user.py
 │   │   ├── product.py
 │   │   ├── order.py
