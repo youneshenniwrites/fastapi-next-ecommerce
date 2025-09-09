@@ -9,7 +9,7 @@ SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    echo=True,  # Logs SQL queries, remove in prod
+    echo=False,
     future=True
 )
 
