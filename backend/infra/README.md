@@ -65,3 +65,23 @@ This folder contains Terraform code to deploy the FastAPI app to AWS.
   ```bash
   terraform destroy
   ```
+
+## 💾 Remote State
+
+This project uses **Terraform remote state** stored in an S3 bucket with **DynamoDB table locking** to prevent concurrent `apply` operations.
+
+- S3 bucket: `fastapi-terraform-state-bucket`
+- DynamoDB table: `terraform-locks`
+- Defined in `remote_state.tf` and configured in `backend.tf`
+
+Make sure these resources exist (Terraform can also create them on first apply).
+
+## ⚠️ Changing Backend
+
+If you modify the backend (e.g., bucket name or region), run:
+
+```bash
+terraform init -reconfigure
+```
+
+This ensures Terraform migrates the local state to the remote backend.
