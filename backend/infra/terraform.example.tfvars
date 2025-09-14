@@ -1,0 +1,5 @@
+region          = "us-east-1"
+container_image = "your-dockerhub-user/fastapi:latest"
+db_password     = "changeme"
+hosted_zone_id  = "Z1234567890"
+domain_name     = "api.example.com"
