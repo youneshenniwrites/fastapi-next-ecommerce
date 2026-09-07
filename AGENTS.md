@@ -1,7 +1,7 @@
 # Working in this repository
 
-The current product is a FastAPI backend. The frontend/ directory is a Next.js
-skeleton; the runnable storefront and checkout flow are still planned. Read
+The product has a FastAPI backend and a runnable Next.js catalog storefront.
+Customer sessions and checkout are still planned. Read
 docs/plans/portfolio.md, docs/architecture.md, and docs/plans/roadmap.md before choosing work; update their
 factual status when a feature lands.
 

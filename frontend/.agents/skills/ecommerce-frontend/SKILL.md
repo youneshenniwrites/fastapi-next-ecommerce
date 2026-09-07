@@ -3,10 +3,8 @@ name: ecommerce-frontend
 description: Scaffold or implement the Next.js ecommerce storefront, its FastAPI integration, and browser verification inside frontend/.
 ---
 
-Read frontend/AGENTS.md and the root roadmap. First inspect whether package.json
-and working checks exist; this folder begins as a directory skeleton. For a
-scaffolding task, establish the smallest runnable App Router/TypeScript app and
-verification commands before adding shopping features.
+Read frontend/AGENTS.md and the root roadmap. Inspect package.json and the existing catalog, generated API types, and checks.
+Preserve the working App Router/TypeScript baseline when adding shopping features.
 
 Use src/app for route composition, src/components for shared UI, and src/lib/api
 for the API client. Generate request/response types from FastAPI's OpenAPI schema;

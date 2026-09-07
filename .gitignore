@@ -2,3 +2,6 @@ backend/.env
 .worktrees/
 .artifacts/
 .DS_Store
+
+frontend/storefront-build.tar.gz
+frontend/audit.json

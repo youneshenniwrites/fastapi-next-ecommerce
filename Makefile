@@ -44,3 +44,10 @@ demo:
 
 admin:
 	cd backend && uv run python -m app.bootstrap admin --email "$(EMAIL)"
+
+.PHONY: frontend frontend-check
+frontend:
+	cd frontend && npm ci && npm run dev
+
+frontend-check:
+	cd frontend && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e

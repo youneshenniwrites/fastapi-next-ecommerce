@@ -3,9 +3,9 @@
 [![Backend CI](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/ci.yml)
 [![Dependency audit](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/dependency-audit.yml)
 
-A storefront project built around a FastAPI API and PostgreSQL, with a planned
+A storefront project built around a FastAPI API and PostgreSQL, with a
 Next.js frontend. **The launch currency is GBP and the chosen cloud is Azure.**
-The backend is runnable locally; the storefront and checkout are still in development.
+The backend and catalog storefront run locally; checkout is still planned.
 
 [Quick start](#quick-start) · [API](#api-overview) · [Checks](#testing-and-quality) ·
 [Architecture](docs/architecture.md) · [Roadmap](docs/plans/roadmap.md) ·
@@ -22,7 +22,7 @@ The backend is runnable locally; the storefront and checkout are still in develo
 | Development | Generated local credentials, Docker Compose, locked Python dependencies |
 | Verification | SQLite/PostgreSQL tests, container smoke tests, coverage gate, dependency audits |
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
-| Frontend | Directory skeleton and guidance only; no runnable Next.js app yet |
+| Frontend | Responsive Next.js catalog/detail pages, filters, generated API types and browser checks |
 | Shopping | Cart, orders, payment processing, and order history are planned |
 | Hosting | Azure is planned; no Azure deployment is provisioned |
 
@@ -50,8 +50,9 @@ and excluded from Git and the Docker build context.
 - OpenAPI contract: [localhost:8000/openapi.json](http://localhost:8000/openapi.json)
 - Health: [localhost:8000/health](http://localhost:8000/health)
 
-There is no frontend listening on port 3000 yet. Re-run `make dev` after changing
-containerized code; use the host workflow below for automatic API reloads.
+For the storefront, run `make demo`, then `cd frontend && npm ci && npm run dev`
+with Node 24.20.0 and npm 11.19.1. Open [localhost:3000](http://localhost:3000).
+See [frontend setup](frontend/README.md). Re-run `make dev` after changing containerized code.
 
 ```sh
 make down  # stops the stack and preserves PostgreSQL data
@@ -98,7 +99,7 @@ HTTP client → FastAPI routes/dependencies → CRUD helpers → SQLAlchemy → 
                        └─ Pydantic validation, JWT checks, admin permissions
 ```
 
-The planned Next.js App Router frontend will consume FastAPI's OpenAPI contract.
+The Next.js App Router frontend consumes generated types from FastAPI's OpenAPI contract.
 FastAPI remains authoritative for permissions, product prices, inventory, and
 future order totals. Domain services will own checkout transactions when that flow
 is implemented; payment/email files currently contain placeholders.
@@ -108,6 +109,9 @@ then starts the non-root API container. Database and API host ports bind to loop
 See [architecture](docs/architecture.md) for the current design and Azure direction.
 
 ## API overview
+
+See [OpenAPI contract and Swagger workflow](docs/api.md) for interactive documentation
+and generated frontend types.
 
 All resource routes use `/api/v1`. Authentication uses an OAuth2-style password
 form and bearer access tokens. Registration never grants admin privileges.
@@ -161,12 +165,17 @@ rollback plan. See [development guide](docs/development.md#database-work).
 
 ## Testing and quality
 
-CI runs four jobs:
+Backend CI runs three jobs, with dependency auditing in a separate workflow:
 
 - **backend:** locked installation, Ruff, requirements consistency, tests, and coverage.
 - **postgres:** the full test suite against separate disposable PostgreSQL databases.
 - **container:** image build, startup, authentication smoke flow, migration checks and rollback.
 - **dependency-audit:** known-vulnerability checks, also run weekly and on demand.
+
+Frontend CI also checks formatting, lint, types, API contract drift, unit coverage,
+a production build, and desktop/mobile browser and accessibility behavior. It
+archives browser evidence and the validated standalone build.
+See [frontend verification](frontend/README.md) for commands and evidence.
 
 Coverage and audit artifacts remain available for 14 days. Dependabot proposes
 weekly Python, CI action, and Docker updates; updates still need review and checks.
@@ -196,7 +205,7 @@ backup/restore, and rollback before provisioning. The old AWS Terraform in
 `backend/infra` is legacy reference, not the deployment path.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
-The next product steps are a runnable catalog frontend, customer
+The next product steps are customer
 sessions, carts, orders, and sandbox payments. Follow the
 [ordered roadmap](docs/plans/roadmap.md) for the remaining work.
 
@@ -206,7 +215,7 @@ sessions, carts, orders, and sandbox payments. Follow the
 backend/app/          API, models, schemas, CRUD helpers, tests
 backend/alembic/      Versioned database migrations
 backend/scripts/      Local setup, smoke tests, requirements check
-frontend/             Next.js directory skeleton and scoped guidance
+frontend/             Next.js storefront, generated API types and browser tests
 .agents/skills/       Shared agent workflows
 .github/              CI, dependency updates, contribution templates
 compose.yaml          Local PostgreSQL/migration/API stack

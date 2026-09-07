@@ -4,8 +4,10 @@ FastAPI exposes /health and /api/v1/auth and /api/v1/products. SQLAlchemy models
 currently represent users and products. PostgreSQL is the development runtime;
 SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
-The frontend/ directory provides a Next.js skeleton and scoped agent guidance.
-The browser application, cart, orders, and payment adapters are not implemented.
+The frontend/ directory provides the Next.js catalog and product-detail storefront.
+Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
+browser receives product data for local filtering. Cart, orders and payment
+adapters are not implemented.
 Existing files for those domains are placeholders. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
@@ -25,7 +27,7 @@ legacy reference; its nested workflow is not an active deployment pipeline.
 
 As checkout is implemented, domain services will own transactions and coordinate
 CRUD helpers. FastAPI remains authoritative for permissions, money, and inventory.
-The future Next.js app will consume an OpenAPI-generated contract.
+The Next.js app consumes an OpenAPI-generated contract; CI rejects contract drift.
 
 ## Planned Azure hosting
 
