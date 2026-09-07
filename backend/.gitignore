@@ -73,3 +73,5 @@ dmypy.json
 .terraform/
 terraform.tfvars
 !.env.example
+
+/dependency-audit.json
