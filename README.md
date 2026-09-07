@@ -143,8 +143,9 @@ Stock must be a nonnegative integer. Lists use a stable id order, a limit of 1â€
 description may explicitly be null. Unsupported currencies and unknown fields
 are rejected. See [backend documentation](backend/README.md) for full constraints.
 
-An admin bootstrap command is still planned. Product management is tested using
-isolated admin fixtures; there is no default admin password or public promotion route.
+Run `make demo` to populate an empty catalog, then `make admin EMAIL=admin@example.com`
+to create an admin with a hidden password prompt. See the [demo guide](docs/demo.md)
+for rerun and promotion behavior. There is no default admin password or public promotion route.
 
 ## Database migrations
 
@@ -194,7 +195,8 @@ will define region, costs, identities/secrets, registry, networking, logs,
 backup/restore, and rollback before provisioning. The old AWS Terraform in
 `backend/infra` is legacy reference, not the deployment path.
 
-The next product steps are admin bootstrap, a runnable catalog frontend, customer
+This is a [senior SWE portfolio project](docs/plans/portfolio.md).
+The next product steps are a runnable catalog frontend, customer
 sessions, carts, orders, and sandbox payments. Follow the
 [ordered roadmap](docs/plans/roadmap.md) for the remaining work.
 

@@ -1,5 +1,7 @@
 # Delivery roadmap
 
+Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
+
 ## Landed foundation
 
 - Authentication repair, active-user/admin checks, bcrypt compatibility, and 22 regression tests (PR #1).
@@ -18,8 +20,8 @@
 
 ## Next PRs, in dependency order
 
-1. Admin bootstrap: an explicit command to create/promote the first admin without
-   hardcoded credentials; verify idempotence and prevent accidental password reset.
+1. Demo foundation implemented: explicit admin bootstrap and empty-catalog seeding.
+   See [demo guide](../demo.md); next build the runnable storefront.
 2. Next.js catalog: App Router, TypeScript, locked runtime, generated OpenAPI client,
    product list/detail, loading/empty/error states, and browser checks.
 3. Customer frontend auth: login/register/profile, server-mediated secure session
