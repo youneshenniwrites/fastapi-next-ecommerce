@@ -1,0 +1,21 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint (locked backend environment)
+        entry: uv run --project backend --locked ruff check
+        language: system
+        types: [python]
+        files: ^backend/
+      - id: ruff-format
+        name: Ruff format check (locked backend environment)
+        entry: uv run --project backend --locked ruff format --check
+        language: system
+        types: [python]
+        files: ^backend/
+      - id: requirements-sync
+        name: Runtime requirements match uv.lock
+        entry: python3 backend/scripts/check_requirements.py
+        language: system
+        pass_filenames: false
+        files: ^backend/(pyproject\.toml|uv\.lock|requirements\.txt)$

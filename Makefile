@@ -1,6 +1,6 @@
 COMPOSE = docker compose --env-file backend/.env -f compose.yaml
 
-.PHONY: setup dev down check migrate test lint
+.PHONY: setup dev down check migrate test lint coverage audit hooks hooks-check requirements-check
 setup:
 	python3 backend/scripts/dev_setup.py
 	cd backend && uv sync --locked
@@ -22,3 +22,18 @@ test:
 
 lint:
 	cd backend && uv run ruff check . && uv run ruff format --check .
+
+coverage:
+	cd backend && uv run pytest --cov --cov-report=term-missing --cov-report=xml
+
+audit:
+	cd backend && uv run pip-audit --strict
+
+hooks:
+	cd backend && uv run pre-commit install
+
+hooks-check:
+	cd backend && uv run pre-commit run --all-files
+
+requirements-check:
+	python3 backend/scripts/check_requirements.py
