@@ -4,7 +4,8 @@ FastAPI exposes /health and /api/v1/auth and /api/v1/products. SQLAlchemy models
 currently represent users and products. PostgreSQL is the development runtime;
 SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
-The browser frontend, cart, orders, and payment adapters are not implemented.
+The frontend/ directory provides a Next.js skeleton and scoped agent guidance.
+The browser application, cart, orders, and payment adapters are not implemented.
 Existing files for those domains are placeholders. Product money still uses Float;
 conversion and database constraints are the next catalog task.
 
@@ -18,9 +19,21 @@ Active admins may mutate products. Customers may read the catalog and their own
 profile. No public route creates an admin.
 
 CI performs locked dependency installation, lint, formatting, tests, and a real
-container/PostgreSQL smoke flow. Infrastructure under backend/infra is incomplete;
-its old nested workflow is not an active deployment pipeline.
+container/PostgreSQL smoke flow. The AWS infrastructure under backend/infra is
+legacy reference; its nested workflow is not an active deployment pipeline.
 
 As checkout is implemented, domain services will own transactions and coordinate
 CRUD helpers. FastAPI remains authoritative for permissions, money, and inventory.
 The future Next.js app will consume an OpenAPI-generated contract.
+
+## Planned Azure hosting
+
+Azure replaces the original AWS direction. No Azure resources are provisioned.
+The proposed starting point is [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/overview)
+for FastAPI and the future Next.js server, plus [Azure Database for PostgreSQL
+Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/overview).
+
+The infrastructure PR will define the subscription, region, cost limits, container
+registry, identity/secrets, networking, and monitoring. It must also cover database
+migrations, TLS, backup/restore, and rollback. Local Docker Compose stays independent
+of cloud provisioning. The legacy AWS Terraform is not an Azure implementation.

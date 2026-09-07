@@ -5,11 +5,12 @@
 - Authentication repair, active-user/admin checks, bcrypt compatibility, and 22 regression tests (PR #1).
 - Locked Python dependencies, Ruff checks, and root GitHub CI (PR #1).
 
-## Current delivery
+## Additional foundation
 
 - Reproducible local credentials and Docker/PostgreSQL setup.
 - Initial migrations and upgrade/downgrade/metadata checks.
-- Agent instructions and three focused repository skills.
+- Agent instructions and three focused repository skills (PR #2).
+- Frontend directory skeleton with a scoped skill, and shared Azure planning guidance.
 
 ## Next PRs, in dependency order
 
@@ -28,8 +29,10 @@
    handling, idempotency, and concurrent last-item purchase tests.
 7. Sandbox payments: select the provider, verify webhooks, handle duplicates,
    failures/cancellations, and connect confirmation/order history.
-8. Deployment: finish Terraform with explicit environment/cost decisions, staging,
-   secrets, TLS, migrations, logs, backup/restore, and rollback evidence.
+8. Azure deployment: replace the legacy AWS direction with Azure infrastructure,
+   starting from Container Apps and PostgreSQL Flexible Server. Establish explicit
+   environment/cost decisions, staging, secrets, TLS, migrations, logs, backup/restore,
+   and rollback evidence. Choose the infrastructure tooling in that PR.
 
 Each PR includes acceptance evidence, self-review findings, and passing CI before
 merge under the user's authorization. Production/cloud deployment and paid external

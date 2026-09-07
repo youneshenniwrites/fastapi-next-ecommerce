@@ -1,8 +1,9 @@
 # Working in this repository
 
-The current product is a FastAPI backend. The Next.js frontend and checkout flow
-are planned, not implemented. Read docs/architecture.md and docs/plans/roadmap.md
-before choosing work; update their factual status when a feature lands.
+The current product is a FastAPI backend. The frontend/ directory is a Next.js
+skeleton; the runnable storefront and checkout flow are still planned. Read
+docs/architecture.md and docs/plans/roadmap.md before choosing work; update their
+factual status when a feature lands.
 
 ## Commands
 
@@ -36,9 +37,11 @@ FastAPI owns permissions, product prices, stock, and future order totals. Browse
 inputs cannot establish admin privileges or authoritative payment state. Schema
 changes include reviewed Alembic migrations. Tests must use disposable databases.
 Do not run downgrade, volume deletion, or seed experiments against customer data.
-The current Terraform files are incomplete and are not an approved deployment path.
+Azure is the chosen cloud provider. The AWS Terraform in backend/infra is legacy
+reference and is not an approved deployment path.
 
 Project skills in .agents/skills cover feature isolation, backend changes, and
-verification. User instructions take precedence over skill guidelines. Use only
-skills relevant to the task. No external reviewer service or public evidence host
+verification, and Azure planning. Frontend-specific guidance lives under
+frontend/.agents/skills and frontend/AGENTS.md. User instructions take precedence
+over skill guidelines. Use only skills relevant to the task. No external reviewer service or public evidence host
 is required; attach redacted logs/screenshots only within the authorized workflow.
