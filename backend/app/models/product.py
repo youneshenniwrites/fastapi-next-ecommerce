@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, Text, DateTime, func
+from sqlalchemy import Column, DateTime, Float, Integer, String, Text, func
+
 from app.models.base import Base
+
 
 class Product(Base):
     __tablename__ = "products"
@@ -9,5 +11,6 @@ class Product(Base):
     description = Column(Text, nullable=True)
     price = Column(Float, nullable=False)
     stock = Column(Integer, default=0)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
