@@ -14,10 +14,8 @@
 
 ## Next PRs, in dependency order
 
-1. Catalog correctness: replace Float money with a chosen explicit currency/minor-unit
-   or decimal representation, preserve existing values through a reviewed migration,
-   bound pagination, validate names/stock/prices, and add DB constraints. Prove
-   invalid/null updates fail and valid CRUD works for admins.
+1. Catalog correctness is implemented: GBP decimal prices, bounded pagination,
+   request validation, database constraints, and legacy-data migration checks.
 2. Admin bootstrap: an explicit command to create/promote the first admin without
    hardcoded credentials; verify idempotence and prevent accidental password reset.
 3. Next.js catalog: App Router, TypeScript, locked runtime, generated OpenAPI client,

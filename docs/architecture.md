@@ -6,8 +6,9 @@ SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
 The frontend/ directory provides a Next.js skeleton and scoped agent guidance.
 The browser application, cart, orders, and payment adapters are not implemented.
-Existing files for those domains are placeholders. Product money still uses Float;
-conversion and database constraints are the next catalog task.
+Existing files for those domains are placeholders. Product prices use Decimal /
+NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
+API validation and database constraints protect catalog values.
 
 The initial development stack has PostgreSQL, a one-shot migration container, and
 the API. The API starts only after migrations succeed. It runs as a non-root user.

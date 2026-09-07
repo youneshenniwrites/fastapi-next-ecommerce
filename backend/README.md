@@ -47,3 +47,27 @@ To refresh the pip compatibility export after changing dependencies:
 ```sh
 uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file requirements.txt
 ```
+
+## Product contract
+
+The launch currency is GBP. Products return `price` as a two-place decimal string
+(for example `"19.90"`) and `currency: "GBP"`. Create requests may omit currency;
+other currencies are rejected. Prices range from 0.00 to 9999999999.99 and may have
+at most two decimal places. Stock is an integer from 0 to 2147483647. Names are
+trimmed and must contain 1–255 characters; descriptions allow up to 10,000.
+
+PUT retains its existing partial-update behavior: omitted fields are preserved.
+Only description may explicitly be null. Unknown fields are rejected. Product
+lists are ordered by id; skip is 0–100000 and limit is 1–100 (default 10).
+
+Migration 0002 labels existing prices GBP, changes storage to NUMERIC(12, 2), and
+adds constraints. It requires an online database connection and checks existing
+data before DDL, refusing invalid rows or
+prices that require rounding. Back up existing databases and correct flagged rows
+before retrying. Downgrading restores legacy float storage and removes currency;
+it is intended for disposable tests, not as a substitute for a production rollback
+and backup plan.
+
+CI runs the tests against both SQLite and PostgreSQL. TEST_DATABASE_URL and
+TEST_MIGRATION_DATABASE_URL are test-only overrides that must name two distinct,
+disposable databases: these tests create/drop tables and exercise downgrades.

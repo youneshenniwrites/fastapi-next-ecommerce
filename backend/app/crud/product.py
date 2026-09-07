@@ -7,7 +7,7 @@ from app.schemas.product import ProductCreate, ProductUpdate
 
 
 def get_products(db: Session, skip: int = 0, limit: int = 10) -> List[Product]:
-    return db.query(Product).offset(skip).limit(limit).all()
+    return db.query(Product).order_by(Product.id).offset(skip).limit(limit).all()
 
 
 def get_product(db: Session, product_id: int) -> Optional[Product]:

@@ -17,12 +17,17 @@ from app.models.base import Base
 
 @pytest.fixture
 def db():
-    engine = create_engine(
-        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    url = os.environ.get("TEST_DATABASE_URL", "sqlite://")
+    options = (
+        {"connect_args": {"check_same_thread": False}, "poolclass": StaticPool}
+        if url == "sqlite://"
+        else {}
     )
+    engine = create_engine(url, **options)
     Base.metadata.create_all(engine)
     with Session(engine) as session:
         yield session
+    Base.metadata.drop_all(engine)
     engine.dispose()
 
 
