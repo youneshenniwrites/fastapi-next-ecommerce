@@ -1,11 +1,15 @@
-from app.db.session import engine
-from app.models.base import Base
+"""Apply migrations; retained for compatibility with the old init-db command."""
+
+from pathlib import Path
+
+from alembic.config import Config
+
+from alembic import command
 
 
 def init_db():
-    # This creates all tables
-    Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created")
+    config = Config(str(Path(__file__).resolve().parents[2] / "alembic.ini"))
+    command.upgrade(config, "head")
 
 
 if __name__ == "__main__":

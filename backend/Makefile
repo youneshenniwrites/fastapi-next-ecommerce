@@ -1,17 +1,8 @@
-# Makefile for FastAPI project
-
-# Run the FastAPI server
+# Prefer the root Makefile for full-stack commands.
+.PHONY: run init-db test
 run:
-	python -m app.main
-
-# Initialize the database
+	uv run uvicorn app.main:app --reload
 init-db:
-	python -m app.db.init_db
-
-# Enter a Python shell with the virtual environment
-shell:
-	python -i
-
-# Run tests (assuming pytest is installed)
+	uv run alembic upgrade head
 test:
-	pytest -v
+	uv run pytest -q

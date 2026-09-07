@@ -1,0 +1,4 @@
+backend/.env
+.worktrees/
+.artifacts/
+.DS_Store

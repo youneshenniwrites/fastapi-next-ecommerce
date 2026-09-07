@@ -13,7 +13,8 @@ uv run pytest -q
 ```
 
 Tests use a fresh in-memory SQLite database for each test and need no `.env` or
-external database. PostgreSQL migration/integration coverage is a follow-up.
+external database. Container CI also runs a real PostgreSQL registration/login smoke test and checks
+migration upgrade, rollback, and metadata consistency.
 
 For the server, configure `DATABASE_URL` (use `postgresql+psycopg://` for PostgreSQL)
 and a random `SECRET_KEY` of at least 32 characters, then run:
@@ -22,9 +23,15 @@ and a random `SECRET_KEY` of at least 32 characters, then run:
 uv run uvicorn app.main:app --reload
 ```
 
-Database migrations and container startup are not implemented yet. Do not treat
-this backend as a production-ready shop. Cart, orders, payments, and frontend
-remain planned work.
+From the repository root, `make dev` generates configuration and starts the full
+local backend stack. On the host, `uv run alembic upgrade head` applies migrations.
+The old `python -m app.db.init_db` command now delegates to Alembic.
+
+The initial migration targets an empty database. If an existing unversioned database
+contains tables, back it up and compare its schema before deciding whether to stamp
+the baseline. Never blindly stamp or drop an existing database to bypass errors.
+
+Cart, orders, payments, and frontend remain planned work.
 
 Registration returns 201. Login accepts form fields `username` (email) and
 `password`; use its bearer token for `/api/v1/auth/me`. Product reads are public;

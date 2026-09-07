@@ -72,3 +72,4 @@ dmypy.json
 *.tfstate.*
 .terraform/
 terraform.tfvars
+!.env.example
