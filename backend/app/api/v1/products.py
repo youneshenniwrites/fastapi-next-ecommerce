@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_admin
@@ -18,7 +18,11 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[ProductRead])
-def read_products(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_products(
+    skip: int = Query(default=0, ge=0, le=100000),
+    limit: int = Query(default=10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
     return get_products(db=db, skip=skip, limit=limit)
 
 

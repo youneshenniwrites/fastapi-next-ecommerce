@@ -41,3 +41,38 @@ jobs:
       - name: Cleanup disposable CI resources
         if: always()
         run: docker compose --env-file backend/.env down --volumes
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ecommerce
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: ecommerce_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ecommerce -d ecommerce_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.22"
+          enable-cache: true
+      - run: uv sync --locked --python 3.12
+      - name: Create separate disposable migration database
+        run: |
+          uv run python - <<'PY'
+          import psycopg
+          with psycopg.connect("postgresql://ecommerce:ci-only-password@localhost:5432/ecommerce_test", autocommit=True) as connection:
+              connection.execute("CREATE DATABASE ecommerce_migrations")
+          PY
+      - run: uv run pytest -q
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://ecommerce:ci-only-password@localhost:5432/ecommerce_test
+          TEST_MIGRATION_DATABASE_URL: postgresql+psycopg://ecommerce:ci-only-password@localhost:5432/ecommerce_migrations
