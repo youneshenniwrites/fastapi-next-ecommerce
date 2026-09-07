@@ -17,7 +17,27 @@ logger = structlog.get_logger()
 # --------------------------
 app = FastAPI(
     title="E-Commerce API",
-    description="Backend API for E-Commerce App (FastAPI + PostgreSQL + Redis + AWS-ready)",
+    description=(
+        "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP "
+        "decimal prices. Product writes require an active admin. Register a customer, "
+        "then use Authorize with your email in the username field to obtain a bearer "
+        "token. Admin bootstrap is an operator CLI, never a public endpoint. "
+        "Cart, checkout and Azure deployment are planned; no real purchases are supported."
+    ),
+    openapi_tags=[
+        {
+            "name": "Health",
+            "description": "Process liveness; does not check database readiness.",
+        },
+        {
+            "name": "Products",
+            "description": "Public catalog reads and admin-only product management. Prices serialize as two-place GBP strings.",
+        },
+        {
+            "name": "auth",
+            "description": "Customer registration, password login and active-user profile.",
+        },
+    ],
     version="0.1.0",
 )
 
@@ -42,8 +62,8 @@ app.add_middleware(
 # --------------------------
 # Health Check Endpoint
 # --------------------------
-@app.get("/health", tags=["Health"])
-async def health_check():
+@app.get("/health", tags=["Health"], summary="Check API process liveness")
+async def health_check() -> dict[str, str]:
     """
     Simple health check endpoint.
     Returns "OK" if the API is running.
