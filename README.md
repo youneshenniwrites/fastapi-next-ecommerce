@@ -175,7 +175,7 @@ Backend CI runs three jobs, with dependency auditing in a separate workflow:
 Frontend CI also checks formatting, lint, types, API contract drift, unit coverage,
 a production build, and desktop/mobile browser and accessibility behavior. It
 archives browser evidence and the validated standalone build.
-See [frontend verification](frontend/README.md) for commands and evidence.
+See [CI and deployment status](docs/ci.md) for the full pipeline.
 
 Coverage and audit artifacts remain available for 14 days. Dependabot proposes
 weekly Python, CI action, and Docker updates; updates still need review and checks.

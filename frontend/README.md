@@ -61,4 +61,4 @@ npm run build assembles .next/standalone with static assets. Run npm start with
 PORT and HOSTNAME environment variables to serve that package. CI archives the
 contents; after extraction use node server.js with API_BASE_URL configured.
 
-Azure deployment is not configured. See .github/workflows/frontend.yml at the repository root for the delivery pipeline.
+Azure deployment is not configured. See ../docs/ci.md for the delivery pipeline.

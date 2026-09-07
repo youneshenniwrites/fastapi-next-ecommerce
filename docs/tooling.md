@@ -1,7 +1,8 @@
 # Engineering checks
 
-The repository has four CI jobs: backend lint/format/tests with coverage, full
-PostgreSQL tests, container startup/migration checks, and dependency auditing.
+The repository checks both applications. See [CI pipeline](ci.md) for frontend
+quality, build/browser checks and the named backend stages. Backend checks cover
+lint/format/tests, PostgreSQL, containers/migrations and dependency auditing.
 These checks support review; they do not certify production readiness.
 
 | Command | Purpose |
@@ -31,7 +32,7 @@ Dependabot checks Python/uv, GitHub Actions, and backend Docker dependencies wee
 Python patch updates are grouped; open PR counts are limited. Changes still need
 review and CI. An agent handling a uv update must regenerate requirements.txt if
 Dependabot leaves it stale; the requirements check deliberately prevents drift.
-Frontend dependency updates will be added when a frontend package manifest exists.
+Frontend npm dependency updates are enabled weekly, with at most two open PRs.
 
 CI actions are pinned to reviewed commit SHAs, with version comments for readers.
 Dependabot can propose updated pins. Jobs have time limits and read-only repository

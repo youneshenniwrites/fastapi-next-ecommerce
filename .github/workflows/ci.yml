@@ -10,22 +10,30 @@ concurrency:
   cancel-in-progress: true
 jobs:
   backend:
+    name: Backend · Lint, contract and unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python dependency tooling
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           version: "0.8.22"
           enable-cache: true
-      - run: uv sync --locked --python 3.12
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run python scripts/check_requirements.py
-      - run: uv run pytest -q --cov --cov-report=term-missing --cov-report=xml
+      - name: Install locked backend dependencies
+        run: uv sync --locked --python 3.12
+      - name: Run Ruff lint
+        run: uv run ruff check .
+      - name: Check Python formatting
+        run: uv run ruff format --check .
+      - name: Verify lockfile and requirements consistency
+        run: uv run python scripts/check_requirements.py
+      - name: Run backend tests and enforce coverage
+        run: uv run pytest -q --cov --cov-report=term-missing --cov-report=xml
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -34,14 +42,20 @@ jobs:
           path: backend/coverage.xml
           retention-days: 14
   container:
+    name: Backend · Container build and migration smoke tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: python3 backend/scripts/dev_setup.py
-      - run: docker compose --env-file backend/.env up --build --wait --wait-timeout 180
-      - run: python3 backend/scripts/smoke.py
-      - run: docker compose --env-file backend/.env exec -T api alembic check
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Generate disposable CI configuration
+        run: python3 backend/scripts/dev_setup.py
+      - name: Build containers, apply migrations and wait for health
+        run: docker compose --env-file backend/.env up --build --wait --wait-timeout 180
+      - name: Test API authentication and authorization
+        run: python3 backend/scripts/smoke.py
+      - name: Verify database schema matches migrations
+        run: docker compose --env-file backend/.env exec -T api alembic check
       - name: Check migration rollback on disposable database
         run: |
           docker compose --env-file backend/.env stop api
@@ -55,6 +69,7 @@ jobs:
         if: always()
         run: docker compose --env-file backend/.env down --volumes
   postgres:
+    name: Backend · PostgreSQL integration tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:
@@ -73,12 +88,15 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python dependency tooling
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           version: "0.8.22"
           enable-cache: true
-      - run: uv sync --locked --python 3.12
+      - name: Install locked backend dependencies
+        run: uv sync --locked --python 3.12
       - name: Create separate disposable migration database
         run: |
           uv run python - <<'PY'
@@ -86,7 +104,8 @@ jobs:
           with psycopg.connect("postgresql://ecommerce:ci-only-password@localhost:5432/ecommerce_test", autocommit=True) as connection:
               connection.execute("CREATE DATABASE ecommerce_migrations")
           PY
-      - run: uv run pytest -q
+      - name: Run full test suite against PostgreSQL
+        run: uv run pytest -q
         env:
           TEST_DATABASE_URL: postgresql+psycopg://ecommerce:ci-only-password@localhost:5432/ecommerce_test
           TEST_MIGRATION_DATABASE_URL: postgresql+psycopg://ecommerce:ci-only-password@localhost:5432/ecommerce_migrations
