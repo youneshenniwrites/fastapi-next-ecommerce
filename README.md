@@ -2,7 +2,8 @@
 
 An ecommerce application under development. The backend currently supports
 registration, login, profiles, and public product reads with admin-only writes.
-Next.js, carts, orders, and payments are planned; they are not available yet.
+The frontend directory is a Next.js skeleton; the runnable storefront, carts,
+orders, and payments are still planned. **Azure is the chosen cloud platform.**
 
 ## Local development
 
@@ -14,7 +15,7 @@ make dev
 
 This generates backend/.env with random local credentials if it does not exist,
 installs locked dependencies, builds the backend, starts PostgreSQL, applies
-migrations, and starts the API. No AWS account or manual configuration is required.
+migrations, and starts the API. No cloud account or manual configuration is required.
 
 API documentation: http://localhost:8000/docs
 Health check: http://localhost:8000/health
@@ -33,13 +34,28 @@ intended for local development, not a production deployment configuration.
 
 ## Repository map
 
+- frontend/: Next.js directory skeleton and frontend-specific agent skill
 - backend/app: API, database models, and tests
 - backend/alembic: database migrations
 - compose.yaml: local PostgreSQL, migration job, and API
 - .github/workflows/ci.yml: backend checks and PostgreSQL/container smoke tests
 - .agents/skills and AGENTS.md: coding-agent workflows and verification commands
 - docs/plans/roadmap.md: ordered remaining work
-- backend/infra: incomplete AWS Terraform, not deployed by this workflow
+- backend/infra: legacy AWS reference; superseded by the Azure direction
 
 See backend/README.md for API and database details, docs/architecture.md for the
 current design, and docs/skill-sources.md for the agent workflow's provenance.
+
+## Azure direction
+
+The proposed target is Azure Container Apps for the API and future Next.js server,
+with Azure Database for PostgreSQL Flexible Server. Hosting has not been provisioned;
+local development continues to use Docker Compose. See the [architecture plan](docs/architecture.md)
+for the remaining infrastructure decisions.
+
+## Agent skills
+
+Shared workflows live in `.agents/skills/`: feature isolation, backend development,
+verification, and Azure planning. `frontend/.agents/skills/ecommerce-frontend/`
+contains the frontend workflow. Root and frontend `AGENTS.md` files explain scope
+and available checks; these skills are committed alongside the code on main.

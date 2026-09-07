@@ -1,3 +1,5 @@
+> Historical checklist. Use [the current roadmap](../docs/plans/roadmap.md) for status and priorities.
+
 ---
 
 ## **1️⃣ Backend Enhancements**
@@ -62,12 +64,12 @@
   - Build image
   - Connect to PostgreSQL + Redis services in `docker-compose`.
 
-- Prepare AWS deployment:
+- Prepare Azure deployment:
 
-  - ECS/Fargate or Lambda + API Gateway
-  - RDS for PostgreSQL
-  - Secrets Manager for env vars
-  - CloudWatch/Sentry for logging
+  - Azure Container Apps
+  - Azure Database for PostgreSQL Flexible Server
+  - Azure identity and secrets configuration
+  - Azure monitoring and logging
 
 ---
 
