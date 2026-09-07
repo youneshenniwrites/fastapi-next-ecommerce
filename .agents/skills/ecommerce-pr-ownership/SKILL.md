@@ -3,6 +3,8 @@ name: ecommerce-pr-ownership
 description: Set and verify the owner's assignment and appropriate labels when opening or repairing pull requests in this ecommerce repository.
 ---
 
+Use ecommerce-naming for branch, commit, and PR naming before creation.
+
 The repository owner is youneshenniwrites. Before opening an agent-authored PR,
 verify `gh api user --jq .login` is that account so GitHub attributes authorship
 correctly. If a different account is authenticated, use an already-authorized

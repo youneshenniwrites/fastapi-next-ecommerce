@@ -24,3 +24,8 @@ updates and maintenance documentation to the checks actually present in this rep
 
 The locally authored ecommerce-pr-ownership skill and REST helper assign the
 owner and add scope labels after PR creation; they preserve actual authorship.
+
+The locally authored ecommerce-naming skill applies
+[Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) to
+commit/PR subjects. Branch naming is a repository-specific adaptation, not part
+of the upstream specification. No specification text is vendored.

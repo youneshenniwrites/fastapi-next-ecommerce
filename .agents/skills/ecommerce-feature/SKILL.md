@@ -3,6 +3,8 @@ name: ecommerce-feature
 description: Prepare an isolated feature or fix in this ecommerce repository, accounting for worktrees, local ports, and PostgreSQL state.
 ---
 
+Use ecommerce-naming before creating a branch or naming a PR.
+
 Inspect the working tree and open PR scope. Use the current task's branch/worktree
 when already isolated; create a fresh one from the intended base if needed. Preserve
 uncommitted user work. Resolve routine non-overlapping changes without blocking.
