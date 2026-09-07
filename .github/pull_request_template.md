@@ -1,3 +1,5 @@
+<!-- PR title: type(scope): description; see CONTRIBUTING.md naming conventions. -->
+
 ## Problem and resulting behavior
 
 Explain the concrete trigger and what changes for a user or maintainer.

@@ -23,7 +23,9 @@ prerequisites. Do not claim checks passed if a missing prerequisite prevented th
 
 ## Delivery
 
-Use a task branch. Respect an existing agent-managed worktree; otherwise use a
+Use the ecommerce-naming skill for branch names, commits, PR titles, and squash
+subjects. Follow CONTRIBUTING.md: type/short-kebab-description branches, never
+agent/, and Conventional Commits subjects. Use a task branch. Respect an existing agent-managed worktree; otherwise use a
 separate worktree when concurrent changes require isolation. Inspect git status
 and overlapping PRs before editing. Allocate separate ports, Compose project names,
 and databases for concurrent runs; worktrees do not isolate running services.

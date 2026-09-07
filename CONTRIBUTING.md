@@ -33,6 +33,32 @@ worktrees. Never point test database overrides at customer data.
 See [tooling](docs/tooling.md) for exact checks and [development](docs/development.md)
 for database and configuration details. Coding agents should also read [AGENTS.md](AGENTS.md).
 
+## Naming conventions
+
+Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+for commit subjects and PR titles: `type(scope): description`. Scope is optional.
+Use `feat` for features, `fix` for bugs; our other types are `docs`, `ci`, `build`,
+`test`, `refactor`, `perf`, `style`, `chore`, and `revert`. Use lowercase types and
+concise descriptions of the resulting change. Mark breaking changes with `!`
+before the colon or a `BREAKING CHANGE:` footer, and explain migration effects.
+
+The specification does not define branch names. Our local adaptation is
+`type/short-kebab-description`, with an optional area in the description:
+
+| Branch | PR title / commit subject |
+| --- | --- |
+| `feat/frontend-catalog` | `feat(frontend): add product catalog` |
+| `fix/auth-token-expiry` | `fix(auth): reject expired tokens` |
+| `docs/naming-conventions` | `docs: define repository naming conventions` |
+| `ci/checkout-update` | `ci: update checkout action` |
+
+Do not create `agent/` branches. Existing Dependabot-managed branches keep their
+bot names; apply compliant PR titles and squash subjects when merging them.
+Use the final PR title as the squash commit subject. Preserve breaking-change
+information in the squash message. This policy applies to future work; do not
+rewrite merged history. The ecommerce-naming skill guides agents through these
+checks. This is a documented review policy, not an automated CI naming gate.
+
 ## PR ownership
 
 Repository ownership is recorded in .github/CODEOWNERS. Assign maintenance PRs to
