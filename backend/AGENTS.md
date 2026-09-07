@@ -19,3 +19,9 @@ Run `make check` at repository root. Changes to migrations, dependencies, startu
 or containers also require the container CI job to pass. Do not mutate an applied
 migration once main contains it; add a new revision. The initial migration targets
 empty databases; existing unversioned databases require schema comparison first.
+
+Product money uses Decimal / NUMERIC(12, 2), serializes as a two-place string, and
+is GBP-only. Preserve the partial PUT contract and reject null required fields.
+See docs/decisions/0001-product-money.md from the repository root for the decision.
+Dependency updates must pass make requirements-check and make audit. CI enforces
+an 85% coverage minimum; tests are not a substitute for PostgreSQL migration checks.

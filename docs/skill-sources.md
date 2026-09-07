@@ -18,3 +18,9 @@ not included. Reassess licensing and publishing behavior if it is added later.
 Azure planning and frontend development guidance are also authored locally. The
 frontend skill is scoped under frontend/.agents/skills; shared skills stay at the
 repository root. These additions contain no vendored third-party implementation.
+
+The ecommerce-maintenance skill is also locally authored. It connects dependency
+updates and maintenance documentation to the checks actually present in this repo.
+
+The locally authored ecommerce-pr-ownership skill and REST helper assign the
+owner and add scope labels after PR creation; they preserve actual authorship.

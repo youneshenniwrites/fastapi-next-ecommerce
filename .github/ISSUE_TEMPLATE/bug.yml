@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible problem with implemented behavior.
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: "For vulnerabilities, use the private security reporting link instead. Do not paste secrets or customer data."
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Revision, environment, and the smallest steps that reproduce the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: Relevant test output, CI link, or screenshot.

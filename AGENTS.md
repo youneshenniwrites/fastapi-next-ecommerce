@@ -12,6 +12,10 @@ factual status when a feature lands.
 - `make check`: lint, format check, and isolated backend tests.
 - `make down`: stop the local stack while preserving its database volume.
 - `make migrate`: apply migrations to the configured local database.
+- `make coverage`: test with branch-aware coverage and the 85% minimum.
+- `make audit`: check installed locked dependencies for known vulnerabilities.
+- `make requirements-check`: verify the pip export agrees with uv.lock.
+- `make hooks-check`: run optional pre-commit checks over tracked files.
 
 Use Python 3.12 and uv. Change pyproject.toml, regenerate uv.lock and the
 requirements.txt export together. Never hand-merge lockfiles. Docker and uv are
@@ -40,8 +44,17 @@ Do not run downgrade, volume deletion, or seed experiments against customer data
 Azure is the chosen cloud provider. The AWS Terraform in backend/infra is legacy
 reference and is not an approved deployment path.
 
-Project skills in .agents/skills cover feature isolation, backend changes, and
-verification, and Azure planning. Frontend-specific guidance lives under
-frontend/.agents/skills and frontend/AGENTS.md. User instructions take precedence
-over skill guidelines. Use only skills relevant to the task. No external reviewer service or public evidence host
-is required; attach redacted logs/screenshots only within the authorized workflow.
+Project skills in .agents/skills cover feature isolation, backend changes,
+verification, Azure planning, maintenance, and PR ownership. Frontend-specific
+guidance lives under frontend/.agents/skills and frontend/AGENTS.md. User
+instructions take precedence over skill guidelines. Use only skills relevant to
+the task. No external reviewer service or public evidence host is required; attach
+redacted logs/screenshots only within the authorized workflow.
+
+See CONTRIBUTING.md for PR expectations, docs/tooling.md for check scope, and
+SECURITY.md for private vulnerability reporting.
+
+For every PR created in this repository, use the ecommerce-pr-ownership skill to
+assign youneshenniwrites and apply relevant labels. Verify the authenticated author
+before creation and read back metadata afterward. Preserve real bot/contributor
+authorship when maintaining their PRs.
