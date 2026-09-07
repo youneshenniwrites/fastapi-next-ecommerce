@@ -1,8 +1,10 @@
+import logging
+
+import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
-import structlog
-from app.api.v1 import products, auth
+
+from app.api.v1 import auth, products
 
 # --------------------------
 # Logging Configuration
@@ -36,6 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # --------------------------
 # Health Check Endpoint
 # --------------------------
@@ -47,6 +50,7 @@ async def health_check():
     """
     logger.info("Health check requested")
     return {"status": "ok"}
+
 
 # --------------------------
 # Placeholder for Routers

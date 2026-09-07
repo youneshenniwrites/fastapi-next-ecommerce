@@ -1,22 +1,53 @@
 from datetime import datetime, timedelta, timezone
-from passlib.context import CryptContext
-from jose import jwt
+
+import jwt
+from pwdlib import PasswordHash
+from pwdlib.hashers.argon2 import Argon2Hasher
+from pwdlib.hashers.bcrypt import BcryptHasher
+
 from app.core.settings import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class LegacyBcryptHasher(BcryptHasher):
+    def verify(self, password: str | bytes, hash: str | bytes) -> bool:
+        # Passlib historically truncated bcrypt passwords at 72 bytes. Preserve
+        # that behavior only for verification; rehash the full password in Argon2.
+        encoded = password.encode("utf-8") if isinstance(password, str) else password
+        return super().verify(encoded[:72], hash)
+
+
+# New passwords use Argon2; existing bcrypt hashes upgrade after a successful login.
+password_hash = PasswordHash((Argon2Hasher(), LegacyBcryptHasher()))
 ALGORITHM = "HS256"
+DUMMY_HASH = password_hash.hash("unused-password-for-timing")
+
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return password_hash.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+
+def create_access_token(subject: int, expires_delta: timedelta | None = None) -> str:
+    now = datetime.now(timezone.utc)
+    lifetime = (
+        expires_delta
+        if expires_delta is not None
+        else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    return jwt.encode(
+        {"sub": str(subject), "iat": now, "exp": now + lifetime},
+        settings.SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
+
 
 def decode_access_token(token: str) -> dict:
-    return jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+    return jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        algorithms=[ALGORITHM],
+        options={"require": ["sub", "exp", "iat"]},
+    )
