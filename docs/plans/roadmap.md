@@ -1,5 +1,7 @@
 # Delivery roadmap
 
+Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
+
 ## Landed foundation
 
 - Authentication repair, active-user/admin checks, bcrypt compatibility, and 22 regression tests (PR #1).
@@ -12,22 +14,24 @@
 - Agent instructions and three focused repository skills (PR #2).
 - Frontend directory skeleton with a scoped skill, and shared Azure planning guidance.
 
+- Catalog correctness: precise GBP prices, bounded validation, and PostgreSQL tests (PR #4).
+- Auditing, coverage gate, pinned CI actions, hooks, and dependency updates (PR #5).
+- Expanded contributor/developer/security documentation and maintenance guidance.
+
 ## Next PRs, in dependency order
 
-1. Catalog correctness is implemented: GBP decimal prices, bounded pagination,
-   request validation, database constraints, and legacy-data migration checks.
-2. Admin bootstrap: an explicit command to create/promote the first admin without
-   hardcoded credentials; verify idempotence and prevent accidental password reset.
-3. Next.js catalog: App Router, TypeScript, locked runtime, generated OpenAPI client,
+1. Demo foundation implemented: explicit admin bootstrap and empty-catalog seeding.
+   See [demo guide](../demo.md); next build the runnable storefront.
+2. Next.js catalog: App Router, TypeScript, locked runtime, generated OpenAPI client,
    product list/detail, loading/empty/error states, and browser checks.
-4. Customer frontend auth: login/register/profile, server-mediated secure session
+3. Customer frontend auth: login/register/profile, server-mediated secure session
    handling, logout and error states. Keep authorization in FastAPI.
-5. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
-6. Orders and checkout: price snapshots, authoritative totals, atomic inventory
+4. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
+5. Orders and checkout: price snapshots, authoritative totals, atomic inventory
    handling, idempotency, and concurrent last-item purchase tests.
-7. Sandbox payments: select the provider, verify webhooks, handle duplicates,
+6. Sandbox payments: select the provider, verify webhooks, handle duplicates,
    failures/cancellations, and connect confirmation/order history.
-8. Azure deployment: replace the legacy AWS direction with Azure infrastructure,
+7. Azure deployment: replace the legacy AWS direction with Azure infrastructure,
    starting from Container Apps and PostgreSQL Flexible Server. Establish explicit
    environment/cost decisions, staging, secrets, TLS, migrations, logs, backup/restore,
    and rollback evidence. Choose the infrastructure tooling in that PR.
@@ -36,3 +40,11 @@ Each PR includes acceptance evidence, self-review findings, and passing CI befor
 merge under the user's authorization. Production/cloud deployment and paid external
 services need their own authorization. Do not add caching/search infrastructure
 until the working shopping journey has a measured need.
+
+## Further engineering controls
+
+Add typed SQLAlchemy models and static type checking, then code scanning and
+repository required-check rules in separate PRs. Add frontend lint/type/build and
+browser checks alongside the runnable frontend. Add observability, operational
+runbooks, and release/restore verification alongside Azure staging. These are
+planned controls, not features already enabled by the documentation.
