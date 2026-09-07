@@ -4,6 +4,11 @@
 
 Explain the concrete trigger and what changes for a user or maintainer.
 
+## Jira ticket
+
+No Jira ticket.
+<!-- Replace with the real ticket key and link when one exists; never invent a ticket. -->
+
 ## Validation
 
 List the commands/results and the exact revision tested. Mark unavailable checks
