@@ -21,3 +21,23 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run pytest -q
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 backend/scripts/dev_setup.py
+      - run: docker compose --env-file backend/.env up --build --wait --wait-timeout 180
+      - run: python3 backend/scripts/smoke.py
+      - run: docker compose --env-file backend/.env exec -T api alembic check
+      - name: Check migration rollback on disposable database
+        run: |
+          docker compose --env-file backend/.env stop api
+          docker compose --env-file backend/.env run --rm migrate alembic downgrade base
+          docker compose --env-file backend/.env run --rm migrate alembic upgrade head
+          docker compose --env-file backend/.env run --rm migrate alembic check
+      - name: Logs on failure
+        if: failure()
+        run: docker compose --env-file backend/.env logs
+      - name: Cleanup disposable CI resources
+        if: always()
+        run: docker compose --env-file backend/.env down --volumes
