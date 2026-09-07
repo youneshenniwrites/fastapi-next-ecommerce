@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private vulnerability report
+    url: https://github.com/youneshenniwrites/fastapi-next-ecommerce/security/advisories/new
+    about: Report security vulnerabilities privately.
