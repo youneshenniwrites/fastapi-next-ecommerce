@@ -37,8 +37,9 @@ assign youneshenniwrites and apply scope labels. Self-review must be identified.
 Before merge, review the full exact-head diff, resolve findings and require all
 applicable checks and external tool review/approval for the current head.
 Self-review alone does not authorize merging. Never bypass branch protection.
-If the tool provides only comments or reactions, do not assume these satisfy a
-required approving review; leave the PR open until the integration is resolved.
+The required `Codex review` status validates the owner-approved clean-review
+signal; follow [its evidence protocol](codex-review.md). A human Approve review is
+not required. Unknown or missing evidence must keep the PR open.
 After merge, verify issue closure, update board status, record
 evidence and identify the next unblocked Backlog ticket. Check README, design notes,
 roadmap, Wiki and skills for changes relevant to the delivered behavior.

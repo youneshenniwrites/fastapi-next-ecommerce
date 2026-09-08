@@ -1,0 +1,34 @@
+name: Codex review gate
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  issue_comment:
+    types: [created, edited, deleted]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  statuses: write
+concurrency:
+  group: codex-review-evidence
+  cancel-in-progress: false
+jobs:
+  evaluate:
+    name: Refresh Codex review progress
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Never check out or execute pull-request code with the write token.
+      - name: Check out trusted default-branch gate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Verify Codex identity, current commit, clean result and resolved threads
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_REPOSITORY: ${{ github.repository }}
+        run: python3 scripts/codex_review_gate.py --repo "$REVIEW_REPOSITORY" --publish

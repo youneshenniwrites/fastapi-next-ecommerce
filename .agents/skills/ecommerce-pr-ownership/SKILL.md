@@ -49,6 +49,10 @@ activity before posting to avoid duplicate requests; request a new review when
 code changes invalidate the reviewed head. Verify the actual bot response and
 reviewed commit. Do not assume the integration bot is a requestable GitHub user.
 
-External review and approval are required before merge. Self-review and CI alone
-are insufficient. Comments/reactions are not automatically formal approvals;
-leave the PR open if the required signal is missing. Never bypass protection.
+External review and approval are required before merge. Follow docs/codex-review.md:
+post a fresh commit-bound request, verify the trusted bot's clean result for the
+current head and all resolved threads, and require the Codex review status plus
+CI. Verify ticket acceptance separately. No human Approve review is required.
+Self-review and CI alone are insufficient. Missing evidence keeps the PR open.
+Never bypass protection. After pushing, publish a pending Codex review status if
+the workflow has not yet run; never publish success without the evidence adapter.
