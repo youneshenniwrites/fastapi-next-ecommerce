@@ -69,6 +69,7 @@ def main():
                     os.environ["VERCEL_TOKEN"],
                 ],
                 check=True,
+                env={**os.environ, "VERCEL_PROJECT_ID": os.environ[variable]},
             )
             if component == "API":
                 read(API + "/health", retry=True)
