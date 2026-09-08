@@ -1,5 +1,9 @@
 # API contract and interactive documentation
 
+Opening the API domain root `/` redirects to `/docs` (Swagger UI), including
+Vercel dashboard domain links. This is the API documentation entry point; the
+storefront is a separate frontend domain. The redirect is not an OpenAPI operation.
+
 FastAPI publishes an OpenAPI 3.1 contract for every implemented endpoint:
 
 - Swagger UI: http://localhost:8000/docs

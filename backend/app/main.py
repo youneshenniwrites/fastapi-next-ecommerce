@@ -3,6 +3,7 @@ import logging
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.api.v1 import auth, products
 
@@ -57,6 +58,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", include_in_schema=False)
+async def documentation_home() -> RedirectResponse:
+    """Make dashboard domain links open the API's interactive documentation."""
+    return RedirectResponse(url="/docs", status_code=307)
 
 
 # --------------------------
