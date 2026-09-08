@@ -1,10 +1,19 @@
 # Automated Codex review gate
 
-The owner's accepted approval signal is a completed clean Codex review of the
-latest commit with every review thread resolved. A human Approve review is not
-required once this gate is installed and required in branch protection. CI remains
-mandatory. Ticket acceptance still requires implementation evidence checked by the
-shipping agent; this gate does not infer task completion from resolved comments.
+## Delivery decision — 8 September 2026
+
+The owner merged #37 and explicitly requested finishing #35 while deferring
+remaining work to the board. This delivery provides **review-status visibility**,
+not enforceable PR-specific approval. The inherited-SHA approval finding and
+protection coverage are deferred to #38. Do not require this commit status in
+branch protection until that ticket is resolved. The formal human approval count
+is not part of the owner's automated workflow; existing CI and conversation
+protections remain.
+
+For future PRs, inspect Codex's current-head review and address findings before
+merge. Any exception requires explicit owner authorization and a linked deferral;
+never label it a clean review. The #35/#37 exception is specific to this delivery.
+Ticket acceptance is checked separately by the shipping agent.
 
 ## Request and evidence
 
@@ -28,7 +37,7 @@ threads whose comments were later edited.
 An old clean review, edited request, human reaction, unknown summary format or
 missing evidence leaves the check pending. Re-request review after changes.
 
-The required commit status is **Codex review**. It shows a pending indicator and
+The informational commit status is **Codex review**. It shows a pending indicator and
 short reason while reviewing; success means the evidence conditions passed. It is
 not a percentage progress bar. Its Details link opens the Actions run that
 inspected the evidence, with logs and a readable summary. PR test runs also
@@ -61,14 +70,8 @@ is tracked separately in #38. The protocol adapter is
 fail-closed because Codex's summary format can change. Unit tests cover spoofed,
 stale, edited and incomplete evidence. Separate read-only CI tests PR changes.
 
-Protect main with this required status plus normal CI, up-to-date branches and
-resolved conversations. Do not remove an existing approval requirement until the
-replacement has been tested and its current-head success verified. Bootstrap may
-run the reviewed gate locally with gh credentials to publish a real evidence-backed
-status; it must not fabricate a pass. Local publication requires `--details-url`
-pointing to the real evidence Actions run, never a PR URL. After installation, use workflow_dispatch
-for recovery, and inspect the workflow failure before retrying. Missing clean bot
-signals require investigation, never an assumed approval.
-
-The gate does not merge PRs itself. The shipping agent verifies ticket acceptance,
-all required checks and current-head evidence before merging. No admin bypass.
+Required-status enforcement, safe PR-specific approval and recovery behaviour
+are deferred to #38. The current status must not be used as the sole authorization
+to merge: a new PR can inherit an old status attached to the same SHA. Refer to
+current review evidence and the owner's explicit delivery authorization instead.
+The reporter does not merge PRs. No admin bypass is used.

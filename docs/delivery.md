@@ -37,9 +37,11 @@ assign youneshenniwrites and apply scope labels. Self-review must be identified.
 Before merge, review the full exact-head diff, resolve findings and require all
 applicable checks and external tool review/approval for the current head.
 Self-review alone does not authorize merging. Never bypass branch protection.
-The required `Codex review` status validates the owner-approved clean-review
-signal; follow [its evidence protocol](codex-review.md). A human Approve review is
-not required. Unknown or missing evidence must keep the PR open.
+The informational `Codex review` status reports review evidence; enforcement is
+deferred to #38. Inspect the actual current-head review before merging; follow [its evidence protocol](codex-review.md). A human Approve review is
+not required. Unknown or missing evidence keeps the PR open unless the owner
+explicitly authorizes a documented deferral. The #35/#37 deferral is not a blanket
+exception for later PRs.
 After merge, verify issue closure, update board status, record
 evidence and identify the next unblocked Backlog ticket. Check README, design notes,
 roadmap, Wiki and skills for changes relevant to the delivered behavior.

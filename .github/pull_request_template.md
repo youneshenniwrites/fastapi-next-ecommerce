@@ -29,8 +29,8 @@ Closes #<!-- actual issue number; use Refs #N for partial work -->
 - [ ] External review completed for the latest commit
 - [ ] Review findings addressed
 - [ ] Required CI checks passed
-- [ ] Required external approval verified for the latest commit
-<!-- Keep the owner as assignee; request only Codex as reviewer. Trigger Codex review through its integration; naming it here does not request a review. The Codex review status must validate the current-head clean-review evidence described in docs/codex-review.md; a human Approve review is not required. -->
+- [ ] Current-head external review verified, or explicit owner-approved deferral linked
+<!-- Keep the owner as assignee; request only Codex as reviewer. Trigger Codex review through its integration; naming it here does not request a review. The Codex review status is informational pending #38; verify actual review evidence as described in docs/codex-review.md; a human Approve review is not required. -->
 
 ## Deployment / Compatibility
 <!-- Optional: omit if not applicable. -->

@@ -77,8 +77,8 @@ output for backend changes. Do not include tokens, passwords, or customer data.
 
 Review the exact pushed revision. Address actionable findings and rerun affected
 checks. A self-review must say it is a self-review; it is not independent approval.
-All applicable CI jobs and the [Codex review gate](docs/codex-review.md) must pass
-before merge. A verified clean external review replaces a human approval; ticket
+All applicable CI jobs must pass before merge. Follow the
+[Codex review policy](docs/codex-review.md); the status is informational pending #38. A verified clean external review replaces a human approval; ticket
 acceptance must still be checked. No workflow in this repository
 bypasses review to automatically merge dependency updates.
 

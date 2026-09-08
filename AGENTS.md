@@ -74,9 +74,10 @@ proposed design, not implemented behavior.
 ## External review requirement
 
 The owner accepts a completed clean Codex review of the latest commit, with all
-findings addressed and threads resolved, as external approval. Follow
-[the review gate protocol](docs/codex-review.md); require the `Codex review` status
-and all applicable CI, and independently verify ticket acceptance criteria.
+findings addressed and threads resolved, as external approval. Explicit owner-approved deferrals
+are permitted only when recorded with a linked issue; do not call them clean reviews. Follow
+[the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,
+require all applicable CI, and independently verify ticket acceptance criteria.
 Self-review is disclosed and cannot replace external review. Request a new review
 after changes. No human reviewer is required. Never bypass protection or invent a
 clean result. Missing, stale or unrecognized evidence keeps the PR open.

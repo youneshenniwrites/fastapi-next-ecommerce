@@ -51,8 +51,9 @@ reviewed commit. Do not assume the integration bot is a requestable GitHub user.
 
 External review and approval are required before merge. Follow docs/codex-review.md:
 post a fresh commit-bound request, verify the trusted bot's clean result for the
-current head and all resolved threads, and require the Codex review status plus
-CI. Verify ticket acceptance separately. No human Approve review is required.
+current head and all resolved threads, and require CI. The Codex review status
+is informational pending #38; any owner-approved exception must be explicitly
+recorded and linked to deferred work. Verify ticket acceptance separately. No human Approve review is required.
 Self-review and CI alone are insufficient. Missing evidence keeps the PR open.
 Never bypass protection. After pushing, publish a pending Codex review status if
 the workflow has not yet run; never publish success without the evidence adapter.
