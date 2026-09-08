@@ -22,3 +22,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 2
+  - package-ecosystem: npm
+    directory: /frontend
+    assignees: [youneshenniwrites]
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    groups:
+      frontend-patches:
+        update-types: ["patch"]

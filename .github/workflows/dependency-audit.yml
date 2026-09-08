@@ -10,23 +10,51 @@ permissions:
   contents: read
 jobs:
   dependency-audit:
+    name: Backend · Dependency audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python dependency tooling
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           version: "0.8.22"
           enable-cache: true
-      - run: uv sync --locked --python 3.12
-      - run: uv run pip-audit --strict --format json --output dependency-audit.json
+      - name: Install locked backend dependencies
+        run: uv sync --locked --python 3.12
+      - name: Audit Python dependencies
+        run: uv run pip-audit --strict --format json --output dependency-audit.json
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dependency-audit
           path: backend/dependency-audit.json
+          retention-days: 14
+  frontend-audit:
+    name: Frontend · Scheduled dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: frontend/.nvmrc
+      - name: Set up pinned npm
+        run: npm install --global npm@11.19.1
+      - name: Audit locked frontend dependencies
+        working-directory: frontend
+        run: npm audit --json > audit.json
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-dependency-audit
+          path: frontend/audit.json
           retention-days: 14
