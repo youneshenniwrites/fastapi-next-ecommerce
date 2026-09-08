@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. The server defaults to http://127.0.0.1:8000 for FastAPI.
+Open http://127.0.0.1:3000. The server defaults to http://127.0.0.1:8000 for FastAPI.
 To change it, set API_BASE_URL in an ignored .env.local; see .env.example. No CORS
 configuration is necessary: only the Next.js server calls FastAPI. Fetches are
 uncached and have a five-second timeout. Failed requests show a retryable state.
@@ -51,7 +51,7 @@ artwork. This is presentation metadata, not authoritative product data.
 
 The catalog currently loads at most 100 products and filters those loaded items;
 a notice appears at that limit. Server-side search/pagination is a future increment
-before a larger catalog. There are no customer sessions, carts, payments or purchase
+before a larger catalog. Session handlers are implemented; there are no account screens, carts, payments or purchase
 controls yet. Automated accessibility checks supplement manual keyboard/mobile
 review; they do not constitute a full accessibility certification.
 
