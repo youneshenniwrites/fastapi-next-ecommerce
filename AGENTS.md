@@ -73,12 +73,13 @@ proposed design, not implemented behavior.
 
 ## External review requirement
 
-The owner requires external tool review and approval before any PR merge.
-Self-review and passing CI are necessary but insufficient. Verify that approval
-covers the current head and resolve findings; request review again after changes.
-Never use an admin bypass or weaken protection to merge. A comment, reaction, or
-absence of findings is not automatically a formal approving GitHub review. If the
-selected tool cannot supply the required signal, leave the PR open and report it.
+The owner accepts a completed clean Codex review of the latest commit, with all
+findings addressed and threads resolved, as external approval. Follow
+[the review gate protocol](docs/codex-review.md); require the `Codex review` status
+and all applicable CI, and independently verify ticket acceptance criteria.
+Self-review is disclosed and cannot replace external review. Request a new review
+after changes. No human reviewer is required. Never bypass protection or invent a
+clean result. Missing, stale or unrecognized evidence keeps the PR open.
 
 The canonical PR format is .github/pull_request_template.md. Use the
 ecommerce-pr-ownership skill to fill it, assign the owner, and request/verify
