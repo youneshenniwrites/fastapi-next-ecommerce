@@ -82,7 +82,7 @@ All applicable CI jobs must pass before merge. Follow the
 acceptance must still be checked. No workflow in this repository
 bypasses review to automatically merge dependency updates.
 
-Merge permission does not authorize Azure provisioning. Cloud deployments need
+Merge permission does not authorize cloud provisioning. Cloud deployments need
 an agreed environment, budget, secrets/identity design, and rollback plan.
 Report vulnerabilities privately through [SECURITY.md](SECURITY.md).
 

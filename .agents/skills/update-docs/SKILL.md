@@ -5,7 +5,7 @@ description: Update ecommerce README, Wiki, onboarding, architecture or API docu
 
 Read [delivery policy](../../../docs/delivery.md) and inspect the requested change against current code. Determine affected documentation rather than rewriting everything: README for entry points, versioned docs for commands/contracts/design decisions, Wiki for explanations, board for live delivery state. Preserve useful detail; link between sources instead of duplicating changing status tables.
 
-Document only verified behavior as implemented. Label proposed features and deployment plans clearly; keep Azure as the chosen cloud and GBP as the demo currency. Describe localhost links as requiring the local stack. Never invent a hosted endpoint, test result or deployment.
+Document only verified behavior as implemented. Label proposed features and deployment plans clearly; follow the approved hosting decision in deploy/environments/README.md and keep GBP as the demo currency. Describe localhost links as requiring the local stack. Never invent a hosted endpoint, test result or deployment.
 
 For API changes, update source OpenAPI metadata and relevant examples using the repository's established contract generation/check commands. Avoid hand-editing generated contracts. Such code changes require the normal relevant validation and PR review. Verify examples, paths, links and commands where practical; report prerequisites that prevent verification.
 

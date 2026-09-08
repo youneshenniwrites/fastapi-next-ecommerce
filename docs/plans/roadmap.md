@@ -32,10 +32,9 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
    handling, idempotency, and concurrent last-item purchase tests.
 6. Sandbox payments: select the provider, verify webhooks, handle duplicates,
    failures/cancellations, and connect confirmation/order history.
-7. Azure deployment: replace the legacy AWS direction with Azure infrastructure,
-   starting from Container Apps and PostgreSQL Flexible Server. Establish explicit
-   environment/cost decisions, staging, secrets, TLS, migrations, logs, backup/restore,
-   and rollback evidence. Choose the infrastructure tooling in that PR.
+7. Free demo deployment (#44–46): Vercel/Render/Neon, isolated dev/prod,
+   with explicit free-tier limits, staging, secrets, TLS, migrations, logs,
+   recovery limitations and rollback evidence. Azure migration remains future #31.
 
 Each PR includes acceptance evidence, self-review findings, and passing CI before
 merge under the user's authorization. Production/cloud deployment and paid external
@@ -46,7 +45,7 @@ until the working shopping journey has a measured need.
 
 Add typed SQLAlchemy models and static type checking, then code scanning and
 repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented. Add observability, operational
-runbooks, and release/restore verification alongside Azure staging. These are
+runbooks, and release/restore verification alongside hosted development. These are
 planned controls, not features already enabled by the documentation.
 
 ## Tracked delivery
@@ -54,6 +53,9 @@ planned controls, not features already enabled by the documentation.
 The [board](https://github.com/users/youneshenniwrites/projects/1) owns live status.
 Customer accounts are split into #24 secure sessions, #25 registration/login,
 #26 profile/navigation and #27 journey verification/documentation. Future work is
-#28 carts, #29 checkout/orders, #30 sandbox payments and #31 Azure. Refine those
+#28 carts, #29 checkout/orders, #30 sandbox payments and #31 future Azure migration. Refine those
 broader items into focused PR tickets before implementation. See
 [session proposal](../design/customer-sessions.md) and [delivery rules](../delivery.md).
+
+Hosting setup #44 is prioritized before further account UI, followed by #45
+previews and #46 production CD. Azure is deferred; no extra API billing is allowed.

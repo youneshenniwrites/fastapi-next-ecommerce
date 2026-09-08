@@ -43,7 +43,8 @@ FastAPI owns permissions, product prices, stock, and future order totals. Browse
 inputs cannot establish admin privileges or authoritative payment state. Schema
 changes include reviewed Alembic migrations. Tests must use disposable databases.
 Do not run downgrade, volume deletion, or seed experiments against customer data.
-Azure is the chosen cloud provider. The AWS Terraform in backend/infra is legacy
+Vercel Hobby, Render Free and Neon Free are the approved demo hosts. Azure is
+optional future work; read deploy/environments/README.md. No paid upgrades. The AWS Terraform in backend/infra is legacy
 reference and is not an approved deployment path.
 
 Project skills in .agents/skills cover feature isolation, backend changes,

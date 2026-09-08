@@ -7,7 +7,7 @@
 [![Dependency audit](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/dependency-audit.yml)
 
 A storefront project built around a FastAPI API and PostgreSQL, with a
-Next.js frontend. **The launch currency is GBP and the chosen cloud is Azure.**
+Next.js frontend. **The launch currency is GBP. Free demo hosting targets Vercel, Render and Neon.**
 The backend and catalog storefront run locally; checkout is still planned.
 
 [Quick start](#quick-start) · [API](#api-overview) · [Checks](#testing-and-quality) ·
@@ -27,7 +27,7 @@ The backend and catalog storefront run locally; checkout is still planned.
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive Next.js catalog/detail pages, filters, generated API types and browser checks |
 | Shopping | Cart, orders, payment processing, and order history are planned |
-| Hosting | Azure is planned; no Azure deployment is provisioned |
+| Hosting | Vercel/Render/Neon free demo planned; not provisioned |
 
 This repository is a development foundation, not a production-ready shop. Tests
 cover implemented behavior; placeholder files do not represent finished features.
@@ -117,7 +117,7 @@ is implemented; payment/email files currently contain placeholders.
 
 The local stack starts PostgreSQL, runs a one-shot Alembic migration container,
 then starts the non-root API container. Database and API host ports bind to loopback.
-See [architecture](docs/architecture.md) for the current design and Azure direction.
+See [architecture](docs/architecture.md) for the current design and hosting direction.
 
 ## API overview
 
@@ -207,13 +207,17 @@ Every change should have a focused PR, review findings, and evidence for the exa
 commit being merged. Self-review must be labelled as such. See
 [contributing](CONTRIBUTING.md) and [skill provenance](docs/skill-sources.md).
 
-## Azure roadmap
+## Live demo hosting plan
 
-The proposed target is Azure Container Apps for FastAPI and the future Next.js
-server, with Azure Database for PostgreSQL Flexible Server. The infrastructure PR
-will define region, costs, identities/secrets, registry, networking, logs,
-backup/restore, and rollback before provisioning. The old AWS Terraform in
-`backend/infra` is legacy reference, not the deployment path.
+The approved £0 demo uses Vercel Hobby for Next.js, Render Free for FastAPI and
+separate Neon Free development/production databases. Provider subdomains supply
+free HTTPS addresses. Environment setup, previews and production CD are tracked
+in #44–46; no public deployment URL is available yet. Read the
+[environment plan](deploy/environments/README.md) for isolation, secrets, cold
+starts, quotas and the intended test → review → deploy sequence.
+
+Azure is an optional future migration (#31). The AWS Terraform in backend/infra
+remains legacy reference. No paid upgrade or new AI API billing is authorized.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
 The next product steps are customer

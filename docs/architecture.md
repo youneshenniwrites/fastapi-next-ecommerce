@@ -29,14 +29,11 @@ As checkout is implemented, domain services will own transactions and coordinate
 CRUD helpers. FastAPI remains authoritative for permissions, money, and inventory.
 The Next.js app consumes an OpenAPI-generated contract; CI rejects contract drift.
 
-## Planned Azure hosting
+## Approved free demo hosting
 
-Azure replaces the original AWS direction. No Azure resources are provisioned.
-The proposed starting point is [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/overview)
-for FastAPI and the future Next.js server, plus [Azure Database for PostgreSQL
-Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/overview).
-
-The infrastructure PR will define the subscription, region, cost limits, container
-registry, identity/secrets, networking, and monitoring. It must also cover database
-migrations, TLS, backup/restore, and rollback. Local Docker Compose stays independent
-of cloud provisioning. The legacy AWS Terraform is not an Azure implementation.
+Vercel Hobby serves Next.js, Render Free runs FastAPI, and separate Neon Free
+projects hold development and production data. The owner approved this £0 plan
+on 8 September 2026. No hosted environment is provisioned yet. See the
+[environment plan](../deploy/environments/README.md) for configuration and rollout.
+Azure is retained as optional future migration (#31), not the immediate target.
+The legacy AWS Terraform is not used for this deployment.

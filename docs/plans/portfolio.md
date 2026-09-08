@@ -2,7 +2,7 @@
 
 This is an interview showcase, not a real business. Build a polished, reproducible
 fictional desk-accessories shop with decisions and evidence the owner can explain.
-GBP is the currency; Azure is the hosting target. Use a modular monolith and add
+GBP is the currency; Vercel/Render/Neon free plans host the demo. Use a modular monolith and add
 infrastructure only for a demonstrated need. Deliver focused, reviewed PRs.
 
 ## Delivery sequence
@@ -14,7 +14,7 @@ infrastructure only for a demonstrated need. Deliver focused, reviewed PRs.
 4. Prove commerce correctness: server-owned prices, atomic inventory, checkout
    idempotency, and concurrent attempts to buy the last item. Implement these
    protections with checkout, not as a later patch. Add sandbox payments afterward.
-5. Azure demo: infrastructure as code, managed secrets, logs, health checks,
+5. Free hosted demo: isolated dev/prod, managed secrets, logs, health checks,
    deployment/rollback documentation. Agree spending limits before provisioning.
 6. Interview package: architecture diagram, decision records with alternatives,
    test evidence, and a five-minute demonstration walkthrough.
