@@ -61,7 +61,7 @@ npm run build assembles .next/standalone with static assets. Run npm start with
 PORT and HOSTNAME environment variables to serve that package. CI archives the
 contents; after extraction use node server.js with API_BASE_URL configured.
 
-Vercel deployment is being configured; no hosted URL is verified yet. See ../docs/ci.md for the delivery pipeline.
+The [development demo](https://forme-ecommerce-development.vercel.app) runs on Vercel; production CD is being configured. See ../docs/ci.md for the delivery pipeline.
 
 ## Customer session API
 

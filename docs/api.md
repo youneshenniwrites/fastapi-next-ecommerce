@@ -9,7 +9,7 @@ FastAPI publishes an OpenAPI 3.1 contract for every implemented endpoint:
 ## Start and verify the local API
 
 These URLs refer to **your computer**. GitHub displays the source and contract;
-it does not run the API. There is no verified public API deployment yet.
+it does not run the API. The [hosted development API docs](https://forme-api-development.vercel.app/docs) are also available.
 
 Start Docker Desktop (or your Docker engine), then from the repository root:
 

@@ -8,8 +8,17 @@ methods, purchased domain or separately billed AI API are authorized.
 
 Track configuration #44, development/previews #45 and production CD #46. The two
 Neon projects are created in Frankfurt on PostgreSQL 17, matching local/CI. Both
-passed Alembic upgrade and metadata checks. Public application URLs are not yet
-verified. Committing these files does not deploy the app.
+passed Alembic upgrade and metadata checks. The development storefront and API are verified over HTTPS; production is not
+yet deployed. Committing these files does not deploy the app.
+
+## Verified development links
+
+- [Storefront](https://forme-ecommerce-development.vercel.app)
+- [Swagger API docs](https://forme-api-development.vercel.app/docs)
+- [OpenAPI contract](https://forme-api-development.vercel.app/openapi.json)
+
+Catalog, product detail, registration/login, secure cookies, profile, cross-origin
+rejection and logout were exercised on hosting with fictional data.
 
 ## Isolation and configuration
 
@@ -54,7 +63,10 @@ or serverless process reuse must not result in permanently stale connections.
    runtime rather than the Dockerfile. The lockfile remains authoritative.
 4. Set each frontend root to frontend, framework to Next.js and Node to 24.
    vercel.json uses npm ci and npx next build. The local npm run build continues
-   preparing the standalone server used by container/browser tests.
+   preparing the standalone server used by container/browser tests. next.config.ts
+   disables standalone output only when VERCEL=1 because the Next.js 16.3 adapter
+   otherwise fails on a missing trace file. Both cloud and local builds are tested.
+   Vercel manages Node 24 patch releases (validated at 24.19.0); local/CI pin 24.20.0.
 5. Configure environment-specific secrets and exact APP_ORIGIN values. Preview
    origin injection is #45; never trust request Host/forwarded headers or wildcard
    the Origin check. An invalid/missing origin must fail closed for session writes.

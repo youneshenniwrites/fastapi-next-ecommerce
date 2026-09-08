@@ -8,7 +8,8 @@
 
 A storefront project built around a FastAPI API and PostgreSQL, with a
 Next.js frontend. **The launch currency is GBP. Free demo hosting targets Vercel and Neon.**
-The backend and catalog storefront run locally; checkout is still planned.
+The backend and catalog storefront run locally and in a
+[development demo](https://forme-ecommerce-development.vercel.app); checkout is still planned.
 
 [Quick start](#quick-start) · [API](#api-overview) · [Checks](#testing-and-quality) ·
 [Architecture](docs/architecture.md) · [Roadmap](docs/plans/roadmap.md) ·
@@ -27,7 +28,7 @@ The backend and catalog storefront run locally; checkout is still planned.
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive Next.js catalog/detail pages, filters, generated API types and browser checks |
 | Shopping | Cart, orders, payment processing, and order history are planned |
-| Hosting | Vercel/Neon configuration in progress; no verified public deployment |
+| Hosting | Development demo verified on Vercel/Neon; production CD in progress |
 
 This repository is a development foundation, not a production-ready shop. Tests
 cover implemented behavior; placeholder files do not represent finished features.
@@ -212,7 +213,7 @@ commit being merged. Self-review must be labelled as such. See
 The approved £0 demo uses Vercel Hobby for Next.js and FastAPI, with
 separate Neon Free development/production databases. Provider subdomains supply
 free HTTPS addresses. Isolated databases are created; environment setup, previews and production CD are tracked
-in #44–46; no public deployment URL is available yet. Read the
+in #44–46; the development demo is available and production delivery is in progress. Read the
 [environment plan](deploy/environments/README.md) for isolation, secrets, cold
 starts, quotas and the intended test → review → deploy sequence.
 
