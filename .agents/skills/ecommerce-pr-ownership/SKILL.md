@@ -11,9 +11,12 @@ correctly. If a different account is authenticated, use an already-authorized
 owner connection or report the mismatch; never falsify authorship or rewrite history.
 Existing bot/contributor PRs retain their real authors.
 
-Use the PR template for a readable description: summary, GitHub issue, validation,
-and compatibility/operations. Link the actual issue; never invent an issue or
-imply one is attached.
+Use .github/pull_request_template.md as the canonical description structure:
+Summary, Issue, optional Before / After, Acceptance criteria, Testing, Review,
+and optional Deployment / Compatibility. Fill it with actual evidence; remove
+unused optional sections. Link real issues and never pre-check unverified review
+or test claims. Use this structure when maintaining bot PRs, preserving useful
+upstream release information.
 
 After creating a PR, choose labels that describe its actual scope: bug,
 enhancement, documentation, tooling, dependencies, github_actions, or docker.
@@ -35,3 +38,18 @@ independent approval. Follow root review/CI/merge instructions separately.
 Follow docs/delivery.md for issue linkage and board status. Include a GitHub issue
 reference. At merge, verify acceptance criteria before issue
 closure/Done, and record any remaining work instead of implying completion.
+
+## Reviewer requests
+
+Assign the owner on every PR. Request youneshenniwrites as a reviewer when the
+owner is not the author; GitHub does not permit authors to review their own PRs.
+Keep the Owner line in that case and do not claim a reviewer request succeeded.
+Request Codex Code Review using its configured integration (or @codex review
+comment). Listing Codex in the PR body is not a request. Inspect existing review
+activity before posting to avoid duplicate requests; request a new review when
+code changes invalidate the reviewed head. Verify the actual bot response and
+reviewed commit. Do not assume the integration bot is a requestable GitHub user.
+
+External review and approval are required before merge. Self-review and CI alone
+are insufficient. Comments/reactions are not automatically formal approvals;
+leave the PR open if the required signal is missing. Never bypass protection.

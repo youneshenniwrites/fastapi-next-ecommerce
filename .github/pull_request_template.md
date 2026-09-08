@@ -1,29 +1,36 @@
-<!-- PR title: type(scope): description; see CONTRIBUTING.md naming conventions. -->
+<!-- PR title: type(scope): description. Replace placeholders; remove optional sections when irrelevant. -->
 
-## Problem and resulting behavior
+## Summary
+What changed and why—in 1–3 sentences.
 
-Explain the concrete trigger and what changes for a user or maintainer.
+## Issue
+Closes #<!-- actual issue number; use Refs #N for partial work -->
 
-## GitHub issue
+## Before / After
+<!-- Optional: include for meaningful behaviour changes; add screenshots if useful. -->
+| Before | After |
+| --- | --- |
+| Previous behaviour | New behaviour |
 
-Closes #<!-- issue number; use Refs #N if this PR only partially completes it -->
+## Acceptance criteria
+- [ ] Required outcome from the linked issue
+- [ ] Relevant error and edge cases handled
+- [ ] Documentation updated where needed
 
-## Validation
-
-List the commands/results and the exact revision tested. Mark unavailable checks
-as untested and explain why. Link relevant CI or redacted before/after evidence.
-
-## Compatibility and operations
-
-Describe API/dependency changes, migration effects, and rollback considerations.
-Use "Not applicable" when the change has none.
+## Testing
+- Checks run:
+- Results and tested commit:
+- Not tested / limitations:
 
 ## Review
+- Owner: @youneshenniwrites
+- External reviewer: Codex Code Review
+- [ ] External review completed for the latest commit
+- [ ] Review findings addressed
+- [ ] Required CI checks passed
+- [ ] Required external approval verified for the latest commit
+<!-- Request the owner as reviewer when they are not the PR author. Trigger Codex review through its integration; naming it here does not request a review. A comment or reaction is not automatically a formal approval. -->
 
-- [ ] I reviewed the complete diff and addressed actionable findings.
-- [ ] External review tool has reviewed and approved the current revision.
-- [ ] Applicable CI checks pass for the commit to be merged.
-- [ ] Documentation and skills reflect the implemented behavior.
-
-State whether this is self-review or independent review. Do not include secrets
-or customer data in the description or evidence.
+## Deployment / Compatibility
+<!-- Optional: omit if not applicable. -->
+Migrations, configuration changes, breaking changes, or rollback notes.

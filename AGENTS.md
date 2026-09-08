@@ -79,3 +79,8 @@ covers the current head and resolve findings; request review again after changes
 Never use an admin bypass or weaken protection to merge. A comment, reaction, or
 absence of findings is not automatically a formal approving GitHub review. If the
 selected tool cannot supply the required signal, leave the PR open and report it.
+
+The canonical PR format is .github/pull_request_template.md. Use the
+ecommerce-pr-ownership skill to fill it, assign the owner, and request/verify
+owner and Codex review as GitHub permits. Read these repository files each time
+you resume PR work; conversation memory is not the source of truth.
