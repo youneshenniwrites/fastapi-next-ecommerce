@@ -13,6 +13,7 @@ from app.crud import user as crud_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import Token
+from app.schemas.errors import ErrorResponse
 from app.schemas.user import UserCreate, UserRead
 
 router = APIRouter()
@@ -20,10 +21,18 @@ router = APIRouter()
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
-@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a customer account",
+    responses={
+        400: {"model": ErrorResponse, "description": "Email is already registered."}
+    },
+)
 def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     """
-    Register a new user.
+    Create an active customer. Registration never grants admin privileges.
     """
     existing_user = crud_user.get_user_by_email(db, email=user_in.email)
     if existing_user:
@@ -42,13 +51,24 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
         raise
 
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login",
+    response_model=Token,
+    summary="Sign in with email and password",
+    responses={
+        401: {
+            "model": ErrorResponse,
+            "description": "Invalid credentials or disabled account.",
+        }
+    },
+)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ) -> Any:
     """
-    Authenticate user and return a JWT access token.
+    Submit an application/x-www-form-urlencoded body. The username field is the
+    account email. Returns a bearer JWT; use it in Authorization: Bearer <token>.
     """
     user = crud_user.get_user_by_email(db, email=form_data.username)
     valid, updated_hash = password_hash.verify_and_update(
@@ -72,7 +92,17 @@ def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/me", response_model=UserRead)
+@router.get(
+    "/me",
+    response_model=UserRead,
+    summary="Read the active user profile",
+    responses={
+        401: {
+            "model": ErrorResponse,
+            "description": "Missing, invalid or expired token, or inactive account.",
+        }
+    },
+)
 def me(current_user: User = Depends(get_current_user)) -> User:
     """
     Get the currently authenticated user.
