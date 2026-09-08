@@ -1,0 +1,4 @@
+interface:
+  display_name: "Self Review"
+  short_description: "Review changes before external code review"
+  default_prompt: "Use $self-review for the current ecommerce delivery task."

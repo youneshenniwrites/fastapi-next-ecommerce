@@ -234,3 +234,9 @@ docs/                 Architecture, development, tooling, decisions, roadmap
 ```
 
 Report security issues privately using the route in [SECURITY.md](SECURITY.md).
+
+## Delivery commands
+
+The [delivery skills reference](docs/delivery-skills.md) explains the five reusable
+Codex workflows for PR creation, self-review, review comments, board updates and
+documentation, including invocation examples and discovery.

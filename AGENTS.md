@@ -86,3 +86,13 @@ The canonical PR format is .github/pull_request_template.md. Use the
 ecommerce-pr-ownership skill to fill it, assign the owner, and request/verify
 Codex review. Keep the owner as assignee, not a requested reviewer. Read these repository files each time
 you resume PR work; conversation memory is not the source of truth.
+
+## Invokable delivery skills
+
+Use create-pr for PR creation or description refresh, self-review for a complete
+implementation review, address-codex-comments for review follow-up,
+update-delivery-board for issue/project reconciliation, and update-docs for
+README, Wiki and contract documentation. Read the selected SKILL.md under
+.agents/skills before using it. These reuse the policies above; they do not
+replace external review or expand authorization. See docs/delivery-skills.md
+for invocation and discovery, including tasks started outside the repository.

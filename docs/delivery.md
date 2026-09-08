@@ -65,3 +65,8 @@ integration and verify completion on the current commit. A named reviewer in the
 body is not evidence of a request or approval. The ownership skill contains the
 operational steps; AGENTS.md routes future sessions to it. External approval
 remains required before merge, including maintenance PRs.
+
+## Reusable skills
+
+Use the [delivery skill reference](delivery-skills.md) for repeatable PR creation,
+self-review, Codex follow-up, board reconciliation and documentation updates.

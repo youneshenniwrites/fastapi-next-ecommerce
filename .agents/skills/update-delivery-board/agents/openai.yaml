@@ -1,0 +1,4 @@
+interface:
+  display_name: "Update Delivery Board"
+  short_description: "Reconcile issues and pull requests on the board"
+  default_prompt: "Use $update-delivery-board for the current ecommerce delivery task."
