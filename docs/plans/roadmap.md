@@ -32,7 +32,7 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
    handling, idempotency, and concurrent last-item purchase tests.
 6. Sandbox payments: select the provider, verify webhooks, handle duplicates,
    failures/cancellations, and connect confirmation/order history.
-7. Free demo deployment (#44–46): Vercel/Render/Neon, isolated dev/prod,
+7. Free demo deployment (#44–46): Vercel/Neon, isolated dev/prod,
    with explicit free-tier limits, staging, secrets, TLS, migrations, logs,
    recovery limitations and rollback evidence. Azure migration remains future #31.
 

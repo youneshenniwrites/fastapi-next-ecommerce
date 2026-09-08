@@ -61,7 +61,7 @@ npm run build assembles .next/standalone with static assets. Run npm start with
 PORT and HOSTNAME environment variables to serve that package. CI archives the
 contents; after extraction use node server.js with API_BASE_URL configured.
 
-Azure deployment is not configured. See ../docs/ci.md for the delivery pipeline.
+Vercel deployment is being configured; no hosted URL is verified yet. See ../docs/ci.md for the delivery pipeline.
 
 ## Customer session API
 

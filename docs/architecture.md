@@ -31,9 +31,9 @@ The Next.js app consumes an OpenAPI-generated contract; CI rejects contract drif
 
 ## Approved free demo hosting
 
-Vercel Hobby serves Next.js, Render Free runs FastAPI, and separate Neon Free
+Vercel Hobby serves Next.js and FastAPI, and separate Neon Free
 projects hold development and production data. The owner approved this £0 plan
-on 8 September 2026. No hosted environment is provisioned yet. See the
+on 8 September 2026. Isolated Neon databases are provisioned; application deployment is in progress. See the
 [environment plan](../deploy/environments/README.md) for configuration and rollout.
 Azure is retained as optional future migration (#31), not the immediate target.
 The legacy AWS Terraform is not used for this deployment.

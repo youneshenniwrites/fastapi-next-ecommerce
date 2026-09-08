@@ -1,90 +1,103 @@
 # Free demo environments
 
-Approved 8 September 2026: Vercel Hobby (Next.js), Render Free (FastAPI), and
-Neon Free (PostgreSQL). This replaces Azure as the immediate deployment target;
-Azure migration is optional future issue #31. Nothing is provisioned by committing
-these files. Track setup #44, development previews #45, production CD #46.
+Approved 8 September 2026: GitHub for delivery, Vercel Hobby for both Next.js and
+FastAPI, and Neon Free for PostgreSQL. Render was rejected after its Free service
+creation required a payment card; the owner requested a no-card alternative and
+fewer providers. Azure migration is optional future #31. No paid upgrades, payment
+methods, purchased domain or separately billed AI API are authorized.
+
+Track configuration #44, development/previews #45 and production CD #46. The two
+Neon projects are created in Frankfurt on PostgreSQL 17, matching local/CI. Both
+passed Alembic upgrade and metadata checks. Public application URLs are not yet
+verified. Committing these files does not deploy the app.
 
 ## Isolation and configuration
 
-| Setting | Development / PR previews | Production demo |
+| Setting | Development | Production demo |
 | --- | --- | --- |
-| Render service | forme-api-development | forme-api-production |
-| Neon project | Dedicated development project | Separate production project |
-| DATABASE_URL | Development credentials only | Production credentials only |
+| Vercel API project | forme-api-development | forme-api-production |
+| Vercel frontend project | forme-ecommerce-development | forme-ecommerce |
+| Neon project | forme-development | forme-production |
+| Database / role | forme_development / forme_development_owner | forme_production / forme_production_owner |
+| DATABASE_URL | Development database only | Production database only |
 | SECRET_KEY | Independent generated key | Independent generated key |
-| Vercel API_BASE_URL | Development API HTTPS URL | Production API HTTPS URL |
-| APP_ORIGIN | Exact trusted preview/development HTTPS origin | Exact production HTTPS origin |
-| ALLOW_LOCAL_HTTP_SESSIONS | Unset on hosted deployments | Unset |
+| Frontend API_BASE_URL | Development API HTTPS URL | Production API HTTPS URL |
+| APP_ORIGIN | Exact trusted deployment HTTPS origin | Exact production HTTPS origin |
+| ALLOW_LOCAL_HTTP_SESSIONS | Unset on hosting | Unset |
 | GitHub environment | development | production |
 
-Names are proposed resource names, not verified public URLs. Actual provider
-subdomains are recorded only after provisioning. Do not purchase a domain.
-Never reuse signing keys or database roles between environments. Tests use local
-throwaway databases; PR code never receives production secrets. Do not copy real
-user data to previews. Hosted data is fictional demo data only.
+Separate Vercel projects isolate the shared development deployment from the public
+production demo. Vercel's `production` target means a project's stable URL: for the
+development projects it still uses development data. PR previews belong to the
+development frontend project only. Tests use disposable local databases; fork PRs
+never receive deployment credentials. No real personal/customer data belongs here.
 
-Neon connection strings must select psycopg explicitly for SQLAlchemy:
+The names above identify resources, not verified domain ownership. Record actual
+provider URLs after provisioning. Never reuse signing keys or database credentials
+between environments. The frontend receives no database password or API signing key.
+Store credentials in provider/GitHub secret stores, never tracked files or logs.
+
+Neon URLs must select psycopg explicitly for SQLAlchemy:
 `postgresql+psycopg://USER:PASSWORD@HOST/DATABASE?sslmode=require`.
-Use independently generated credentials in each project and retain TLS options.
-Keep a direct connection string for migrations; runtime pooling is configured only
-with tested driver-compatible settings. Store actual values in provider/GitHub
-secret stores, never in tracked files or shared logs.
+Retain TLS parameters. Migrations use direct connections. Verify runtime connection
+recovery and bounded connection use before public deployment; suspended Neon compute
+or serverless process reuse must not result in permanently stale connections.
 
-## Provisioning order
+## Provisioning and verification
 
-1. Sign in to Vercel, Render and Neon. Select Hobby/Free throughout; no paid
-   trial, add-on or payment method. Render overages without a payment method pause
-   service/builds; two API services share the workspace's free instance hours.
-2. Create two separate Neon Free projects in a compatible nearby region. Obtain
-   distinct connection strings; run reviewed Alembic migrations before serving
-   application traffic. No automatic downgrade or destructive demo reseed.
-3. Connect render.yaml only after the databases are ready. Its two services use
-   plan: free, independent generated signing keys and user-supplied DATABASE_URL.
-   Render may deploy initially on creation; autoDeployTrigger: off prevents later
-   commit-triggered deployments. The existing Docker image listens on 0.0.0.0:8000.
-4. Configure Vercel with frontend as the root, Next.js framework, Node 24 and the
-   locked dependency install. Use `npx next build` on Vercel; the local `npm run
-   build` also prepares a standalone server for container/browser testing.
-5. Connect preview variables to development and production variables to production.
-   Exact preview APP_ORIGIN injection belongs to #45; never wildcard Origin checks
-   or derive trust from request Host/forwarded headers. Keep provider auto-production
-   deployment disabled until GitHub CD owns promotion in #46.
-6. Verify schema, health, catalog and session behavior before publishing demo links.
-   /health is liveness, not proof of database readiness: a product request exercises
-   the DB. Swagger /docs, /redoc and /openapi.json remain available on each API.
+1. Keep Vercel on Hobby and Neon on Free; no card or upgrade. Free quotas may pause
+   the demo. It is a personal, non-commercial interview showcase.
+2. Create separate Neon projects/roles and independent signing keys. Run reviewed
+   Alembic migrations before serving traffic; never auto-downgrade or reseed data.
+3. Set each API project's root to backend, framework to FastAPI and Python to 3.12
+   via .python-version. Vercel discovers app/main.py:app. It uses the native Python
+   runtime rather than the Dockerfile. The lockfile remains authoritative.
+4. Set each frontend root to frontend, framework to Next.js and Node to 24.
+   vercel.json uses npm ci and npx next build. The local npm run build continues
+   preparing the standalone server used by container/browser tests.
+5. Configure environment-specific secrets and exact APP_ORIGIN values. Preview
+   origin injection is #45; never trust request Host/forwarded headers or wildcard
+   the Origin check. An invalid/missing origin must fail closed for session writes.
+6. Keep direct Git deployments disabled in both vercel.json files. GitHub Actions
+   will upload a clean, tested revision through the CLI; a GitHub App repository
+   connection is optional (the owner connected the frontend repository). The .vercelignore files exclude local credentials
+   and build caches from manual CLI uploads.
+7. Verify /health, catalog DB reads, /docs, /redoc, /openapi.json and session behavior
+   over HTTPS before advertising URLs. /health alone is liveness, not DB readiness.
+
+GitHub environments currently restrict deployment workflow refs to main. A future
+preview workflow must run trusted orchestration from main and validate the source
+PR before using development credentials. Do not inject secrets into arbitrary PR
+code, or add a write-enabled pull_request_target workflow that executes PR code.
 
 ## Delivery sequence
 
 PR: lint/types/contract → unit/integration tests → build/browser tests → Codex
-review → development preview. Backend branch changes are tested in disposable CI;
-shared development deployment is serialized when explicitly promoted. Frontend
-previews do not imply an isolated backend for each PR.
+review → development preview. Backend changes use disposable CI databases; promotion
+to the shared development API is explicit and serialized. A frontend preview does
+not imply a dedicated backend/database for every PR.
 
-Main: verify exact commit → serialize production deployment → run backward-compatible
-migrations once → deploy API and await readiness → deploy website → smoke-test
-catalog/session boundaries → publish GitHub deployment links. Disable independent
-provider production triggers to prevent bypassing this sequence. #46 implements
-these steps; no deployment workflow exists yet.
+Main: verify exact commit → serialize deployment → run backward-compatible migrations
+once → deploy API and verify readiness → deploy frontend → smoke-test catalog and
+session boundaries → publish GitHub deployment links. #46 implements this sequence;
+there is no automatic deployment workflow yet. Do not deploy a newer unverified SHA
+just because it became the current main while a previous run was executing.
 
-Keep the previous known-good deploy available. Roll back application revisions
-only when compatible with the current database; database rollback/restoration is
-an explicit recovery operation. Never auto-downgrade migrations after a failed deploy.
+Keep the last known-good deployment. Roll back application revisions only when
+compatible with the current schema. Database recovery is an explicit operation,
+not an automatic downgrade after failed deployment. Free retention limits are not
+a backup guarantee; document a tested recovery procedure before relying on one.
 
-## Free-tier behavior
+## Runtime limits
 
-Render sleeps after inactivity and waking can take about a minute. The current
-five-second API timeout deliberately remains bounded; the storefront shows retry
-and sessions return a temporary 503 without clearing a valid cookie. #45 must
-exercise this on hosting and provide a clear warm-up/retry experience. Do not
-retry login/register mutations automatically or keep services awake artificially.
-Deployment smoke tests may retry bounded read-only requests while the API warms.
+Vercel Functions are request-scoped serverless processes, not persistent containers.
+No local persistent writes or durable background jobs are assumed. Neon can suspend
+compute; retain bounded request timeouts and test recovery. The existing five-second
+frontend timeout may show retry/temporary 503 while services initialize. Do not
+retry login or other mutations automatically. Deployment smoke checks may retry
+bounded read-only requests. Future carts/checkout must keep state and transactions
+in PostgreSQL, not process memory.
 
-Neon may also suspend compute. Free-tier quota exhaustion can suspend the demo;
-this is not an always-on availability guarantee. Monitor provider usage and avoid
-payment methods or paid upgrades. The GitHub repository is public: do not expose
-secrets or credentials in build artifacts. No separately billed AI API is used.
-
-References: [Render free limits](https://render.com/docs/free),
-[Render Blueprint specification](https://render.com/docs/blueprint-spec),
+References: [Vercel FastAPI](https://vercel.com/docs/frameworks/backend/fastapi),
+[Python runtime](https://vercel.com/docs/functions/runtimes/python),
 [Vercel Hobby](https://vercel.com/docs/plans/hobby), [Neon Free](https://neon.com/pricing).

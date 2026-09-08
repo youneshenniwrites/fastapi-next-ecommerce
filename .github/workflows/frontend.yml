@@ -117,6 +117,6 @@ jobs:
           ## Storefront delivery
           See the named checks above for build and browser-test results.
           Successful runs publish the standalone build and browser evidence as artifacts.
-          **Deployment: not configured.** No Azure resources are provisioned by this workflow.
-          The Azure staging milestone will add environment, identity, migration and deployment checks.
+          **Deployment: not configured.** This workflow validates and packages the frontend.
+          Hosting tickets #45–46 add separate Vercel deployment and smoke checks.
           EOF

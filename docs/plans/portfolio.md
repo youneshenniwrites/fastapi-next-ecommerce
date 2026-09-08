@@ -2,7 +2,7 @@
 
 This is an interview showcase, not a real business. Build a polished, reproducible
 fictional desk-accessories shop with decisions and evidence the owner can explain.
-GBP is the currency; Vercel/Render/Neon free plans host the demo. Use a modular monolith and add
+GBP is the currency; Vercel/Neon free plans host the demo. Use a modular monolith and add
 infrastructure only for a demonstrated need. Deliver focused, reviewed PRs.
 
 ## Delivery sequence

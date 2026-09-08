@@ -9,7 +9,7 @@ FastAPI publishes an OpenAPI 3.1 contract for every implemented endpoint:
 ## Start and verify the local API
 
 These URLs refer to **your computer**. GitHub displays the source and contract;
-it does not run the API. There is no hosted Azure API yet.
+it does not run the API. There is no verified public API deployment yet.
 
 Start Docker Desktop (or your Docker engine), then from the repository root:
 

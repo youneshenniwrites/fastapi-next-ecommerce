@@ -7,7 +7,7 @@
 [![Dependency audit](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/workflows/dependency-audit.yml)
 
 A storefront project built around a FastAPI API and PostgreSQL, with a
-Next.js frontend. **The launch currency is GBP. Free demo hosting targets Vercel, Render and Neon.**
+Next.js frontend. **The launch currency is GBP. Free demo hosting targets Vercel and Neon.**
 The backend and catalog storefront run locally; checkout is still planned.
 
 [Quick start](#quick-start) · [API](#api-overview) · [Checks](#testing-and-quality) ·
@@ -27,7 +27,7 @@ The backend and catalog storefront run locally; checkout is still planned.
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive Next.js catalog/detail pages, filters, generated API types and browser checks |
 | Shopping | Cart, orders, payment processing, and order history are planned |
-| Hosting | Vercel/Render/Neon free demo planned; not provisioned |
+| Hosting | Vercel/Neon configuration in progress; no verified public deployment |
 
 This repository is a development foundation, not a production-ready shop. Tests
 cover implemented behavior; placeholder files do not represent finished features.
@@ -209,9 +209,9 @@ commit being merged. Self-review must be labelled as such. See
 
 ## Live demo hosting plan
 
-The approved £0 demo uses Vercel Hobby for Next.js, Render Free for FastAPI and
+The approved £0 demo uses Vercel Hobby for Next.js and FastAPI, with
 separate Neon Free development/production databases. Provider subdomains supply
-free HTTPS addresses. Environment setup, previews and production CD are tracked
+free HTTPS addresses. Isolated databases are created; environment setup, previews and production CD are tracked
 in #44–46; no public deployment URL is available yet. Read the
 [environment plan](deploy/environments/README.md) for isolation, secrets, cold
 starts, quotas and the intended test → review → deploy sequence.
