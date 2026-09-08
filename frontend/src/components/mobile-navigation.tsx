@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,9 +13,19 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 export function MobileNavigation() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    // Match Tailwind's sm breakpoint; the sheet is portaled outside its wrapper.
+    const desktop = window.matchMedia("(min-width: 40rem)");
+    const closeOnDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
   return (
     <div className="sm:hidden">
-      <Sheet>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"

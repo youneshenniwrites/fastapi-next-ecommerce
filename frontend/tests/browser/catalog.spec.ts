@@ -107,3 +107,29 @@ test("mobile navigation supports keyboard, dismissal and real links", async ({
     ),
   ).toBeTruthy();
 });
+
+test("mobile navigation closes when resizing to desktop", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "mobile", "Mobile menu only");
+  await page.goto("/");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const trigger = page.getByRole("button", { name: "Open navigation" });
+  const dialog = page.getByRole("dialog", { name: "Explore FORME" });
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCount(0);
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Our approach" })
+    .click();
+  await expect(page).toHaveURL(/#approach$/);
+  await page.setViewportSize({ width: 393, height: 851 });
+  await expect(dialog).not.toBeVisible();
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+});
