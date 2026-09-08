@@ -25,8 +25,11 @@ def test_register_login_and_me(client):
         data={"username": "new@example.com", "password": "password123"},
     )
     assert login.status_code == 200
+    assert login.json()["expires_in"] > 0
     token = login.json()["access_token"]
-    assert decode_access_token(token)["sub"] == str(response.json()["id"])
+    claims = decode_access_token(token)
+    assert claims["sub"] == str(response.json()["id"])
+    assert claims["exp"] - claims["iat"] == login.json()["expires_in"]
     me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
     assert me.status_code == 200
     assert me.json()["email"] == "new@example.com"

@@ -9,6 +9,15 @@ export default defineConfig({
   use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
   projects: [
     {
+      name: "sessions",
+      testMatch: "session.spec.ts",
+      use: {
+        baseURL: "http://127.0.0.1:3300",
+        trace: "off",
+        screenshot: "off",
+      },
+    },
+    {
       name: "desktop",
       testMatch: "catalog.spec.ts",
       use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3300" },
@@ -42,6 +51,8 @@ export default defineConfig({
       env: {
         API_BASE_URL: "http://127.0.0.1:18300",
         PORT: "3300",
+        APP_ORIGIN: "http://127.0.0.1:3300",
+        ALLOW_LOCAL_HTTP_SESSIONS: "true",
         HOSTNAME: "127.0.0.1",
       },
       reuseExistingServer: false,

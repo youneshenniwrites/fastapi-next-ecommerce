@@ -89,7 +89,11 @@ def login(
         subject=user.id, expires_delta=access_token_expires
     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "expires_in": int(access_token_expires.total_seconds()),
+    }
 
 
 @router.get(

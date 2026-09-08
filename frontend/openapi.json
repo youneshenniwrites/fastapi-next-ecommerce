@@ -274,6 +274,10 @@
             "title": "Access Token",
             "type": "string"
           },
+          "expires_in": {
+            "title": "Expires In",
+            "type": "integer"
+          },
           "token_type": {
             "default": "bearer",
             "title": "Token Type",
@@ -281,7 +285,8 @@
           }
         },
         "required": [
-          "access_token"
+          "access_token",
+          "expires_in"
         ],
         "title": "Token",
         "type": "object"
