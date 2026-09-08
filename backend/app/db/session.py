@@ -8,7 +8,14 @@ from app.core.settings import settings
 # postgres://username:password@localhost:5432/dbname
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False, future=True)
+
+def create_db_engine(database_url: str):
+    # Hosted PostgreSQL may close idle connections when compute suspends.
+    # Validate at checkout; do not replay transactions or mutations on failure.
+    return create_engine(database_url, echo=False, future=True, pool_pre_ping=True)
+
+
+engine = create_db_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

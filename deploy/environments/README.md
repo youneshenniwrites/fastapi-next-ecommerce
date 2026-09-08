@@ -104,7 +104,11 @@ a backup guarantee; document a tested recovery procedure before relying on one.
 
 Vercel Functions are request-scoped serverless processes, not persistent containers.
 No local persistent writes or durable background jobs are assumed. Neon can suspend
-compute; retain bounded request timeouts and test recovery. The existing five-second
+compute. SQLAlchemy validates pooled connections at checkout (`pool_pre_ping`)
+and replaces those closed while idle. PostgreSQL CI exercises this by terminating
+only a test-owned idle connection and verifying the next checkout succeeds. This
+does not replay interrupted transactions or retry mutations. Retain bounded
+request timeouts and verify hosting recovery. The existing five-second
 frontend timeout may show retry/temporary 503 while services initialize. Do not
 retry login or other mutations automatically. Deployment smoke checks may retry
 bounded read-only requests. Future carts/checkout must keep state and transactions
