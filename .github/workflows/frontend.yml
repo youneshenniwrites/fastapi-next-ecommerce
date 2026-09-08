@@ -30,7 +30,7 @@ jobs:
       - name: Install locked frontend dependencies
         run: npm ci
       - name: Set up Python for API contract export
-        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           version: "0.8.22"
       - name: Install locked API dependencies
@@ -84,7 +84,7 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: "1"
       - name: Set up Python for real API integration tests
-        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           version: "0.8.22"
       - name: Install locked API dependencies
