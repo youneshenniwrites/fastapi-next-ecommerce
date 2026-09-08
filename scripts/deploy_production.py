@@ -75,6 +75,7 @@ def main():
                 read(API + "/health", retry=True)
                 products = json.loads(read(API + "/api/v1/products/", retry=True))
                 assert isinstance(products, list) and products, "Demo catalog is empty"
+                read(API + "/")  # Dashboard domain link must resolve to docs.
                 read(API + "/docs")
                 read(API + "/openapi.json")
                 read(API + "/api/v1/auth/me", expected=401)
