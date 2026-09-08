@@ -21,7 +21,7 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 ## Next PRs, in dependency order
 
 1. Demo foundation implemented: explicit admin bootstrap and empty-catalog seeding.
-   See [demo guide](../demo.md); next build the runnable storefront.
+   See [demo guide](../demo.md); the catalog storefront is also implemented.
 2. Next.js catalog implemented: App Router, TypeScript, generated API contract,
    product list/detail, filtering, state handling and desktop/mobile browser checks.
 3. Customer frontend auth: login/register/profile, server-mediated secure session
@@ -47,3 +47,12 @@ Add typed SQLAlchemy models and static type checking, then code scanning and
 repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented. Add observability, operational
 runbooks, and release/restore verification alongside Azure staging. These are
 planned controls, not features already enabled by the documentation.
+
+## Tracked delivery
+
+The [board](https://github.com/users/youneshenniwrites/projects/1) owns live status.
+Customer accounts are split into #24 secure sessions, #25 registration/login,
+#26 profile/navigation and #27 journey verification/documentation. Future work is
+#28 carts, #29 checkout/orders, #30 sandbox payments and #31 Azure. Refine those
+broader items into focused PR tickets before implementation. See
+[session proposal](../design/customer-sessions.md) and [delivery rules](../delivery.md).

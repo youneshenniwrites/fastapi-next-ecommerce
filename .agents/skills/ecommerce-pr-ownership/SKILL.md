@@ -31,3 +31,7 @@ writing. Re-running it is safe if a previous call only partially succeeded.
 Verify author, assignee, and labels before handing off a PR. CODEOWNERS expresses
 code-review ownership; it does not assign PRs or make an author's own review an
 independent approval. Follow root review/CI/merge instructions separately.
+
+Follow docs/delivery.md for issue linkage and board status. Include a GitHub issue
+reference separately from Jira. At merge, verify acceptance criteria before issue
+closure/Done, and record any remaining work instead of implying completion.

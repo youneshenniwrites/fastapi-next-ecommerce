@@ -83,3 +83,8 @@ bypasses review to automatically merge dependency updates.
 Merge permission does not authorize Azure provisioning. Cloud deployments need
 an agreed environment, budget, secrets/identity design, and rollback plan.
 Report vulnerabilities privately through [SECURITY.md](SECURITY.md).
+
+## Delivery tracking
+
+Follow [delivery workflow](docs/delivery.md) for issue scope, board transitions,
+PR linkage and completion evidence. The project board is the live work queue.

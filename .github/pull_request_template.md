@@ -4,6 +4,10 @@
 
 Explain the concrete trigger and what changes for a user or maintainer.
 
+## GitHub issue
+
+Closes #<!-- issue number; use Refs #N if this PR only partially completes it -->
+
 ## Jira ticket
 
 No Jira ticket.
