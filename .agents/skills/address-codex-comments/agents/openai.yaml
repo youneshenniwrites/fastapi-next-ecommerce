@@ -1,0 +1,4 @@
+interface:
+  display_name: "Address Codex Comments"
+  short_description: "Fix, reply to and resolve review findings"
+  default_prompt: "Use $address-codex-comments for the current ecommerce delivery task."

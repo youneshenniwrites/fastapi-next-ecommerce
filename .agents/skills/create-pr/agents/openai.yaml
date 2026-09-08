@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create PR"
+  short_description: "Open a complete issue-linked pull request"
+  default_prompt: "Use $create-pr for the current ecommerce delivery task."

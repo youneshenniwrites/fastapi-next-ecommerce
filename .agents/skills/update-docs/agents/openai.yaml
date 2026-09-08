@@ -1,0 +1,4 @@
+interface:
+  display_name: "Update Docs"
+  short_description: "Keep repository and Wiki documentation accurate"
+  default_prompt: "Use $update-docs for the current ecommerce delivery task."

@@ -1,0 +1,14 @@
+---
+name: create-pr
+description: Create or refresh an ecommerce pull request with issue linkage, accurate testing, ownership and Codex review.
+---
+
+Read [delivery rules](../../../docs/delivery.md), the [PR template](../../../.github/pull_request_template.md), and the existing [naming](../ecommerce-naming/SKILL.md) and [ownership](../ecommerce-pr-ownership/SKILL.md) skills. Resolve paths relative to this file; run repository commands from the repository root.
+
+Inspect the working tree, intended base, full diff, linked issue and existing PRs before writing. Reuse an existing PR for this branch instead of creating a duplicate. Preserve unrelated work and real contributor authorship. Reuse or create a scoped issue under the user's delivery authorization.
+
+Use [self-review](../self-review/SKILL.md) before requesting external review. Fill the canonical template from the final implementation: factual acceptance checkboxes, tests actually run, limitations and disclosed self-review. Use Closes only for a fully completed issue; otherwise Refs. Remove irrelevant optional sections and Jira placeholders.
+
+Within existing push/PR authorization, commit and push the intended changes, then create or refresh the PR using gh/API. Pass multiline text through a body file or structured JSON, never shell interpolation of PR content. Apply the ownership helper and read back title, base/head, body, owner assignment and labels. Request only Codex using the current-head protocol in [review documentation](../../../docs/codex-review.md); avoid duplicate requests for an unchanged head.
+
+Use [update-delivery-board](../update-delivery-board/SKILL.md) to move the linked ticket to In review. Report the PR URL, checks and review state. Creating a PR does not itself authorize merging or deployment; continue a separately authorized delivery task under the repository merge policy.
