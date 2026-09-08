@@ -29,8 +29,8 @@ with a reason; do not represent it as delivered. A retrospective summary can
 record previously delivered work, explicitly labelled as retrospective.
 
 Each PR includes its GitHub issue, validation and review evidence. Use Closes #N
-only when that PR completes the whole ticket; use Refs #N for partial work. Keep
-No Jira ticket. when no real Jira reference exists. Preserve real authorship,
+only when that PR completes the whole ticket; use Refs #N for partial work.
+GitHub Issues are our ticket tracker. Preserve real authorship,
 assign youneshenniwrites and apply scope labels. Self-review must be identified.
 
 ## Finish and resume

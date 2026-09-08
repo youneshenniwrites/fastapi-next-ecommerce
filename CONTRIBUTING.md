@@ -68,8 +68,8 @@ is the actual GitHub account that opens the PR; do not forge a different author.
 
 ## Review and merge
 
-Use the PR template headings. Include a Jira ticket section with the actual key
-and link, or write "No Jira ticket." Never invent a ticket reference.
+Use the PR template headings and reference the GitHub issue. Use Closes #N
+for completed tickets and Refs #N for partial work. Never invent a ticket reference.
 
 Explain the problem and resulting behavior, then give the commands/results and
 material limitations. Include relevant screenshots for UI changes, or API/test

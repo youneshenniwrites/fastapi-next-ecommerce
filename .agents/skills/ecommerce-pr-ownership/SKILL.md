@@ -11,9 +11,9 @@ correctly. If a different account is authenticated, use an already-authorized
 owner connection or report the mismatch; never falsify authorship or rewrite history.
 Existing bot/contributor PRs retain their real authors.
 
-Use the PR template for a readable description: summary, Jira ticket, validation,
-and compatibility/operations. Include the real Jira key/link if provided; otherwise
-write "No Jira ticket." Never invent an issue or imply one is attached.
+Use the PR template for a readable description: summary, GitHub issue, validation,
+and compatibility/operations. Link the actual issue; never invent an issue or
+imply one is attached.
 
 After creating a PR, choose labels that describe its actual scope: bug,
 enhancement, documentation, tooling, dependencies, github_actions, or docker.
@@ -33,5 +33,5 @@ code-review ownership; it does not assign PRs or make an author's own review an
 independent approval. Follow root review/CI/merge instructions separately.
 
 Follow docs/delivery.md for issue linkage and board status. Include a GitHub issue
-reference separately from Jira. At merge, verify acceptance criteria before issue
+reference. At merge, verify acceptance criteria before issue
 closure/Done, and record any remaining work instead of implying completion.
