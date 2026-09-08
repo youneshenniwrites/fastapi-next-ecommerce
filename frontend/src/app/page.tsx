@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import { RetryCatalog } from "@/components/retry-catalog";
 import Image from "next/image";
 import { apiClient } from "@/lib/api/client";
@@ -28,7 +29,7 @@ export default async function Home() {
             Thoughtful objects for the place you do your best work. Simple
             forms. A calmer everyday.
           </p>
-          <a className="button" href="#collection">
+          <a className={buttonVariants()} href="#collection">
             Explore the collection <span aria-hidden="true">↗</span>
           </a>
           <div className="hero-note">

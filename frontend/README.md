@@ -61,7 +61,7 @@ npm run build assembles .next/standalone with static assets. Run npm start with
 PORT and HOSTNAME environment variables to serve that package. CI archives the
 contents; after extraction use node server.js with API_BASE_URL configured.
 
-The [development demo](https://forme-ecommerce-development.vercel.app) runs on Vercel; production CD is being configured. See ../docs/ci.md for the delivery pipeline.
+The [development demo](https://forme-ecommerce-development.vercel.app) runs on Vercel; production CD runs through GitHub Actions. See ../docs/ci.md for the delivery pipeline.
 
 ## Customer session API
 
@@ -75,3 +75,9 @@ mutations require the configured Origin. All responses are private/no-store,
 return no bearer token in JSON and use bounded upstream requests. See
 [session design](../docs/design/customer-sessions.md) for errors, expiry and
 stateless logout limitations. Account forms are the next feature tickets.
+
+## UI components
+
+Tailwind v4 and shadcn/ui provide the shared Button, Badge and Skeleton primitives.
+See [the design-system guide](design-system.md) for tokens, adding components,
+server/client boundaries and the incremental CSS migration strategy.

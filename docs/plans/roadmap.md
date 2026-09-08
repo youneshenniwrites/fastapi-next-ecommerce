@@ -27,6 +27,12 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 - Both environments publicly deployed and smoke tested from reviewed main 4606e67; idle PostgreSQL connection recovery is merged (#48).
 - Production delivery workflow in #49: exact-main CI checks, migration, API then frontend deployment and smoke verification. Keep #46 open until the first GitHub-triggered release is verified.
 
+## Frontend design-system work
+
+Tailwind v4 and shadcn Button, Badge and Skeleton establish the FORME component
+foundation (#53). Full catalog/navigation layout migration follows separately;
+account, cart and checkout components are added with their feature tickets.
+
 ## Next PRs, in dependency order
 
 1. Finish frontend PR previews with safe development data and exact origins (#45).

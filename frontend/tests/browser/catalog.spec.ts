@@ -56,3 +56,14 @@ test("out-of-stock, missing products and responsive keyboard navigation", async 
     page.getByRole("heading", { name: "This object has moved on." }),
   ).toBeVisible();
 });
+
+test("shared action and stock badge use the FORME theme", async ({ page }) => {
+  await page.goto("/");
+  const action = page.getByRole("link", { name: /Explore the collection/ });
+  await expect(action).toHaveCSS("background-color", "rgb(48, 78, 60)");
+  await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
+  await action.focus();
+  await expect(action).toBeFocused();
+  await expect(action).toHaveCSS("outline-style", "solid");
+  await expect(page.locator('[data-slot="badge"]')).toHaveText("Out of stock");
+});

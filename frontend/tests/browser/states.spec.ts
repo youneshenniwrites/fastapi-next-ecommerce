@@ -23,11 +23,16 @@ test("loading state is visible while catalog fetch is pending", async ({
   page,
   request,
 }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await request.post("http://127.0.0.1:18301/scenario/slow");
   await page.goto("/", { waitUntil: "commit" });
   await expect(
     page.getByRole("status", { name: "Loading collection" }),
   ).toBeVisible();
+  await expect(page.locator('[data-slot="skeleton"]').first()).toHaveCSS(
+    "animation-name",
+    "none",
+  );
   await expect(
     page.getByRole("heading", { name: "A little space for something new." }),
   ).toBeVisible();
