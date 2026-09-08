@@ -23,3 +23,7 @@ limits. Keep the runnable catalog distinct from planned authentication and check
 README, development/tooling docs, and relevant agent guidance consistent. Validate
 new skill metadata and local links. Report self-review honestly and avoid claiming
 production readiness from coverage or vulnerability-audit results alone.
+
+Read docs/delivery.md and the maintenance decisions in docs/tooling.md. Resolve or
+record a concrete next action for failing bot PRs during maintenance handoff. Do
+not claim continuous monitoring: scheduled dependency review is not configured.

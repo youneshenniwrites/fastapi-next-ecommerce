@@ -41,3 +41,17 @@ permissions. The backend workflow cancels superseded runs for the same ref.
 Next tooling increments should add static type checking as the SQLAlchemy models
 are typed, code scanning, and repository rules for required checks. Those controls
 are not enabled by this PR and should not be claimed as implemented.
+
+## Dependency review decisions — 8 September 2026
+
+- PR #21 was closed: Node 26 type declarations did not match the pinned Node 24
+  runtime. Keep the types major aligned until a deliberate runtime migration.
+- PR #22 was closed: Uvicorn 0.52.4 was already locked; the proposed lower-bound
+  change added no runtime upgrade and left requirements.txt stale. Future Python
+  updates must regenerate the pip export and pass consistency checks. This does
+  not mean lower-bound changes are always inappropriate.
+- PRs #19 and #20 upgraded SHA-pinned CI actions after upstream and CI review.
+
+Dependabot's weekly proposals remain enabled. Scheduled agent review is **not
+configured**, and passing checks do not automatically merge proposals. See
+[delivery workflow](delivery.md) for maintenance handoff expectations.

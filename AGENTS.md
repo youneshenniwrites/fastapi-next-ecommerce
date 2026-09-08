@@ -60,3 +60,13 @@ For every PR created in this repository, use the ecommerce-pr-ownership skill to
 assign youneshenniwrites and apply relevant labels. Verify the authenticated author
 before creation and read back metadata afterward. Preserve real bot/contributor
 authorship when maintaining their PRs.
+
+## Delivery tracking
+
+Follow docs/delivery.md before implementation and at handoff. Use repository issues
+and the linked board for current work, the repository for versioned rules, and the
+Wiki for explanations. Every implementation PR needs an issue reference; use
+Closes #N only for a completed ticket. Update board status and verify acceptance,
+CI, PR disposition and relevant documentation before reporting completion.
+For customer sessions (#24), read docs/design/customer-sessions.md; it is a
+proposed design, not implemented behavior.

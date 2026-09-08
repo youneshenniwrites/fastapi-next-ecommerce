@@ -17,3 +17,7 @@ capture relevant browser evidence. Label checks not yet available as untested.
 
 Plan hosting for Azure with the root ecommerce-azure skill when deployment is in
 scope; frontend scaffolding itself does not require cloud resources.
+
+Use docs/delivery.md for ticket and board tracking. For customer sessions, consult
+docs/design/customer-sessions.md before implementation; update the proposed note
+when actual behavior lands and verify it against the linked acceptance criteria.
