@@ -1,9 +1,11 @@
 import io
+import json
 import os
 import tarfile
 import tempfile
 import unittest
 import urllib.error
+from pathlib import Path
 from unittest.mock import patch
 
 import deploy_production
@@ -107,6 +109,60 @@ class DeploymentFailureTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "API unavailable"):
                 deploy_production.main()
             self.assertEqual(deploy.call_count, 1)
+
+    def test_cli_receives_matching_org_and_project_for_each_component(self):
+        archive = io.BytesIO()
+        with tarfile.open(fileobj=archive, mode="w"):
+            pass
+        selected = []
+
+        def cli(args, check, env=None):
+            env = os.environ if env is None else env
+            # Vercel rejects an exported org without its paired project, even
+            # when the archive includes a valid .vercel/project.json file.
+            self.assertEqual(env["VERCEL_ORG_ID"], "team-test")
+            project = env["VERCEL_PROJECT_ID"]
+            root = Path(args[args.index("--cwd") + 1])
+            self.assertEqual(
+                json.loads((root / ".vercel/project.json").read_text())["projectId"],
+                project,
+            )
+            selected.append(project)
+
+        def read(url, **kwargs):
+            if url.endswith("/api/v1/products/"):
+                return b'[{"name":"Demo product"}]'
+            return b"FORME Demo product"
+
+        with tempfile.NamedTemporaryFile() as summary:
+            env = {
+                "RELEASE_SHA": SHA,
+                "VERCEL_ORG_ID": "team-test",
+                "VERCEL_API_PROJECT_ID": "api-test",
+                "VERCEL_FRONTEND_PROJECT_ID": "frontend-test",
+                "VERCEL_PROJECT_ID": "stale-inherited-project",
+                "VERCEL_TOKEN": "test-placeholder",
+                "GITHUB_STEP_SUMMARY": summary.name,
+            }
+            with (
+                patch.dict(os.environ, env),
+                patch.object(
+                    deploy_production.subprocess,
+                    "check_output",
+                    return_value=archive.getvalue(),
+                ),
+                patch.object(deploy_production.subprocess, "run", side_effect=cli),
+                patch.object(deploy_production, "read", side_effect=read),
+                patch.object(
+                    deploy_production.urllib.request,
+                    "urlopen",
+                    side_effect=urllib.error.HTTPError(
+                        "https://example.com", 403, "Forbidden", {}, None
+                    ),
+                ),
+            ):
+                deploy_production.main()
+        self.assertEqual(selected, ["api-test", "frontend-test"])
 
     def test_read_only_retry_is_bounded(self):
         failure = urllib.error.URLError("unavailable")
