@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-test("browse, filter and view the real FastAPI catalog", async ({ page }) => {
+test("browse, filter and view the real FastAPI catalog", async ({
+  page,
+}, info) => {
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "Room to think. Space to create." }),
@@ -23,6 +25,10 @@ test("browse, filter and view the real FastAPI catalog", async ({ page }) => {
   await expect(page.locator(".detail-price")).toContainText("£79.00");
   await expect(page.getByText("In stock", { exact: true })).toBeVisible();
   await expect(page.getByText(/no purchases can be made/)).toBeVisible();
+  await page.screenshot({
+    path: `test-results/detail-${info.project.name}.png`,
+    fullPage: true,
+  });
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 test("out-of-stock, missing products and responsive keyboard navigation", async ({
@@ -66,4 +72,64 @@ test("shared action and stock badge use the FORME theme", async ({ page }) => {
   await expect(action).toBeFocused();
   await expect(action).toHaveCSS("outline-style", "solid");
   await expect(page.locator('[data-slot="badge"]')).toHaveText("Out of stock");
+});
+
+test("mobile navigation supports keyboard, dismissal and real links", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "mobile", "Mobile menu only");
+  await page.goto("/");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const trigger = page.getByRole("button", { name: "Open navigation" });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Explore FORME" });
+  await expect(dialog).toBeVisible();
+  await page.screenshot({
+    path: "test-results/mobile-menu.png",
+    fullPage: true,
+  });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await page
+    .getByRole("navigation", { name: "Mobile navigation" })
+    .getByRole("link", { name: "The collection" })
+    .click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(/#collection$/);
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBeTruthy();
+});
+
+test("mobile navigation closes when resizing to desktop", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "mobile", "Mobile menu only");
+  await page.goto("/");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const trigger = page.getByRole("button", { name: "Open navigation" });
+  const dialog = page.getByRole("dialog", { name: "Explore FORME" });
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCount(0);
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Our approach" })
+    .click();
+  await expect(page).toHaveURL(/#approach$/);
+  await page.setViewportSize({ width: 393, height: 851 });
+  await expect(dialog).not.toBeVisible();
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
 });

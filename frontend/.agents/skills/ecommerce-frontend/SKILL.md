@@ -25,3 +25,7 @@ when actual behavior lands and verify it against the linked acceptance criteria.
 For UI components and styling, read frontend/design-system.md. Use semantic
 Tailwind tokens and compose shadcn primitives; retain reduced-motion behavior and
 review generated registry code, dependencies and server/client boundaries.
+
+Use Lucide named imports for icons; do not author new SVG artwork. SiteHeader,
+SiteFooter, SectionHeading, ProductCard and ProductDetails are the shared layout
+compositions. Include mobile Sheet keyboard/focus checks when changing navigation.

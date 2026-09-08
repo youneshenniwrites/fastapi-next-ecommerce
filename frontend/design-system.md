@@ -2,7 +2,7 @@
 
 Tailwind CSS v4 supplies utilities and semantic tokens. shadcn/ui supplies editable
 React components in `src/components/ui`; shop components compose them. Button,
-Badge and Skeleton were generated with the pinned shadcn CLI using the official
+Badge, Skeleton, Sheet, Input, Checkbox and NativeSelect were generated with the pinned shadcn CLI using the official
 new-york registry, then adapted to FORME tokens and the local `cn` helper.
 
 ## Adding a component
@@ -26,18 +26,25 @@ helper. Do not install the whole registry. Add components for real feature needs
 - Preserve disabled, keyboard-focus, error, empty, stock and reduced-motion states.
   There is no dark-mode switch or supported dark palette yet.
 
-## Incremental CSS migration
+## Layout and navigation
 
-Tailwind theme and utilities are imported explicitly, without Preflight. Existing
-native-control resets and typography remain in the components layer; utilities
-can override them. Component primitives receive solid zero-width borders in the
-base layer, so their border utilities work without resetting all native controls.
-Existing layout selectors remain until the separate storefront migration. Do not
-turn Preflight on without auditing untouched pages and native form controls.
+SiteHeader/SiteFooter, SectionHeading, ProductCard and ProductDetails compose the
+storefront. The mobile Sheet has a labelled dialog, close control, focus trap and
+Escape dismissal; links close it before navigating. Sorting uses NativeSelect to
+retain the platform's keyboard and mobile selection behavior. Search uses Input,
+and the labelled Checkbox filters available stock.
 
-The shared Button default keeps FORME's rectangular, comfortably sized action
-style. Default badges support stock labels; skeletons honor reduced motion. No
-account forms, cart interactions or checkout behavior are introduced here.
+All existing page layouts now use Tailwind utilities. Preflight is enabled after
+migrating the hero, catalog, details, loading, error and not-found pages; obsolete
+layout CSS is removed. Base CSS retains semantic tokens, keyboard focus and
+reduced-motion rules. The `product` and `detail-price` hooks remain for browser
+assertions, not styling. No dark palette or transactional controls are introduced.
+
+Use named imports from `lucide-react` for UI icons; decorative icons are hidden
+from assistive technology and icon buttons have accessible names. Do not hand-draw
+SVG icons or illustrations. Existing product/hero artwork is unchanged; imagery
+replacement is a separate decision. Third-party notices retain Lucide/Feather and
+shadcn licence terms.
 
 ## Verification
 

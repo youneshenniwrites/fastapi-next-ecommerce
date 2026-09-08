@@ -1,16 +1,16 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  filterProducts,
-  money,
-  productArt,
-  type Product,
-  type Sort,
-} from "@/lib/catalog";
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
+import { ProductCard } from "@/components/product-card";
+import { stateLayout } from "@/components/storefront-layout";
+import { filterProducts, type Product, type Sort } from "@/lib/catalog";
 export function Catalog({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
   const [inStock, setInStock] = useState(false);
@@ -18,83 +18,71 @@ export function Catalog({ products }: { products: Product[] }) {
   const visible = filterProducts(products, query, inStock, sort);
   return (
     <>
-      <div className="catalog-tools">
-        <label className="search">
-          <span aria-hidden="true">⌕</span>
-          <input
+      <div className="flex flex-wrap items-center gap-4 border-y border-border py-4">
+        <div className="relative min-w-0 basis-full md:flex-1 md:basis-auto">
+          <Search
+            className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            className="h-10 pl-10"
             type="search"
             aria-label="Search collection"
             placeholder="Find something for your space…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-        </label>
-        <label className="stock-filter">
-          <input
-            type="checkbox"
+        </div>
+        <div className="flex min-h-11 items-center gap-2">
+          <Checkbox
+            id="in-stock"
             checked={inStock}
-            onChange={(e) => setInStock(e.target.checked)}
-          />{" "}
-          In stock only
-        </label>
-        <label className="sort">
-          Sort by{" "}
-          <select
+            onCheckedChange={(checked) => setInStock(checked === true)}
+            className="size-5"
+          />
+          <label
+            htmlFor="in-stock"
+            className="cursor-pointer whitespace-nowrap py-2 text-xs"
+          >
+            In stock only
+          </label>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <label htmlFor="sort-products" className="text-xs">
+            Sort by
+          </label>
+          <NativeSelect
+            id="sort-products"
             aria-label="Sort products"
+            className="h-10 max-w-[180px]"
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
           >
-            <option value="featured">Featured</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-            <option value="name">Name</option>
-          </select>
-        </label>
+            <NativeSelectOption value="featured">Featured</NativeSelectOption>
+            <NativeSelectOption value="price-asc">
+              Price: low to high
+            </NativeSelectOption>
+            <NativeSelectOption value="price-desc">
+              Price: high to low
+            </NativeSelectOption>
+            <NativeSelectOption value="name">Name</NativeSelectOption>
+          </NativeSelect>
+        </div>
       </div>
-      <p className="result-count" role="status">
+      <p role="status" className="my-5 text-xs text-muted-foreground">
         {visible.length} {visible.length === 1 ? "object" : "objects"}
         {products.length === 100
           ? " · Showing the first 100 catalog items"
           : ""}
       </p>
       {visible.length ? (
-        <div className="product-grid">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-10">
           {visible.map((product) => (
-            <article className="product" key={product.id}>
-              <Link href={`/products/${product.id}`} className="product-link">
-                <div className="product-image">
-                  <Image
-                    src={productArt(product.name)}
-                    alt={`Illustration of ${product.name}`}
-                    width={600}
-                    height={500}
-                  />
-                  {product.stock === 0 && (
-                    <Badge
-                      variant="outline"
-                      className="absolute top-4 left-4 rounded-none bg-background px-2.5 py-1 text-[9px] tracking-wide"
-                    >
-                      Out of stock
-                    </Badge>
-                  )}
-                  <span className="product-arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                </div>
-                <div className="product-meta">
-                  <h3>{product.name}</h3>
-                  <span>{money(product.price)}</span>
-                </div>
-                <p>
-                  {product.description ||
-                    "A considered object for your workspace."}
-                </p>
-              </Link>
-            </article>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
-        <div className="state">
+        <div className={stateLayout}>
           <h3>
             {products.length
               ? "No objects found."

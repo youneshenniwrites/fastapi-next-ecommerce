@@ -30,7 +30,7 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 ## Frontend design-system work
 
 Tailwind v4 and shadcn Button, Badge and Skeleton establish the FORME component
-foundation (#53). Full catalog/navigation layout migration follows separately;
+foundation (#53). Catalog/navigation layouts now compose shared components and Lucide icons (#54);
 account, cart and checkout components are added with their feature tickets.
 
 ## Next PRs, in dependency order
