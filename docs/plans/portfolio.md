@@ -14,8 +14,10 @@ infrastructure only for a demonstrated need. Deliver focused, reviewed PRs.
 4. Prove commerce correctness: server-owned prices, atomic inventory, checkout
    idempotency, and concurrent attempts to buy the last item. Implement these
    protections with checkout, not as a later patch. Add sandbox payments afterward.
-5. Free hosted demo: isolated dev/prod, managed secrets, logs, health checks,
-   deployment/rollback documentation. Agree spending limits before provisioning.
+5. Free hosted demo: development and production are live on isolated Vercel/Neon
+   resources, with secret stores, API docs and smoke evidence. Production workflow
+   acceptance (#46) and frontend PR previews (#45) finish this milestone. No paid
+   upgrades, card or extra API billing.
 6. Interview package: architecture diagram, decision records with alternatives,
    test evidence, and a five-minute demonstration walkthrough.
 

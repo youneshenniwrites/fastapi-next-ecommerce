@@ -33,7 +33,12 @@ The Next.js app consumes an OpenAPI-generated contract; CI rejects contract drif
 
 Vercel Hobby serves Next.js and FastAPI, and separate Neon Free
 projects hold development and production data. The owner approved this £0 plan
-on 8 September 2026. Isolated Neon databases are provisioned; application deployment is in progress. See the
+on 8 September 2026. Both environments are deployed and verified: production
+[storefront](https://forme-ecommerce.vercel.app) and
+[Swagger](https://forme-api-production.vercel.app/docs). The production workflow
+requires successful exact-main CI, applies migrations, deploys the API before the
+frontend and checks public endpoints. First GitHub-run acceptance is tracked in
+#46; frontend PR previews remain #45. See the
 [environment plan](../deploy/environments/README.md) for configuration and rollout.
 Azure is retained as optional future migration (#31), not the immediate target.
 The legacy AWS Terraform is not used for this deployment.

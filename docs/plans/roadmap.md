@@ -18,23 +18,26 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 - Auditing, coverage gate, pinned CI actions, hooks, and dependency updates (PR #5).
 - Expanded contributor/developer/security documentation and maintenance guidance.
 
+## Delivered application and hosting
+
+- Explicit admin bootstrap and empty-catalog demo seeding; see [demo guide](../demo.md).
+- Next.js catalog/detail storefront, generated API contract, state handling and desktop/mobile browser checks.
+- Server-mediated login/profile/logout with HttpOnly cookies and exact origin checks (#24 / #41).
+- Isolated Vercel/Neon development and production configuration (#44 / #47).
+- Both environments publicly deployed and smoke tested from reviewed main 4606e67; idle PostgreSQL connection recovery is merged (#48).
+- Production delivery workflow in #49: exact-main CI checks, migration, API then frontend deployment and smoke verification. Keep #46 open until the first GitHub-triggered release is verified.
+
 ## Next PRs, in dependency order
 
-1. Demo foundation implemented: explicit admin bootstrap and empty-catalog seeding.
-   See [demo guide](../demo.md); the catalog storefront is also implemented.
-2. Next.js catalog implemented: App Router, TypeScript, generated API contract,
-   product list/detail, filtering, state handling and desktop/mobile browser checks.
-3. Server-mediated session handlers implemented: login/profile/logout, HttpOnly
-   cookies and origin checks. Account login/register/profile UI remains in #25–27.
+1. Finish frontend PR previews with safe development data and exact origins (#45).
+2. Account registration/login/profile UI and full journey verification (#25–27).
    Keep authorization in FastAPI.
-4. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
-5. Orders and checkout: price snapshots, authoritative totals, atomic inventory
+3. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
+4. Orders and checkout: price snapshots, authoritative totals, atomic inventory
    handling, idempotency, and concurrent last-item purchase tests.
-6. Sandbox payments: select the provider, verify webhooks, handle duplicates,
-   failures/cancellations, and connect confirmation/order history.
-7. Free demo deployment (#44–46): Vercel/Neon, isolated dev/prod,
-   with explicit free-tier limits, staging, secrets, TLS, migrations, logs,
-   recovery limitations and rollback evidence. Azure migration remains future #31.
+5. Sandbox payments: verify webhooks, handle duplicate/failure/cancellation events,
+   and connect confirmation/order history.
+6. Optional Azure migration (#31), only if justified by the portfolio and budget.
 
 Each PR includes acceptance evidence, self-review findings, and passing CI before
 merge under the user's authorization. Production/cloud deployment and paid external
@@ -57,5 +60,6 @@ Customer accounts are split into #24 secure sessions, #25 registration/login,
 broader items into focused PR tickets before implementation. See
 [session proposal](../design/customer-sessions.md) and [delivery rules](../delivery.md).
 
-Hosting setup #44 is prioritized before further account UI, followed by #45
-previews and #46 production CD. Azure is deferred; no extra API billing is allowed.
+Hosting setup #44 is complete. Development and production are live; #46 tracks
+production workflow acceptance and #45 tracks the remaining frontend previews.
+Then return to account UI. Azure is deferred; no extra API billing is allowed.
