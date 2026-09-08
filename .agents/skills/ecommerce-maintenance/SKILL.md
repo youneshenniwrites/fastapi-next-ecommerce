@@ -19,7 +19,7 @@ updates; the agent still reviews the exact head and follows the owner's merge
 instructions. Do not activate the legacy AWS workflow during maintenance.
 
 When documenting tooling, name the executable command, what it verifies, and its
-limits. Preserve the frontend's skeleton status until a runnable app exists. Keep
+limits. Keep the runnable catalog distinct from planned authentication and checkout. Keep
 README, development/tooling docs, and relevant agent guidance consistent. Validate
 new skill metadata and local links. Report self-review honestly and avoid claiming
 production readiness from coverage or vulnerability-audit results alone.

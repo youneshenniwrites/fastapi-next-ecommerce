@@ -1,7 +1,7 @@
 # Contributing
 
 Start with the [README](README.md) and [roadmap](docs/plans/roadmap.md). The working
-product is the backend; the frontend is a skeleton. Keep proposed features scoped
+product is the backend; the catalog frontend is runnable. Keep proposed features scoped
 to the next usable behavior and separate tooling/documentation changes when useful.
 
 ## Local workflow
@@ -25,8 +25,8 @@ worktrees. Never point test database overrides at customer data.
   Product price is a decimal string in GBP; avoid introducing float arithmetic.
 - **Dependencies:** edit pyproject.toml, regenerate uv.lock, and export requirements.txt.
   Run the audit and requirements check. Review upstream release notes for compatibility.
-- **Frontend:** follow frontend/AGENTS.md. Add actual build/type/browser checks when
-  the runnable app is introduced; a directory skeleton cannot pass a frontend build.
+- **Frontend:** follow frontend/AGENTS.md. Run lint, formatting, type, unit, build
+  and browser checks. Regenerate API types when the backend contract changes.
 - **Docs/skills:** describe implemented behavior accurately. Validate links and skill
   frontmatter. Do not turn future plans into claims of production readiness.
 

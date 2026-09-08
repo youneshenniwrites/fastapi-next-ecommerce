@@ -1,14 +1,64 @@
-# Frontend skeleton
+# FORME storefront
 
-Reserved for the Next.js App Router + TypeScript storefront. This folder is not
-runnable yet: package.json, dependencies, routes, and frontend CI arrive in the
-Next.js implementation PR. `make dev` currently starts the backend only.
+A fictional desk-accessories catalog for the senior SWE portfolio. Next.js App
+Router and React render catalog and detail pages against FastAPI; search, stock
+filtering and price/name sorting work in the browser. Prices remain decimal strings
+and are formatted/sorted with integer pennies, without floating-point money math.
 
-- `src/app/`: future routes and layouts
-- `src/components/`: future shared UI
-- `src/lib/api/`: future OpenAPI-generated client and integration helpers
-- `AGENTS.md`: frontend conventions
-- `.agents/skills/ecommerce-frontend/`: scoped development skill
+## Run locally
 
-Azure is the hosting target. See [architecture](../docs/architecture.md) and the
-[roadmap](../docs/plans/roadmap.md) for the proposed deployment and implementation order.
+Install Node 24.20.0 (or use nvm install from this directory) and npm 11.19.1.
+From the root, run make dev and make demo. Then from frontend/:
+
+```sh
+npm ci
+npm run dev
+```
+
+Open http://localhost:3000. The server defaults to http://127.0.0.1:8000 for FastAPI.
+To change it, set API_BASE_URL in an ignored .env.local; see .env.example. No CORS
+configuration is necessary: only the Next.js server calls FastAPI. Fetches are
+uncached and have a five-second timeout. Failed requests show a retryable state.
+
+## Verification
+
+| Command              | Check                                                             |
+| -------------------- | ----------------------------------------------------------------- |
+| npm run lint         | ESLint, TypeScript lint rules, React hooks and Next.js rules      |
+| npm run format:check | Prettier formatting                                               |
+| npm run typecheck    | TypeScript and generated route types                              |
+| npm test             | Catalog/money unit tests with enforced coverage                   |
+| npm run build        | Production Next.js standalone build                               |
+| npm run test:e2e     | Desktop/mobile real-API browsing, axe accessibility, fault states |
+| npm audit            | Locked dependency vulnerability audit                             |
+| npm run api:check    | Generated schema/type drift against Git                           |
+
+Before browser tests, run make setup at the root, npm run build here, and
+npx playwright install chromium (add --with-deps on Linux). Tests use ports
+18300/18301 and 3300/3301, migrate a temporary SQLite database, and seed it. The
+backend CI suite separately verifies PostgreSQL. Browser traces on failure and
+HTML reports are retained in GitHub artifacts for 14 days.
+
+Regenerate the API contract from backend/ with uv run python -m scripts.export_openapi,
+then npm run api:generate here. No running database is needed. Commit openapi.json
+and src/lib/api/schema.d.ts together. Runtime calls use openapi-fetch and generated types.
+
+## Scope and design
+
+FORME uses original local SVG illustrations, system fonts and no external image/font
+services. Illustrations correspond to the demo names; unknown products have neutral
+artwork. This is presentation metadata, not authoritative product data.
+
+The catalog currently loads at most 100 products and filters those loaded items;
+a notice appears at that limit. Server-side search/pagination is a future increment
+before a larger catalog. There are no customer sessions, carts, payments or purchase
+controls yet. Automated accessibility checks supplement manual keyboard/mobile
+review; they do not constitute a full accessibility certification.
+
+ESLint 10 uses the official Next plugin directly with typescript-eslint and React
+hooks rules. This avoids incompatible legacy plugins in eslint-config-next.
+npm run build assembles .next/standalone with static assets. Run npm start with
+PORT and HOSTNAME environment variables to serve that package. CI archives the
+contents; after extraction use node server.js with API_BASE_URL configured.
+
+Azure deployment is not configured. See .github/workflows/frontend.yml at the repository root for the delivery pipeline.

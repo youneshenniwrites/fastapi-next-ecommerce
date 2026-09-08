@@ -14,7 +14,7 @@ make admin EMAIL=admin@example.com
 The admin command prompts twice for a private password (8–128 characters). There
 is no shared default password, command-line password option, or generated secret
 in output. Use the account in `/docs` through the login endpoint. Public signup
-cannot grant admin access. The storefront is the next implementation step.
+cannot grant admin access. Start the storefront with cd frontend && npm ci && npm run dev; browse localhost:3000.
 
 `make demo` seeds six products only when the catalog is empty. Reruns leave all
 existing products untouched, including changed names, prices and depleted stock.

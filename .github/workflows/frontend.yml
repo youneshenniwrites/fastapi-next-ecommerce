@@ -1,0 +1,122 @@
+name: Frontend CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    name: Frontend · Lint, types, contract and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Set up pinned npm
+        run: npm install --global npm@11.19.1
+      - name: Install locked frontend dependencies
+        run: npm ci
+      - name: Set up Python for API contract export
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          version: "0.8.22"
+      - name: Install locked API dependencies
+        run: uv sync --locked --python 3.12 --project ../backend
+      - name: Export and verify the FastAPI contract
+        run: |
+          cd ../backend
+          uv run python -m scripts.export_openapi
+          cd ../frontend
+          npm run api:check
+      - name: Check formatting
+        run: npm run format:check
+      - name: Run ESLint
+        run: npm run lint
+      - name: Check TypeScript and route types
+        run: npm run typecheck
+      - name: Run unit tests and enforce coverage
+        run: npm test
+      - name: Audit frontend dependencies
+        run: npm audit
+      - name: Upload frontend unit coverage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-unit-coverage
+          path: frontend/coverage
+          retention-days: 14
+  browser:
+    name: Frontend · Production build and browser tests
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Set up pinned npm
+        run: npm install --global npm@11.19.1
+      - name: Install locked frontend dependencies
+        run: npm ci
+      - name: Build the production storefront
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Set up Python for real API integration tests
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          version: "0.8.22"
+      - name: Install locked API dependencies
+        run: uv sync --locked --python 3.12 --project ../backend
+      - name: Install Chromium and browser system dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Test desktop, mobile, accessibility and failure states
+        run: npm run test:e2e
+      - name: Upload browser report, screenshots and failure traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-browser-evidence
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 14
+      - name: Package the standalone build
+        run: tar -czf storefront-build.tar.gz -C .next/standalone .
+      - name: Upload validated storefront build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: storefront-build
+          path: frontend/storefront-build.tar.gz
+          retention-days: 14
+      - name: Summarize build and deployment status
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Storefront delivery
+          See the named checks above for build and browser-test results.
+          Successful runs publish the standalone build and browser evidence as artifacts.
+          **Deployment: not configured.** No Azure resources are provisioned by this workflow.
+          The Azure staging milestone will add environment, identity, migration and deployment checks.
+          EOF

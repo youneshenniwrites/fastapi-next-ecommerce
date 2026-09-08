@@ -22,8 +22,8 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 
 1. Demo foundation implemented: explicit admin bootstrap and empty-catalog seeding.
    See [demo guide](../demo.md); next build the runnable storefront.
-2. Next.js catalog: App Router, TypeScript, locked runtime, generated OpenAPI client,
-   product list/detail, loading/empty/error states, and browser checks.
+2. Next.js catalog implemented: App Router, TypeScript, generated API contract,
+   product list/detail, filtering, state handling and desktop/mobile browser checks.
 3. Customer frontend auth: login/register/profile, server-mediated secure session
    handling, logout and error states. Keep authorization in FastAPI.
 4. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
@@ -44,7 +44,6 @@ until the working shopping journey has a measured need.
 ## Further engineering controls
 
 Add typed SQLAlchemy models and static type checking, then code scanning and
-repository required-check rules in separate PRs. Add frontend lint/type/build and
-browser checks alongside the runnable frontend. Add observability, operational
+repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented. Add observability, operational
 runbooks, and release/restore verification alongside Azure staging. These are
 planned controls, not features already enabled by the documentation.

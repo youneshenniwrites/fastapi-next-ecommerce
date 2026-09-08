@@ -92,7 +92,7 @@ then the normal tests. Dependabot PRs may need the export regenerated before CI 
 | Product write returns 401 | Supply a valid bearer token for an active account |
 | Product write returns 403 | The account is not an admin; no public promotion route exists |
 | Product write returns 422 | Check GBP currency, decimal precision, bounds, nulls, and unknown fields |
-| Frontend command cannot find package.json | The frontend is still a skeleton |
+| Frontend cannot load the catalog | Start FastAPI, check server-side API_BASE_URL, then make demo for sample data |
 | Audit fails without a vulnerability report | Check advisory-service/network errors before interpreting the result |
 
 Use the linked CI run when reporting a failed check. State the revision, command,

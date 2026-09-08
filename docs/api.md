@@ -25,9 +25,17 @@ The backend owns the contract. From backend/, run:
 uv run python -m scripts.export_openapi
 ```
 
+Then from frontend/:
+
+```sh
+npm run api:generate
+```
+
 The exporter uses inert local configuration and does not connect to a database.
-It writes a deterministic frontend/openapi.json snapshot. The next frontend PR
-will generate TypeScript types from this snapshot and check contract drift in CI.
+It writes a deterministic frontend/openapi.json snapshot; openapi-typescript
+produces src/lib/api/schema.d.ts. The Next.js server uses openapi-fetch with these
+types. CI regenerates both files and rejects uncommitted drift. Generated types
+provide compile-time checking; they are not runtime payload validation.
 
 When changing an endpoint, update its models, summary/description, security and
 error responses, add behavior tests, then regenerate the contract. The exported
