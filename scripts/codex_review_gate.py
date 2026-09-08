@@ -34,13 +34,24 @@ def trusted(value):
     return user.get("id") == BOT_ID and user.get("type") == "Bot"
 
 
+def review_request(comment):
+    return comment.get("author_association") in {
+        "OWNER",
+        "MEMBER",
+        "COLLABORATOR",
+    } and bool(
+        re.fullmatch(
+            r"@codex review(?:\n<!-- codex-review-head:[0-9a-f]{40} -->)?",
+            comment.get("body", "").strip(),
+        )
+    )
+
+
 def evaluate(sha, comments, reactions, unresolved, reviews=()):
     if unresolved:
         return "pending", "Resolve review conversations and obtain a clean re-review"
     marker = f"<!-- codex-review-head:{sha} -->"
-    requests = [
-        c for c in comments if "@codex review" in c.get("body", "") and not trusted(c)
-    ]
+    requests = [c for c in comments if review_request(c)]
     if not requests:
         return "pending", "Awaiting a Codex review request bound to this commit"
     request = max(requests, key=lambda c: c["id"])
@@ -165,7 +176,10 @@ def inspect(repo, number):
     sha = pr["head"]["sha"]
     comments = pages(f"repos/{repo}/issues/{number}/comments")
     matching = [
-        c for c in comments if f"<!-- codex-review-head:{sha} -->" in c.get("body", "")
+        c
+        for c in comments
+        if review_request(c)
+        and f"<!-- codex-review-head:{sha} -->" in c.get("body", "")
     ]
     reactions = {}
     if matching:

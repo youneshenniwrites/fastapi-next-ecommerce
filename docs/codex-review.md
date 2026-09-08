@@ -8,7 +8,9 @@ shipping agent; this gate does not infer task completion from resolved comments.
 
 ## Request and evidence
 
-Request review using a new, unedited comment (substitute the full current SHA):
+Request review as a repository owner, member or collaborator, using a new,
+unedited comment containing exactly the request below (substitute the full current
+SHA). Incidental mentions and outsider comments are not authoritative requests:
 
 ```
 @codex review

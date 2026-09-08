@@ -35,6 +35,7 @@ class ReviewEvidence(unittest.TestCase):
         self.bot = {"id": BOT_ID, "type": "Bot"}
         self.request = {
             "id": 10,
+            "author_association": "OWNER",
             "body": "@codex review\n<!-- codex-review-head:" + self.sha + " -->",
             "created_at": "2026-09-08T10:00:00Z",
             "updated_at": "2026-09-08T10:00:00Z",
@@ -58,6 +59,40 @@ class ReviewEvidence(unittest.TestCase):
 
     def test_clean(self):
         self.assertEqual(self.result(), "success")
+
+    def test_outsider_cannot_reset_review(self):
+        outsider = dict(
+            self.request,
+            id=20,
+            author_association="NONE",
+            created_at="2026-09-08T11:00:00Z",
+            updated_at="2026-09-08T11:00:00Z",
+        )
+        self.assertEqual(
+            evaluate(
+                self.sha, [self.request, self.summary, outsider], self.reactions, False
+            )[0],
+            "success",
+        )
+
+    def test_incidental_mention_cannot_reset_review(self):
+        prose = dict(
+            self.request,
+            id=20,
+            body="Remember to use @codex review before merging",
+            created_at="2026-09-08T11:00:00Z",
+            updated_at="2026-09-08T11:00:00Z",
+        )
+        self.assertEqual(
+            evaluate(
+                self.sha, [self.request, self.summary, prose], self.reactions, False
+            )[0],
+            "success",
+        )
+
+    def test_unknown_association_cannot_authorize_review(self):
+        self.request.pop("author_association")
+        self.assertEqual(self.result(), "pending")
 
     def test_unresolved(self):
         self.assertEqual(self.result(True), "pending")
