@@ -82,4 +82,5 @@ stateless logout limitations. Account forms are the next feature tickets.
 Tailwind v4 and shadcn/ui provide shared actions, stock badges, loading skeletons,
 search/stock/sort controls and mobile navigation. Lucide supplies the UI icons.
 See [the design-system guide](design-system.md) for tokens, adding components,
-server/client boundaries and the reset strategy. Existing artwork remains unchanged.
+server/client boundaries and the reset strategy. Product and hero images use the
+licensed local photography described above.
