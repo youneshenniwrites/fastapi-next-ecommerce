@@ -1,12 +1,12 @@
 # Legacy AWS infrastructure
 
-This folder contains the original, incomplete AWS Terraform. **Azure is now the
-chosen cloud provider.** These files are retained as historical reference and are
-not the deployment path for this project. Do not run them as part of local setup.
+This folder contains the original, incomplete AWS Terraform. These files are
+historical reference and are not the approved deployment path. Do not run them
+as part of local setup.
 
 The old workflow in backend/.github/workflows/terraform.yml is also legacy and is
 not an active root GitHub Actions workflow. Do not promote it into an active workflow.
 
-See [the architecture plan](../../docs/architecture.md#planned-azure-hosting) and
-[the roadmap](../../docs/plans/roadmap.md) for the Azure replacement. No Azure
-infrastructure has been provisioned or implemented in this folder.
+See [the approved hosting plan](../../docs/architecture.md#approved-free-demo-hosting)
+and [environment runbook](../../deploy/environments/README.md) for Vercel and Neon.
+Azure is an optional future migration (#31). No cloud resources are managed here.

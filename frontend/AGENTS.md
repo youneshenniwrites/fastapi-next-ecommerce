@@ -20,5 +20,6 @@ Preserve loading, empty, error, not-found, out-of-stock and reduced-motion behav
 Verify keyboard access, mobile layout and automated accessibility checks. Product
 art is locally authored SVG illustration; unknown names use neutral fallback art.
 
-Server-mediated sessions are implemented; account UI, cart, checkout and Azure deployment remain planned. Do not
+Server-mediated sessions are implemented; account UI, cart, checkout and free demo deployment remain planned.
+Read deploy/environments/README.md in the repository root for the approved hosting plan. Do not
 present working purchase controls until the corresponding transaction exists.

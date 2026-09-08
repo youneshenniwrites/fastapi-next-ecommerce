@@ -7,3 +7,6 @@ frontend/storefront-build.tar.gz
 frontend/audit.json
 
 __pycache__/
+
+# Provider-local metadata, credentials and generated deployment output
+.vercel/

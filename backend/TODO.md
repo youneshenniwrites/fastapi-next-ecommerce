@@ -64,7 +64,7 @@
   - Build image
   - Connect to PostgreSQL + Redis services in `docker-compose`.
 
-- Prepare Azure deployment:
+- Optional future Azure migration (#31), after Vercel/Neon demo delivery:
 
   - Azure Container Apps
   - Azure Database for PostgreSQL Flexible Server

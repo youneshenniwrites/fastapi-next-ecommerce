@@ -3,8 +3,9 @@ name: ecommerce-azure
 description: Plan Azure hosting or infrastructure changes for this ecommerce repository, including the API, future Next.js frontend, and PostgreSQL.
 ---
 
-Azure is the chosen cloud provider. Read docs/architecture.md for the proposed
-services and distinguish planned infrastructure from resources actually provisioned.
+Azure is optional future migration work (#31). Apply this skill only for an
+explicit Azure task; current demo hosting uses Vercel and Neon. Read
+docs/architecture.md and distinguish planned infrastructure from provisioned resources.
 The AWS Terraform in backend/infra is legacy reference, not a starting deployment.
 
 Keep Docker Compose as the local workflow. For cloud work, verify current Azure

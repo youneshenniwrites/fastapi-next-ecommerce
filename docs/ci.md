@@ -23,11 +23,11 @@ FastAPI's generated OpenAPI snapshot is checked in CI so API drift fails the PR.
 
 A successful build is not a deployment. The frontend workflow produces a standalone
 build artifact only after browser tests pass. The workflow summary explicitly marks
-Azure deployment as not configured; there is no fake deploy job or cloud operation.
+deployment as not configured; there is no fake deploy job or cloud operation.
 
-Azure staging will add: approved budget/environment → workload identity → image
-publication → migration execution → deployment → health/smoke verification, with
-rollback and logs. Provisioning remains a separate portfolio milestone.
+Vercel delivery (#45–46) adds verified commit → migration execution → API deployment
+→ frontend deployment → health/smoke verification, with rollback and logs.
+See [the environment plan](../deploy/environments/README.md).
 
 ## Reading a failure
 

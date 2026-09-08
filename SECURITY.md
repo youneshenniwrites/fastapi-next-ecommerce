@@ -23,9 +23,8 @@ Local credentials are generated into an ignored file and excluded from Docker bu
 
 CI audits locked Python dependencies, validates code/tests, and checks PostgreSQL
 migrations. These checks do not prove the app is ready for production. Rate limiting,
-password recovery, browser session design, full security scanning, and Azure
-production hardening remain roadmap work. The health endpoint checks process
+password recovery, full security scanning, and production hardening remain roadmap work. The health endpoint checks process
 liveness; it is not a database-readiness or security assessment.
 
 Do not deploy the legacy AWS Terraform as part of this project's current roadmap.
-Azure is the selected target, but no Azure deployment is provisioned.
+Vercel Hobby and Neon Free are the demo targets; see deploy/environments/README.md.

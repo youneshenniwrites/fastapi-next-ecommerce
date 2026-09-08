@@ -15,8 +15,8 @@ Build loading, empty, error, and out-of-stock states alongside each shopping vie
 Verify keyboard use and mobile layout, then run the actual frontend checks and
 capture relevant browser evidence. Label checks not yet available as untested.
 
-Plan hosting for Azure with the root ecommerce-azure skill when deployment is in
-scope; frontend scaffolding itself does not require cloud resources.
+Use deploy/environments/README.md for the approved Vercel/Neon hosting design
+when deployment is in scope; frontend scaffolding itself does not require cloud resources.
 
 Use docs/delivery.md for ticket and board tracking. For customer sessions, consult
 docs/design/customer-sessions.md before implementation; update the proposed note
