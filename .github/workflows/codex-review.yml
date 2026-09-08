@@ -4,6 +4,9 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   issue_comment:
     types: [created, edited, deleted]
+  workflow_run:
+    workflows: [Codex review events]
+    types: [requested, completed]
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:

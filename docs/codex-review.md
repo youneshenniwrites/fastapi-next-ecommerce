@@ -32,13 +32,15 @@ not a percentage progress bar. Its Details link opens the Actions run that
 inspected the evidence, with logs and a readable summary. PR test runs also
 inspect live evidence with a read-only token; their green job result means the
 inspection ran, not that Codex approved. The separate workflow refreshes evidence on PR and
-comment events, manually, and approximately every five minutes to catch
+comment events, a read-only review-event relay, manually, and approximately every five minutes to catch
 reactions and resolved threads (GitHub scheduling may be delayed).
 
 ## Trust and operations
 
 The write-enabled workflow uses pull_request_target, default-branch issue_comment,
-schedule and manual events. It executes only the protected default branch's gate code,
+schedule, manual and default-branch workflow_run events. Review submissions,
+edits and dismissals trigger a separate permissionless relay; the receiver reads
+fresh GitHub evidence and never trusts relay artifacts or executes its code. It executes only the protected default branch's gate code,
 never pull-request code. It does not install PR dependencies or interpolate PR
 content into shell commands. Evidence is paginated; API failures abort evaluation
 with a pending status. New SHAs require their own success. The protocol adapter is
