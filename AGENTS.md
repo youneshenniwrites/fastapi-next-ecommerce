@@ -70,3 +70,12 @@ Closes #N only for a completed ticket. Update board status and verify acceptance
 CI, PR disposition and relevant documentation before reporting completion.
 For customer sessions (#24), read docs/design/customer-sessions.md; it is a
 proposed design, not implemented behavior.
+
+## External review requirement
+
+The owner requires external tool review and approval before any PR merge.
+Self-review and passing CI are necessary but insufficient. Verify that approval
+covers the current head and resolve findings; request review again after changes.
+Never use an admin bypass or weaken protection to merge. A comment, reaction, or
+absence of findings is not automatically a formal approving GitHub review. If the
+selected tool cannot supply the required signal, leave the PR open and report it.

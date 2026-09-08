@@ -36,7 +36,11 @@ assign youneshenniwrites and apply scope labels. Self-review must be identified.
 ## Finish and resume
 
 Before merge, review the full exact-head diff, resolve findings and require all
-applicable checks. After merge, verify issue closure, update board status, record
+applicable checks and external tool review/approval for the current head.
+Self-review alone does not authorize merging. Never bypass branch protection.
+If the tool provides only comments or reactions, do not assume these satisfy a
+required approving review; leave the PR open until the integration is resolved.
+After merge, verify issue closure, update board status, record
 evidence and move newly unblocked work to Ready. Check README, design notes,
 roadmap, Wiki and skills for changes relevant to the delivered behavior.
 

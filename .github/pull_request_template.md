@@ -21,6 +21,7 @@ Use "Not applicable" when the change has none.
 ## Review
 
 - [ ] I reviewed the complete diff and addressed actionable findings.
+- [ ] External review tool has reviewed and approved the current revision.
 - [ ] Applicable CI checks pass for the commit to be merged.
 - [ ] Documentation and skills reflect the implemented behavior.
 
