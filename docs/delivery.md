@@ -17,8 +17,7 @@ only for capabilities unavailable through those interfaces.
 
 ## Board and PR lifecycle
 
-- Backlog: work needs refinement or has unmet dependencies.
-- Ready: scoped, unblocked and ready to begin.
+- Backlog: planned work; start only when scoped and unblocked.
 - In progress: implementation underway; keep one implementation ticket active.
 - In review: a PR is open and review/checks are underway.
 - Done: acceptance criteria are met and implementing PRs are merged.
@@ -41,7 +40,7 @@ Self-review alone does not authorize merging. Never bypass branch protection.
 If the tool provides only comments or reactions, do not assume these satisfy a
 required approving review; leave the PR open until the integration is resolved.
 After merge, verify issue closure, update board status, record
-evidence and move newly unblocked work to Ready. Check README, design notes,
+evidence and identify the next unblocked Backlog ticket. Check README, design notes,
 roadmap, Wiki and skills for changes relevant to the delivered behavior.
 
 At handoff, report merged/open PRs, remaining blockers, checks and the next ticket.
