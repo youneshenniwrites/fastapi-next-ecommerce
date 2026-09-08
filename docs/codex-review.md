@@ -26,7 +26,10 @@ missing evidence leaves the check pending. Re-request review after changes.
 
 The required commit status is **Codex review**. It shows a pending indicator and
 short reason while reviewing; success means the evidence conditions passed. It is
-not a percentage progress bar. The separate workflow refreshes evidence on PR and
+not a percentage progress bar. Its Details link opens the Actions run that
+inspected the evidence, with logs and a readable summary. PR test runs also
+inspect live evidence with a read-only token; their green job result means the
+inspection ran, not that Codex approved. The separate workflow refreshes evidence on PR and
 comment events, manually, and approximately every five minutes to catch
 reactions and resolved threads (GitHub scheduling may be delayed).
 
@@ -44,7 +47,8 @@ Protect main with this required status plus normal CI, up-to-date branches and
 resolved conversations. Do not remove an existing approval requirement until the
 replacement has been tested and its current-head success verified. Bootstrap may
 run the reviewed gate locally with gh credentials to publish a real evidence-backed
-status; it must not fabricate a pass. After installation, use workflow_dispatch
+status; it must not fabricate a pass. Local publication requires `--details-url`
+pointing to the real evidence Actions run, never a PR URL. After installation, use workflow_dispatch
 for recovery, and inspect the workflow failure before retrying. Missing clean bot
 signals require investigation, never an assumed approval.
 

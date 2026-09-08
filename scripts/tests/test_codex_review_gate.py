@@ -1,6 +1,32 @@
 import unittest
+from unittest.mock import patch
 
-from scripts.codex_review_gate import BOT_ID, evaluate
+from scripts.codex_review_gate import BOT_ID, details_url, evaluate
+
+
+class StatusLinks(unittest.TestCase):
+    @patch.dict("os.environ", {"GITHUB_RUN_ID": "123"}, clear=True)
+    def test_actions_links_to_its_run(self):
+        self.assertEqual(
+            details_url("owner/repo"), "https://github.com/owner/repo/actions/runs/123"
+        )
+
+    @patch.dict("os.environ", {}, clear=True)
+    def test_local_requires_real_run(self):
+        with self.assertRaises(ValueError):
+            details_url("owner/repo")
+
+    def test_rejects_pr_loop(self):
+        with self.assertRaises(ValueError):
+            details_url("owner/repo", "https://github.com/owner/repo/pull/37")
+
+    def test_local_can_link_evidence_job(self):
+        self.assertEqual(
+            details_url(
+                "owner/repo", "https://github.com/owner/repo/actions/runs/123/job/456"
+            ),
+            "https://github.com/owner/repo/actions/runs/123/job/456",
+        )
 
 
 class ReviewEvidence(unittest.TestCase):

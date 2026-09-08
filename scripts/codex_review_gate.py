@@ -14,6 +14,21 @@ BOT_ID = 199175422
 CONTEXT = "Codex review"
 
 
+def details_url(repo, explicit=None):
+    """Link status details to the actual evidence run, never back to the PR."""
+    url = explicit
+    if not url and os.environ.get("GITHUB_RUN_ID"):
+        url = f"https://github.com/{repo}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+    if not url or not re.fullmatch(
+        r"https://github\.com/" + re.escape(repo) + r"/actions/runs/\d+(?:/job/\d+)?",
+        url,
+    ):
+        raise ValueError(
+            "Publishing requires an Actions run URL (--details-url for local bootstrap)"
+        )
+    return url
+
+
 def trusted(value):
     user = value.get("user", {})
     return user.get("id") == BOT_ID and user.get("type") == "Bot"
@@ -170,7 +185,11 @@ def main():
     parser.add_argument("--repo", required=True)
     parser.add_argument("--pr", type=int)
     parser.add_argument("--publish", action="store_true")
+    parser.add_argument(
+        "--details-url", help="Actual evidence Actions run URL for local bootstrap"
+    )
     args = parser.parse_args()
+    target = details_url(args.repo, args.details_url) if args.publish else None
     numbers = (
         [args.pr]
         if args.pr
@@ -185,10 +204,19 @@ def main():
                     "state": "pending",
                     "context": CONTEXT,
                     "description": "Checking external review evidence",
+                    "target_url": target,
                 },
             )
         sha, state, reason = inspect(args.repo, number)
         print(json.dumps({"pr": number, "sha": sha, "state": state, "reason": reason}))
+        if os.environ.get("GITHUB_STEP_SUMMARY"):
+            with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                summary.write(
+                    f"### Codex review · PR #{number}\n\n"
+                    f"- Reviewed head: `{sha}`\n- Gate: **{state}**\n- Reason: {reason}\n\n"
+                    "This job inspects evidence. A successful job alone is not review approval; "
+                    "the required **Codex review** status must be successful.\n\n"
+                )
         if args.publish:
             # Write only to the inspected SHA. A concurrent push gets no success
             # status and must independently pass a new evaluation.
@@ -198,7 +226,7 @@ def main():
                     "state": state,
                     "context": CONTEXT,
                     "description": reason[:140],
-                    "target_url": f"https://github.com/{args.repo}/pull/{number}",
+                    "target_url": target,
                 },
             )
 
