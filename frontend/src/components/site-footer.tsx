@@ -20,6 +20,14 @@ export function SiteFooter() {
         Fictional shop · Portfolio demonstration
         <br />
         Browse in GBP. Purchasing is not available yet.
+        <br />
+        Representative photography ·{" "}
+        <a
+          className="underline"
+          href="https://github.com/youneshenniwrites/fastapi-next-ecommerce/blob/main/frontend/PHOTO_CREDITS.md"
+        >
+          Photo credits
+        </a>
       </p>
       <a
         className="inline-flex items-center gap-2 underline underline-offset-4"

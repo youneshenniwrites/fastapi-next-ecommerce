@@ -1,4 +1,4 @@
-# FORME storefront
+# VINDOR storefront
 
 A fictional desk-accessories catalog for the senior SWE portfolio. Next.js App
 Router and React render catalog and detail pages against FastAPI; search, stock
@@ -45,9 +45,10 @@ and src/lib/api/schema.d.ts together. Runtime calls use openapi-fetch and genera
 
 ## Scope and design
 
-FORME uses original local SVG illustrations, system fonts and no external image/font
-services. Illustrations correspond to the demo names; unknown products have neutral
-artwork. This is presentation metadata, not authoritative product data.
+VINDOR uses locally stored, licensed WebP photography, system fonts and Lucide icons.
+See [photo credits](PHOTO_CREDITS.md) for sources and licences. Photographs are
+representative, not exact product specifications or brand endorsements. Unknown
+products use a neutral Lucide placeholder.
 
 The catalog currently loads at most 100 products and filters those loaded items;
 a notice appears at that limit. Server-side search/pagination is a future increment

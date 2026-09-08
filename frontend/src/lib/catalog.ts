@@ -38,5 +38,7 @@ const artwork: Record<string, string> = {
   "Ceramic Pen Cup": "cup",
 };
 export function productArt(name: string) {
-  return `/art/${artwork[name] ?? "object"}.svg`;
+  return Object.hasOwn(artwork, name)
+    ? `/photos/${artwork[name]}.webp`
+    : undefined;
 }

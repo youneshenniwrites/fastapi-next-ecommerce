@@ -39,7 +39,7 @@ export function MobileNavigation() {
         <SheetContent className="w-[min(85vw,360px)]">
           <SheetHeader className="px-6 pt-16">
             <SheetTitle className="font-serif text-3xl">
-              Explore FORME
+              Explore VINDOR
             </SheetTitle>
             <SheetDescription>
               Considered objects for a calmer workspace.

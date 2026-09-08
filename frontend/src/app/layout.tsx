@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: { default: "FORME — Room to think", template: "%s | FORME" },
+  title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
   description:
     "Considered objects for a calmer workspace. A fictional ecommerce portfolio.",
 };

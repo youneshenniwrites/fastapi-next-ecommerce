@@ -1,20 +1,14 @@
-import Image from "next/image";
+import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { money, productArt, type Product } from "@/lib/catalog";
+import { money, type Product } from "@/lib/catalog";
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product min-w-0">
       <Link href={`/products/${product.id}`} className="group block">
         <div className="relative overflow-hidden bg-muted">
-          <Image
-            className="w-full transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transform-none"
-            src={productArt(product.name)}
-            alt={`Illustration of ${product.name}`}
-            width={600}
-            height={500}
-          />
+          <ProductImage name={product.name} />
           {product.stock === 0 && (
             <Badge
               variant="outline"

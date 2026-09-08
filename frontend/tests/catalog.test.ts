@@ -42,7 +42,8 @@ describe("GBP display and catalog controls", () => {
     ).toEqual(["Cup", "Mat", "Stand"]);
   });
   it("uses demo artwork only for known names and a neutral fallback", () => {
-    expect(productArt("Task Light")).toBe("/art/lamp.svg");
-    expect(productArt("Unrecognised product")).toBe("/art/object.svg");
+    expect(productArt("Task Light")).toBe("/photos/lamp.webp");
+    for (const name of ["Unrecognised product", "toString", "__proto__"])
+      expect(productArt(name)).toBeUndefined();
   });
 });

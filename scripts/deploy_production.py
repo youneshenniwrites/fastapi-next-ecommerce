@@ -80,7 +80,7 @@ def main():
                 read(API + "/openapi.json")
                 read(API + "/api/v1/auth/me", expected=401)
         page = read(WEB, retry=True).decode()
-        assert "FORME" in page and html.escape(products[0]["name"]) in page, (
+        assert "VINDOR" in page and html.escape(products[0]["name"]) in page, (
             "Catalog did not render"
         )
         read(WEB + "/api/session/me", expected=401)

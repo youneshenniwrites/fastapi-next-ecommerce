@@ -147,3 +147,10 @@ confirm schema compatibility, then promote that deployment through Vercel. Recor
 both API and frontend revisions and rerun smoke checks. Do not downgrade the
 database automatically. A manually rolled-back version is temporary: the next
 eligible main release will advance production again.
+
+## VINDOR identity
+
+VINDOR is the public product name (formerly FORME). Existing repository slug,
+Vercel project IDs, deployment domains and database/role identifiers remain stable
+to preserve CI, links and sessions. They are infrastructure identifiers, not
+storefront branding. No data migration or paid domain is needed for this rename.

@@ -6,16 +6,10 @@ export function Wordmark() {
   return (
     <Link
       href="/"
-      aria-label="FORME home"
-      className="inline-flex items-start font-serif text-[40px] font-bold leading-none tracking-[-3px]"
+      aria-label="VINDOR home"
+      className="inline-flex items-start font-serif text-[40px] font-bold leading-none tracking-[-2px]"
     >
-      forme
-      <span
-        className="ml-1 mt-1 font-sans text-[10px] tracking-normal"
-        aria-hidden="true"
-      >
-        ®
-      </span>
+      vindor
     </Link>
   );
 }

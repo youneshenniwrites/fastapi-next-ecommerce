@@ -1,10 +1,10 @@
-import Image from "next/image";
+import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
 import { ArrowLeft, Check, Minus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { container, eyebrow } from "@/components/storefront-layout";
 import { cn } from "@/lib/utils";
-import { money, productArt, type Product } from "@/lib/catalog";
+import { money, type Product } from "@/lib/catalog";
 export function ProductDetails({ product }: { product: Product }) {
   return (
     <main id="main" className={cn(container, "py-10 pb-20")}>
@@ -17,14 +17,7 @@ export function ProductDetails({ product }: { product: Product }) {
       </Link>
       <div className="grid items-start gap-8 md:grid-cols-2 lg:gap-16">
         <div className="overflow-hidden bg-muted">
-          <Image
-            className="w-full"
-            src={productArt(product.name)}
-            alt={`Illustration of ${product.name}`}
-            width={900}
-            height={750}
-            priority
-          />
+          <ProductImage name={product.name} priority />
         </div>
         <div className="min-w-0 py-4">
           <p className={eyebrow}>THE WORKSPACE COLLECTION</p>
@@ -50,7 +43,8 @@ export function ProductDetails({ product }: { product: Product }) {
             <strong>A collection to explore.</strong>
             <p>
               This is a portfolio demonstration. Cart and checkout are coming
-              next; no purchases can be made.
+              next; no purchases can be made. Photography shows representative
+              workspace objects, not exact products or brand endorsements.
             </p>
           </div>
           <dl className="mt-8 text-xs [&_div]:flex [&_div]:justify-between [&_div]:gap-4 [&_div]:border-b [&_div]:border-border [&_div]:py-3">
@@ -60,7 +54,7 @@ export function ProductDetails({ product }: { product: Product }) {
             </div>
             <div>
               <dt>Reference</dt>
-              <dd>FORME / {String(product.id).padStart(3, "0")}</dd>
+              <dd>VINDOR / {String(product.id).padStart(3, "0")}</dd>
             </div>
           </dl>
         </div>
