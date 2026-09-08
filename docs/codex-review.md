@@ -22,7 +22,9 @@ from the verified Codex bot (GitHub user ID 199175422), the matching summary com
 a +1 reaction from that bot on the request (or its explicit, unedited clean-result
 comment identifying the current commit), and no unresolved review threads. The
 explicit-result path also supports existing unedited review requests. Later
-requests or findings invalidate an older clean result.
+requests or findings invalidate an older clean result. Review edits use GraphQL
+update timestamps; inline comments are checked separately, including resolved
+threads whose comments were later edited.
 An old clean review, edited request, human reaction, unknown summary format or
 missing evidence leaves the check pending. Re-request review after changes.
 
@@ -42,8 +44,20 @@ schedule, manual and default-branch workflow_run events. Review submissions,
 edits and dismissals trigger a separate permissionless relay; the receiver reads
 fresh GitHub evidence and never trusts relay artifacts or executes its code. It executes only the protected default branch's gate code,
 never pull-request code. It does not install PR dependencies or interpolate PR
-content into shell commands. Evidence is paginated; API failures abort evaluation
-with a pending status. New SHAs require their own success. The protocol adapter is
+content into shell commands. Evidence is paginated with bounded cursors. A failure
+in one PR does not abandon the others: affected commit groups stay pending and
+the workflow fails. PRs sharing a SHA are evaluated together; all must pass,
+including when using a scoped refresh. Head and draft state are checked again
+after inspection. New SHAs require their own success.
+
+Publication occurs only when state or reason changes, avoiding GitHub's limit of
+1,000 statuses per SHA/context. The Details link therefore identifies the last
+status transition; unchanged refreshes are available in Actions. If GitHub cannot
+list PRs or accept a status write, the workflow fails but cannot erase an old
+status remotely. The shipping agent must require a successful fresh refresh and
+recheck current-head evidence before merging. Events and API reads are snapshots,
+not an atomic lock against a concurrent review. Broader UI/protection enforcement
+is tracked separately in #38. The protocol adapter is
 fail-closed because Codex's summary format can change. Unit tests cover spoofed,
 stale, edited and incomplete evidence. Separate read-only CI tests PR changes.
 

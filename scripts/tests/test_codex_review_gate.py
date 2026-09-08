@@ -217,3 +217,44 @@ class ReviewEvidence(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EditedReviews(unittest.TestCase):
+    setUp = ReviewEvidence.setUp
+    clean_comment = ReviewEvidence.clean_comment
+
+    def test_edit_of_old_review_invalidates_later_clean_signal(self):
+        review = {
+            "user": self.bot,
+            "submitted_at": "2026-09-08T09:00:00Z",
+            "updated_at": "2026-09-08T10:02:00Z",
+            "state": "COMMENTED",
+        }
+        self.assertEqual(
+            evaluate(
+                self.sha,
+                [self.request, self.summary, self.clean_comment()],
+                {},
+                False,
+                [review],
+            )[0],
+            "pending",
+        )
+
+    def test_clean_signal_after_old_review_edit_can_pass(self):
+        review = {
+            "user": self.bot,
+            "submitted_at": "2026-09-08T09:00:00Z",
+            "updated_at": "2026-09-08T09:30:00Z",
+            "state": "COMMENTED",
+        }
+        self.assertEqual(
+            evaluate(
+                self.sha,
+                [self.request, self.summary, self.clean_comment()],
+                {},
+                False,
+                [review],
+            )[0],
+            "success",
+        )

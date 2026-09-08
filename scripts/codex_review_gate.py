@@ -111,7 +111,10 @@ def evaluate(sha, comments, reactions, unresolved, reviews=()):
     signal_time = max((c["created_at"] for c in clean), default=request["created_at"])
     if any(
         trusted(r)
-        and r.get("submitted_at", "") >= signal_time
+        and (
+            not r.get("updated_at")
+            or max(r.get("submitted_at") or "", r["updated_at"]) >= signal_time
+        )
         and r.get("state") in {"COMMENTED", "CHANGES_REQUESTED", "DISMISSED"}
         for r in reviews
     ):
@@ -147,7 +150,8 @@ def threads(repo, number):
     owner, name = repo.split("/")
     cursor = None
     unresolved = False
-    while True:
+    seen = set()
+    for _ in range(100):
         result = api(
             "graphql",
             {
@@ -169,6 +173,64 @@ def threads(repo, number):
         if not connection["pageInfo"]["hasNextPage"]:
             return unresolved
         cursor = connection["pageInfo"]["endCursor"]
+        if not cursor or cursor in seen:
+            raise RuntimeError("Review-thread pagination did not advance")
+        seen.add(cursor)
+    raise RuntimeError("Review-thread pagination limit exceeded")
+
+
+def review_history(repo, number):
+    owner, name = repo.split("/")
+    cursor = None
+    seen = set()
+    reviews = []
+    for _ in range(100):
+        response = api(
+            "graphql",
+            {
+                "query": """query($owner:String!,$name:String!,$number:Int!,$cursor:String){
+          repository(owner:$owner,name:$name){pullRequest(number:$number){reviews(first:100,after:$cursor){
+          nodes{submittedAt updatedAt state author{__typename ... on Bot{databaseId} ... on User{databaseId}}}
+          pageInfo{hasNextPage endCursor}}}}}""",
+                "variables": {
+                    "owner": owner,
+                    "name": name,
+                    "number": number,
+                    "cursor": cursor,
+                },
+            },
+        )
+        if response.get("errors"):
+            raise RuntimeError("Cannot retrieve complete review history")
+        connection = response["data"]["repository"]["pullRequest"]["reviews"]
+        for review in connection["nodes"]:
+            author = review.get("author") or {}
+            reviews.append(
+                {
+                    "user": {
+                        "id": author.get("databaseId"),
+                        "type": author.get("__typename"),
+                    },
+                    "state": review["state"],
+                    "submitted_at": review["submittedAt"],
+                    "updated_at": review["updatedAt"],
+                }
+            )
+        if not connection["pageInfo"]["hasNextPage"]:
+            break
+        cursor = connection["pageInfo"]["endCursor"]
+        if not cursor or cursor in seen:
+            raise RuntimeError("Review-history pagination did not advance")
+        seen.add(cursor)
+    else:
+        raise RuntimeError("Review-history pagination limit exceeded")
+    # Inline edits may not change their parent review's timestamp. Treat them
+    # as findings too, even if the conversation was previously resolved.
+    for comment in pages(f"repos/{repo}/pulls/{number}/comments"):
+        reviews.append(
+            {**comment, "state": "COMMENTED", "submitted_at": comment["created_at"]}
+        )
+    return reviews
 
 
 def inspect(repo, number):
@@ -187,9 +249,12 @@ def inspect(repo, number):
         reactions[latest["id"]] = pages(
             f"repos/{repo}/issues/comments/{latest['id']}/reactions"
         )
-    reviews = pages(f"repos/{repo}/pulls/{number}/reviews")
+    reviews = review_history(repo, number)
     state, reason = evaluate(sha, comments, reactions, threads(repo, number), reviews)
-    if pr["draft"] or pr["state"] != "open":
+    current = api(f"repos/{repo}/pulls/{number}")
+    if current["head"]["sha"] != sha:
+        state, reason = "pending", "PR head changed during inspection; retry required"
+    elif current["draft"] or current["state"] != "open":
         state, reason = "pending", "PR must be open and ready for review"
     return sha, state, reason
 
@@ -204,45 +269,126 @@ def main():
     )
     args = parser.parse_args()
     target = details_url(args.repo, args.details_url) if args.publish else None
-    numbers = (
-        [args.pr]
-        if args.pr
-        else [p["number"] for p in pages(f"repos/{args.repo}/pulls?state=open")]
-    )
-    for number in numbers:
-        if args.publish:
-            current = api(f"repos/{args.repo}/pulls/{number}")["head"]["sha"]
+    if args.publish:
+        publish_reviews(args.repo, target, args.pr)
+    else:
+        numbers = (
+            [args.pr]
+            if args.pr
+            else [p["number"] for p in pages(f"repos/{args.repo}/pulls?state=open")]
+        )
+        for number in numbers:
+            report(number, *inspect(args.repo, number))
+
+
+def report(number, sha, state, reason):
+    print(json.dumps({"pr": number, "sha": sha, "state": state, "reason": reason}))
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+            summary.write(
+                f"### Codex review · PR #{number}\n\n"
+                f"- Inspected head: `{sha}`\n- Gate: **{state}**\n- Reason: {reason}\n\n"
+                "This job inspects evidence. A successful job alone is not review approval; "
+                "the required **Codex review** status must be successful.\n\n"
+            )
+
+
+def latest_status(repo, sha):
+    for page in range(1, 101):
+        batch = api(f"repos/{repo}/commits/{sha}/statuses?per_page=100&page={page}")
+        for status in batch:
+            if status.get("context", "").casefold() == CONTEXT.casefold():
+                return status
+        if len(batch) < 100:
+            return None
+    raise RuntimeError("Status pagination limit exceeded")
+
+
+def publish_reviews(repo, target, only_pr=None):
+    # Commit statuses are shared by every PR with the same SHA. Always discover
+    # all open PRs, even for a scoped refresh, and aggregate their evidence.
+    pulls = pages(f"repos/{repo}/pulls?state=open")
+    groups = {}
+    for pr in pulls:
+        groups.setdefault(pr["head"]["sha"], []).append(pr["number"])
+    if only_pr is not None:
+        groups = {sha: numbers for sha, numbers in groups.items() if only_pr in numbers}
+        if not groups:
+            raise RuntimeError("Requested PR is not open; no status published")
+
+    def publish(sha, state, reason):
+        description = reason[:140]
+        try:
+            previous = latest_status(repo, sha)
+        except Exception:  # noqa: BLE001 - never preserve approval on incomplete status evidence
             api(
-                f"repos/{args.repo}/statuses/{current}",
+                f"repos/{repo}/statuses/{sha}",
                 {
                     "state": "pending",
                     "context": CONTEXT,
-                    "description": "Checking external review evidence",
+                    "description": "Status history unavailable; retry required",
                     "target_url": target,
                 },
             )
-        sha, state, reason = inspect(args.repo, number)
-        print(json.dumps({"pr": number, "sha": sha, "state": state, "reason": reason}))
-        if os.environ.get("GITHUB_STEP_SUMMARY"):
-            with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
-                summary.write(
-                    f"### Codex review · PR #{number}\n\n"
-                    f"- Reviewed head: `{sha}`\n- Gate: **{state}**\n- Reason: {reason}\n\n"
-                    "This job inspects evidence. A successful job alone is not review approval; "
-                    "the required **Codex review** status must be successful.\n\n"
+            raise RuntimeError("Status history could not be verified") from None
+        # GitHub allows only 1,000 statuses per SHA/context. A scheduled refresh
+        # with the same result must not consume another entry just to change its URL.
+        if (
+            previous
+            and previous["state"] == state
+            and previous.get("description") == description
+        ):
+            return
+        api(
+            f"repos/{repo}/statuses/{sha}",
+            {
+                "state": state,
+                "context": CONTEXT,
+                "description": description,
+                "target_url": target,
+            },
+        )
+
+    failures = False
+    for sha, numbers in groups.items():
+        outcomes = []
+        for number in numbers:
+            try:
+                inspected, state, reason = inspect(repo, number)
+                if inspected != sha:
+                    state, reason = (
+                        "pending",
+                        "Head changed since discovery; retry required",
+                    )
+            except Exception:  # noqa: BLE001 - isolate malformed/API evidence per PR; fail run below
+                # Keep this head pending, but inspect the remaining groups.
+                failures = True
+                state, reason = (
+                    "pending",
+                    "Evidence API inspection failed; retry required",
                 )
-        if args.publish:
-            # Write only to the inspected SHA. A concurrent push gets no success
-            # status and must independently pass a new evaluation.
-            api(
-                f"repos/{args.repo}/statuses/{sha}",
-                {
-                    "state": state,
-                    "context": CONTEXT,
-                    "description": reason[:140],
-                    "target_url": target,
-                },
-            )
+            report(number, sha, state, reason)
+            outcomes.append((state, reason))
+        blocked = next((result for result in outcomes if result[0] != "success"), None)
+        state, reason = blocked or (
+            "success",
+            "All open PRs for this commit have verified clean Codex review",
+        )
+        try:
+            publish(sha, state, reason)
+        except Exception:  # noqa: BLE001 - a publication failure must not abandon other heads
+            failures = True
+            for number in numbers:
+                report(
+                    number,
+                    sha,
+                    "pending",
+                    "Status publication failed; do not merge until a successful refresh",
+                )
+    if failures:
+        raise RuntimeError(
+            "Review refresh incomplete; do not merge until a successful retry"
+        )
 
 
 if __name__ == "__main__":
