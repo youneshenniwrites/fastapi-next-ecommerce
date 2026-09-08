@@ -18,6 +18,8 @@ jobs:
           persist-credentials: false
       - name: Test stale, spoofed, running and unresolved review rejection
         run: python3 -m unittest discover -s scripts/tests -v
+      - name: Test production revision eligibility
+        run: python3 -m unittest discover -s scripts -p "test_production_ready.py" -v
       - name: Inspect live Codex evidence (read only; does not approve)
         if: github.event_name == 'pull_request'
         env:
