@@ -1,0 +1,112 @@
+name: Codex Actions review
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Open pull request number to review
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: codex-actions-review-${{ inputs.pr_number }}
+  cancel-in-progress: true
+jobs:
+  review:
+    name: Codex · Prepare and review PR
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      head: ${{ steps.prepare.outputs.head }}
+      pr: ${{ steps.prepare.outputs.pr }}
+      message: ${{ steps.codex.outputs.final-message }}
+    steps:
+      - name: Check out trusted review configuration
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify API credential is configured
+        env:
+          REVIEW_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$REVIEW_API_KEY" ]; then
+            echo '::error::Add OPENAI_API_KEY in repository Actions secrets before running this workflow.'
+            exit 1
+          fi
+      - name: Prepare immutable PR comparison
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_PR: ${{ inputs.pr_number }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+          number = os.environ['REVIEW_PR']
+          if not re.fullmatch(r'[1-9][0-9]*', number):
+              raise SystemExit('pr_number must be a positive integer')
+          repo = os.environ['GITHUB_REPOSITORY']
+          pr = json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/pulls/{number}']))
+          if pr['state'] != 'open' or pr['draft']:
+              raise SystemExit('Choose an open, non-draft PR')
+          base, head = pr['base']['sha'], pr['head']['sha']
+          for sha in (base, head):
+              if not re.fullmatch(r'[0-9a-f]{40}', sha):
+                  raise SystemExit('Invalid GitHub commit identifier')
+              subprocess.run(['git', 'fetch', 'origin', sha], check=True)
+          # Keep the trusted checkout; PR content is only Git objects and a patch.
+          with Path('review.patch').open('wb') as patch:
+              subprocess.run(['git', 'diff', '--no-ext-diff', '--no-textconv', f'{base}...{head}'], stdout=patch, check=True)
+          Path('review-context.json').write_text(json.dumps({'pr': number, 'base': base, 'head': head}))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'head={head}\npr={number}\n')
+          print(f'Reviewing PR #{number}: {base}...{head}')
+          PY
+      - name: Run Codex review — inspect live tool output here
+        id: codex
+        uses: openai/codex-action@86365089eb2b84e0a8fb0717b304f8bdcb13b20e # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/actions-review.md
+          output-file: review-result.md
+          sandbox: read-only
+          safety-strategy: drop-sudo
+          codex-args: '["--json"]'
+  publish:
+    name: Codex · Publish reviewed commit and findings
+    needs: review
+    if: needs.review.result == 'success' && needs.review.outputs.message != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Verify current head and publish review report
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          REVIEW_PR: ${{ needs.review.outputs.pr }}
+          REVIEW_HEAD: ${{ needs.review.outputs.head }}
+          REVIEW_MESSAGE: ${{ needs.review.outputs.message }}
+        with:
+          script: |
+            const number = Number(process.env.REVIEW_PR);
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
+            if (pr.state !== 'open' || pr.draft || pr.head.sha !== process.env.REVIEW_HEAD) {
+              core.setFailed('PR changed during review; rerun against the current head.');
+              return;
+            }
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const report = process.env.REVIEW_MESSAGE;
+            if (report.length > 55000) {
+              core.setFailed('Review exceeds comment limit; inspect the review job output.');
+              return;
+            }
+            await github.rest.issues.createComment({ ...context.repo, issue_number: number,
+              body: `## Codex Actions review\n\nReviewed commit: \`${pr.head.sha}\`\n\n[Execution logs](${run})\n\n${report}\n\nInformational review report; this does not submit GitHub approval or replace the current review policy.` });
+            await core.summary.addHeading('Codex review published').addLink('PR and findings', pr.html_url).addRaw(`\n\nReviewed commit: ${pr.head.sha}`).write();

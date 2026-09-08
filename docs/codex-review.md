@@ -75,3 +75,8 @@ are deferred to #38. The current status must not be used as the sole authorizati
 to merge: a new PR can inherit an old status attached to the same SHA. Refer to
 current review evidence and the owner's explicit delivery authorization instead.
 The reporter does not merge PRs. No admin bypass is used.
+
+## Optional Actions-based review
+
+The [manual Actions review](codex-actions-review.md) exposes a separate review run
+and its tool output. It does not expose hosted sessions or replace this policy.
