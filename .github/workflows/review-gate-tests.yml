@@ -1,0 +1,27 @@
+name: Review gate tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+jobs:
+  tests:
+    name: Review gate · Evidence validation tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test stale, spoofed, running and unresolved review rejection
+        run: python3 -m unittest discover -s scripts/tests -v
+      - name: Inspect live Codex evidence (read only; does not approve)
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_REPOSITORY: ${{ github.repository }}
+          REVIEW_PR: ${{ github.event.pull_request.number }}
+        run: python3 scripts/codex_review_gate.py --repo "$REVIEW_REPOSITORY" --pr "$REVIEW_PR"

@@ -17,8 +17,7 @@ only for capabilities unavailable through those interfaces.
 
 ## Board and PR lifecycle
 
-- Backlog: work needs refinement or has unmet dependencies.
-- Ready: scoped, unblocked and ready to begin.
+- Backlog: planned work; start only when scoped and unblocked.
 - In progress: implementation underway; keep one implementation ticket active.
 - In review: a PR is open and review/checks are underway.
 - Done: acceptance criteria are met and implementing PRs are merged.
@@ -29,15 +28,22 @@ with a reason; do not represent it as delivered. A retrospective summary can
 record previously delivered work, explicitly labelled as retrospective.
 
 Each PR includes its GitHub issue, validation and review evidence. Use Closes #N
-only when that PR completes the whole ticket; use Refs #N for partial work. Keep
-No Jira ticket. when no real Jira reference exists. Preserve real authorship,
+only when that PR completes the whole ticket; use Refs #N for partial work.
+GitHub Issues are our ticket tracker. Preserve real authorship,
 assign youneshenniwrites and apply scope labels. Self-review must be identified.
 
 ## Finish and resume
 
 Before merge, review the full exact-head diff, resolve findings and require all
-applicable checks. After merge, verify issue closure, update board status, record
-evidence and move newly unblocked work to Ready. Check README, design notes,
+applicable checks and external tool review/approval for the current head.
+Self-review alone does not authorize merging. Never bypass branch protection.
+The informational `Codex review` status reports review evidence; enforcement is
+deferred to #38. Inspect the actual current-head review before merging; follow [its evidence protocol](codex-review.md). A human Approve review is
+not required. Unknown or missing evidence keeps the PR open unless the owner
+explicitly authorizes a documented deferral. The #35/#37 deferral is not a blanket
+exception for later PRs.
+After merge, verify issue closure, update board status, record
+evidence and identify the next unblocked Backlog ticket. Check README, design notes,
 roadmap, Wiki and skills for changes relevant to the delivered behavior.
 
 At handoff, report merged/open PRs, remaining blockers, checks and the next ticket.
@@ -45,3 +51,17 @@ Inspect open maintenance PRs and either resolve them within authorized scope or
 record their next action; do not silently leave failures unexplained. This is an
 agent workflow, not a continuously running service. Scheduled dependency review
 is not configured. Dependabot proposes updates weekly; it does not review or merge.
+
+## Common PR description and reviewers
+
+The [PR template](../.github/pull_request_template.md) defines Summary, Issue,
+optional Before / After, Acceptance criteria, Testing, Review, and optional
+Deployment / Compatibility. Fill acceptance criteria from the issue and testing
+with actual results; remove irrelevant optional sections. No Jira placeholder.
+
+Assign youneshenniwrites on every PR; do not request them as reviewer.
+Codex is the sole requested reviewer. Request Codex through the review
+integration and verify completion on the current commit. A named reviewer in the
+body is not evidence of a request or approval. The ownership skill contains the
+operational steps; AGENTS.md routes future sessions to it. External approval
+remains required before merge, including maintenance PRs.

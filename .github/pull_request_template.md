@@ -1,33 +1,37 @@
-<!-- PR title: type(scope): description; see CONTRIBUTING.md naming conventions. -->
+<!-- PR title: type(scope): description. Replace placeholders; remove optional sections when irrelevant. -->
 
-## Problem and resulting behavior
+## Summary
+What changed and why—in 1–3 sentences.
 
-Explain the concrete trigger and what changes for a user or maintainer.
+## Issue
+Closes #<!-- actual issue number; use Refs #N for partial work -->
 
-## GitHub issue
+## Before / After
+<!-- Optional: include for meaningful behaviour changes; add screenshots if useful. -->
+| Before | After |
+| --- | --- |
+| Previous behaviour | New behaviour |
 
-Closes #<!-- issue number; use Refs #N if this PR only partially completes it -->
+## Acceptance criteria
+- [ ] Required outcome from the linked issue
+- [ ] Relevant error and edge cases handled
+- [ ] Documentation updated where needed
 
-## Jira ticket
-
-No Jira ticket.
-<!-- Replace with the real ticket key and link when one exists; never invent a ticket. -->
-
-## Validation
-
-List the commands/results and the exact revision tested. Mark unavailable checks
-as untested and explain why. Link relevant CI or redacted before/after evidence.
-
-## Compatibility and operations
-
-Describe API/dependency changes, migration effects, and rollback considerations.
-Use "Not applicable" when the change has none.
+## Testing
+- Checks run:
+- Results and tested commit:
+- Not tested / limitations:
 
 ## Review
+- Implementation review: self-review / independent review (identify which)
+- Owner: @youneshenniwrites
+- External reviewer: Codex Code Review
+- [ ] External review completed for the latest commit
+- [ ] Review findings addressed
+- [ ] Required CI checks passed
+- [ ] Current-head external review verified, or explicit owner-approved deferral linked
+<!-- Keep the owner as assignee; request only Codex as reviewer. Trigger Codex review through its integration; naming it here does not request a review. The Codex review status is informational pending #38; verify actual review evidence as described in docs/codex-review.md; a human Approve review is not required. -->
 
-- [ ] I reviewed the complete diff and addressed actionable findings.
-- [ ] Applicable CI checks pass for the commit to be merged.
-- [ ] Documentation and skills reflect the implemented behavior.
-
-State whether this is self-review or independent review. Do not include secrets
-or customer data in the description or evidence.
+## Deployment / Compatibility
+<!-- Optional: omit if not applicable. -->
+Migrations, configuration changes, breaking changes, or rollback notes.

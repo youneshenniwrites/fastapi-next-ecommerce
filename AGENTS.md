@@ -50,7 +50,7 @@ Project skills in .agents/skills cover feature isolation, backend changes,
 verification, Azure planning, maintenance, and PR ownership. Frontend-specific
 guidance lives under frontend/.agents/skills and frontend/AGENTS.md. User
 instructions take precedence over skill guidelines. Use only skills relevant to
-the task. No external reviewer service or public evidence host is required; attach
+the task. Codex external review is required before merge; no public evidence host is required. Attach
 redacted logs/screenshots only within the authorized workflow.
 
 See CONTRIBUTING.md for PR expectations, docs/tooling.md for check scope, and
@@ -70,3 +70,19 @@ Closes #N only for a completed ticket. Update board status and verify acceptance
 CI, PR disposition and relevant documentation before reporting completion.
 For customer sessions (#24), read docs/design/customer-sessions.md; it is a
 proposed design, not implemented behavior.
+
+## External review requirement
+
+The owner accepts a completed clean Codex review of the latest commit, with all
+findings addressed and threads resolved, as external approval. Explicit owner-approved deferrals
+are permitted only when recorded with a linked issue; do not call them clean reviews. Follow
+[the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,
+require all applicable CI, and independently verify ticket acceptance criteria.
+Self-review is disclosed and cannot replace external review. Request a new review
+after changes. No human reviewer is required. Never bypass protection or invent a
+clean result. Missing, stale or unrecognized evidence keeps the PR open.
+
+The canonical PR format is .github/pull_request_template.md. Use the
+ecommerce-pr-ownership skill to fill it, assign the owner, and request/verify
+Codex review. Keep the owner as assignee, not a requested reviewer. Read these repository files each time
+you resume PR work; conversation memory is not the source of truth.
