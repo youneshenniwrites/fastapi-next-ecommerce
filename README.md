@@ -45,10 +45,18 @@ installs the locked Python environment, builds the API image, starts PostgreSQL,
 applies migrations, and waits for the API health check. Credentials are local-only
 and excluded from Git and the Docker build context.
 
+**These links open services on your own computer, not a hosted GitHub demo.**
+Wait for `make dev` to succeed before opening them. If Docker or the API is stopped,
+the links will be unavailable.
+
 - API documentation: [localhost:8000/docs](http://localhost:8000/docs)
 - ReDoc: [localhost:8000/redoc](http://localhost:8000/redoc)
 - OpenAPI contract: [localhost:8000/openapi.json](http://localhost:8000/openapi.json)
 - Health: [localhost:8000/health](http://localhost:8000/health)
+
+For a first API request, authentication, and Postman import, follow the
+[API onboarding guide](docs/api.md). The [checked-in OpenAPI contract](frontend/openapi.json)
+can be downloaded even while the API is offline; executing requests requires the stack.
 
 For the storefront, run `make demo`, then `cd frontend && npm ci && npm run dev`
 with Node 24.20.0 and npm 11.19.1. Open [localhost:3000](http://localhost:3000).
