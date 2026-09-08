@@ -24,8 +24,9 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
    See [demo guide](../demo.md); the catalog storefront is also implemented.
 2. Next.js catalog implemented: App Router, TypeScript, generated API contract,
    product list/detail, filtering, state handling and desktop/mobile browser checks.
-3. Customer frontend auth: login/register/profile, server-mediated secure session
-   handling, logout and error states. Keep authorization in FastAPI.
+3. Server-mediated session handlers implemented: login/profile/logout, HttpOnly
+   cookies and origin checks. Account login/register/profile UI remains in #25–27.
+   Keep authorization in FastAPI.
 4. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
 5. Orders and checkout: price snapshots, authoritative totals, atomic inventory
    handling, idempotency, and concurrent last-item purchase tests.

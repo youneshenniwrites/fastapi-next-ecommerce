@@ -1,7 +1,7 @@
 # Working in this repository
 
 The product has a FastAPI backend and a runnable Next.js catalog storefront.
-Customer sessions and checkout are still planned. Read
+Server-mediated customer sessions are implemented; account UI and checkout are planned. Read
 docs/plans/portfolio.md, docs/architecture.md, and docs/plans/roadmap.md before choosing work; update their
 factual status when a feature lands.
 
@@ -68,8 +68,7 @@ and the linked board for current work, the repository for versioned rules, and t
 Wiki for explanations. Every implementation PR needs an issue reference; use
 Closes #N only for a completed ticket. Update board status and verify acceptance,
 CI, PR disposition and relevant documentation before reporting completion.
-For customer sessions (#24), read docs/design/customer-sessions.md; it is a
-proposed design, not implemented behavior.
+For customer sessions (#24), read docs/design/customer-sessions.md; it documents the implemented handlers and remaining account UI work.
 
 ## External review requirement
 

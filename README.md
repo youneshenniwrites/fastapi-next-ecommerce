@@ -62,7 +62,7 @@ For a first API request, authentication, and Postman import, follow the
 can be downloaded even while the API is offline; executing requests requires the stack.
 
 For the storefront, run `make demo`, then `cd frontend && npm ci && npm run dev`
-with Node 24.20.0 and npm 11.19.1. Open [localhost:3000](http://localhost:3000).
+with Node 24.20.0 and npm 11.19.1. Open [127.0.0.1:3000](http://127.0.0.1:3000).
 See [frontend setup](frontend/README.md). Re-run `make dev` after changing containerized code.
 
 ```sh
@@ -217,7 +217,7 @@ backup/restore, and rollback before provisioning. The old AWS Terraform in
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
 The next product steps are customer
-sessions, carts, orders, and sandbox payments. Follow the
+account screens, carts, orders, and sandbox payments. Follow the
 [ordered roadmap](docs/plans/roadmap.md) for the remaining work.
 
 ## Repository map

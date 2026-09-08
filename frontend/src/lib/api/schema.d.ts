@@ -229,6 +229,8 @@ export interface components {
         Token: {
             /** Access Token */
             access_token: string;
+            /** Expires In */
+            expires_in: number;
             /**
              * Token Type
              * @default bearer

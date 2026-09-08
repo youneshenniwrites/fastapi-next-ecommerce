@@ -20,5 +20,5 @@ Preserve loading, empty, error, not-found, out-of-stock and reduced-motion behav
 Verify keyboard access, mobile layout and automated accessibility checks. Product
 art is locally authored SVG illustration; unknown names use neutral fallback art.
 
-Customer sessions, cart, checkout and Azure deployment are still planned. Do not
+Server-mediated sessions are implemented; account UI, cart, checkout and Azure deployment remain planned. Do not
 present working purchase controls until the corresponding transaction exists.

@@ -1,9 +1,15 @@
-# Customer sessions — proposal for issue #24
+# Customer sessions — issue #24
 
-Status: proposed, not implemented. This note defines the intended security and
-verification boundaries before account UI work (#25–27). FastAPI bearer auth
-already exists; Next.js customer sessions do not. Revise this note with actual
-routes, cookie settings and evidence when the implementation lands.
+Session handlers are implemented; account screens remain in #25–27.
+
+- POST `/api/session/login`: JSON email/password, returns authenticated: true.
+- GET `/api/session/me`: active profile or 401; upstream failure returns 503.
+- POST `/api/session/logout`: clears the session cookie.
+
+Every response is private/no-store. Configure APP_ORIGIN to the exact browser
+origin. Local loopback HTTP requires ALLOW_LOCAL_HTTP_SESSIONS=true; deployment
+uses HTTPS and __Host-session. No arbitrary redirect destination is supported:
+next/redirect login fields are rejected, and account UI owns local navigation.
 
 ## Flow and ownership
 
@@ -30,10 +36,11 @@ reject external, protocol-relative and malformed redirect targets.
 
 ## Expiry, failures and logout
 
-Cookie lifetime must not outlive the access token. The current token response has
-no expires_in value, so implementation must select and document an explicit
-lifetime source. If an unverified exp claim is read solely to bound cookie expiry,
-it must never establish authentication or authorization; FastAPI validates tokens.
+FastAPI now returns expires_in (seconds) from the configured issued-token lifetime.
+Next.js subtracts upstream elapsed time and a rounding margin before setting cookie
+Max-Age. Token expiry remains authoritative in FastAPI even if client clock or
+response delivery delays leave a stale browser cookie. No JWT claims are trusted
+or decoded by Next.js.
 Do not add a refresh-token flow implicitly. Expiry requires sign-in again.
 
 Resolve the profile through FastAPI, handling invalid/expired tokens and disabled
