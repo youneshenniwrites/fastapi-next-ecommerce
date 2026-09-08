@@ -112,7 +112,7 @@ def evaluate(sha, comments, reactions, unresolved, reviews=()):
     if any(
         trusted(r)
         and r.get("submitted_at", "") >= signal_time
-        and r.get("state") in {"COMMENTED", "CHANGES_REQUESTED"}
+        and r.get("state") in {"COMMENTED", "CHANGES_REQUESTED", "DISMISSED"}
         for r in reviews
     ):
         return "pending", "Obtain a new clean review after the latest review findings"

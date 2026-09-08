@@ -180,6 +180,23 @@ class ReviewEvidence(unittest.TestCase):
             "pending",
         )
 
+    def test_dismissed_later_findings_still_require_clean_review(self):
+        review = {
+            "user": self.bot,
+            "submitted_at": "2026-09-08T10:01:00Z",
+            "state": "DISMISSED",
+        }
+        self.assertEqual(
+            evaluate(
+                self.sha,
+                [self.request, self.summary, self.clean_comment()],
+                {},
+                False,
+                [review],
+            )[0],
+            "pending",
+        )
+
     def test_later_findings_invalidate_clean_comment(self):
         review = {
             "user": self.bot,
