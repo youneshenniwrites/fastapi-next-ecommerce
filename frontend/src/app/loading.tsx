@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 export default function Loading() {
   return (
     <main id="main" className="loading">
@@ -6,7 +7,11 @@ export default function Loading() {
         <h1>Gathering the collection…</h1>
         <div className="skeleton-grid">
           {[1, 2, 3].map((i) => (
-            <div className="skeleton" key={i} />
+            <Skeleton
+              className="skeleton h-[250px] rounded-none bg-muted motion-reduce:animate-none"
+              aria-hidden="true"
+              key={i}
+            />
           ))}
         </div>
       </div>

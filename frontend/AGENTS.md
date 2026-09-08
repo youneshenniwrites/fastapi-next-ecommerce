@@ -20,6 +20,10 @@ Preserve loading, empty, error, not-found, out-of-stock and reduced-motion behav
 Verify keyboard access, mobile layout and automated accessibility checks. Product
 art is locally authored SVG illustration; unknown names use neutral fallback art.
 
-Server-mediated sessions are implemented; account UI, cart, checkout and free demo deployment remain planned.
+Server-mediated sessions are implemented; account UI, cart, checkout remain planned. Development and production demos are deployed.
 Read deploy/environments/README.md in the repository root for the approved hosting plan. Do not
 present working purchase controls until the corresponding transaction exists.
+
+Use Tailwind semantic tokens and shadcn primitives for new UI. Read
+[design-system.md](design-system.md) before adding components or changing global
+CSS. Preserve the incremental reset strategy and server/client boundaries.

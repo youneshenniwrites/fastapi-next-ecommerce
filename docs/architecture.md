@@ -5,6 +5,8 @@ currently represent users and products. PostgreSQL is the development runtime;
 SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
 The frontend/ directory provides the Next.js catalog and product-detail storefront.
+Tailwind v4 and shadcn/ui supply shared themed primitives; existing layouts migrate
+incrementally. See [frontend design system](../frontend/design-system.md).
 Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
 browser receives product data for local filtering. Cart, orders and payment
 adapters are not implemented.

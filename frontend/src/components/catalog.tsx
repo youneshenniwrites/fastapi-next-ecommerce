@@ -1,4 +1,6 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -68,7 +70,12 @@ export function Catalog({ products }: { products: Product[] }) {
                     height={500}
                   />
                   {product.stock === 0 && (
-                    <span className="sold-out">Out of stock</span>
+                    <Badge
+                      variant="outline"
+                      className="absolute top-4 left-4 rounded-none bg-background px-2.5 py-1 text-[9px] tracking-wide"
+                    >
+                      Out of stock
+                    </Badge>
                   )}
                   <span className="product-arrow" aria-hidden="true">
                     ↗
@@ -99,15 +106,14 @@ export function Catalog({ products }: { products: Product[] }) {
               : "The collection is empty. Please check back soon."}
           </p>
           {products.length > 0 && (
-            <button
-              className="button"
+            <Button
               onClick={() => {
                 setQuery("");
                 setInStock(false);
               }}
             >
               Clear filters
-            </button>
+            </Button>
           )}
         </div>
       )}

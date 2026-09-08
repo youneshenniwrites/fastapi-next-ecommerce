@@ -21,3 +21,7 @@ when deployment is in scope; frontend scaffolding itself does not require cloud 
 Use docs/delivery.md for ticket and board tracking. For customer sessions, consult
 docs/design/customer-sessions.md before implementation; update the proposed note
 when actual behavior lands and verify it against the linked acceptance criteria.
+
+For UI components and styling, read frontend/design-system.md. Use semantic
+Tailwind tokens and compose shadcn primitives; retain reduced-motion behavior and
+review generated registry code, dependencies and server/client boundaries.
