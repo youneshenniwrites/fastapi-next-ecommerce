@@ -29,7 +29,7 @@ Closes #<!-- actual issue number; use Refs #N for partial work -->
 - [ ] Review findings addressed
 - [ ] Required CI checks passed
 - [ ] Required external approval verified for the latest commit
-<!-- Request the owner as reviewer when they are not the PR author. Trigger Codex review through its integration; naming it here does not request a review. A comment or reaction is not automatically a formal approval. -->
+<!-- Keep the owner as assignee; request only Codex as reviewer. Trigger Codex review through its integration; naming it here does not request a review. A comment or reaction is not automatically a formal approval. -->
 
 ## Deployment / Compatibility
 <!-- Optional: omit if not applicable. -->

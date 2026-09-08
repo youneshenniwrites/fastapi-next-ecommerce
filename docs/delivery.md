@@ -56,8 +56,8 @@ optional Before / After, Acceptance criteria, Testing, Review, and optional
 Deployment / Compatibility. Fill acceptance criteria from the issue and testing
 with actual results; remove irrelevant optional sections. No Jira placeholder.
 
-Assign youneshenniwrites on every PR and request their review when they are not
-the author. GitHub prevents author self-review. Request Codex through the review
+Assign youneshenniwrites on every PR; do not request them as reviewer.
+Codex is the sole requested reviewer. Request Codex through the review
 integration and verify completion on the current commit. A named reviewer in the
 body is not evidence of a request or approval. The ownership skill contains the
 operational steps; AGENTS.md routes future sessions to it. External approval

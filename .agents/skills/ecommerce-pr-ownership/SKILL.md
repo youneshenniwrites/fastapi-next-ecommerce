@@ -41,9 +41,8 @@ closure/Done, and record any remaining work instead of implying completion.
 
 ## Reviewer requests
 
-Assign the owner on every PR. Request youneshenniwrites as a reviewer when the
-owner is not the author; GitHub does not permit authors to review their own PRs.
-Keep the Owner line in that case and do not claim a reviewer request succeeded.
+Assign the owner on every PR, but do not request their review. Codex is the sole
+requested reviewer; ownership and reviewer requests are separate.
 Request Codex Code Review using its configured integration (or @codex review
 comment). Listing Codex in the PR body is not a request. Inspect existing review
 activity before posting to avoid duplicate requests; request a new review when
