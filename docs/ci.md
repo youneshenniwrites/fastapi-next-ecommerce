@@ -23,10 +23,14 @@ FastAPI's generated OpenAPI snapshot is checked in CI so API drift fails the PR.
 
 A successful build is not a deployment. The frontend workflow produces a standalone
 build artifact only after browser tests pass. The workflow summary explicitly marks
-deployment as not configured; there is no fake deploy job or cloud operation.
+that CI itself does not deploy. Production delivery is a separate workflow.
 
-Vercel delivery (#45–46) adds verified commit → migration execution → API deployment
-→ frontend deployment → health/smoke verification, with rollback and logs.
+Production delivery (#46) waits for all four main verification workflows on the
+same commit, skips stale or already deployed revisions, and serializes releases.
+Its named steps run migrations → Vercel API deploy and database reads → storefront
+deploy → public smoke checks. The production environment and job summary link to
+the release. API/browser sessions are checked without exposing secrets. Frontend
+PR previews remain #45. Failed deployment does not automatically roll back schema.
 See [the environment plan](../deploy/environments/README.md).
 
 ## Reading a failure

@@ -8,8 +8,14 @@ methods, purchased domain or separately billed AI API are authorized.
 
 Track configuration #44, development/previews #45 and production CD #46. The two
 Neon projects are created in Frankfurt on PostgreSQL 17, matching local/CI. Both
-passed Alembic upgrade and metadata checks. The development storefront and API are verified over HTTPS; production is not
-yet deployed. Committing these files does not deploy the app.
+passed Alembic upgrade and metadata checks. Both development and production are verified over HTTPS. Production was first
+released from reviewed main 4606e67; the workflow below automates subsequent releases.
+
+## Verified production links
+
+- [Storefront](https://forme-ecommerce.vercel.app)
+- [Swagger API docs](https://forme-api-production.vercel.app/docs)
+- [OpenAPI contract](https://forme-api-production.vercel.app/openapi.json)
 
 ## Verified development links
 
@@ -41,8 +47,7 @@ development projects it still uses development data. PR previews belong to the
 development frontend project only. Tests use disposable local databases; fork PRs
 never receive deployment credentials. No real personal/customer data belongs here.
 
-The names above identify resources, not verified domain ownership. Record actual
-provider URLs after provisioning. Never reuse signing keys or database credentials
+The links above were verified against the configured provider aliases. Never reuse signing keys or database credentials
 between environments. The frontend receives no database password or API signing key.
 Store credentials in provider/GitHub secret stores, never tracked files or logs.
 
@@ -91,13 +96,18 @@ not imply a dedicated backend/database for every PR.
 
 Main: verify exact commit → serialize deployment → run backward-compatible migrations
 once → deploy API and verify readiness → deploy frontend → smoke-test catalog and
-session boundaries → publish GitHub deployment links. #46 implements this sequence;
-there is no automatic deployment workflow yet. Do not deploy a newer unverified SHA
+session boundaries → publish GitHub deployment links. `production.yml` implements
+this sequence after successful main CI. It requires Backend CI, Frontend CI,
+Dependency audit and Review gate tests for the same main push; missing, failed or
+running evidence prevents release. It skips already successful releases and
+serializes production runs. The GitHub environment exposes the release URL. Do not deploy a newer unverified SHA
 just because it became the current main while a previous run was executing.
 
 Keep the last known-good deployment. Roll back application revisions only when
 compatible with the current schema. Database recovery is an explicit operation,
-not an automatic downgrade after failed deployment. Free retention limits are not
+not an automatic downgrade after failed deployment. A failed smoke check leaves
+the run failed; a partial API/frontend release requires investigation and an
+explicit compatible application rollback. Free retention limits are not
 a backup guarantee; document a tested recovery procedure before relying on one.
 
 ## Runtime limits
@@ -117,3 +127,23 @@ in PostgreSQL, not process memory.
 References: [Vercel FastAPI](https://vercel.com/docs/frameworks/backend/fastapi),
 [Python runtime](https://vercel.com/docs/functions/runtimes/python),
 [Vercel Hobby](https://vercel.com/docs/plans/hobby), [Neon Free](https://neon.com/pricing).
+
+## CI credentials and operations
+
+GitHub's production environment contains `DATABASE_URL` and `VERCEL_TOKEN` secrets,
+and `VERCEL_ORG_ID`, `VERCEL_API_PROJECT_ID`, `VERCEL_FRONTEND_PROJECT_ID` variables.
+Runtime signing keys remain in Vercel. The same credential names are prepared in
+development for #45, but frontend PR previews are not implemented by this workflow.
+The team-scoped CI token expires **7 December 2026**; replace it in both GitHub
+environments before expiry. Never store it in the repository or command examples.
+
+Use Actions → Production delivery → Run workflow on main to retry after fixing
+provider configuration. It still requires all successful exact-commit CI. The
+workflow is triggered by CI completion, not by raw PR code; production secrets are
+restricted to main. Direct Vercel Git deployments remain disabled.
+
+For an application rollback, inspect the last known-good Vercel deployment and
+confirm schema compatibility, then promote that deployment through Vercel. Record
+both API and frontend revisions and rerun smoke checks. Do not downgrade the
+database automatically. A manually rolled-back version is temporary: the next
+eligible main release will advance production again.

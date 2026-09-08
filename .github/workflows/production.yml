@@ -1,0 +1,83 @@
+name: Production delivery
+on:
+  workflow_run:
+    workflows: [Backend CI, Frontend CI, Dependency audit, Review gate tests]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  deployments: read
+concurrency:
+  group: vercel-production-delivery
+  cancel-in-progress: false
+jobs:
+  verify:
+    name: Verify exact main revision and completed CI
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      sha: ${{ steps.gate.outputs.sha }}
+    steps:
+      - name: Check out trusted delivery code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Require successful main CI for the candidate revision
+        id: gate
+        run: python3 scripts/production_ready.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+  deploy:
+    name: Migrate, deploy API and storefront, verify public endpoints
+    needs: verify
+    if: needs.verify.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://forme-ecommerce.vercel.app
+    steps:
+      - name: Check out the verified revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+          persist-credentials: false
+      - name: Confirm revision is still main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ needs.verify.outputs.sha }}
+        run: test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$RELEASE_SHA"
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: frontend/.nvmrc
+      - name: Set up Python dependency tooling
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.8.22"
+      - name: Install locked migration dependencies and pinned deployment CLI
+        run: |
+          uv sync --project backend --locked --python 3.12
+          npm install --global vercel@59.11.7
+      - name: Apply forward database migrations
+        working-directory: backend
+        run: uv run alembic upgrade head
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: migration-only-placeholder-not-used-to-sign-tokens
+      - name: Deploy API, verify database reads, deploy storefront and smoke test
+        run: python3 scripts/deploy_production.py
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_API_PROJECT_ID: ${{ vars.VERCEL_API_PROJECT_ID }}
+          VERCEL_FRONTEND_PROJECT_ID: ${{ vars.VERCEL_FRONTEND_PROJECT_ID }}
+          RELEASE_SHA: ${{ needs.verify.outputs.sha }}
+          NO_UPDATE_NOTIFIER: "1"
+          VERCEL_TELEMETRY_DISABLED: "1"

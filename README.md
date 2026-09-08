@@ -28,7 +28,7 @@ The backend and catalog storefront run locally and in a
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive Next.js catalog/detail pages, filters, generated API types and browser checks |
 | Shopping | Cart, orders, payment processing, and order history are planned |
-| Hosting | Development demo verified on Vercel/Neon; production CD in progress |
+| Hosting | Development and production demos verified on Vercel/Neon; main releases through GitHub CI/CD |
 
 This repository is a development foundation, not a production-ready shop. Tests
 cover implemented behavior; placeholder files do not represent finished features.
@@ -213,7 +213,9 @@ commit being merged. Self-review must be labelled as such. See
 The approved £0 demo uses Vercel Hobby for Next.js and FastAPI, with
 separate Neon Free development/production databases. Provider subdomains supply
 free HTTPS addresses. Isolated databases are created; environment setup, previews and production CD are tracked
-in #44–46; the development demo is available and production delivery is in progress. Read the
+in #44–46. [Production storefront](https://forme-ecommerce.vercel.app) and
+[Swagger API docs](https://forme-api-production.vercel.app/docs) are live.
+Production delivery follows successful main CI; PR previews remain #45. Read the
 [environment plan](deploy/environments/README.md) for isolation, secrets, cold
 starts, quotas and the intended test → review → deploy sequence.
 
