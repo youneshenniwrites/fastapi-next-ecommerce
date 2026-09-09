@@ -132,7 +132,7 @@ class DeploymentFailureTests(unittest.TestCase):
         def read(url, **kwargs):
             if url.endswith("/api/v1/products/"):
                 return b'[{"name":"Demo product"}]'
-            return b"FORME Demo product"
+            return b"VINDOR Demo product"
 
         with tempfile.NamedTemporaryFile() as summary:
             env = {

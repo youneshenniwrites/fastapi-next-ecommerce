@@ -1,9 +1,9 @@
-# FORME UI foundation
+# VINDOR UI foundation
 
 Tailwind CSS v4 supplies utilities and semantic tokens. shadcn/ui supplies editable
 React components in `src/components/ui`; shop components compose them. Button,
 Badge, Skeleton, Sheet, Input, Checkbox and NativeSelect were generated with the pinned shadcn CLI using the official
-new-york registry, then adapted to FORME tokens and the local `cn` helper.
+new-york registry, then adapted to VINDOR tokens and the local `cn` helper.
 
 ## Adding a component
 
@@ -18,7 +18,7 @@ helper. Do not install the whole registry. Add components for real feature needs
 - Use semantic utilities (`bg-primary`, `text-muted-foreground`, `border-border`)
   instead of repeating palette values. Tokens live in `src/app/globals.css`.
 - Paper backgrounds, forest-green actions, sage surfaces and a warm focus outline
-  preserve the FORME identity. Use system sans-serif text and Georgia headings.
+  preserve the VINDOR identity. Use system sans-serif text and Georgia headings.
 - Use Button for actions, `buttonVariants()` on real links, Badge for stock labels,
   and Skeleton inside a labelled loading status. Never nest a button inside a link.
 - Keep layout/server components on the server. Add client boundaries only for
@@ -42,8 +42,7 @@ assertions, not styling. No dark palette or transactional controls are introduce
 
 Use named imports from `lucide-react` for UI icons; decorative icons are hidden
 from assistive technology and icon buttons have accessible names. Do not hand-draw
-SVG icons or illustrations. Existing product/hero artwork is unchanged; imagery
-replacement is a separate decision. Third-party notices retain Lucide/Feather and
+SVG icons or illustrations. Use locally stored photographs with source and licence records in PHOTO_CREDITS.md. Third-party notices retain Lucide/Feather and
 shadcn licence terms.
 
 ## Verification

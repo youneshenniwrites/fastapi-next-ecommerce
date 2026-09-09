@@ -18,7 +18,8 @@ Do not hand-edit generated schemas or maintain independent response interfaces.
 
 Preserve loading, empty, error, not-found, out-of-stock and reduced-motion behavior.
 Verify keyboard access, mobile layout and automated accessibility checks. Product
-art is locally authored SVG illustration; unknown names use neutral fallback art.
+photography is licensed and stored locally; unknown names use a Lucide placeholder.
+Read PHOTO_CREDITS.md before replacing assets. Never create custom SVG artwork.
 
 Server-mediated sessions are implemented; account UI, cart, checkout remain planned. Development and production demos are deployed.
 Read deploy/environments/README.md in the repository root for the approved hosting plan. Do not

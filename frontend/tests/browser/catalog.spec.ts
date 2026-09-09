@@ -63,7 +63,7 @@ test("out-of-stock, missing products and responsive keyboard navigation", async 
   ).toBeVisible();
 });
 
-test("shared action and stock badge use the FORME theme", async ({ page }) => {
+test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   await page.goto("/");
   const action = page.getByRole("link", { name: /Explore the collection/ });
   await expect(action).toHaveCSS("background-color", "rgb(48, 78, 60)");
@@ -83,7 +83,7 @@ test("mobile navigation supports keyboard, dismissal and real links", async ({
   const trigger = page.getByRole("button", { name: "Open navigation" });
   await trigger.focus();
   await page.keyboard.press("Enter");
-  const dialog = page.getByRole("dialog", { name: "Explore FORME" });
+  const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
   await expect(dialog).toBeVisible();
   await page.screenshot({
     path: "test-results/mobile-menu.png",
@@ -115,7 +115,7 @@ test("mobile navigation closes when resizing to desktop", async ({
   await page.goto("/");
   await page.emulateMedia({ reducedMotion: "reduce" });
   const trigger = page.getByRole("button", { name: "Open navigation" });
-  const dialog = page.getByRole("dialog", { name: "Explore FORME" });
+  const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
   await trigger.click();
   await expect(dialog).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -132,4 +132,24 @@ test("mobile navigation closes when resizing to desktop", async ({
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
+});
+
+test("VINDOR branding and local photographs load", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveTitle("VINDOR — Room to think");
+  await expect(page.getByRole("link", { name: "VINDOR home" })).toHaveCount(2);
+  await expect(page.getByRole("status")).toHaveText("6 objects");
+  const photos = page.locator("main img");
+  await expect(photos).toHaveCount(7);
+  for (const photo of await photos.all()) {
+    await photo.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        photo.evaluate((img) => (img as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+    await expect(photo).toHaveAttribute("src", /photos/);
+    await expect(photo).not.toHaveAttribute("src", /\.svg/);
+  }
+  await expect(page.getByRole("link", { name: "Photo credits" })).toBeVisible();
 });

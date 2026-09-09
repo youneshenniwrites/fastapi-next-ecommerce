@@ -43,3 +43,10 @@ frontend and checks public endpoints. First GitHub-run acceptance is tracked in
 [environment plan](../deploy/environments/README.md) for configuration and rollout.
 Azure is retained as optional future migration (#31), not the immediate target.
 The legacy AWS Terraform is not used for this deployment.
+
+## VINDOR identity
+
+VINDOR is the public product name (formerly FORME). Existing repository slug,
+Vercel project IDs, deployment domains and database/role identifiers remain stable
+to preserve CI, links and sessions. They are infrastructure identifiers, not
+storefront branding. No data migration or paid domain is needed for this rename.

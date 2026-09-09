@@ -53,14 +53,14 @@ export default async function Home() {
         </div>
         <div className="relative overflow-hidden bg-muted">
           <Image
-            className="w-full"
-            src="/art/workspace.svg"
-            alt="Illustration of a warm workspace with an oak monitor stand, task light and stationery"
+            className="aspect-[15/13] w-full object-cover"
+            src="/photos/workspace.webp"
+            alt="Workspace with a monitor, laptop, wooden accessories and plants"
             width={900}
             height={780}
             priority
           />
-          <div className="absolute inset-x-5 bottom-5 flex justify-between text-[8px] tracking-widest">
+          <div className="absolute inset-x-5 bottom-5 flex justify-between bg-background/95 p-3 text-[8px] tracking-widest">
             <span>THE EVERYDAY EDIT</span>
             <span>01 / 06</span>
           </div>
@@ -100,7 +100,7 @@ export default async function Home() {
           <em>More space for you.</em>
         </h2>
         <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
-          FORME explores a simple idea: a workspace should make room for your
+          VINDOR explores a simple idea: a workspace should make room for your
           attention. This fictional collection brings warm textures and useful
           forms into everyday focus.
         </p>
@@ -108,7 +108,7 @@ export default async function Home() {
           className="absolute right-[12%] top-0 hidden font-serif text-[250px] leading-none text-muted-foreground lg:block"
           aria-hidden="true"
         >
-          f.
+          v.
         </span>
       </section>
     </main>

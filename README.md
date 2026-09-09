@@ -1,4 +1,4 @@
-# FastAPI + Next.js ecommerce
+# VINDOR — FastAPI + Next.js ecommerce
 
 [Delivery board](https://github.com/users/youneshenniwrites/projects/1) · [Engineering Wiki](https://github.com/youneshenniwrites/fastapi-next-ecommerce/wiki) · [Delivery workflow](docs/delivery.md)
 
