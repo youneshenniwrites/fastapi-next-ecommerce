@@ -52,7 +52,7 @@ products use a neutral Lucide placeholder.
 
 The catalog currently loads at most 100 products and filters those loaded items;
 a notice appears at that limit. Server-side search/pagination is a future increment
-before a larger catalog. Session handlers are implemented; there are no account screens, carts, payments or purchase
+before a larger catalog. Registration and login screens are implemented; there are no carts, payments or purchase
 controls yet. Automated accessibility checks supplement manual keyboard/mobile
 review; they do not constitute a full accessibility certification.
 
@@ -77,7 +77,10 @@ APP_ORIGIN_ALIASES entry (JSON array, at most five). Host-only cookies are not
 shared between aliases. Invalid alias configuration fails closed. All responses are private/no-store,
 return no bearer token in JSON and use bounded upstream requests. See
 [session design](../docs/design/customer-sessions.md) for errors, expiry and
-stateless logout limitations. Account forms are the next feature tickets.
+stateless logout limitations. Visit `/register` to create a demo account and
+`/login` to sign in. Registration uses the same-origin `/api/session/register`
+handler; a successful login always returns to the collection. Profile/navigation
+and broader journey verification remain #26–27.
 
 ## UI components
 

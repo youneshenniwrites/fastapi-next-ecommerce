@@ -1,13 +1,17 @@
 # Customer sessions — issue #24
 
-Session handlers are implemented; account screens remain in #25–27.
+Session handlers and registration/login screens are implemented; profile/navigation
+and broader journey verification remain in #26–27.
 
+- POST `/api/session/register`: JSON email/password, returns registered: true (201);
+  duplicate registration returns a generic 400, validation 422 and upstream failure
+  503. Only credentials are forwarded to FastAPI; no admin fields or session token.
 - POST `/api/session/login`: JSON email/password, returns authenticated: true.
 - GET `/api/session/me`: active profile or 401; upstream failure returns 503.
 - POST `/api/session/logout`: clears the session cookie.
 
 Every response is private/no-store. Configure APP_ORIGIN to the exact browser
-origin. Local loopback HTTP requires ALLOW_LOCAL_HTTP_SESSIONS=true; deployment
+origin or explicitly configured HTTPS APP_ORIGIN_ALIASES. Local loopback HTTP requires ALLOW_LOCAL_HTTP_SESSIONS=true; deployment
 uses HTTPS and __Host-session. No arbitrary redirect destination is supported:
 next/redirect login fields are rejected, and account UI owns local navigation.
 
@@ -64,3 +68,13 @@ browser-visible state and that private responses are not cached. Exercise local
 HTTP and deployment cookie policy explicitly. Use disposable data and avoid
 credentials in traces/screenshots. UI tickets add accessible forms and full browser
 journey evidence; they do not replace session-handler tests in #24.
+
+## Account forms (#25)
+
+`/register` and `/login` compose shadcn Input and Button with visible labels,
+native validation, pending states, focusable error feedback and keyboard access.
+Registration asks users to sign in after success; it does not retry writes or
+silently authenticate. An uncertain response advises trying sign-in before
+registering again. Login always navigates to `/#collection`, ignoring query-string
+redirect destinations. Credentials are not persisted in browser storage or traces.
+Password reset, email verification and rate limiting remain separate work.

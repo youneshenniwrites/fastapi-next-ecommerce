@@ -1,7 +1,8 @@
 # Working in this repository
 
 The product has a FastAPI backend and a runnable Next.js catalog storefront.
-Server-mediated customer sessions are implemented; account UI and checkout are planned. Read
+Server-mediated customer sessions and registration/login screens are implemented;
+profile/navigation and checkout are planned. Read
 docs/plans/portfolio.md, docs/architecture.md, and docs/plans/roadmap.md before choosing work; update their
 factual status when a feature lands.
 

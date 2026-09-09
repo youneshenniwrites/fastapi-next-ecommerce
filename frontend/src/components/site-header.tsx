@@ -49,6 +49,9 @@ export function SiteHeader() {
           >
             Our approach
           </Link>
+          <Link className="hover:underline underline-offset-8" href="/login">
+            Sign in
+          </Link>
         </nav>
         <span className="hidden text-[9px] tracking-widest text-muted-foreground lg:inline">
           OBJECTS FOR EVERYDAY FOCUS
