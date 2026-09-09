@@ -150,7 +150,28 @@ eligible main release will advance production again.
 
 ## VINDOR identity
 
-VINDOR is the public product name (formerly FORME). Existing repository slug,
-Vercel project IDs, deployment domains and database/role identifiers remain stable
-to preserve CI, links and sessions. They are infrastructure identifiers, not
-storefront branding. No data migration or paid domain is needed for this rename.
+VINDOR is the public product name (formerly FORME). Vercel and Neon project display names use VINDOR.
+Repository slug, project IDs, database names/roles and credentials remain stable.
+The original FORME domains remain available during the migration. No database
+migration or paid domain is needed. See the environment rollout below for URLs.
+
+## VINDOR domain rollout
+
+The free API aliases are `https://vindor-api-production.vercel.app` and
+`https://vindor-api-development.vercel.app`; `/docs` opens Swagger UI.
+The storefront aliases to activate after this change deploys are
+`https://vindor-ecommerce.vercel.app` and
+`https://vindor-ecommerce-development.vercel.app`.
+
+Keep each environment's existing `APP_ORIGIN` and set `APP_ORIGIN_ALIASES` to a
+JSON array containing only its new storefront origin. No wildcard or automatic
+trust of request hosts is allowed. Aliases must be exact HTTPS origins, with at
+most five entries; malformed configuration fails closed. Local HTTP sessions do
+not support aliases. Both old and new origins then pass the same session checks.
+Host-only cookies remain isolated: users sign in separately on each hostname.
+Do not mix development and production origins.
+
+Deploy the reviewed change before assigning storefront aliases to the current
+production target in each Vercel project. Verify both domains, `/api/session/me`,
+valid-origin logout, rejected untrusted-origin logout and image loading. Existing
+API_BASE_URL and delivery smoke URLs remain valid through retained FORME aliases.

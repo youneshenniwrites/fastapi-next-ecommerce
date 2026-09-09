@@ -72,7 +72,9 @@ set APP_ORIGIN to their public origin and omit ALLOW_LOCAL_HTTP_SESSIONS.
 
 POST /api/session/login accepts JSON email/password; GET /api/session/me returns
 the active profile; POST /api/session/logout clears the HttpOnly cookie. Browser
-mutations require the configured Origin. All responses are private/no-store,
+mutations require the configured APP_ORIGIN or an explicitly configured HTTPS
+APP_ORIGIN_ALIASES entry (JSON array, at most five). Host-only cookies are not
+shared between aliases. Invalid alias configuration fails closed. All responses are private/no-store,
 return no bearer token in JSON and use bounded upstream requests. See
 [session design](../docs/design/customer-sessions.md) for errors, expiry and
 stateless logout limitations. Account forms are the next feature tickets.

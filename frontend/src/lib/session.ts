@@ -20,8 +20,19 @@ function policy() {
     throw new Error(
       "Sessions require HTTPS or explicit loopback development mode",
     );
+  const aliases: unknown = JSON.parse(process.env.APP_ORIGIN_ALIASES || "[]");
+  if (!Array.isArray(aliases) || aliases.length > 5)
+    throw new Error(
+      "APP_ORIGIN_ALIASES must be an array of at most five origins",
+    );
+  for (const alias of aliases) {
+    if (typeof alias !== "string") throw new Error("Invalid origin alias");
+    const parsed = new URL(alias);
+    if (!secure || parsed.protocol !== "https:" || parsed.origin !== alias)
+      throw new Error("Origin aliases must be exact HTTPS origins");
+  }
   return {
-    origin: raw,
+    origins: [raw, ...aliases],
     secure,
     name: secure ? "__Host-session" : "local-session",
   };
@@ -51,7 +62,7 @@ function clear(response: NextResponse, config: ReturnType<typeof policy>) {
 export async function login(request: NextRequest) {
   try {
     const config = policy();
-    if (request.headers.get("origin") !== config.origin)
+    if (!config.origins.includes(request.headers.get("origin") ?? ""))
       return reply({ error: "Origin rejected" }, 403);
     if (!request.headers.get("content-type")?.startsWith("application/json"))
       return reply({ error: "Expected JSON" }, 415);
@@ -131,7 +142,7 @@ export async function profile(request: NextRequest) {
 export async function logout(request: NextRequest) {
   try {
     const config = policy();
-    if (request.headers.get("origin") !== config.origin)
+    if (!config.origins.includes(request.headers.get("origin") ?? ""))
       return reply({ error: "Origin rejected" }, 403);
     return clear(reply({ authenticated: false }), config);
   } catch {

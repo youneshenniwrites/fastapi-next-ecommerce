@@ -29,6 +29,7 @@ function upstream(body: unknown, status = 200) {
 }
 beforeEach(() => {
   vi.stubEnv("APP_ORIGIN", "https://shop.test");
+  vi.stubEnv("APP_ORIGIN_ALIASES", "");
   upstream({ access_token: token, token_type: "bearer", expires_in: 1800 });
 });
 afterEach(() => {
@@ -226,4 +227,48 @@ it("preserves profile cookies on upstream server errors", async () => {
   );
   expect(res.status).toBe(503);
   expect(res.headers.get("set-cookie")).toBeNull();
+});
+
+it("accepts only explicitly configured HTTPS migration aliases", async () => {
+  vi.stubEnv("APP_ORIGIN_ALIASES", '["https://new-shop.test"]');
+  expect(
+    (await login(request(undefined, "https://new-shop.test"))).status,
+  ).toBe(200);
+  expect(
+    (await logout(request(undefined, "https://new-shop.test"))).status,
+  ).toBe(200);
+  upstream({ access_token: token, token_type: "bearer", expires_in: 1800 });
+  expect((await login(request())).status).toBe(200);
+  vi.mocked(fetch).mockClear();
+  for (const origin of [
+    "https://new-shop.test.evil.test",
+    "https://other.test",
+    null,
+  ]) {
+    expect((await login(request(undefined, origin))).status).toBe(403);
+    expect((await logout(request(undefined, origin))).status).toBe(403);
+  }
+  expect(fetch).not.toHaveBeenCalled();
+});
+it.each([
+  "invalid",
+  "null",
+  '"https://new-shop.test"',
+  "[42]",
+  '["https://user:pass@shop.test"]',
+  '["https://shop.test/path"]',
+  '["http://shop.test"]',
+  '["invalid"]',
+  JSON.stringify(Array(6).fill("https://shop.test")),
+])("fails closed for invalid aliases: %s", async (aliases) => {
+  vi.stubEnv("APP_ORIGIN_ALIASES", aliases);
+  expect((await login(request())).status).toBe(503);
+  expect((await logout(request())).status).toBe(503);
+  expect(fetch).not.toHaveBeenCalled();
+});
+it("rejects aliases in local HTTP mode", async () => {
+  vi.stubEnv("APP_ORIGIN", "http://127.0.0.1:3000");
+  vi.stubEnv("ALLOW_LOCAL_HTTP_SESSIONS", "true");
+  vi.stubEnv("APP_ORIGIN_ALIASES", '["https://new-shop.test"]');
+  expect((await login(request())).status).toBe(503);
 });
