@@ -22,6 +22,12 @@ Authentication uses PyJWT and Argon2, with bcrypt verification and upgrade on lo
 Active admins may mutate products. Customers may read the catalog and their own
 profile. No public route creates an admin.
 
+The Next.js registration and login screens call same-origin session handlers.
+Login stores the API token in an HttpOnly cookie; server-mediated profile calls
+forward it to FastAPI. Session responses are private and not cached. Registration
+does not automatically sign in. Profile/account navigation remains planned (#26);
+see the [session design](design/customer-sessions.md).
+
 CI performs locked dependency installation, lint, formatting, tests, and a real
 container/PostgreSQL smoke flow. The AWS infrastructure under backend/infra is
 legacy reference; its nested workflow is not an active deployment pipeline.
@@ -35,11 +41,11 @@ The Next.js app consumes an OpenAPI-generated contract; CI rejects contract drif
 Vercel Hobby serves Next.js and FastAPI, and separate Neon Free
 projects hold development and production data. The owner approved this £0 plan
 on 8 September 2026. Both environments are deployed and verified: production
-[storefront](https://forme-ecommerce.vercel.app) and
-[Swagger](https://forme-api-production.vercel.app/docs). The production workflow
+[storefront](https://vindor-ecommerce.vercel.app) and
+[Swagger](https://vindor-api-production.vercel.app/docs). The production workflow
 requires successful exact-main CI, applies migrations, deploys the API before the
-frontend and checks public endpoints. First GitHub-run acceptance is tracked in
-#46; frontend PR previews remain #45. See the
+frontend and checks public endpoints. GitHub-triggered production delivery is
+verified (#46); frontend PR previews remain #45. See the
 [environment plan](../deploy/environments/README.md) for configuration and rollout.
 Azure is retained as optional future migration (#31), not the immediate target.
 The legacy AWS Terraform is not used for this deployment.
