@@ -26,7 +26,7 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 - Server-mediated login/profile/logout with HttpOnly cookies and exact origin checks (#24 / #41).
 - Isolated Vercel/Neon development and production configuration (#44 / #47).
 - Both environments publicly deployed and smoke tested from reviewed main 4606e67; idle PostgreSQL connection recovery is merged (#48).
-- Production delivery workflow in #49: exact-main CI checks, migration, API then frontend deployment and smoke verification. Keep #46 open until the first GitHub-triggered release is verified.
+- Production delivery workflow in #49: exact-main CI checks, migration, API then frontend deployment and smoke verification. GitHub-triggered release acceptance is verified (#46).
 
 ## Frontend design-system work
 
@@ -65,8 +65,8 @@ Customer accounts are split into #24 secure sessions, #25 registration/login,
 #26 profile/navigation and #27 journey verification/documentation. Future work is
 #28 carts, #29 checkout/orders, #30 sandbox payments and #31 future Azure migration. Refine those
 broader items into focused PR tickets before implementation. See
-[session proposal](../design/customer-sessions.md) and [delivery rules](../delivery.md).
+[session design](../design/customer-sessions.md) and [delivery rules](../delivery.md).
 
-Hosting setup #44 is complete. Development and production are live; #46 tracks
-production workflow acceptance and #45 tracks the remaining frontend previews.
-Then return to account UI. Azure is deferred; no extra API billing is allowed.
+Hosting setup #44 and production workflow acceptance #46 are complete.
+Development and production are live; #45 tracks the remaining frontend previews.
+Profile/account navigation (#26) is the next product task. Azure is deferred; no extra API billing is allowed.
