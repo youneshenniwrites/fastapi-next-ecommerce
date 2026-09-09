@@ -8,6 +8,16 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
   projects: [
+    ...["Desktop Chrome", "Pixel 7"].map((device) => ({
+      name: `account-${device}`,
+      testMatch: "account.spec.ts",
+      use: {
+        ...devices[device],
+        baseURL: "http://127.0.0.1:3300",
+        trace: "off" as const,
+        screenshot: "off" as const,
+      },
+    })),
     {
       name: "sessions",
       testMatch: "session.spec.ts",

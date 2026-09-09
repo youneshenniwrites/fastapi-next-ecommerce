@@ -62,6 +62,14 @@ export function MobileNavigation() {
                 Our approach
               </Link>
             </SheetClose>
+            <SheetClose asChild>
+              <Link
+                className="border-b border-border py-5 text-base"
+                href="/login"
+              >
+                Sign in
+              </Link>
+            </SheetClose>
           </nav>
           <p className="mt-auto p-6 text-xs text-muted-foreground">
             Fictional shop · Browse in GBP

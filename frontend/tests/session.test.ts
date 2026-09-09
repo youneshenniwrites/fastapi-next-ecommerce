@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 import { NextRequest } from "next/server";
-import { login, logout, profile } from "../src/lib/session";
+import { login, logout, profile, register } from "../src/lib/session";
 const token = "private-bearer-token";
 function request(
   body: unknown = { email: "demo@example.test", password: "password" },
@@ -271,4 +271,76 @@ it("rejects aliases in local HTTP mode", async () => {
   vi.stubEnv("ALLOW_LOCAL_HTTP_SESSIONS", "true");
   vi.stubEnv("APP_ORIGIN_ALIASES", '["https://new-shop.test"]');
   expect((await login(request())).status).toBe(503);
+});
+
+describe("registration boundary", () => {
+  it("forwards only credentials and returns no profile or token", async () => {
+    upstream({ id: 1, email: "demo@example.test", is_superuser: false }, 201);
+    const res = await register(
+      request({
+        email: "demo@example.test",
+        password: "test-password",
+        is_superuser: true,
+      }),
+    );
+    expect(res.status).toBe(201);
+    expect(await res.json()).toEqual({ registered: true });
+    expect(res.headers.get("cache-control")).toBe("private, no-store");
+    expect(res.headers.get("set-cookie")).toBeNull();
+    const sent = vi.mocked(fetch).mock.calls[0][0] as Request;
+    expect(await sent.json()).toEqual({
+      email: "demo@example.test",
+      password: "test-password",
+    });
+    expect(sent.redirect).toBe("error");
+  });
+  it("rejects missing or mismatched origins", async () => {
+    for (const origin of [null, "https://evil.test"])
+      expect((await register(request(undefined, origin))).status).toBe(403);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("rejects malformed JSON and unsupported content types", async () => {
+    for (const [type, expected] of [
+      ["text/plain", 415],
+      ["application/json", 400],
+    ] as const) {
+      const req = new NextRequest("https://shop.test/api/session/register", {
+        method: "POST",
+        headers: { Origin: "https://shop.test", "Content-Type": type },
+        body: "{",
+      });
+      expect((await register(req)).status).toBe(expected);
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it.each([
+    null,
+    {},
+    { email: 1, password: "valid-password" },
+    { email: "", password: "valid-password" },
+    { email: "a".repeat(255), password: "valid-password" },
+    { email: "a", password: 1 },
+    { email: "a", password: "short" },
+    { email: "a", password: "x".repeat(129) },
+  ])("validates credentials before upstream access: %j", async (body) => {
+    expect((await register(request(body))).status).toBe(422);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it.each([400, 422, 500, 200])(
+    "maps upstream status %s without exposing details",
+    async (status) => {
+      upstream({ detail: "private internal data" }, status);
+      const res = await register(request());
+      expect(res.status).toBe([400, 422].includes(status) ? status : 503);
+      expect(JSON.stringify(await res.json())).not.toContain(
+        "private internal data",
+      );
+    },
+  );
+  it("handles missing success data and network failures", async () => {
+    upstream(null, 201);
+    expect((await register(request())).status).toBe(503);
+    vi.mocked(fetch).mockRejectedValue(new Error("private failure"));
+    expect((await register(request())).status).toBe(503);
+  });
 });

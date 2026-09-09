@@ -149,3 +149,66 @@ export async function logout(request: NextRequest) {
     return reply({ error: "Authentication service unavailable" }, 503);
   }
 }
+
+export async function register(request: NextRequest) {
+  try {
+    const config = policy();
+    if (!config.origins.includes(request.headers.get("origin") ?? ""))
+      return reply({ error: "Origin rejected" }, 403);
+    if (!request.headers.get("content-type")?.startsWith("application/json"))
+      return reply({ error: "Expected JSON" }, 415);
+    let input;
+    try {
+      input = await request.json();
+    } catch {
+      return reply({ error: "Invalid JSON" }, 400);
+    }
+    if (
+      !input ||
+      typeof input.email !== "string" ||
+      !input.email ||
+      input.email.length > 254 ||
+      typeof input.password !== "string" ||
+      input.password.length < 8 ||
+      input.password.length > 128
+    )
+      return reply(
+        { error: "Enter a valid email and a password of 8–128 characters." },
+        422,
+      );
+    const result = await apiClient().POST("/api/v1/auth/register", {
+      redirect: "error",
+      body: { email: input.email, password: input.password },
+    });
+    if (result.response.status === 400)
+      return reply(
+        {
+          error:
+            "Unable to create this account. Try signing in or use another email.",
+        },
+        400,
+      );
+    if (result.response.status === 422)
+      return reply(
+        { error: "Enter a valid email and a password of 8–128 characters." },
+        422,
+      );
+    if (result.response.status !== 201 || !result.data)
+      return reply(
+        {
+          error:
+            "Unable to confirm registration. Try signing in before registering again.",
+        },
+        503,
+      );
+    return reply({ registered: true }, 201);
+  } catch {
+    return reply(
+      {
+        error:
+          "Unable to confirm registration. Try signing in before registering again.",
+      },
+      503,
+    );
+  }
+}
