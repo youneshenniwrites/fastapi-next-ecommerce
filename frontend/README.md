@@ -79,8 +79,8 @@ return no bearer token in JSON and use bounded upstream requests. See
 [session design](../docs/design/customer-sessions.md) for errors, expiry and
 stateless logout limitations. Visit `/register` to create a demo account and
 `/login` to sign in. Registration uses the same-origin `/api/session/register`
-handler; a successful login always returns to the collection. Profile/navigation
-and broader journey verification remain #26–27.
+handler; a successful login always returns to the collection. Profile/navigation is implemented in `/account`; broader journey verification
+remains #27.
 
 ## UI components
 

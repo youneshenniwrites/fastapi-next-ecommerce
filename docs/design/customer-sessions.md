@@ -1,7 +1,7 @@
 # Customer sessions — issue #24
 
-Session handlers and registration/login screens are implemented; profile/navigation
-and broader journey verification remain in #26–27.
+Session handlers, registration/login screens and profile/navigation are implemented.
+Broader journey verification remains in #27.
 
 - POST `/api/session/register`: JSON email/password, returns registered: true (201);
   duplicate registration returns a generic 400, validation 422 and upstream failure
@@ -78,3 +78,21 @@ silently authenticate. An uncertain response advises trying sign-in before
 registering again. Login always navigates to `/#collection`, ignoring query-string
 redirect destinations. Credentials are not persisted in browser storage or traces.
 Password reset, email verification and rate limiting remain separate work.
+
+
+## Profile and navigation (#26)
+
+`/account` renders a public loading shell and retrieves only the current customer
+through GET `/api/session/me`. No profile data or bearer token is included in
+shared page HTML. The private endpoint remains no-store; UI state is held only
+in memory. The account page displays email and membership date, never admin flags.
+A missing/expired session shows a sign-in prompt; an outage hides details and
+shows a retry action without claiming the customer is signed out.
+
+Desktop and mobile navigation use the same session state. It is revalidated on
+route changes, page restoration, focus/visibility changes, and every minute while
+visible. Hidden/leaving pages clear their profile snapshot; aborted or superseded
+requests cannot restore it. The sign-out button posts to the origin-checked
+logout handler and then performs a full navigation to `/login` to discard the
+router cache. Failed sign-out shows an error and allows retry; it never claims
+success. Clearing a browser cookie still does not revoke copied JWTs.

@@ -71,7 +71,9 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   await action.focus();
   await expect(action).toBeFocused();
   await expect(action).toHaveCSS("outline-style", "solid");
-  await expect(page.locator('[data-slot="badge"]')).toHaveText("Out of stock");
+  await expect(
+    page.getByRole("main").locator('[data-slot="badge"]'),
+  ).toHaveText("Out of stock");
 });
 
 test("mobile navigation supports keyboard, dismissal and real links", async ({
@@ -139,7 +141,7 @@ test("VINDOR branding and local photographs load", async ({ page }) => {
   await expect(page).toHaveTitle("VINDOR — Room to think");
   await expect(page.getByRole("link", { name: "VINDOR home" })).toHaveCount(2);
   await expect(page.getByRole("status")).toHaveText("6 objects");
-  const photos = page.locator("main img");
+  const photos = page.getByRole("main").locator("img");
   await expect(photos).toHaveCount(7);
   for (const photo of await photos.all()) {
     await photo.scrollIntoViewIfNeeded();

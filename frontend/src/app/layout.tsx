@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
+import { SessionProvider } from "@/components/session-provider";
 export const metadata: Metadata = {
   title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
   description:
@@ -21,9 +22,11 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <SessionProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </SessionProvider>
       </body>
     </html>
   );
