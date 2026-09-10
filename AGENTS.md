@@ -70,7 +70,7 @@ and the linked board for current work, the repository for versioned rules, and t
 Wiki for explanations. Every implementation PR needs an issue reference; use
 Closes #N only for a completed ticket. Update board status and verify acceptance,
 CI, PR disposition and relevant documentation before reporting completion.
-For customer sessions (#24), read docs/design/customer-sessions.md; it documents the implemented handlers and remaining account UI work.
+For customer sessions (#24), read docs/design/customer-sessions.md; it documents implemented account flows and session boundaries.
 
 ## External review requirement
 

@@ -22,22 +22,24 @@ uncached and have a five-second timeout. Failed requests show a retryable state.
 
 ## Verification
 
-| Command              | Check                                                             |
-| -------------------- | ----------------------------------------------------------------- |
-| npm run lint         | ESLint, TypeScript lint rules, React hooks and Next.js rules      |
-| npm run format:check | Prettier formatting                                               |
-| npm run typecheck    | TypeScript and generated route types                              |
-| npm test             | Catalog/money unit tests with enforced coverage                   |
-| npm run build        | Production Next.js standalone build                               |
-| npm run test:e2e     | Desktop/mobile real-API browsing, axe accessibility, fault states |
-| npm audit            | Locked dependency vulnerability audit                             |
-| npm run api:check    | Generated schema/type drift against Git                           |
+| Command              | Check                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
+| npm run lint         | ESLint, TypeScript lint rules, React hooks and Next.js rules          |
+| npm run format:check | Prettier formatting                                                   |
+| npm run typecheck    | TypeScript and generated route types                                  |
+| npm test             | Catalog/money and session unit tests with enforced coverage           |
+| npm run build        | Production Next.js standalone build                                   |
+| npm run test:e2e     | Desktop/mobile catalog and full account journey, axe and fault states |
+| npm audit            | Locked dependency vulnerability audit                                 |
+| npm run api:check    | Generated schema/type drift against Git                               |
 
 Before browser tests, run make setup at the root, npm run build here, and
 npx playwright install chromium (add --with-deps on Linux). Tests use ports
 18300/18301 and 3300/3301, migrate a temporary SQLite database, and seed it. The
-backend CI suite separately verifies PostgreSQL. Browser traces on failure and
-HTML reports are retained in GitHub artifacts for 14 days.
+backend CI suite separately verifies PostgreSQL. Browser HTML reports are retained in GitHub artifacts for 14 days. Account/session
+projects disable automatic screenshots and traces to avoid recording credentials;
+explicit screenshots contain only empty forms or mocked fictional profiles. Other
+browser projects retain traces on failure.
 
 Regenerate the API contract from backend/ with uv run python -m scripts.export_openapi,
 then npm run api:generate here. No running database is needed. Commit openapi.json
@@ -62,7 +64,7 @@ npm run build assembles .next/standalone with static assets. Run npm start with
 PORT and HOSTNAME environment variables to serve that package. CI archives the
 contents; after extraction use node server.js with API_BASE_URL configured.
 
-The [development demo](https://forme-ecommerce-development.vercel.app) runs on Vercel; production CD runs through GitHub Actions. See ../docs/ci.md for the delivery pipeline.
+The [development demo](https://vindor-ecommerce-development.vercel.app) runs on Vercel; production CD runs through GitHub Actions. See ../docs/ci.md for the delivery pipeline.
 
 ## Customer session API
 
@@ -79,8 +81,10 @@ return no bearer token in JSON and use bounded upstream requests. See
 [session design](../docs/design/customer-sessions.md) for errors, expiry and
 stateless logout limitations. Visit `/register` to create a demo account and
 `/login` to sign in. Registration uses the same-origin `/api/session/register`
-handler; a successful login always returns to the collection. Profile/navigation is implemented in `/account`; broader journey verification
-remains #27.
+handler; a successful login always returns to the collection. Profile/navigation
+and sign-out are implemented in `/account`. Desktop/mobile tests cover the complete
+registration → login → profile → logout journey. See the [account verification
+guide](../docs/account-journey.md) for a manual walkthrough, test evidence and limits.
 
 ## UI components
 

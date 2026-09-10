@@ -1,7 +1,8 @@
 # Customer sessions — issue #24
 
 Session handlers, registration/login screens and profile/navigation are implemented.
-Broader journey verification remains in #27.
+The [account journey guide](../account-journey.md) links desktop/mobile verification,
+onboarding steps and implementation evidence (#27).
 
 - POST `/api/session/register`: JSON email/password, returns registered: true (201);
   duplicate registration returns a generic 400, validation 422 and upstream failure

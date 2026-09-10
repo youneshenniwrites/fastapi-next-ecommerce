@@ -28,7 +28,8 @@ forward it to FastAPI. Session responses are private and not cached. Registratio
 does not automatically sign in. The account page fetches the current profile
 through the private handler; its shared page HTML contains only a public shell.
 Navigation reflects the verified session, and sign-out clears the cookie;
-see the [session design](design/customer-sessions.md).
+see the [session design](design/customer-sessions.md) and
+[complete account journey evidence](account-journey.md).
 
 CI performs locked dependency installation, lint, formatting, tests, and a real
 container/PostgreSQL smoke flow. The AWS infrastructure under backend/infra is

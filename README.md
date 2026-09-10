@@ -223,8 +223,8 @@ Azure is an optional future migration (#31). The AWS Terraform in backend/infra
 remains legacy reference. No paid upgrade or new AI API billing is authorized.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
-The next product steps are account journey verification (#27), carts, orders,
-and sandbox payments. Follow the
+The next product steps are carts, orders and sandbox payments. The customer
+account journey is implemented and covered by desktop/mobile browser tests. Follow the
 [ordered roadmap](docs/plans/roadmap.md) for the remaining work.
 
 ## Try customer accounts
@@ -235,8 +235,10 @@ details and a password you do not use elsewhere. Registration does not sign you
 in automatically. Successful login returns to the catalog; choose My account in
 the navigation to view your profile and sign out. The [account page](https://vindor-ecommerce.vercel.app/account)
 requires a valid session. Session tokens stay in HttpOnly cookies.
-See the [session design](docs/design/customer-sessions.md) for implemented
-handlers, security boundaries and remaining work.
+Follow the [account walkthrough and verification guide](docs/account-journey.md)
+for the complete journey, failure cases, automated evidence and known limits.
+The [session design](docs/design/customer-sessions.md) explains handlers and
+security boundaries.
 
 
 ## Repository map
