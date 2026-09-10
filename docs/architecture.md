@@ -25,7 +25,9 @@ profile. No public route creates an admin.
 The Next.js registration and login screens call same-origin session handlers.
 Login stores the API token in an HttpOnly cookie; server-mediated profile calls
 forward it to FastAPI. Session responses are private and not cached. Registration
-does not automatically sign in. Profile/account navigation remains planned (#26);
+does not automatically sign in. The account page fetches the current profile
+through the private handler; its shared page HTML contains only a public shell.
+Navigation reflects the verified session, and sign-out clears the cookie;
 see the [session design](design/customer-sessions.md).
 
 CI performs locked dependency installation, lint, formatting, tests, and a real

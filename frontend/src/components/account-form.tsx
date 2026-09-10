@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function AccountForm({ mode }: { mode: "login" | "register" }) {
   const registering = mode === "register";
-  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [registered, setRegistered] = useState(false);
@@ -47,8 +45,8 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
         form.reset();
         if (registering) setRegistered(true);
         else {
-          router.replace("/#collection");
-          router.refresh();
+          // Discard cached account/navigation state after authentication.
+          window.location.replace("/#collection");
         }
       } else if (!registering && response.status === 401) {
         setError("Email or password is incorrect. Please try again.");

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { AccountLink } from "@/components/account-link";
 import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,14 +63,10 @@ export function MobileNavigation() {
                 Our approach
               </Link>
             </SheetClose>
-            <SheetClose asChild>
-              <Link
-                className="border-b border-border py-5 text-base"
-                href="/login"
-              >
-                Sign in
-              </Link>
-            </SheetClose>
+            <AccountLink
+              className="border-b border-border py-5 text-base"
+              onClick={() => setOpen(false)}
+            />
           </nav>
           <p className="mt-auto p-6 text-xs text-muted-foreground">
             Fictional shop · Browse in GBP

@@ -19,7 +19,7 @@ The backend and catalog storefront run locally and in a
 
 | Area | Status |
 | --- | --- |
-| Accounts | Registration/login screens, HttpOnly browser sessions, current-user API, disabled-user rejection |
+| Accounts | Registration/login screens, HttpOnly browser sessions, private profile page, sign-out, disabled-user rejection |
 | Product catalog | Public reads; creation, partial updates, deletion restricted to active admins |
 | Money and validation | Fixed-precision GBP prices, database constraints, bounded pagination |
 | Persistence | PostgreSQL, Alembic migrations, legacy-data validation |
@@ -223,8 +223,8 @@ Azure is an optional future migration (#31). The AWS Terraform in backend/infra
 remains legacy reference. No paid upgrade or new AI API billing is authorized.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
-The next product steps are profile/account navigation (#26), account journey
-verification (#27), carts, orders, and sandbox payments. Follow the
+The next product steps are account journey verification (#27), carts, orders,
+and sandbox payments. Follow the
 [ordered roadmap](docs/plans/roadmap.md) for the remaining work.
 
 ## Try customer accounts
@@ -232,8 +232,9 @@ verification (#27), carts, orders, and sandbox payments. Follow the
 Use the hosted [registration page](https://vindor-ecommerce.vercel.app/register)
 and [sign-in page](https://vindor-ecommerce.vercel.app/login) with fictional demo
 details and a password you do not use elsewhere. Registration does not sign you
-in automatically. Successful login returns to the catalog; a profile page and
-signed-in navigation are planned in #26. Session tokens stay in HttpOnly cookies.
+in automatically. Successful login returns to the catalog; choose My account in
+the navigation to view your profile and sign out. The [account page](https://vindor-ecommerce.vercel.app/account)
+requires a valid session. Session tokens stay in HttpOnly cookies.
 See the [session design](docs/design/customer-sessions.md) for implemented
 handlers, security boundaries and remaining work.
 

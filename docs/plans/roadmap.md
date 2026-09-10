@@ -22,6 +22,7 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 
 - Explicit admin bootstrap and empty-catalog demo seeding; see [demo guide](../demo.md).
 - Next.js catalog/detail storefront, generated API contract, state handling and desktop/mobile browser checks.
+- Private profile page, session-aware desktop/mobile navigation and sign-out (#26).
 - Registration/login screens with same-origin registration and fixed safe navigation (#25).
 - Server-mediated login/profile/logout with HttpOnly cookies and exact origin checks (#24 / #41).
 - Isolated Vercel/Neon development and production configuration (#44 / #47).
@@ -37,7 +38,7 @@ account, cart and checkout components are added with their feature tickets.
 ## Next PRs, in dependency order
 
 1. Finish frontend PR previews with safe development data and exact origins (#45).
-2. Profile/account navigation and full journey verification (#26–27).
+2. Full account journey verification (#27).
    Keep authorization in FastAPI.
 3. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
 4. Orders and checkout: price snapshots, authoritative totals, atomic inventory
@@ -69,4 +70,4 @@ broader items into focused PR tickets before implementation. See
 
 Hosting setup #44 and production workflow acceptance #46 are complete.
 Development and production are live; #45 tracks the remaining frontend previews.
-Profile/account navigation (#26) is the next product task. Azure is deferred; no extra API billing is allowed.
+Account journey verification (#27) is the next product task. Azure is deferred; no extra API billing is allowed.
