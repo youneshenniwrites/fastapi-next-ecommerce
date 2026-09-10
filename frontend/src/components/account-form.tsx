@@ -1,13 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FormEvent,
+} from "react";
 import { ArrowLeft, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+// Server HTML must not accept credentials before React attaches submit handling.
+const subscribe = () => () => {};
+
 export function AccountForm({ mode }: { mode: "login" | "register" }) {
   const registering = mode === "register";
+  const ready = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [registered, setRegistered] = useState(false);
@@ -19,7 +33,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy.current) return;
+    if (!ready || busy.current) return;
     busy.current = true;
     setPending(true);
     setError("");
@@ -111,9 +125,10 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
         </div>
       ) : (
         <form
+          method="post"
           onSubmit={submit}
           aria-label={registering ? "Create account" : "Sign in"}
-          aria-busy={pending}
+          aria-busy={!ready || pending}
           className="mt-8 space-y-5"
         >
           <div className="space-y-2">
@@ -127,7 +142,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               autoComplete="email"
               required
               maxLength={254}
-              disabled={pending}
+              disabled={!ready || pending}
               className="h-12"
             />
           </div>
@@ -144,7 +159,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               minLength={registering ? 8 : 1}
               maxLength={registering ? 128 : 1024}
               aria-describedby={registering ? "password-help" : undefined}
-              disabled={pending}
+              disabled={!ready || pending}
               className="h-12"
             />
             {registering && (
@@ -163,25 +178,43 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               {error}
             </p>
           )}
-          <Button type="submit" disabled={pending} className="h-12 w-full">
+          <Button
+            type="submit"
+            disabled={!ready || pending}
+            className="h-12 w-full transition-none"
+          >
             {pending && (
               <LoaderCircle
                 className="size-4 animate-spin motion-reduce:animate-none"
                 aria-hidden="true"
               />
             )}
-            {pending
+            {!ready
               ? registering
-                ? "Creating account…"
-                : "Signing in…"
-              : registering
-                ? "Create account"
-                : "Sign in"}
+                ? "Preparing registration…"
+                : "Preparing sign-in…"
+              : pending
+                ? registering
+                  ? "Creating account…"
+                  : "Signing in…"
+                : registering
+                  ? "Create account"
+                  : "Sign in"}
           </Button>
           <p role="status" className="sr-only">
-            {pending ? "Please wait while your request is processed." : ""}
+            {!ready
+              ? "Loading the secure form. Please wait."
+              : pending
+                ? "Please wait while your request is processed."
+                : ""}
           </p>
         </form>
+      )}
+      {!ready && (
+        <p className="mt-6 text-sm" role="status">
+          Loading the form. If this message remains, enable JavaScript and
+          reload the page.
+        </p>
       )}
       {!registered && (
         <p className="mt-6 text-center text-sm text-muted-foreground">

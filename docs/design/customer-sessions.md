@@ -73,6 +73,10 @@ journey evidence; they do not replace session-handler tests in #24.
 
 `/register` and `/login` compose shadcn Input and Button with visible labels,
 native validation, pending states, focusable error feedback and keyboard access.
+Inputs and submission stay disabled until client handlers are ready. The form
+uses POST as a fallback and explains when JavaScript must be enabled. First
+submissions and service errors do not reload the page; successful login still
+uses a full navigation to clear previous session state.
 Registration asks users to sign in after success; it does not retry writes or
 silently authenticate. An uncertain response advises trying sign-in before
 registering again. Login always navigates to `/#collection`, ignoring query-string
@@ -92,7 +96,8 @@ shows a retry action without claiming the customer is signed out.
 Desktop and mobile navigation share a session lookup. The account page uses its
 own lookup boundary so session updates do not wrap streamed catalog content. It is revalidated on
 mount, page restoration, focus/visibility changes, and every minute while visible.
-Account links and successful sign-in use full navigations to prevent cached
+Guest sign-in links use client navigation without prefetching. Authenticated
+account links and successful sign-in use full navigations to prevent cached
 private screens from being restored by the client router. Hidden/leaving pages clear their profile snapshot; aborted or superseded
 requests cannot restore it. The sign-out button posts to the origin-checked
 logout handler and then performs a full navigation to `/login` to discard the

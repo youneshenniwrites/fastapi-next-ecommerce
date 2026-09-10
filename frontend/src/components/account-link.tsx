@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useSession } from "@/components/session-provider";
 export function AccountLink({
   className,
@@ -15,14 +16,20 @@ export function AccountLink({
       </span>
     );
   }
-  const guest = session.status === "guest";
+  if (session.status === "guest")
+    return (
+      <Link
+        href="/login"
+        prefetch={false}
+        className={className}
+        onClick={onClick}
+      >
+        Sign in
+      </Link>
+    );
   return (
-    <a
-      href={guest ? "/login" : "/account"}
-      className={className}
-      onClick={onClick}
-    >
-      {guest ? "Sign in" : "My account"}
+    <a href="/account" className={className} onClick={onClick}>
+      My account
     </a>
   );
 }
