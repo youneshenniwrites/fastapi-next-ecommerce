@@ -293,3 +293,178 @@ test("background account pages defer all profile requests until visible", async 
   ).toBeVisible();
   expect(requests).toBe(2);
 });
+
+for (const mode of ["login", "register"] as const) {
+  test(`${mode} waits for delayed scripts before allowing the first submission`, async ({
+    page,
+  }) => {
+    let release!: () => void;
+    const scripts = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/_next/static/**/*.js", async (route) => {
+      await scripts;
+      await route.continue();
+    });
+    let submissions = 0;
+    await page.route(`**/api/session/${mode}`, (route) => {
+      submissions++;
+      return route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: "{}",
+      });
+    });
+    try {
+      await page.goto(`/${mode}`, { waitUntil: "commit" });
+      const email = page.getByLabel("Email address");
+      const password = page.getByLabel("Password", { exact: true });
+      const submit = page.getByRole("main").getByRole("button");
+      await expect(email).toBeDisabled();
+      await expect(password).toBeDisabled();
+      await expect(submit).toBeDisabled();
+      await expect(submit).toContainText("Preparing");
+      expect(submissions).toBe(0);
+      release();
+      await expect(submit).toBeEnabled();
+      await email.fill("first-click@example.com");
+      await password.fill("fictional-first-click-password");
+      let documentRequests = 0;
+      page.on("request", (request) => {
+        if (
+          request.isNavigationRequest() &&
+          request.frame() === page.mainFrame()
+        )
+          documentRequests++;
+      });
+      await submit.click();
+      await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
+      expect(submissions).toBe(1);
+      expect(documentRequests).toBe(0);
+      await expect(page).toHaveURL(new RegExp(`/${mode}$`));
+      await expect(email).toHaveValue("first-click@example.com");
+    } finally {
+      release();
+    }
+  });
+}
+
+test.describe("without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+  test("account forms stay disabled and explain when JavaScript is unavailable", async ({
+    page,
+  }) => {
+    for (const mode of ["login", "register"]) {
+      await page.goto(`/${mode}`);
+      await expect(page.getByLabel("Email address")).toBeDisabled();
+      await expect(page.getByLabel("Password", { exact: true })).toBeDisabled();
+      await expect(page.getByRole("main").getByRole("button")).toBeDisabled();
+      await expect(
+        page.getByText(
+          "Loading the form. If this message remains, enable JavaScript and reload the page.",
+        ),
+      ).toBeVisible();
+    }
+  });
+});
+
+test("guest sign-in links navigate on the first click without reloading", async ({
+  page,
+}) => {
+  for (const source of ["header", "account"]) {
+    await page.goto("/account");
+    await expect(
+      page.getByRole("heading", { name: "Sign in to view your account" }),
+    ).toBeVisible();
+    if (source === "header" && test.info().project.name.includes("Pixel"))
+      await page.getByRole("button", { name: "Open navigation" }).click();
+    const signIn =
+      source === "account"
+        ? page
+            .getByRole("main")
+            .getByRole("link", { name: "Sign in", exact: true })
+        : page.getByRole("link", { name: "Sign in", exact: true }).first();
+    let documentRequests = 0;
+    const record = (request: import("@playwright/test").Request) => {
+      if (request.isNavigationRequest() && request.frame() === page.mainFrame())
+        documentRequests++;
+    };
+    page.on("request", record);
+    await signIn.click();
+    await expect(
+      page.getByRole("heading", { name: "Welcome back." }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Email address")).toBeEnabled();
+    expect(documentRequests).toBe(0);
+    page.off("request", record);
+  }
+});
+
+test("empty and incomplete sign-in submissions stay on the form without requests", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  const submit = page.getByRole("button", { name: "Sign in", exact: true });
+  const email = page.getByLabel("Email address");
+  const password = page.getByLabel("Password", { exact: true });
+  await expect(submit).toBeEnabled();
+  let documents = 0;
+  let loginRequests = 0;
+  page.on("request", (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame())
+      documents++;
+    if (new URL(request.url()).pathname === "/api/session/login")
+      loginRequests++;
+  });
+  // The owner's exact report: the first click, with both fields untouched.
+  await submit.click();
+  await expect(email).toBeFocused();
+  expect(
+    await email.evaluate(
+      (el) => (el as HTMLInputElement).validity.valueMissing,
+    ),
+  ).toBe(true);
+  await email.fill("empty-password@example.com");
+  await submit.click();
+  await expect(password).toBeFocused();
+  expect(
+    await password.evaluate(
+      (el) => (el as HTMLInputElement).validity.valueMissing,
+    ),
+  ).toBe(true);
+  await email.fill("");
+  await password.fill("fictional-test-password");
+  await submit.click();
+  await expect(email).toBeFocused();
+  await email.fill("invalid-email");
+  await submit.click();
+  expect(
+    await email.evaluate(
+      (el) => (el as HTMLInputElement).validity.typeMismatch,
+    ),
+  ).toBe(true);
+  await expect(page).toHaveURL(/\/login$/);
+  expect(documents).toBe(0);
+  expect(loginRequests).toBe(0);
+});
+
+test("header sign-in on the login page does not reload or discard input", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  await page.getByLabel("Email address").fill("navigation@example.com");
+  if (test.info().project.name.includes("Pixel"))
+    await page.getByRole("button", { name: "Open navigation" }).click();
+  let documents = 0;
+  page.on("request", (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame())
+      documents++;
+  });
+  await page.getByRole("link", { name: "Sign in", exact: true }).click();
+  await expect(page.getByLabel("Email address")).toBeVisible();
+  await expect(page.getByLabel("Email address")).toHaveValue(
+    "navigation@example.com",
+  );
+  await expect(page).toHaveURL(/\/login$/);
+  expect(documents).toBe(0);
+});

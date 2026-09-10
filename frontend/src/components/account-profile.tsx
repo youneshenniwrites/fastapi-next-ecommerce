@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { LogOut, UserRound } from "lucide-react";
 import { useSession } from "@/components/session-provider";
@@ -48,7 +49,9 @@ export function AccountProfile() {
             Your session may have expired. Sign in to continue.
           </p>
           <Button asChild>
-            <a href="/login">Sign in</a>
+            <Link href="/login" prefetch={false}>
+              Sign in
+            </Link>
           </Button>
         </section>
       ) : session.status === "error" ? (
