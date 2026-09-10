@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { createHmac } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 
-test("accessible registration, duplicate account, invalid login and safe success", async ({
+test("complete UI account journey with duplicate registration and invalid login", async ({
   page,
 }) => {
   const email = `account-${crypto.randomUUID()}@example.com`;
@@ -34,6 +34,8 @@ test("accessible registration, duplicate account, invalid login and safe success
   await expect(
     page.getByText("Your account is ready. Sign in to continue."),
   ).toBeFocused();
+  await page.getByRole("link", { name: "Continue to sign in" }).click();
+  await expect(page).toHaveURL(/\/login$/);
   await page.goto("/register");
   await emailField.fill(email);
   await passwordField.fill(password);
@@ -62,6 +64,21 @@ test("accessible registration, duplicate account, invalid login and safe success
   expect(
     await page.evaluate(() => localStorage.length + sessionStorage.length),
   ).toBe(0);
+  if (test.info().project.name.includes("Pixel"))
+    await page.getByRole("button", { name: "Open navigation" }).click();
+  await page.getByRole("link", { name: "My account", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Customer profile" }),
+  ).toContainText(email);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  expect((await page.request.get("/api/session/me")).status()).toBe(401);
+  await page.goto("/account");
+  await expect(
+    page.getByRole("heading", { name: "Sign in to view your account" }),
+  ).toBeVisible();
+  await expect(page.getByText(email, { exact: true })).toHaveCount(0);
 });
 
 test("pending submission prevents duplicates and recovers from a service failure", async ({

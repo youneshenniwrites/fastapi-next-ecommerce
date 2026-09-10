@@ -13,7 +13,7 @@ FastAPI publishes an OpenAPI 3.1 contract for every implemented endpoint:
 ## Start and verify the local API
 
 These URLs refer to **your computer**. GitHub displays the source and contract;
-it does not run the API. The [hosted development API docs](https://forme-api-development.vercel.app/docs) are also available.
+it does not run the API. The [hosted development API docs](https://vindor-api-development.vercel.app/docs) are also available.
 
 Start Docker Desktop (or your Docker engine), then from the repository root:
 
@@ -69,6 +69,30 @@ Use the Postman desktop application or its Desktop Agent for localhost requests;
 a cloud agent cannot reach a server on your laptop. Keep token/password values
 local and out of Git or shared collection exports. An expired token requires login
 again. Swagger is an equivalent interactive client and needs no Postman account.
+
+## Browser sessions and the direct API
+
+The [customer account walkthrough](account-journey.md) uses the Next.js storefront.
+Swagger and imported Postman requests call FastAPI directly. These are separate
+clients; signing in through Swagger does not sign the storefront in.
+
+| Client boundary | Sign-in request | Credential used for profile reads |
+| --- | --- | --- |
+| FastAPI / Swagger / Postman | `POST /api/v1/auth/login`, form-encoded `username` and `password` | `Authorization: Bearer <access_token>` on `/api/v1/auth/me` |
+| Storefront browser | `POST /api/session/login`, JSON `email` and `password` | Browser-managed HttpOnly cookie on `/api/session/me`; no token returned in JSON |
+
+The storefront also provides JSON registration at `/api/session/register` and
+POST sign-out at `/api/session/logout`. State-changing session requests require
+the exact configured Origin; cookie and no-store rules are documented in the
+[session design](design/customer-sessions.md). The FastAPI OpenAPI snapshot covers
+FastAPI endpoints; these Next.js session handlers are documented separately.
+
+Storefront sign-out clears its browser cookie, not tokens held by Postman or
+Swagger. Clearing Swagger authorization likewise removes that client's stored
+credentials without server-side JWT revocation. Use fictional accounts and keep
+bearer tokens out of shared exports. Expired or disabled-user tokens are rejected
+by FastAPI. Password reset, email verification and global sign-out are not
+implemented.
 
 ## Troubleshooting
 
