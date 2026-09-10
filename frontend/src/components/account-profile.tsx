@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { LogOut, UserRound } from "lucide-react";
 import { useSession } from "@/components/session-provider";
@@ -49,7 +48,7 @@ export function AccountProfile() {
             Your session may have expired. Sign in to continue.
           </p>
           <Button asChild>
-            <Link href="/login">Sign in</Link>
+            <a href="/login">Sign in</a>
           </Button>
         </section>
       ) : session.status === "error" ? (
@@ -97,12 +96,14 @@ export function AccountProfile() {
       <p className="mt-8 text-sm text-muted-foreground">
         A fictional shop. Browse the collection in GBP.
       </p>
-      <Link
+      {/* Full navigation intentionally discards the private account router state. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+      <a
         href="/#collection"
         className="mt-3 inline-block text-sm underline underline-offset-4"
       >
         Back to the collection
-      </Link>
+      </a>
     </main>
   );
 }

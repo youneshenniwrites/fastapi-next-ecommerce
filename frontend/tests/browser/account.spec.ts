@@ -249,3 +249,47 @@ test("restoring an account page revalidates and discards its previous profile", 
     0,
   );
 });
+
+test("background account pages defer all profile requests until visible", async ({
+  page,
+}) => {
+  let requests = 0;
+  await page.addInitScript(() =>
+    Object.defineProperty(document, "visibilityState", {
+      value: "hidden",
+      configurable: true,
+    }),
+  );
+  await page.route("**/api/session/me", (route) => {
+    requests++;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        email: "background@example.com",
+        created_at: "2026-09-01T12:00:00Z",
+      }),
+    });
+  });
+  await page.goto("/account");
+  await page.waitForLoadState("networkidle");
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event("focus"));
+    window.dispatchEvent(new PageTransitionEvent("pageshow"));
+  });
+  expect(requests).toBe(0);
+  await expect(
+    page.getByText("background@example.com", { exact: true }),
+  ).toHaveCount(0);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      value: "visible",
+      configurable: true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(
+    page.getByText("background@example.com", { exact: true }),
+  ).toBeVisible();
+  expect(requests).toBe(2);
+});

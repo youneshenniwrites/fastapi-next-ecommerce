@@ -89,9 +89,11 @@ in memory. The account page displays email and membership date, never admin flag
 A missing/expired session shows a sign-in prompt; an outage hides details and
 shows a retry action without claiming the customer is signed out.
 
-Desktop and mobile navigation use the same session state. It is revalidated on
-route changes, page restoration, focus/visibility changes, and every minute while
-visible. Hidden/leaving pages clear their profile snapshot; aborted or superseded
+Desktop and mobile navigation share a session lookup. The account page uses its
+own lookup boundary so session updates do not wrap streamed catalog content. It is revalidated on
+mount, page restoration, focus/visibility changes, and every minute while visible.
+Account links and successful sign-in use full navigations to prevent cached
+private screens from being restored by the client router. Hidden/leaving pages clear their profile snapshot; aborted or superseded
 requests cannot restore it. The sign-out button posts to the origin-checked
 logout handler and then performs a full navigation to `/login` to discard the
 router cache. Failed sign-out shows an error and allows retry; it never claims

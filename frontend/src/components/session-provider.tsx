@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname } from "next/navigation";
 import type { components } from "@/lib/api/schema";
 
 type User = Pick<components["schemas"]["UserRead"], "email" | "created_at">;
@@ -24,19 +23,19 @@ export function useSession() {
 // Only the public shell is rendered on the server. Private data is fetched with
 // cookies through the same-origin handler; never serialize a token into React.
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const [snapshot, setSnapshot] = useState<{
-    path: string;
-    session: Session;
-  }>();
+  const [snapshot, setSnapshot] = useState<Session>();
   useEffect(() => {
     let controller: AbortController | undefined;
     let active = true;
     async function refresh() {
       controller?.abort();
+      if (document.visibilityState !== "visible") {
+        setSnapshot(undefined);
+        return;
+      }
       const current = new AbortController();
       controller = current;
-      setSnapshot({ path: pathname, session: { status: "loading" } });
+      setSnapshot({ status: "loading" });
       try {
         const response = await fetch("/api/session/me", {
           cache: "no-store",
@@ -52,11 +51,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             user: { email: user.email, created_at: user.created_at },
           };
         }
-        if (active && !current.signal.aborted)
-          setSnapshot({ path: pathname, session });
+        if (
+          active &&
+          !current.signal.aborted &&
+          document.visibilityState === "visible"
+        )
+          setSnapshot(session);
       } catch {
-        if (active && !current.signal.aborted)
-          setSnapshot({ path: pathname, session: { status: "error" } });
+        if (active && !current.signal.aborted) setSnapshot({ status: "error" });
       }
     }
     function hide() {
@@ -84,11 +86,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("focus", refresh);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [pathname]);
-  const session =
-    snapshot?.path === pathname
-      ? snapshot.session
-      : { status: "loading" as const };
+  }, []);
+  const session = snapshot ?? { status: "loading" as const };
   return (
     <SessionContext.Provider value={session}>
       {children}
