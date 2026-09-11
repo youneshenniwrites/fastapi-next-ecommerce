@@ -2,7 +2,7 @@
 
 Tailwind CSS v4 supplies utilities and semantic tokens. shadcn/ui supplies editable
 React components in `src/components/ui`; shop components compose them. Button,
-Badge, Skeleton, Sheet, Input, Checkbox and NativeSelect were generated with the pinned shadcn CLI using the official
+Badge, Skeleton, Sheet, Input, Checkbox, Select and NativeSelect were generated with the pinned shadcn CLI using the official
 new-york registry, then adapted to VINDOR tokens and the local `cn` helper.
 
 ## Adding a component
@@ -30,8 +30,7 @@ helper. Do not install the whole registry. Add components for real feature needs
 
 SiteHeader/SiteFooter, SectionHeading, ProductCard and ProductDetails compose the
 storefront. The mobile Sheet has a labelled dialog, close control, focus trap and
-Escape dismissal; links close it before navigating. Sorting uses NativeSelect to
-retain the platform's keyboard and mobile selection behavior. Search uses Input,
+Escape dismissal; links close it before navigating. Sorting uses shadcn Select for a themed popup with keyboard and mobile interaction. Search uses Input,
 and the labelled Checkbox filters available stock.
 
 All existing page layouts now use Tailwind utilities. Preflight is enabled after
@@ -62,3 +61,22 @@ attributes, pre-hydration disabled controls and POST fallback. Login and registr
 use different password limits; never trim or log passwords. API validation remains
 authoritative. Test invalid submissions for zero navigation and zero API calls.
 See the [design-system Wiki](https://github.com/youneshenniwrites/fastapi-next-ecommerce/wiki/Design-system).
+
+## Consistency rules
+
+Buttons, text inputs and select triggers use the shared rounded-md token (4px).
+Form actions/fields are 48px tall; compact catalog controls are 40px tall.
+Keep the global 2px warm keyboard outline with 4px offset; do not layer additional
+focus rings onto it. Image containers remain rectangular; supporting panels may
+use the existing 8px radius, and decorative icon badges may remain circular.
+
+The homepage renders its hero and approach sections independently of catalog
+fetching. The catalog Suspense fallback matches the two-column mobile/three-column
+desktop grid, 6:5 images and title/price/description slots. Loading is announced
+once by a labelled status; visual placeholders are hidden from assistive technology.
+
+All interactive controls should compose shadcn primitives. Keep native page scrolling
+without global smooth scrolling, so validation focus does not animate the viewport;
+use shadcn ScrollArea when a bounded custom scroll panel is needed. Select retains
+its own Radix viewport and scroll controls. Do not wrap its menu in a second scroll
+container. Reserve inline form-error space so corrections do not move submit controls.

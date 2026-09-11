@@ -151,9 +151,13 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               disabled={!ready || pending}
               className="h-12"
             />
-            {errors.email && (
-              <FieldError id="email-error" errors={[errors.email]} />
-            )}
+            <div className="min-h-5">
+              <FieldError
+                id="email-error"
+                className="leading-5"
+                errors={[errors.email]}
+              />
+            </div>
           </Field>
           <Field data-invalid={Boolean(errors.password)}>
             <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -182,9 +186,13 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
                 Use 8–128 characters. Don't reuse a real password.
               </p>
             )}
-            {errors.password && (
-              <FieldError id="password-error" errors={[errors.password]} />
-            )}
+            <div className="min-h-5">
+              <FieldError
+                id="password-error"
+                className="leading-5"
+                errors={[errors.password]}
+              />
+            </div>
           </Field>
           {error && (
             <p
