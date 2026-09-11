@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { AccountLink } from "@/components/account-link";
+import { CartLink } from "@/components/cart-link";
 import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,10 @@ export function MobileNavigation() {
               </Link>
             </SheetClose>
             <AccountLink
+              className="border-b border-border py-5 text-base"
+              onClick={() => setOpen(false)}
+            />
+            <CartLink
               className="border-b border-border py-5 text-base"
               onClick={() => setOpen(false)}
             />
