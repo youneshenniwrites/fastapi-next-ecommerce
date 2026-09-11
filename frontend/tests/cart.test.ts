@@ -92,10 +92,11 @@ describe("cart read boundary", () => {
   it("returns the backend cart without leaking the bearer", async () => {
     const res = await getCart(getRequest());
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(cartBody);
-    expect(JSON.stringify(await res.json().catch(() => null))).not.toContain(
-      token,
-    );
+    // Read the body once: a second json() call would reject on the consumed
+    // stream and assert against "null" instead of the real payload.
+    const payload = await res.text();
+    expect(JSON.parse(payload)).toEqual(cartBody);
+    expect(payload).not.toContain(token);
     expect(res.headers.get("cache-control")).toContain("no-store");
     expect(res.headers.get("vary")).toContain("Cookie");
     const call = vi.mocked(fetch).mock.calls[0][0] as Request;

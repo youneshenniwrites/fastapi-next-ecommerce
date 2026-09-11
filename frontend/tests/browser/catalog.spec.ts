@@ -13,9 +13,9 @@ test("browse, filter and view the real FastAPI catalog", async ({
     page.getByRole("heading", { name: "No objects found." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await page.getByLabel("In stock only").check();
+  await page.getByRole("checkbox", { name: "In stock only" }).check();
   await expect(page.getByRole("status")).toHaveText("5 objects");
-  await page.getByLabel("Sort products").click();
+  await page.getByRole("combobox", { name: "Sort products" }).click();
   await page
     .getByRole("option", { name: "Price: low to high", exact: true })
     .click();
@@ -72,30 +72,23 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   await expect(action).toHaveCSS("background-color", "rgb(48, 78, 60)");
   await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(action).toHaveCSS("border-radius", "4px");
-  await expect(page.getByLabel("Search collection")).toHaveCSS(
-    "border-radius",
-    "4px",
-  );
-  await expect(page.getByLabel("Sort products")).toHaveCSS(
-    "border-radius",
-    "4px",
-  );
-  await page.getByLabel("Search collection").fill("Oak");
+  // Role locators exclude the hidden React Suspense copy of the filter bar,
+  // so streaming hydration cannot fail these assertions with strict-mode
+  // violations.
+  const search = page.getByRole("searchbox", { name: "Search collection" });
+  const sort = page.getByRole("combobox", { name: "Sort products" });
+  await expect(search).toHaveCSS("border-radius", "4px");
+  await expect(sort).toHaveCSS("border-radius", "4px");
+  await search.fill("Oak");
   await expect(page.getByRole("status")).toHaveText("1 object");
-  await page.getByLabel("Search collection").focus();
-  await expect(page.getByLabel("Search collection")).toBeFocused();
-  await expect(page.getByLabel("Search collection")).toHaveCSS(
-    "box-shadow",
-    "none",
-  );
-  await expect(page.getByLabel("Search collection")).toHaveCSS(
-    "outline-width",
-    "2px",
-  );
+  await search.focus();
+  await expect(search).toBeFocused();
+  await expect(search).toHaveCSS("box-shadow", "none");
+  await expect(search).toHaveCSS("outline-width", "2px");
   await action.focus();
   await expect(action).toBeFocused();
   await expect(action).toHaveCSS("outline-style", "solid");
-  await page.getByLabel("Search collection").fill("");
+  await search.fill("");
   await expect(
     page.getByRole("main").locator('[data-slot="badge"]'),
   ).toHaveText("Out of stock");

@@ -459,15 +459,10 @@ test("mutation timeout shows a recoverable error and reconciles", async ({
   ).toBeVisible({ timeout: 20000 });
   await page.unroute("**/api/cart/items/*");
 
-  // Poll the authoritative cart until client and server agree again.
-  await expect
-    .poll(
-      async () => {
-        await page.goto("/cart");
-        return await page.getByText("Qty 2").count();
-      },
-      { timeout: 30000 },
-    )
-    .toBe(1);
+  // Let the cart page settle once, then wait for client and server to agree
+  // again. Navigating inside the poll loop would abort each in-flight
+  // re-read with a fresh reload and livelock on the loading state.
+  await page.goto("/cart");
+  await expect(page.getByText("Qty 2")).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId("cart-count").first()).toHaveText("2");
 });
