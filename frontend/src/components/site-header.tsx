@@ -3,6 +3,7 @@ import { MobileNavigation } from "@/components/mobile-navigation";
 import { container } from "@/components/storefront-layout";
 import { cn } from "@/lib/utils";
 import { AccountLink } from "@/components/account-link";
+import { CartLink } from "@/components/cart-link";
 export function Wordmark() {
   return (
     <Link
@@ -51,6 +52,7 @@ export function SiteHeader() {
             Our approach
           </Link>
           <AccountLink className="hover:underline underline-offset-8" />
+          <CartLink className="hover:underline underline-offset-8" />
         </nav>
         <span className="hidden text-[9px] tracking-widest text-muted-foreground lg:inline">
           OBJECTS FOR EVERYDAY FOCUS

@@ -33,6 +33,16 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3300" },
     },
     {
+      name: "cart-desktop",
+      testMatch: "cart.spec.ts",
+      use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3300" },
+    },
+    {
+      name: "cart-mobile",
+      testMatch: "cart.spec.ts",
+      use: { ...devices["Pixel 7"], baseURL: "http://127.0.0.1:3300" },
+    },
+    {
       name: "mobile",
       testMatch: "catalog.spec.ts",
       use: { ...devices["Pixel 7"], baseURL: "http://127.0.0.1:3300" },

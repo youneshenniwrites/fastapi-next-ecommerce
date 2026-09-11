@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 import { SessionProvider } from "@/components/session-provider";
+import { CartProvider } from "@/components/cart-provider";
 export const metadata: Metadata = {
   title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
   description:
@@ -23,9 +24,11 @@ export default function RootLayout({
           Skip to content
         </a>
         <SessionProvider>
-          <SiteHeader />
+          <CartProvider>
+            <SiteHeader />
+            {children}
+          </CartProvider>
         </SessionProvider>
-        {children}
         <SiteFooter />
       </body>
     </html>
