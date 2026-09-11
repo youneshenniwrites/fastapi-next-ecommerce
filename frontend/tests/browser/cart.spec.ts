@@ -310,6 +310,52 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await expect(page.getByTestId("cart-count").first()).toHaveText("6");
 });
 
+test("switching accounts without sign-out never shows the previous cart", async ({
+  page,
+  request,
+}) => {
+  const all = await products(request);
+  const first = all.find((p) => p.name === "Notebook Set")!;
+  const emailA = `cart-switch-a-${crypto.randomUUID()}@example.com`;
+  const emailB = `cart-switch-b-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, emailA, password);
+  await register(request, emailB, password);
+
+  await login(page, emailA, password);
+  await page.goto(`/products/${first.id}`);
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ })
+    .click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await page.goto("/cart");
+  await expect(page.getByRole("link", { name: first.name })).toBeVisible();
+
+  // Fail the new account's re-read: the previous customer's rendered cart
+  // must be invalidated (loading, then the error state) instead of preserved
+  // with a stale banner.
+  await page.route("**/api/cart", (route) => route.abort());
+  await page.evaluate(
+    async ({ email, password }) => {
+      const response = await fetch("/api/session/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok)
+        throw new Error(`in-page login failed: ${response.status}`);
+    },
+    { email: emailB, password },
+  );
+  // The session provider reloads identity on window focus without remounting
+  // the cart provider, exercising the confirmed account-change path.
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("link", { name: first.name })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+  await page.unroute("**/api/cart");
+});
+
 test("stale cart shows a visible warning and recovers on refresh", async ({
   page,
   request,
