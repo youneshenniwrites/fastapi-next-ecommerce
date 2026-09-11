@@ -60,6 +60,76 @@
         "title": "Body_login_api_v1_auth_login_post",
         "type": "object"
       },
+      "CartItem": {
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "line_total": {
+            "title": "Line Total",
+            "type": "string"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductRead"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "product",
+          "quantity",
+          "available",
+          "line_total"
+        ],
+        "title": "CartItem",
+        "type": "object"
+      },
+      "CartQuantity": {
+        "additionalProperties": false,
+        "properties": {
+          "quantity": {
+            "maximum": 99.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quantity"
+        ],
+        "title": "CartQuantity",
+        "type": "object"
+      },
+      "CartRead": {
+        "properties": {
+          "currency": {
+            "const": "GBP",
+            "default": "GBP",
+            "title": "Currency",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "subtotal": {
+            "title": "Subtotal",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "subtotal"
+        ],
+        "title": "CartRead",
+        "type": "object"
+      },
       "ErrorResponse": {
         "description": "HTTP errors use a detail string; validation errors have FastAPI's 422 schema.",
         "properties": {
@@ -401,7 +471,7 @@
     }
   },
   "info": {
-    "description": "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP decimal prices. Product writes require an active admin. Register a customer, then use Authorize with your email in the username field to obtain a bearer token. Admin bootstrap is an operator CLI, never a public endpoint. Cart and checkout are planned; no real purchases are supported.",
+    "description": "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP decimal prices. Product writes require an active admin. Register a customer, then use Authorize with your email in the username field to obtain a bearer token. Admin bootstrap is an operator CLI, never a public endpoint. Signed-in carts use current prices without reserving stock; checkout is planned.",
     "title": "E-Commerce API",
     "version": "0.1.0"
   },
@@ -545,6 +615,184 @@
         "summary": "Register a customer account",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/cart/": {
+      "get": {
+        "description": "Current GBP prices and availability; stock is not reserved. Saved shortages remain visible. Deleted products are removed from carts.",
+        "operationId": "get_cart_api_v1_cart__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Read your saved cart",
+        "tags": [
+          "Cart"
+        ]
+      }
+    },
+    "/api/v1/cart/items/{product_id}": {
+      "delete": {
+        "description": "Idempotent: missing lines also return 204. Only your own line can be removed.",
+        "operationId": "delete_cart_item_api_v1_cart_items__product_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Product Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Remove a product from your cart",
+        "tags": [
+          "Cart"
+        ]
+      },
+      "put": {
+        "description": "Idempotent quantity 1\u201399. New lines/increases require stock; reductions and unchanged quantities remain allowed during shortages. Concurrent writes serialize per customer: last serialized write wins. Prices and ownership cannot be supplied.",
+        "operationId": "put_cart_item_api_v1_cart_items__product_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Product Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartQuantity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Set an absolute cart quantity",
+        "tags": [
+          "Cart"
         ]
       }
     },

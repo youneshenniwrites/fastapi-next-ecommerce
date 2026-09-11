@@ -31,7 +31,8 @@ The initial migration targets an empty database. If an existing unversioned data
 contains tables, back it up and compare its schema before deciding whether to stamp
 the baseline. Never blindly stamp or drop an existing database to bypass errors.
 
-Cart, orders, payments, and frontend remain planned work.
+Signed-in cart persistence is documented in [the cart API guide](../docs/design/cart-api.md).
+The Next.js storefront and accounts are implemented; cart UI, checkout and payments remain planned.
 
 Registration returns 201. Login accepts form fields `username` (email) and
 `password`; use its bearer token for `/api/v1/auth/me`. Product reads are public;

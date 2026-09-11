@@ -39,7 +39,7 @@ account, cart and checkout components are added with their feature tickets.
 ## Next PRs, in dependency order
 
 1. Finish frontend PR previews with safe development data and exact origins (#45).
-2. Persistent carts: ownership, quantity changes/removal, stock checks, API and UI.
+2. Cart storefront (#72), building on the persistent signed-in [cart API](../design/cart-api.md) (#71): quantity changes/removal, availability and the complete customer journey.
 3. Orders and checkout: price snapshots, authoritative totals, atomic inventory
    handling, idempotency, and concurrent last-item purchase tests.
 4. Sandbox payments: verify webhooks, handle duplicate/failure/cancellation events,
@@ -69,4 +69,4 @@ broader items into focused PR tickets before implementation. See
 
 Hosting setup #44 and production workflow acceptance #46 are complete.
 Development and production are live; #45 tracks the remaining frontend previews.
-Account journey verification (#27) is complete; persistent carts (#28) are the next product task. Azure is deferred; no extra API billing is allowed.
+Account journey verification (#27) is complete; the cart storefront (#72) is the next product task after the persistent API (#71). Azure is deferred; no extra API billing is allowed.
