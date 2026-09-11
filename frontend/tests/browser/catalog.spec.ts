@@ -80,9 +80,22 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
     "border-radius",
     "4px",
   );
+  await page.getByLabel("Search collection").fill("Oak");
+  await expect(page.getByRole("status")).toHaveText("1 object");
+  await page.getByLabel("Search collection").focus();
+  await expect(page.getByLabel("Search collection")).toBeFocused();
+  await expect(page.getByLabel("Search collection")).toHaveCSS(
+    "box-shadow",
+    "none",
+  );
+  await expect(page.getByLabel("Search collection")).toHaveCSS(
+    "outline-width",
+    "2px",
+  );
   await action.focus();
   await expect(action).toBeFocused();
   await expect(action).toHaveCSS("outline-style", "solid");
+  await page.getByLabel("Search collection").fill("");
   await expect(
     page.getByRole("main").locator('[data-slot="badge"]'),
   ).toHaveText("Out of stock");

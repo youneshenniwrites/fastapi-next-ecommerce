@@ -36,7 +36,7 @@ export function Catalog({ products }: { products: Product[] }) {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <div className="flex min-h-11 items-center gap-2">
+        <div className="flex min-h-11 w-24 shrink-0 items-center gap-2">
           <Checkbox
             id="in-stock"
             checked={inStock}
@@ -51,7 +51,10 @@ export function Catalog({ products }: { products: Product[] }) {
           </label>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <label htmlFor="sort-products" className="text-xs">
+          <label
+            htmlFor="sort-products"
+            className="w-10 shrink-0 whitespace-nowrap text-xs"
+          >
             Sort by
           </label>
           <Select

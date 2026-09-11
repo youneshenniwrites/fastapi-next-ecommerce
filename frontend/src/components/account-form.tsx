@@ -152,7 +152,11 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               className="h-12"
             />
             <div className="min-h-5">
-              <FieldError id="email-error" errors={[errors.email]} />
+              <FieldError
+                id="email-error"
+                className="leading-5"
+                errors={[errors.email]}
+              />
             </div>
           </Field>
           <Field data-invalid={Boolean(errors.password)}>
@@ -183,7 +187,11 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               </p>
             )}
             <div className="min-h-5">
-              <FieldError id="password-error" errors={[errors.password]} />
+              <FieldError
+                id="password-error"
+                className="leading-5"
+                errors={[errors.password]}
+              />
             </div>
           </Field>
           {error && (
