@@ -39,6 +39,12 @@ To explore customer authentication:
 2. Click **Authorize**. Enter that email in `username` and the password in
    `password`; leave client credentials empty. Swagger obtains a bearer token.
 3. Execute `GET /api/v1/auth/me` to inspect the authenticated profile.
+4. Choose an in-stock product ID from the catalog. Execute
+   `PUT /api/v1/cart/items/{product_id}` with `{"quantity": 1}`.
+5. Execute `GET /api/v1/cart/` to see the saved line, current GBP price, exact
+   subtotal and availability. Repeat the PUT: the absolute quantity stays 1.
+6. Execute `DELETE /api/v1/cart/items/{product_id}` to remove the line (204).
+   GET the cart again to confirm it is empty.
 
 Public signup creates a customer. Product writes require an active admin created
 through the explicit CLI in [demo setup](demo.md); no public endpoint promotes
@@ -118,10 +124,18 @@ personal data before sharing logs. Restart the stack after restarting your machi
 if the services are no longer running.
 
 The schema documents request/response models, bearer security requirements,
-pagination bounds, and 400/401/403/404 errors where applicable. FastAPI documents
+pagination bounds, and 400/401/403/404/409 errors where applicable. FastAPI documents
 422 validation errors. Products return prices as exact two-place GBP strings;
 PUT keeps omitted fields and allows null only for description. Health is liveness,
-not database readiness. No cart, checkout or payment endpoints are claimed yet.
+not database readiness.
+
+Cart GET/PUT/DELETE operations require an active customer's bearer token. Cart PUT
+sets an integer quantity from 1 to 99; new lines and increases beyond current stock
+return 409. Reductions and removal remain allowed during shortages. Cart totals
+use current backend prices, and adding a line does not reserve stock. Deleted
+products are removed from saved carts. See [the cart contract](design/cart-api.md)
+for persistence and concurrency semantics. Cart storefront controls, checkout and
+payment endpoints remain planned.
 
 ## Contract workflow
 
