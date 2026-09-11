@@ -28,6 +28,7 @@ type CartContextValue = {
   pending: Record<number, boolean>;
   errors: Record<number, string>;
   notice: string;
+  staleNotice: string;
   refresh: () => void;
   setQuantity: (productId: number, quantity: number) => Promise<boolean>;
   removeItem: (productId: number) => Promise<boolean>;
@@ -41,6 +42,7 @@ const CartContext = createContext<CartContextValue>({
   pending: {},
   errors: {},
   notice: "",
+  staleNotice: "",
   refresh: () => {},
   setQuantity: async () => false,
   removeItem: async () => false,
@@ -78,6 +80,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<Record<number, boolean>>({});
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [notice, setNotice] = useState("");
+  // Visible stale-cart warning: background re-reads preserve the rendered
+  // cart, so staleness needs its own banner instead of the sr-only notice.
+  const [staleNotice, setStaleNotice] = useState("");
   const requestId = useRef(0);
   const busy = useRef(new Set<number>());
   const lastEmail = useRef<string | null>(null);
@@ -96,13 +101,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (requestId.current === id) setSnapshot(next);
   }, []);
 
-  // Background failures preserve a rendered cart and surface a retry notice
-  // instead of wiping private UI; explicit loads without a cart still fail
-  // into the error state with its Try again action.
+  // Background failures preserve a rendered cart and surface a visible
+  // retry warning instead of wiping private UI; explicit loads without a
+  // cart still fail into the error state with its Try again action.
   const markStale = useCallback((id: number) => {
     if (requestId.current !== id) return;
     if (snapshotRef.current?.status === "ready") {
-      setNotice("Couldn't update your cart. Please try again.");
+      setStaleNotice("Couldn't update your cart. Please try again.");
       return;
     }
     setSnapshot({ status: "error" });
@@ -125,6 +130,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           return;
         }
         const cart = (await response.json()) as Cart;
+        if (requestId.current === id) setStaleNotice("");
         applySnapshot(id, { status: "ready", cart });
       } catch {
         if (!signal.aborted) markStale(id);
@@ -154,7 +160,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const current = sessionRef.current;
     if (current.status === "loading") {
       requestId.current += 1;
-      setSnapshot({ status: "loading" });
+      // The session reloads (e.g. on window focus) while the cart is
+      // rendered: preserve the cart instead of flashing a skeleton, so a
+      // failed re-read still reconciles against the ready snapshot.
+      setSnapshot((previous) =>
+        previous && previous.status === "ready"
+          ? previous
+          : { status: "loading" },
+      );
       return;
     }
     if (current.status !== "authenticated") {
@@ -164,6 +177,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setPending({});
       setErrors({});
       setNotice("");
+      setStaleNotice("");
       setSnapshot({ status: current.status === "guest" ? "guest" : "error" });
       return;
     }
@@ -176,6 +190,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setPending({});
       setErrors({});
       setNotice("");
+      setStaleNotice("");
     }
     lastEmail.current = current.user.email;
     const id = ++requestId.current;
@@ -244,6 +259,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return next;
       });
       setNotice("");
+      setStaleNotice("");
       try {
         return await run(AbortSignal.timeout(10000));
       } finally {
@@ -300,6 +316,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             return false;
           }
           applySnapshot(id, { status: "ready", cart: body as Cart });
+          if (requestId.current === id) setStaleNotice("");
           return true;
         } catch {
           // A timeout leaves the outcome uncertain: the write may still have
@@ -403,6 +420,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       pending,
       errors,
       notice,
+      staleNotice,
       refresh,
       setQuantity,
       removeItem,
@@ -414,6 +432,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     pending,
     errors,
     notice,
+    staleNotice,
     refresh,
     setQuantity,
     removeItem,

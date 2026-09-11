@@ -266,6 +266,18 @@ export function CartView() {
   const { cart: data } = cart.state;
   return (
     <div className="space-y-8">
+      {cart.staleNotice && (
+        <p
+          role="status"
+          className="flex items-start gap-2 rounded-md border border-border bg-secondary p-4 text-sm"
+        >
+          <AlertTriangle
+            className="mt-0.5 size-4 shrink-0"
+            aria-hidden="true"
+          />
+          {cart.staleNotice}
+        </p>
+      )}
       <p role="status" className="text-xs text-muted-foreground">
         {data.items.length} {data.items.length === 1 ? "line" : "lines"} ·{" "}
         {data.items.reduce((total, item) => total + item.quantity, 0)} objects

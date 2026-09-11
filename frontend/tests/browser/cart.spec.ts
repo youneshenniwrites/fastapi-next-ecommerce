@@ -249,7 +249,9 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await updateButton(page, first.name).click();
   await expect(page.getByRole("alert").first()).toBeVisible();
 
-  // Quantities beyond stock return a recoverable 409 (Task Light has stock 8).
+  // Quantities beyond stock are rejected with a 409 and a stock-specific
+  // message (Task Light has stock 8): asserting the status and the message
+  // keeps a generic server failure from passing as stock handling.
   await page.goto(`/products/${second.id}`);
   await page
     .getByRole("main")
@@ -258,9 +260,17 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await openCartLink(page, info.project.name);
   const scarce = page.getByLabel(`Quantity of ${second.name}, 1 to 99`);
   await scarce.fill("99");
-  await updateButton(page, second.name).click();
+  const [shortage] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/cart/items/") &&
+        response.request().method() === "PUT",
+    ),
+    updateButton(page, second.name).click(),
+  ]);
+  expect(shortage.status()).toBe(409);
   await expect(page.getByRole("alert").first()).toContainText(
-    /Not enough stock|exceeds current stock|temporarily unavailable/,
+    /Not enough stock|exceeds current stock/,
   );
 
   // Failed writes surface the handler's generic recoverable message (the
@@ -298,4 +308,120 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await page.reload();
   await expect(page.getByText("Qty 3")).toHaveCount(2);
   await expect(page.getByTestId("cart-count").first()).toHaveText("6");
+});
+
+test("stale cart shows a visible warning and recovers on refresh", async ({
+  page,
+  request,
+}) => {
+  const all = await products(request);
+  const item =
+    all.find((p) => p.name === "Notebook Set") ?? all.find((p) => p.stock > 5)!;
+  const email = `cart-stale-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await login(page, email, password);
+  await page.goto(`/products/${item.id}`);
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ })
+    .click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await page.goto("/cart");
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+
+  // A failed background refresh keeps the rendered cart and surfaces a
+  // visible warning instead of wiping private UI.
+  await page.route("**/api/cart", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: '{"error":"Your cart is temporarily unavailable. Please try again."}',
+      });
+      return;
+    }
+    await route.continue();
+  });
+  const [failedRefresh] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/cart") &&
+        response.request().method() === "GET",
+    ),
+    page.evaluate(() => window.dispatchEvent(new Event("focus"))),
+  ]);
+  expect(failedRefresh.status()).toBe(503);
+  const warning = page
+    .getByRole("status")
+    .filter({ hasText: "Couldn't update your cart" });
+  await expect(warning).toBeVisible();
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+
+  // The next successful refresh clears the warning.
+  await page.unroute("**/api/cart");
+  const [recoveredRefresh] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/cart") &&
+        response.request().method() === "GET",
+    ),
+    page.evaluate(() => window.dispatchEvent(new Event("focus"))),
+  ]);
+  expect(recoveredRefresh.ok()).toBe(true);
+  await expect(warning).toHaveCount(0);
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+});
+
+test("mutation timeout shows a recoverable error and reconciles", async ({
+  page,
+  request,
+}) => {
+  const all = await products(request);
+  const item =
+    all.find((p) => p.name === "Notebook Set") ?? all.find((p) => p.stock > 5)!;
+  const email = `cart-timeout-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await login(page, email, password);
+  await page.goto(`/products/${item.id}`);
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ });
+  await add.click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+
+  // Let the server process the write, then delay its response past the
+  // 10s client timeout: the aborted request still settles server-side, so
+  // the timeout message must appear and reconciliation must converge on
+  // the persisted cart.
+  await page.route("**/api/cart/items/*", async (route) => {
+    if (route.request().method() === "PUT") {
+      const upstream = await route.fetch();
+      await new Promise((resolve) => setTimeout(resolve, 11000));
+      // The client aborts at 10s, so this fulfill is expectedly rejected;
+      // the server already processed the write above.
+      await route.fulfill({ response: upstream }).catch(() => {});
+      return;
+    }
+    await route.continue();
+  });
+  await add.click();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "timed out" }),
+  ).toBeVisible({ timeout: 20000 });
+  await page.unroute("**/api/cart/items/*");
+
+  // Poll the authoritative cart until client and server agree again.
+  await expect
+    .poll(
+      async () => {
+        await page.goto("/cart");
+        return await page.getByText("Qty 2").count();
+      },
+      { timeout: 30000 },
+    )
+    .toBe(1);
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
 });
