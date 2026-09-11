@@ -441,7 +441,17 @@ test("empty and incomplete sign-in submissions stay on the form without requests
       (el) => (el as HTMLInputElement).validity.valueMissing,
     ),
   ).toBe(true);
+  await expect(
+    page.getByText("Enter your email address.", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Enter your password.", { exact: true }),
+  ).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await email.fill("empty-password@example.com");
+  await expect(
+    page.getByText("Enter your email address.", { exact: true }),
+  ).toHaveCount(0);
   await submit.click();
   await expect(password).toBeFocused();
   expect(
@@ -460,6 +470,10 @@ test("empty and incomplete sign-in submissions stay on the form without requests
       (el) => (el as HTMLInputElement).validity.typeMismatch,
     ),
   ).toBe(true);
+  await expect(
+    page.getByText("Enter a valid email address.", { exact: true }),
+  ).toBeVisible();
+  await expect(email).toHaveAttribute("aria-invalid", "true");
   await expect(page).toHaveURL(/\/login$/);
   expect(documents).toBe(0);
   expect(loginRequests).toBe(0);

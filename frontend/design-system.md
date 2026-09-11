@@ -51,3 +51,14 @@ Run lint, formatting, types, unit tests, build and Playwright as described in th
 README. Browser tests cover actual catalog/retry behavior, keyboard and mobile
 access, axe checks, theme styles and reduced-motion loading. Desktop/mobile
 screenshots are produced in `test-results` and retained by CI artifacts.
+
+## Account form validation
+
+Account forms use React Hook Form with a Zod resolver and shadcn Field, FieldLabel
+and FieldError. Schemas live in src/lib/account-validation.ts. Validate on submit,
+then on change; associate inline messages with inputs and focus the first invalid
+field. Hydrated forms suppress native tooltips with noValidate. Preserve required
+attributes, pre-hydration disabled controls and POST fallback. Login and registration
+use different password limits; never trim or log passwords. API validation remains
+authoritative. Test invalid submissions for zero navigation and zero API calls.
+See the [design-system Wiki](https://github.com/youneshenniwrites/fastapi-next-ecommerce/wiki/Design-system).
