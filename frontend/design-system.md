@@ -80,3 +80,16 @@ without global smooth scrolling, so validation focus does not animate the viewpo
 use shadcn ScrollArea when a bounded custom scroll panel is needed. Select retains
 its own Radix viewport and scroll controls. Do not wrap its menu in a second scroll
 container. Reserve inline form-error space so corrections do not move submit controls.
+
+## Cart storefront
+
+Signed-in cart state lives in an in-memory CartProvider fed by same-origin
+`/api/cart` handlers; bearer tokens never reach the browser. AddToCartButton,
+CartLink (navigation count) and CartView (lines, quantity forms, subtotal)
+compose Button, Badge, Input and Skeleton with the shared 4px corners and
+48px/40px control heights. Quantity forms use React Hook Form with a Zod
+1–99 schema; the backend remains authoritative for prices, totals and stock.
+Concurrent writes serialize per product with an in-flight guard, the last
+settled write triggers an authoritative re-read, and background failures keep
+the rendered cart behind a visible retry warning instead of wiping it.
+Signed-out visitors get a sign-in action; no guest storage exists.

@@ -69,4 +69,4 @@ broader items into focused PR tickets before implementation. See
 
 Hosting setup #44 and production workflow acceptance #46 are complete.
 Development and production are live; #45 tracks the remaining frontend previews.
-Account journey verification (#27) is complete; the cart storefront (#72) is the next product task after the persistent API (#71). Azure is deferred; no extra API billing is allowed.
+Account journey verification (#27) is complete; the persistent cart API (#71) is delivered and the cart storefront (#72) is in delivery. Azure is deferred; no extra API billing is allowed.

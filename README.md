@@ -27,7 +27,7 @@ The backend and catalog storefront run locally and in a
 | Verification | SQLite/PostgreSQL tests, container smoke tests, coverage gate, dependency audits |
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive catalog/detail and registration/login pages, filters, generated API types and browser checks |
-| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; cart UI, checkout, payments and order history remain planned |
+| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; checkout, payments and order history remain planned |
 | Hosting | Development and production demos verified on Vercel/Neon; main releases through GitHub CI/CD |
 
 This repository is a development foundation, not a production-ready shop. Tests
@@ -223,8 +223,8 @@ Azure is an optional future migration (#31). The AWS Terraform in backend/infra
 remains legacy reference. No paid upgrade or new AI API billing is authorized.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
-The next product steps are the cart storefront, orders and sandbox payments. The customer
-account journey is implemented and covered by desktop/mobile browser tests. Follow the
+The next product steps are orders and sandbox payments. The customer
+account journey and the signed-in cart storefront are implemented and covered by desktop/mobile browser tests. Follow the
 [ordered roadmap](docs/plans/roadmap.md) for the remaining work.
 
 ## Try customer accounts
