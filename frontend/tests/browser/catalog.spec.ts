@@ -15,7 +15,10 @@ test("browse, filter and view the real FastAPI catalog", async ({
   await page.getByRole("button", { name: "Clear filters" }).click();
   await page.getByLabel("In stock only").check();
   await expect(page.getByRole("status")).toHaveText("5 objects");
-  await page.getByLabel("Sort products").selectOption("price-asc");
+  await page.getByLabel("Sort products").click();
+  await page
+    .getByRole("option", { name: "Price: low to high", exact: true })
+    .click();
   await expect(page.locator(".product h3").first()).toHaveText("Notebook Set");
   await page.getByRole("searchbox").fill("Oak");
   await page.getByRole("link", { name: /Oak Monitor Stand/ }).click();
@@ -68,6 +71,15 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   const action = page.getByRole("link", { name: /Explore the collection/ });
   await expect(action).toHaveCSS("background-color", "rgb(48, 78, 60)");
   await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(action).toHaveCSS("border-radius", "4px");
+  await expect(page.getByLabel("Search collection")).toHaveCSS(
+    "border-radius",
+    "4px",
+  );
+  await expect(page.getByLabel("Sort products")).toHaveCSS(
+    "border-radius",
+    "4px",
+  );
   await action.focus();
   await expect(action).toBeFocused();
   await expect(action).toHaveCSS("outline-style", "solid");

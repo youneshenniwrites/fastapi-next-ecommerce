@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { CatalogSkeleton } from "@/components/catalog-skeleton";
 import { ArrowUpRight, Minus } from "lucide-react";
 import {
   container,
@@ -12,17 +14,7 @@ import Image from "next/image";
 import { apiClient } from "@/lib/api/client";
 import { Catalog } from "@/components/catalog";
 export const dynamic = "force-dynamic";
-export default async function Home() {
-  let products;
-  try {
-    const result = await apiClient().GET("/api/v1/products/", {
-      params: { query: { limit: 100, skip: 0 } },
-    });
-    if (result.error || !result.data) throw new Error("Catalog unavailable");
-    products = result.data;
-  } catch {
-    products = null;
-  }
+export default function Home() {
   return (
     <main id="main">
       <section
@@ -75,19 +67,9 @@ export default async function Home() {
           title="Find your focus."
           description="Small details. A different kind of day."
         />
-        {products === null ? (
-          <div
-            className={stateLayout}
-            role="alert"
-            aria-label="Catalog unavailable"
-          >
-            <h3>The collection is taking a moment.</h3>
-            <p>We couldn’t reach the catalog. Please try again shortly.</p>
-            <RetryCatalog />
-          </div>
-        ) : (
-          <Catalog products={products} />
-        )}
+        <Suspense fallback={<CatalogSkeleton />}>
+          <CatalogData />
+        </Suspense>
       </section>
       <section
         id="approach"
@@ -112,5 +94,27 @@ export default async function Home() {
         </span>
       </section>
     </main>
+  );
+}
+
+async function CatalogData() {
+  let products;
+  try {
+    const result = await apiClient().GET("/api/v1/products/", {
+      params: { query: { limit: 100, skip: 0 } },
+    });
+    if (result.error || !result.data) throw new Error("Catalog unavailable");
+    products = result.data;
+  } catch {
+    products = null;
+  }
+  return products === null ? (
+    <div className={stateLayout} role="alert" aria-label="Catalog unavailable">
+      <h3>The collection is taking a moment.</h3>
+      <p>We couldn’t reach the catalog. Please try again shortly.</p>
+      <RetryCatalog />
+    </div>
+  ) : (
+    <Catalog products={products} />
   );
 }

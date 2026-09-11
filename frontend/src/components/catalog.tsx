@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { ProductCard } from "@/components/product-card";
 import { stateLayout } from "@/components/storefront-layout";
 import { filterProducts, type Product, type Sort } from "@/lib/catalog";
@@ -51,22 +54,24 @@ export function Catalog({ products }: { products: Product[] }) {
           <label htmlFor="sort-products" className="text-xs">
             Sort by
           </label>
-          <NativeSelect
-            id="sort-products"
-            aria-label="Sort products"
-            className="h-10 max-w-[180px]"
+          <Select
             value={sort}
-            onChange={(e) => setSort(e.target.value as Sort)}
+            onValueChange={(value) => setSort(value as Sort)}
           >
-            <NativeSelectOption value="featured">Featured</NativeSelectOption>
-            <NativeSelectOption value="price-asc">
-              Price: low to high
-            </NativeSelectOption>
-            <NativeSelectOption value="price-desc">
-              Price: high to low
-            </NativeSelectOption>
-            <NativeSelectOption value="name">Name</NativeSelectOption>
-          </NativeSelect>
+            <SelectTrigger
+              id="sort-products"
+              aria-label="Sort products"
+              className="h-10 w-[180px]"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="featured">Featured</SelectItem>
+              <SelectItem value="price-asc">Price: low to high</SelectItem>
+              <SelectItem value="price-desc">Price: high to low</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <p role="status" className="my-5 text-xs text-muted-foreground">

@@ -29,6 +29,9 @@ test("loading state is visible while catalog fetch is pending", async ({
   await expect(
     page.getByRole("status", { name: "Loading collection" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Room to think. Space to create." }),
+  ).toBeVisible();
   await expect(page.locator('[data-slot="skeleton"]').first()).toHaveCSS(
     "animation-name",
     "none",
