@@ -65,6 +65,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cart/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read your saved cart
+         * @description Current GBP prices and availability; stock is not reserved. Saved shortages remain visible. Deleted products are removed from carts.
+         */
+        get: operations["get_cart_api_v1_cart__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cart/items/{product_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set an absolute cart quantity
+         * @description Idempotent quantity 1–99. New lines/increases require stock; reductions and unchanged quantities remain allowed during shortages. Concurrent writes serialize per customer: last serialized write wins. Prices and ownership cannot be supplied.
+         */
+        put: operations["put_cart_item_api_v1_cart_items__product_id__put"];
+        post?: never;
+        /**
+         * Remove a product from your cart
+         * @description Idempotent: missing lines also return 204. Only your own line can be removed.
+         */
+        delete: operations["delete_cart_item_api_v1_cart_items__product_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/products/": {
         parameters: {
             query?: never;
@@ -162,6 +206,34 @@ export interface components {
             scope: string;
             /** Username */
             username: string;
+        };
+        /** CartItem */
+        CartItem: {
+            /** Available */
+            available: boolean;
+            /** Line Total */
+            line_total: string;
+            product: components["schemas"]["ProductRead"];
+            /** Quantity */
+            quantity: number;
+        };
+        /** CartQuantity */
+        CartQuantity: {
+            /** Quantity */
+            quantity: number;
+        };
+        /** CartRead */
+        CartRead: {
+            /**
+             * Currency
+             * @default GBP
+             * @constant
+             */
+            currency: "GBP";
+            /** Items */
+            items: components["schemas"]["CartItem"][];
+            /** Subtotal */
+            subtotal: string;
         };
         /**
          * ErrorResponse
@@ -383,6 +455,135 @@ export interface operations {
             };
             /** @description Email is already registered. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_cart_api_v1_cart__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CartRead"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    put_cart_item_api_v1_cart_items__product_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartQuantity"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CartRead"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_cart_item_api_v1_cart_items__product_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

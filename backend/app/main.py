@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.api.v1 import auth, products
+from app.api.v1 import auth, cart, products
 
 # --------------------------
 # Logging Configuration
@@ -23,7 +23,7 @@ app = FastAPI(
         "decimal prices. Product writes require an active admin. Register a customer, "
         "then use Authorize with your email in the username field to obtain a bearer "
         "token. Admin bootstrap is an operator CLI, never a public endpoint. "
-        "Cart and checkout are planned; no real purchases are supported."
+        "Signed-in carts use current prices without reserving stock; checkout is planned."
     ),
     openapi_tags=[
         {
@@ -85,6 +85,7 @@ async def health_check() -> dict[str, str]:
 # from app.api.v1 import products, users
 app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(cart.router, prefix="/api/v1/cart", tags=["Cart"])
 # app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 
 

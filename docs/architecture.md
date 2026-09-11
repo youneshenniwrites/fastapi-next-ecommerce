@@ -1,15 +1,14 @@
 # Current architecture
 
-FastAPI exposes /health and /api/v1/auth and /api/v1/products. SQLAlchemy models
-currently represent users and products. PostgreSQL is the development runtime;
+FastAPI exposes /health and /api/v1/auth and /api/v1/products and /api/v1/cart. SQLAlchemy models
+represent users, products and customer cart lines. PostgreSQL is the development runtime;
 SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
 The frontend/ directory provides the Next.js catalog and product-detail storefront.
 Tailwind v4 and shadcn/ui supply shared themed primitives; page layouts compose reusable storefront components. See [frontend design system](../frontend/design-system.md).
 Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
-browser receives product data for local filtering. Cart, orders and payment
-adapters are not implemented.
-Existing files for those domains are placeholders. Product prices use Decimal /
+browser receives product data for local filtering. Signed-in cart persistence is implemented; see [cart API](design/cart-api.md).
+Cart UI, orders and payment adapters remain planned. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
 

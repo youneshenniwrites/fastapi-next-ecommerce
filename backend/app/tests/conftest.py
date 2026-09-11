@@ -6,7 +6,7 @@ os.environ["SECRET_KEY"] = "test-only-secret-key-that-is-at-least-32-characters"
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -24,6 +24,12 @@ def db():
         else {}
     )
     engine = create_engine(url, **options)
+    if engine.dialect.name == "sqlite":
+
+        @event.listens_for(engine, "connect")
+        def enable_foreign_keys(connection, _):
+            connection.execute("PRAGMA foreign_keys=ON")
+
     Base.metadata.create_all(engine)
     with Session(engine) as session:
         yield session
