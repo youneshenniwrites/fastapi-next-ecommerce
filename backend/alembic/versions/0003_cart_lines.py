@@ -15,6 +15,7 @@ depends_on = None
 
 
 def upgrade():
+    """Create cart storage with ownership, uniqueness and quantity constraints."""
     op.create_table(
         "cart_lines",
         sa.Column("user_id", sa.Integer(), nullable=False),
@@ -29,5 +30,6 @@ def upgrade():
 
 
 def downgrade():
+    """Remove cart storage; saved cart lines are lost on rollback."""
     op.drop_index("ix_cart_lines_product_id", table_name="cart_lines")
     op.drop_table("cart_lines")

@@ -17,6 +17,7 @@ from app.models.user import User
 
 @pytest.fixture
 def product(db):
+    """Persist a fictional product with enough stock for quantity boundary tests."""
     item = Product(name="Cart test", price=Decimal("19.99"), stock=99)
     db.add(item)
     db.commit()
@@ -24,10 +25,12 @@ def product(db):
 
 
 def headers(token):
+    """Build bearer headers without exposing the token in test output."""
     return {"Authorization": f"Bearer {token}"}
 
 
 def put(client, token, product, quantity, **extra):
+    """Submit an absolute quantity with optional fields for rejection tests."""
     return client.put(
         f"/api/v1/cart/items/{product.id}",
         headers=headers(token),
@@ -36,6 +39,7 @@ def put(client, token, product, quantity, **extra):
 
 
 def test_cart_current_money_stock_and_idempotence(client, db, product, token):
+    """Verify retries, live prices, visible shortages, reductions and repeat removal."""
     assert client.get("/api/v1/cart/", headers=headers(token)).json()["items"] == []
     for _ in range(2):
         result = put(client, token, product, 3)
@@ -68,10 +72,12 @@ def test_cart_current_money_stock_and_idempotence(client, db, product, token):
 
 @pytest.mark.parametrize("quantity", [0, -1, 100, 1.5, "2", True, None])
 def test_invalid_quantity(client, product, token, quantity):
+    """Reject out-of-range values and coercions such as strings and booleans."""
     assert put(client, token, product, quantity).status_code == 422
 
 
 def test_stock_missing_and_untrusted_fields(client, db, product, token):
+    """Reject unavailable additions, missing products and client authority fields."""
     product.stock = 0
     db.commit()
     assert put(client, token, product, 1).status_code == 409
@@ -94,6 +100,7 @@ def test_stock_missing_and_untrusted_fields(client, db, product, token):
 
 
 def test_auth_and_customer_isolation(client, db, product, user, token):
+    """Keep carts separate and deny anonymous, expired and disabled credentials."""
     assert put(client, token, product, 2).status_code == 200
     other = User(email="other@example.com", hashed_password="unused", is_active=True)
     db.add(other)
@@ -141,6 +148,7 @@ def test_auth_and_customer_isolation(client, db, product, user, token):
 
 
 def test_persistence_and_product_deletion(client, db, product, user, token):
+    """Restore saved lines across sessions and remove them when products are deleted."""
     assert put(client, token, product, 99).status_code == 200
     # New DB session (as after process restart), and a fresh login/token.
     with Session(db.get_bind()) as fresh:
@@ -167,6 +175,7 @@ def test_persistence_and_product_deletion(client, db, product, user, token):
 
 
 def test_database_constraints(db, product, user):
+    """Reject invalid quantities and orphaned ownership references at the database."""
     for user_id, product_id, quantity in [
         (user.id, product.id, 0),
         (user.id, product.id, 100),
@@ -180,6 +189,7 @@ def test_database_constraints(db, product, user):
 
 
 def test_postgres_concurrent_duplicate_and_updates(db, product, user):
+    """Verify separate PostgreSQL transactions cannot create duplicate customer lines."""
     if db.get_bind().dialect.name != "postgresql":
         pytest.skip("PostgreSQL row-lock semantics are verified in integration CI")
     uid, pid = user.id, product.id
@@ -188,6 +198,7 @@ def test_postgres_concurrent_duplicate_and_updates(db, product, user):
         barrier = Barrier(2)
 
         def worker(quantity):
+            """Race an independent transaction against the other absolute quantity write."""
             with Session(db.get_bind()) as session:
                 barrier.wait(timeout=10)
                 return set_quantity(session, uid, pid, quantity)
@@ -202,6 +213,7 @@ def test_postgres_concurrent_duplicate_and_updates(db, product, user):
 
 
 def test_multiple_products_and_maximum_money(client, db, product, token):
+    """Sum multiple lines exactly even when totals exceed the product price range."""
     product.price = Decimal("9999999999.99")
     second = Product(name="Second", price=Decimal("0.01"), stock=2)
     db.add(second)
@@ -216,6 +228,7 @@ def test_multiple_products_and_maximum_money(client, db, product, token):
 
 
 def test_unique_line_and_customer_cascade(db, product, user):
+    """Reject duplicate lines and cascade customer deletion to saved cart data."""
     uid, pid = user.id, product.id
     db.add(CartLine(user_id=uid, product_id=pid, quantity=1))
     db.commit()

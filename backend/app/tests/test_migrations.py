@@ -9,12 +9,14 @@ BACKEND = Path(__file__).resolve().parents[2]
 
 
 def test_migration_upgrade_downgrade_and_metadata(tmp_path):
+    """Verify repeatable migrations, metadata and cart constraints on disposable storage."""
     database_url = os.environ.get(
         "TEST_MIGRATION_DATABASE_URL", f"sqlite:///{tmp_path / 'migration.db'}"
     )
     env = dict(os.environ, DATABASE_URL=database_url)
 
     def alembic(*args):
+        """Run a checked migration command against the disposable test database."""
         subprocess.run(
             [sys.executable, "-m", "alembic", *args],
             cwd=BACKEND,
@@ -62,6 +64,7 @@ def test_migration_upgrade_downgrade_and_metadata(tmp_path):
 
 # TEST_MIGRATION_DATABASE_URL, when set, must point to a separate disposable DB.
 def test_existing_product_migration_preserves_money_and_rejects_loss(tmp_path):
+    """Preserve valid legacy prices and reject migration that would lose precision."""
     from decimal import Decimal
 
     from sqlalchemy import MetaData, Table, text
@@ -72,6 +75,7 @@ def test_existing_product_migration_preserves_money_and_rejects_loss(tmp_path):
     env = dict(os.environ, DATABASE_URL=url)
 
     def migrate(*args, check=True):
+        """Run legacy migration steps, optionally retaining an expected failure result."""
         return subprocess.run(
             [sys.executable, "-m", "alembic", *args],
             cwd=BACKEND,

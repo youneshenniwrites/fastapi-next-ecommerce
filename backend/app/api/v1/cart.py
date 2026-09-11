@@ -15,6 +15,7 @@ ProductId = Annotated[int, Path(ge=1, le=2147483647)]
 
 
 def private_response(response: Response) -> None:
+    """Prevent successful cart responses from being cached."""
     response.headers["Cache-Control"] = "private, no-store"
 
 
@@ -28,6 +29,7 @@ router.dependencies.append(Depends(private_response))
     description="Current GBP prices and availability; stock is not reserved. Saved shortages remain visible. Deleted products are removed from carts.",
 )
 def get_cart(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Return only the authenticated customer’s cart at current product prices."""
     return read_cart(db, user.id)
 
 
@@ -44,6 +46,7 @@ def put_cart_item(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """Set the customer’s absolute quantity using backend stock rules."""
     return set_quantity(db, user.id, product_id, payload.quantity)
 
 
@@ -58,4 +61,5 @@ def delete_cart_item(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """Remove only the customer’s line, succeeding even if it is absent."""
     remove_line(db, user.id, product_id)

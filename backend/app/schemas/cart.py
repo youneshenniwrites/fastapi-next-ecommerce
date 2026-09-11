@@ -19,6 +19,7 @@ class CartItem(BaseModel):
 
     @field_serializer("line_total", when_used="json")
     def serialize_total(self, value: Decimal) -> str:
+        """Serialize exact GBP amounts with two fractional digits."""
         return format(value, ".2f")
 
 
@@ -29,4 +30,5 @@ class CartRead(BaseModel):
 
     @field_serializer("subtotal", when_used="json")
     def serialize_total(self, value: Decimal) -> str:
+        """Serialize exact GBP amounts with two fractional digits."""
         return format(value, ".2f")

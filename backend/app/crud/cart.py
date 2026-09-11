@@ -13,6 +13,7 @@ from app.schemas.product import ProductRead
 
 def read_cart(db: Session, user_id: int) -> CartRead:
     # One statement: prices, availability and quantities share the same snapshot.
+    """Read quantities and current prices together and calculate exact GBP totals."""
     rows = db.execute(
         select(CartLine, Product)
         .join(Product, Product.id == CartLine.product_id)
@@ -37,6 +38,7 @@ def read_cart(db: Session, user_id: int) -> CartRead:
 def lock_customer(db: Session, user_id: int) -> None:
     # Serialize mutations even when a cart has no rows yet. PostgreSQL is the
     # runtime; SQLite is only used for sequential behavioral tests.
+    """Serialize writes even for empty carts and recheck active status under lock."""
     user = db.scalar(
         select(User)
         .where(User.id == user_id)
@@ -48,6 +50,7 @@ def lock_customer(db: Session, user_id: int) -> None:
 
 
 def set_quantity(db: Session, user_id: int, product_id: int, quantity: int) -> CartRead:
+    """Commit an absolute quantity; stock limits apply only to new lines and increases."""
     lock_customer(db, user_id)
     product = db.scalar(
         select(Product)
@@ -73,6 +76,7 @@ def set_quantity(db: Session, user_id: int, product_id: int, quantity: int) -> C
 
 
 def remove_line(db: Session, user_id: int, product_id: int) -> None:
+    """Serialize and commit an idempotent removal scoped to the customer."""
     lock_customer(db, user_id)
     db.execute(
         delete(CartLine).where(
