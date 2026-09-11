@@ -29,6 +29,30 @@ def test_migration_upgrade_downgrade_and_metadata(tmp_path):
     alembic("check")
     engine = create_engine(database_url)
     assert {"users", "products", "cart_lines"} <= set(inspect(engine).get_table_names())
+    schema = inspect(engine)
+    assert schema.get_pk_constraint("cart_lines")["constrained_columns"] == [
+        "user_id",
+        "product_id",
+    ]
+    assert {
+        constraint["name"] for constraint in schema.get_check_constraints("cart_lines")
+    } == {"ck_cart_quantity"}
+    check = schema.get_check_constraints("cart_lines")[0]["sqltext"]
+    normalized = "".join(check.replace("(", "").replace(")", "").split()).lower()
+    assert normalized == "quantity>=1andquantity<=99"
+    foreign_keys = schema.get_foreign_keys("cart_lines")
+    assert {
+        (
+            tuple(key["constrained_columns"]),
+            key["referred_table"],
+            tuple(key["referred_columns"]),
+            key["options"].get("ondelete"),
+        )
+        for key in foreign_keys
+    } == {
+        (("user_id",), "users", ("id",), "CASCADE"),
+        (("product_id",), "products", ("id",), "CASCADE"),
+    }
     alembic("downgrade", "base")
     assert "users" not in inspect(engine).get_table_names()
     alembic("upgrade", "head")
