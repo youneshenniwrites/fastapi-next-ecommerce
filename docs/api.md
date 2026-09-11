@@ -134,8 +134,8 @@ sets an integer quantity from 1 to 99; new lines and increases beyond current st
 return 409. Reductions and removal remain allowed during shortages. Cart totals
 use current backend prices, and adding a line does not reserve stock. Deleted
 products are removed from saved carts. See [the cart contract](design/cart-api.md)
-for persistence and concurrency semantics. Cart storefront controls, checkout and
-payment endpoints remain planned.
+for persistence and concurrency semantics. The signed-in cart storefront is
+implemented; checkout and payment endpoints remain planned.
 
 ## Contract workflow
 
