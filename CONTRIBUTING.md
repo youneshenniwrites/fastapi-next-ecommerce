@@ -11,7 +11,14 @@ to the next usable behavior and separate tooling/documentation changes when usef
 3. Reproduce bugs before fixing them and add a behavior-level regression test.
 4. Run `make check`. Use `make coverage`, `make audit`, and
    `make requirements-check` for relevant dependency or tooling changes.
-5. Review the complete diff and open a focused PR with validation evidence.
+5. Commit incrementally as each coherent change is completed and verified:
+   stage only relevant files, keep coupled code, tests and generated files
+   together, and review the staged diff before committing with a focused
+   Conventional Commits subject (see Naming conventions below). Small tasks
+   may need only one commit. Incremental commits do not replace full PR
+   testing or current-head external review, and committing never authorizes
+   pushing or merging.
+6. Review the complete diff and open a focused PR with validation evidence.
 
 `make hooks` installs optional local checks. CI still runs even when hooks are not
 installed. Use separate Compose project names, ports, and databases for concurrent
