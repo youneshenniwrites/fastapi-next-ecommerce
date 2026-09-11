@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type FormEvent,
-} from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { accountSchema, type AccountValues } from "@/lib/account-validation";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +15,17 @@ const subscribe = () => () => {};
 
 export function AccountForm({ mode }: { mode: "login" | "register" }) {
   const registering = mode === "register";
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AccountValues>({
+    resolver: zodResolver(accountSchema(mode)),
+    defaultValues: { email: "", password: "" },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
   const ready = useSyncExternalStore(
     subscribe,
     () => true,
@@ -31,22 +40,16 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
     if (error || registered) feedback.current?.focus();
   }, [error, registered]);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submit(values: AccountValues) {
     if (!ready || busy.current) return;
     busy.current = true;
     setPending(true);
     setError("");
-    const form = event.currentTarget;
-    const fields = new FormData(form);
     try {
       const response = await fetch(`/api/session/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: String(fields.get("email") ?? "").trim(),
-          password: String(fields.get("password") ?? ""),
-        }),
+        body: JSON.stringify(values),
         signal: AbortSignal.timeout(10000),
       });
       const result = await response.json();
@@ -56,7 +59,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
           ? result.registered === true
           : result.authenticated === true)
       ) {
-        form.reset();
+        reset();
         if (registering) setRegistered(true);
         else {
           // Discard cached account/navigation state after authentication.
@@ -126,18 +129,21 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
       ) : (
         <form
           method="post"
-          onSubmit={submit}
+          noValidate
+          onSubmit={(event) => {
+            void handleSubmit(submit)(event);
+          }}
           aria-label={registering ? "Create account" : "Sign in"}
           aria-busy={!ready || pending}
           className="mt-8 space-y-5"
         >
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email address
-            </label>
+          <Field data-invalid={Boolean(errors.email)}>
+            <FieldLabel htmlFor="email">Email address</FieldLabel>
             <Input
               id="email"
-              name="email"
+              {...register("email")}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "email-error" : undefined}
               type="email"
               autoComplete="email"
               required
@@ -145,20 +151,29 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
               disabled={!ready || pending}
               className="h-12"
             />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
+            {errors.email && (
+              <FieldError id="email-error" errors={[errors.email]} />
+            )}
+          </Field>
+          <Field data-invalid={Boolean(errors.password)}>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
             <Input
               id="password"
-              name="password"
+              {...register("password")}
+              aria-invalid={Boolean(errors.password)}
               type="password"
               autoComplete={registering ? "new-password" : "current-password"}
               required
               minLength={registering ? 8 : 1}
               maxLength={registering ? 128 : 1024}
-              aria-describedby={registering ? "password-help" : undefined}
+              aria-describedby={
+                [
+                  registering ? "password-help" : "",
+                  errors.password ? "password-error" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ") || undefined
+              }
               disabled={!ready || pending}
               className="h-12"
             />
@@ -167,7 +182,10 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
                 Use 8–128 characters. Don't reuse a real password.
               </p>
             )}
-          </div>
+            {errors.password && (
+              <FieldError id="password-error" errors={[errors.password]} />
+            )}
+          </Field>
           {error && (
             <p
               ref={feedback}
