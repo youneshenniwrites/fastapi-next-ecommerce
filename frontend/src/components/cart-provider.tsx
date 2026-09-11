@@ -84,6 +84,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // cart, so staleness needs its own banner instead of the sr-only notice.
   const [staleNotice, setStaleNotice] = useState("");
   const requestId = useRef(0);
+  // Account generation: bumped on every confirmed identity change (including
+  // sign-out). Fetch and mutation completions from older generations are
+  // ignored so one customer's cart, errors or pending flags can never leak
+  // into another customer's session.
+  const accountGen = useRef(0);
   const busy = useRef(new Set<number>());
   const lastEmail = useRef<string | null>(null);
   const sessionRef = useRef(session);
@@ -104,8 +109,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Background failures preserve a rendered cart and surface a visible
   // retry warning instead of wiping private UI; explicit loads without a
   // cart still fail into the error state with its Try again action.
-  const markStale = useCallback((id: number) => {
-    if (requestId.current !== id) return;
+  const markStale = useCallback((id: number, gen: number) => {
+    if (requestId.current !== id || gen !== accountGen.current) return;
     if (snapshotRef.current?.status === "ready") {
       setStaleNotice("Couldn't update your cart. Please try again.");
       return;
@@ -114,26 +119,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchCart = useCallback(
-    async (id: number, signal: AbortSignal) => {
+    async (id: number, signal: AbortSignal, gen: number) => {
+      // A newer account generation invalidates this read: never apply
+      // another customer's snapshot, stale fallback or notice.
+      const fresh = () => gen === accountGen.current && !signal.aborted;
       try {
         const response = await fetch("/api/cart", {
           cache: "no-store",
           signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]),
         });
-        if (signal.aborted) return;
+        if (!fresh()) return;
         if (response.status === 401) {
           applySnapshot(id, { status: "guest" });
           return;
         }
         if (!response.ok) {
-          markStale(id);
+          markStale(id, gen);
           return;
         }
         const cart = (await response.json()) as Cart;
+        if (!fresh()) return;
         if (requestId.current === id) setStaleNotice("");
         applySnapshot(id, { status: "ready", cart });
       } catch {
-        if (!signal.aborted) markStale(id);
+        if (!signal.aborted && gen === accountGen.current) markStale(id, gen);
       }
     },
     [applySnapshot, markStale],
@@ -146,11 +155,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const reconcile = useCallback(async () => {
     const current = sessionRef.current;
     if (current.status !== "authenticated") return;
+    const gen = accountGen.current;
     const id = ++requestId.current;
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 10000);
     try {
-      await fetchCart(id, controller.signal);
+      await fetchCart(id, controller.signal, gen);
     } finally {
       window.clearTimeout(timer);
     }
@@ -172,27 +182,41 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
     if (current.status !== "authenticated") {
       requestId.current += 1;
+      accountGen.current += 1;
       lastEmail.current = null;
       busy.current.clear();
       setPending({});
       setErrors({});
       setNotice("");
       setStaleNotice("");
-      setSnapshot({ status: current.status === "guest" ? "guest" : "error" });
+      const next = {
+        status:
+          current.status === "guest" ? ("guest" as const) : ("error" as const),
+      };
+      snapshotRef.current = next;
+      setSnapshot(next);
       return;
     }
     if (
       lastEmail.current !== null &&
       lastEmail.current !== current.user.email
     ) {
-      // Account changes discard the previous customer's private cart UI.
+      // A confirmed account change invalidates the previous customer's
+      // rendered cart immediately. Preserving it until the new fetch lands
+      // would display one customer's private cart to another customer when
+      // the re-read fails, so reset to loading synchronously (including the
+      // ref that markStale consults) before fetching the new account's cart.
+      accountGen.current += 1;
       busy.current.clear();
       setPending({});
       setErrors({});
       setNotice("");
       setStaleNotice("");
+      snapshotRef.current = { status: "loading" };
+      setSnapshot({ status: "loading" });
     }
     lastEmail.current = current.user.email;
+    const gen = accountGen.current;
     const id = ++requestId.current;
     setSnapshot((previous) =>
       previous && previous.status === "ready"
@@ -200,7 +224,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         : { status: "loading" },
     );
     const controller = new AbortController();
-    void fetchCart(id, controller.signal);
+    void fetchCart(id, controller.signal, gen);
   }, [fetchCart]);
 
   const refreshRef = useRef(refresh);
@@ -247,8 +271,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const mutate = useCallback(
     async (
       productId: number,
-      run: (signal: AbortSignal) => Promise<boolean>,
+      run: (signal: AbortSignal, gen: number) => Promise<boolean>,
     ) => {
+      // Completions from a previous account generation must not clear the
+      // new account's busy/pending entries (which would allow duplicate
+      // writes) or trigger a re-read against the wrong identity.
+      const gen = accountGen.current;
+      const email = lastEmail.current;
       if (busy.current.has(productId)) return false;
       busy.current.add(productId);
       setPending((previous) => ({ ...previous, [productId]: true }));
@@ -261,20 +290,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setNotice("");
       setStaleNotice("");
       try {
-        return await run(AbortSignal.timeout(10000));
+        return await run(AbortSignal.timeout(10000), gen);
       } finally {
-        busy.current.delete(productId);
-        setPending((previous) => {
-          if (!(productId in previous)) return previous;
-          const next = { ...previous };
-          delete next[productId];
-          return next;
-        });
-        // The last write to settle re-reads the authoritative cart so the
-        // final UI matches the server after concurrent mutations and
-        // refreshes, including mutations whose timeout left the outcome
-        // uncertain.
-        if (busy.current.size === 0) await reconcile();
+        // Skip cleanup after an account change: refresh already cleared the
+        // previous generation's busy/pending entries, and touching them here
+        // could delete the new account's entries or re-read the wrong cart.
+        if (gen === accountGen.current && lastEmail.current === email) {
+          busy.current.delete(productId);
+          setPending((previous) => {
+            if (!(productId in previous)) return previous;
+            const next = { ...previous };
+            delete next[productId];
+            return next;
+          });
+          // The last write to settle re-reads the authoritative cart so the
+          // final UI matches the server after concurrent mutations and
+          // refreshes, including mutations whose timeout left the outcome
+          // uncertain.
+          if (busy.current.size === 0) await reconcile();
+        }
       }
     },
     [reconcile],
@@ -289,8 +323,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }));
         return false;
       }
-      return mutate(productId, async (signal) => {
+      return mutate(productId, async (signal, gen) => {
         const id = ++requestId.current;
+        const fresh = () => gen === accountGen.current;
         try {
           const response = await fetch(`/api/cart/items/${productId}`, {
             method: "PUT",
@@ -300,6 +335,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             signal,
           });
           const body = await response.json().catch(() => null);
+          if (!fresh()) return false;
           if (response.status === 401) {
             applySnapshot(id, { status: "guest" });
             setErrors((previous) => ({
@@ -319,6 +355,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           if (requestId.current === id) setStaleNotice("");
           return true;
         } catch {
+          if (!fresh()) return false;
           // A timeout leaves the outcome uncertain: the write may still have
           // settled server-side. Surface a recoverable error; the mutation
           // epilogue re-reads the authoritative cart once quiet.
@@ -337,14 +374,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = useCallback(
     async (productId: number) => {
-      return mutate(productId, async (signal) => {
+      return mutate(productId, async (signal, gen) => {
         const id = ++requestId.current;
+        const fresh = () => gen === accountGen.current;
         try {
           const response = await fetch(`/api/cart/items/${productId}`, {
             method: "DELETE",
             cache: "no-store",
             signal,
           });
+          if (!fresh()) return false;
           if (response.status === 401) {
             applySnapshot(id, { status: "guest" });
             setErrors((previous) => ({
@@ -355,6 +394,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           }
           if (response.status !== 204) {
             const body = await response.json().catch(() => null);
+            if (!fresh()) return false;
             setErrors((previous) => ({
               ...previous,
               [productId]: errorMessage(response.status, body),
@@ -365,6 +405,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           // authoritative cart once all writes settle.
           return true;
         } catch {
+          if (!fresh()) return false;
           // A timeout leaves the outcome uncertain: the removal may still
           // have settled server-side. Surface a recoverable error; the
           // mutation epilogue re-reads the authoritative cart once quiet.
