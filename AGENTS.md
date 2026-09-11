@@ -41,6 +41,14 @@ separate worktree when concurrent changes require isolation. Inspect git status
 and overlapping PRs before editing. Allocate separate ports, Compose project names,
 and databases for concurrent runs; worktrees do not isolate running services.
 
+Commit incrementally as coherent changes are completed: use focused
+Conventional Commits subjects, stage only relevant files, and keep coupled
+code, tests and generated files together. Run the appropriate checks before
+each commit and review the staged diff; preserve unrelated work. Small tasks
+may need only one commit. Incremental commits do not replace full PR testing
+or current-head external review, and committing never authorizes pushing or
+merging.
+
 For fixes, reproduce the behavior and add a regression check. Review the complete
 diff after implementation. Record findings and test evidence in the PR, explicitly
 identifying self-review when the same agent implemented the change. Follow the
