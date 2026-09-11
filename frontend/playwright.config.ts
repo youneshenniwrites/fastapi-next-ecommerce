@@ -32,15 +32,27 @@ export default defineConfig({
       testMatch: "catalog.spec.ts",
       use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3300" },
     },
+    // Cart tests register users, sign in and render private cart data, so
+    // failure artifacts stay disabled like the account/session projects.
     {
       name: "cart-desktop",
       testMatch: "cart.spec.ts",
-      use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3300" },
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: "http://127.0.0.1:3300",
+        trace: "off" as const,
+        screenshot: "off" as const,
+      },
     },
     {
       name: "cart-mobile",
       testMatch: "cart.spec.ts",
-      use: { ...devices["Pixel 7"], baseURL: "http://127.0.0.1:3300" },
+      use: {
+        ...devices["Pixel 7"],
+        baseURL: "http://127.0.0.1:3300",
+        trace: "off" as const,
+        screenshot: "off" as const,
+      },
     },
     {
       name: "mobile",
