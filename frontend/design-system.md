@@ -91,5 +91,7 @@ compose Button, Badge, Input and Skeleton with the shared 4px corners and
 1–99 schema; the backend remains authoritative for prices, totals and stock.
 Concurrent writes serialize per product with an in-flight guard, the last
 settled write triggers an authoritative re-read, and background failures keep
-the rendered cart behind a visible retry warning instead of wiping it.
+the rendered cart behind a visible warning with a Refresh cart button, including
+an empty saved cart. Post-write refresh timeouts use the same recovery path.
+Quantity errors are programmatically associated with their input.
 Signed-out visitors get a sign-in action; no guest storage exists.

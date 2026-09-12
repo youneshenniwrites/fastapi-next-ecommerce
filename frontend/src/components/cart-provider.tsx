@@ -157,13 +157,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (current.status !== "authenticated") return;
     const gen = accountGen.current;
     const id = ++requestId.current;
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 10000);
-    try {
-      await fetchCart(id, controller.signal, gen);
-    } finally {
-      window.clearTimeout(timer);
-    }
+    // fetchCart owns its timeout so it can distinguish timeout failure from
+    // cancellation and surface the stale-cart warning.
+    await fetchCart(id, new AbortController().signal, gen);
   }, [fetchCart]);
 
   const refresh = useCallback(() => {

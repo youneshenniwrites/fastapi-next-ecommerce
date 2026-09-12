@@ -94,6 +94,11 @@ function QuantityForm({ item }: { item: CartItem }) {
             required
             disabled={pending}
             aria-invalid={Boolean(errors.quantity || error)}
+            aria-describedby={
+              errors.quantity || error
+                ? `quantity-error-${productId}`
+                : undefined
+            }
             className="h-10 w-20 text-center"
           />
           <Button
@@ -124,14 +129,15 @@ function QuantityForm({ item }: { item: CartItem }) {
           <Plus aria-hidden="true" />
         </Button>
       </div>
-      {errors.quantity && (
-        <p role="alert" className="text-xs text-destructive">
-          Quantity must be a whole number from 1 to 99.
-        </p>
-      )}
-      {error && (
-        <p role="alert" className="text-xs text-destructive">
-          {error}
+      {(errors.quantity || error) && (
+        <p
+          id={`quantity-error-${productId}`}
+          role="alert"
+          className="text-xs text-destructive"
+        >
+          {errors.quantity
+            ? "Quantity must be a whole number from 1 to 99."
+            : error}
         </p>
       )}
       {shortage && (
@@ -203,6 +209,23 @@ function CartLine({ item }: { item: CartItem }) {
   );
 }
 
+function CartRefreshWarning() {
+  const cart = useCart();
+  if (!cart.staleNotice) return null;
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-secondary p-4 text-sm"
+    >
+      <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
+      <span>{cart.staleNotice}</span>
+      <Button type="button" variant="outline" size="sm" onClick={cart.refresh}>
+        Refresh cart
+      </Button>
+    </div>
+  );
+}
+
 export function CartView() {
   const cart = useCart();
 
@@ -248,6 +271,7 @@ export function CartView() {
   if (cart.state.cart.items.length === 0) {
     return (
       <section aria-label="Empty cart" className="space-y-5">
+        <CartRefreshWarning />
         <ShoppingBag className="size-7 text-primary" aria-hidden="true" />
         <h2 className="text-xl">Your cart is empty</h2>
         <p className="text-sm text-muted-foreground">
@@ -266,18 +290,7 @@ export function CartView() {
   const { cart: data } = cart.state;
   return (
     <div className="space-y-8">
-      {cart.staleNotice && (
-        <p
-          role="status"
-          className="flex items-start gap-2 rounded-md border border-border bg-secondary p-4 text-sm"
-        >
-          <AlertTriangle
-            className="mt-0.5 size-4 shrink-0"
-            aria-hidden="true"
-          />
-          {cart.staleNotice}
-        </p>
-      )}
+      <CartRefreshWarning />
       <p role="status" className="text-xs text-muted-foreground">
         {data.items.length} {data.items.length === 1 ? "line" : "lines"} ·{" "}
         {data.items.reduce((total, item) => total + item.quantity, 0)} objects

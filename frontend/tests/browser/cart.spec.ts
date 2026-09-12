@@ -413,7 +413,7 @@ test("stale cart shows a visible warning and recovers on refresh", async ({
         response.url().endsWith("/api/cart") &&
         response.request().method() === "GET",
     ),
-    page.evaluate(() => window.dispatchEvent(new Event("focus"))),
+    page.getByRole("button", { name: "Refresh cart", exact: true }).click(),
   ]);
   expect(recoveredRefresh.ok()).toBe(true);
   await expect(warning).toHaveCount(0);
@@ -465,4 +465,56 @@ test("mutation timeout shows a recoverable error and reconciles", async ({
   await page.goto("/cart");
   await expect(page.getByText("Qty 2")).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+});
+
+test("post-write refresh timeout offers a visible retry", async ({
+  page,
+  request,
+}) => {
+  const item = (await products(request)).find((product) => product.stock > 5)!;
+  const email = `cart-refresh-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await login(page, email, password);
+  await page.goto(`/products/${item.id}`);
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true })
+    .click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await page.goto("/cart");
+  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  // Leave reads unanswered until the client's real timeout expires.
+  await page.route("**/api/cart", () => {});
+  await page
+    .getByRole("button", { name: `Increase quantity of ${item.name}` })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toBeVisible({ timeout: 15000 });
+  await page.unroute("**/api/cart");
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: `Remove ${item.name} from cart` })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
+  // An empty saved cart can be stale too (for example, another tab added a line).
+  await page.route("**/api/cart", (route) =>
+    route.fulfill({ status: 503, body: "{}" }),
+  );
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toBeVisible();
+  await page.unroute("**/api/cart");
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toHaveCount(0);
 });
