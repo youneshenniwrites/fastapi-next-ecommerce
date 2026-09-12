@@ -118,8 +118,13 @@ is not configured. Dependabot proposes updates weekly; it does not review or mer
 
 The [PR template](../.github/pull_request_template.md) defines Summary, Issue,
 optional Before / After, Acceptance criteria, Testing, Review, and optional
-Deployment / Compatibility. Fill acceptance criteria from the issue and testing
-with actual results; remove irrelevant optional sections. No Jira placeholder.
+Deployment notes. Lead with a short customer or contributor outcome; fill
+acceptance criteria from the issue and testing with the tested commit and actual
+results. Use a brief self-review disclosure plus linked current-head Codex review
+and CI evidence. State pending or failed results honestly and refresh evidence
+after changes. Keep owner assignment and labels in the sidebar, without duplicate
+review checkboxes or owner/reviewer metadata in the body. Remove irrelevant
+optional sections. No Jira placeholder.
 
 Assign youneshenniwrites on every PR; do not request them as reviewer.
 Codex is the sole requested reviewer. Request Codex through the review
