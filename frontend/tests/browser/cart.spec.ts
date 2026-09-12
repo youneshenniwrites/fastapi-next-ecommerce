@@ -107,7 +107,7 @@ test("signed-in cart journey persists across reload and logout/login", async ({
 
   await login(page, email, password);
 
-  await page.goto(`/products/${item.id}`);
+  await page.goto(`/products/${item.id}`, { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", { name: item.name, exact: true }),
   ).toBeVisible();
@@ -156,7 +156,7 @@ test("signed-in cart journey persists across reload and logout/login", async ({
   ).toBeVisible();
 
   // Re-add, then verify logout/login restores the saved cart.
-  await page.goto(`/products/${item.id}`);
+  await page.goto(`/products/${item.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
@@ -327,7 +327,7 @@ test("a stale cart cannot write into a different signed-in account", async ({
   await register(request, emailA, password);
   await register(request, emailB, password);
   await login(page, emailA, password);
-  await page.goto(`/products/${item.id}`);
+  await page.goto(`/products/${item.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: "Add to cart", exact: true })
@@ -391,7 +391,7 @@ test("failed new-account reads never preserve the previous cart", async ({
   await register(request, emailA, password);
   await register(request, emailB, password);
   await login(page, emailA, password);
-  await page.goto(`/products/${item.id}`);
+  await page.goto(`/products/${item.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: "Add to cart", exact: true })
@@ -440,7 +440,7 @@ async function savedCart(
   const password = "disposable-cart-password";
   await register(request, email, password);
   await login(page, email, password);
-  await page.goto(`/products/${item.id}`);
+  await page.goto(`/products/${item.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: "Add to cart", exact: true })
@@ -833,4 +833,94 @@ test("session poll restores an ownerless cart after another window signs in", as
     page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
   ).toBeVisible();
   await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+});
+
+test("add feedback belongs to the verified account", async ({
+  page,
+  request,
+}) => {
+  const email = `switch-feedback-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await savedCart(page, request);
+  await expect(
+    page.getByRole("button", { name: "Saved to cart", exact: true }),
+  ).toBeVisible();
+  await page.evaluate(
+    async ({ email, password }) => {
+      await fetch("/api/session/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      window.dispatchEvent(new Event("focus"));
+    },
+    { email, password },
+  );
+  await expect(
+    page
+      .getByRole("main")
+      .getByRole("button", { name: "Add to cart", exact: true }),
+  ).toBeEnabled({ timeout: 2000 });
+  await expect(
+    page.getByRole("button", { name: "Saved to cart", exact: true }),
+  ).toHaveCount(0);
+});
+
+test("a previous owner's pending add cannot block the new owner", async ({
+  page,
+  request,
+}) => {
+  const email = `switch-pending-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await savedCart(page, request);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true });
+  await expect(add).toBeEnabled();
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let captured!: () => void;
+  const capturedRequest = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  let intercepted = false;
+  await page.route("**/*", async (route) => {
+    if (!intercepted && route.request().headers()["next-action"]) {
+      intercepted = true;
+      const response = await route.fetch();
+      captured();
+      await held;
+      await route.fulfill({ response });
+    } else await route.continue();
+  });
+  try {
+    await add.click();
+    await capturedRequest;
+    await page.evaluate(
+      async ({ email, password }) => {
+        await fetch("/api/session/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        window.dispatchEvent(new Event("focus"));
+      },
+      { email, password },
+    );
+    release();
+    await expect(add).toBeEnabled();
+    await add.click();
+    await expect(
+      page.getByRole("button", { name: "Adding…", exact: true }),
+    ).toBeVisible();
+    release();
+    await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  } finally {
+    release();
+  }
 });

@@ -11,6 +11,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { CartOperations } from "@/lib/cart-operations";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/components/session-provider";
 import { changeCart } from "@/app/cart/actions";
@@ -99,10 +100,9 @@ export function CartProvider({
   }, [sessionChanged, router]);
 
   const [pending, setPending] = useState<Record<number, boolean>>({});
-  const busy = useRef(new Set<number>());
-  const ownerRef = useRef(snapshot.owner);
+  const busy = useRef(new CartOperations(snapshot.owner));
   useLayoutEffect(() => {
-    ownerRef.current = snapshot.owner;
+    busy.current.reset(snapshot.owner);
   }, [snapshot.owner]);
   const [errors, setErrors] = useState<Record<number, CartFailure>>({});
   const [concealed, setConcealed] = useState(false);
@@ -176,16 +176,16 @@ export function CartProvider({
     });
   }
   function mutate(change: CartChange): Promise<boolean> {
-    if (snapshot.status !== "ready" || busy.current.has(change.productId))
-      return Promise.resolve(false);
-    busy.current.add(change.productId);
+    if (snapshot.status !== "ready") return Promise.resolve(false);
+    const operation = busy.current.begin(change.productId);
+    if (!operation) return Promise.resolve(false);
     setPending((current) => ({ ...current, [change.productId]: true }));
     clearError(change.productId);
     return new Promise((resolve) => {
       startMutation(async () => {
         try {
           const result = await changeCart(snapshot.owner, change);
-          if (ownerRef.current !== snapshot.owner) {
+          if (!busy.current.current(change.productId, operation)) {
             resolve(false);
             return;
           }
@@ -196,7 +196,7 @@ export function CartProvider({
             }));
           resolve(result.ok);
         } catch {
-          if (ownerRef.current !== snapshot.owner) {
+          if (!busy.current.current(change.productId, operation)) {
             resolve(false);
             return;
           }
@@ -213,12 +213,13 @@ export function CartProvider({
           startRefresh(() => router.refresh());
           resolve(false);
         } finally {
-          busy.current.delete(change.productId);
-          setPending((current) => {
-            const next = { ...current };
-            delete next[change.productId];
-            return next;
-          });
+          if (busy.current.finish(change.productId, operation)) {
+            setPending((current) => {
+              const next = { ...current };
+              delete next[change.productId];
+              return next;
+            });
+          }
         }
       });
     });
