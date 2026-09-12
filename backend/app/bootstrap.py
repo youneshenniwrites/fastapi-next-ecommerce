@@ -9,6 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.security import get_password_hash
 from app.db.session import SessionLocal
+from app.models.demo_catalog import DemoCatalog
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.product import ProductCreate
@@ -22,12 +23,54 @@ DEMO_PRODUCTS = (
     ("Notebook Set", "Fictional set of three dotted notebooks.", "12.90", 30),
     ("Ceramic Pen Cup", "Fictional hand-finished stationery holder.", "18.00", 0),
 )
+ADDITIONAL_DEMO_PRODUCTS = (
+    (
+        "Compact Keyboard",
+        "Fictional low-profile keyboard for everyday desk work.",
+        "49.00",
+        16,
+    ),
+    (
+        "Focus Headphones",
+        "Fictional padded over-ear headphones for a quiet workspace.",
+        "89.00",
+        7,
+    ),
+    (
+        "Insulated Bottle",
+        "Fictional green steel bottle for desk-side hydration.",
+        "26.00",
+        22,
+    ),
+    (
+        "Handled Planter",
+        "Fictional rustic ceramic planter; plant not included.",
+        "21.00",
+        9,
+    ),
+    (
+        "Analogue Desk Clock",
+        "Fictional round bedside or desk clock with a warm metallic finish.",
+        "32.00",
+        11,
+    ),
+    (
+        "Wireless Mouse",
+        "Fictional compact red wireless mouse for everyday browsing.",
+        "23.00",
+        14,
+    ),
+)
+DEMO_PRODUCTS += ADDITIONAL_DEMO_PRODUCTS
+CATALOG_EDITION = "twelve-products"
 
 
 def seed_demo(db):
     """Populate only an empty catalog; never overwrite or replenish existing data."""
     if db.get_bind().dialect.name == "postgresql":
         db.execute(text("LOCK TABLE products IN SHARE ROW EXCLUSIVE MODE"))
+    if db.get(DemoCatalog, CATALOG_EDITION) is not None:
+        return 0
     if db.scalar(select(Product.id).limit(1)) is not None:
         return 0
     for name, description, price, stock in DEMO_PRODUCTS:
@@ -35,8 +78,31 @@ def seed_demo(db):
             name=name, description=description, price=price, stock=stock, currency="GBP"
         )
         db.add(Product(**data.model_dump()))
+    db.add(DemoCatalog(edition=CATALOG_EDITION))
     db.flush()
     return len(DEMO_PRODUCTS)
+
+
+def expand_demo(db):
+    """Append this edition once without touching existing products or saved carts."""
+    if db.get_bind().dialect.name == "postgresql":
+        db.execute(text("LOCK TABLE products IN SHARE ROW EXCLUSIVE MODE"))
+    if db.get(DemoCatalog, CATALOG_EDITION) is not None:
+        return 0
+    if db.scalar(select(Product.id).limit(1)) is None:
+        return seed_demo(db)
+    # Refuse ambiguity instead of silently adopting or duplicating existing items.
+    names = [product[0] for product in ADDITIONAL_DEMO_PRODUCTS]
+    if db.scalar(select(Product.id).where(Product.name.in_(names)).limit(1)):
+        raise ValueError("Expansion names already exist; inspect the catalog manually.")
+    for name, description, price, stock in ADDITIONAL_DEMO_PRODUCTS:
+        data = ProductCreate(
+            name=name, description=description, price=price, stock=stock, currency="GBP"
+        )
+        db.add(Product(**data.model_dump()))
+    db.add(DemoCatalog(edition=CATALOG_EDITION))
+    db.flush()
+    return len(ADDITIONAL_DEMO_PRODUCTS)
 
 
 def ensure_admin(db, email, password=None, *, promote_existing=False):
@@ -72,14 +138,18 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command", required=True)
     seed = commands.add_parser("seed-demo")
     seed.add_argument("--confirm-demo", action="store_true", required=True)
+    expand = commands.add_parser("expand-demo")
+    expand.add_argument("--confirm-demo", action="store_true", required=True)
     admin = commands.add_parser("admin")
     admin.add_argument("--email", required=True)
     admin.add_argument("--promote-existing", action="store_true")
     args = parser.parse_args(argv)
     try:
         with SessionLocal.begin() as db:
-            if args.command == "seed-demo":
-                count = seed_demo(db)
+            if args.command in {"seed-demo", "expand-demo"}:
+                count = (
+                    seed_demo(db) if args.command == "seed-demo" else expand_demo(db)
+                )
                 message = (
                     f"Created {count} demo products; existing catalogs are preserved."
                 )

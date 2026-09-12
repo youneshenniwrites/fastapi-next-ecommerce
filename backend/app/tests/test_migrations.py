@@ -30,7 +30,9 @@ def test_migration_upgrade_downgrade_and_metadata(tmp_path):
     alembic("upgrade", "head")
     alembic("check")
     engine = create_engine(database_url)
-    assert {"users", "products", "cart_lines"} <= set(inspect(engine).get_table_names())
+    assert {"users", "products", "cart_lines", "demo_catalog_editions"} <= set(
+        inspect(engine).get_table_names()
+    )
     schema = inspect(engine)
     assert schema.get_pk_constraint("cart_lines")["constrained_columns"] == [
         "user_id",
