@@ -547,9 +547,11 @@ test("uncertain writes stay read-only until the cart can be read again", async (
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toBeVisible({ timeout: 15000 });
   await expect(add).toBeDisabled();
-  await fault(page, request, {});
+  await fault(page, request, { read: "delay" });
   await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(add).toBeDisabled();
   await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await fault(page, request, {});
   await expect(add).toBeEnabled();
   await expect(
     page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
@@ -949,4 +951,28 @@ test("a previous owner's pending add cannot block the new owner", async ({
   } finally {
     release();
   }
+});
+
+test("a late streamed cart cannot reveal a session already known to be signed out", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  await fault(page, request, { read: "delay" });
+  await page.route("**/api/session/me", (route) =>
+    route.fulfill({ status: 401, contentType: "application/json", body: "{}" }),
+  );
+  const guestResponse = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/session/me") && response.status() === 401,
+  );
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
+  await page.context().clearCookies();
+  await guestResponse;
+  await page.waitForLoadState("load");
+  await expect(page.getByTestId("cart-count")).toHaveCount(0);
+  await page.goto("/cart", { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("heading", { name: "Sign in to view your saved cart" }),
+  ).toBeVisible();
 });
