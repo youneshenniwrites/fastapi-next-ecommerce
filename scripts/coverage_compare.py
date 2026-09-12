@@ -22,7 +22,16 @@ def executable_lines(kind, report):
     text = report.read_text()
     result = {}
     if kind == "backend":
-        for item in ET.fromstring(text).iter("class"):
+        root = ET.fromstring(text)
+        sources = [
+            str(PurePosixPath(item.text or ""))
+            for item in root.findall("sources/source")
+        ]
+        if len(sources) != 1 or not (
+            sources[0] == "app" or sources[0].endswith("/backend/app")
+        ):
+            raise ValueError("Backend source root does not match backend/app")
+        for item in root.iter("class"):
             name = source_path(item.attrib["filename"], "backend/app")
             if name in result:
                 raise ValueError("Duplicate source")

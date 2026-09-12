@@ -14,7 +14,7 @@ BASE = "b" * 40
 
 
 def xml(hits="1", filename="example.py"):
-    return f'''<coverage lines-covered="{hits}" lines-valid="1" branches-covered="0" branches-valid="0"><packages><package><classes><class filename="{filename}"><lines><line number="3" hits="{hits}"/></lines></class></classes></package></packages></coverage>'''
+    return f'''<coverage lines-covered="{hits}" lines-valid="1" branches-covered="0" branches-valid="0"><sources><source>app</source></sources><packages><package><classes><class filename="{filename}"><lines><line number="3" hits="{hits}"/></lines></class></classes></package></packages></coverage>'''
 
 
 class ComparisonTests(unittest.TestCase):
@@ -60,6 +60,13 @@ class ComparisonTests(unittest.TestCase):
             executable_lines("backend", self.head)
         with self.assertRaises(ValueError):
             changed_lines("+++ b/../../secret\n@@ -0,0 +1 @@\n+x")
+
+    def test_changed_backend_source_root_is_not_mapped_to_app(self):
+        self.head.write_text(
+            xml().replace("<source>app</source>", "<source>other</source>")
+        )
+        with self.assertRaises(ValueError):
+            executable_lines("backend", self.head)
 
     def test_frontend_lcov_and_inconsistent_totals(self):
         self.head.write_text(
