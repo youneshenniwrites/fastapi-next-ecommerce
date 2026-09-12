@@ -1,5 +1,8 @@
 # Frontend agent guidance
 
+Read root [AGENTS.md](../AGENTS.md) and the assigned issue's scope/handoff first;
+[delivery policy](../docs/delivery.md) governs ticket splitting and resume steps.
+
 This is the runnable Next.js App Router/TypeScript catalog. Read the root portfolio
 plan and naming skill. Use Node 24.20.0 (.nvmrc) and npm 11.19.1; commit package-lock.json.
 

@@ -6,6 +6,7 @@ create a background service or replace external Codex review.
 
 | Invoke | Outcome |
 | --- | --- |
+| `$refine-tickets` | Scoped linked stories, dependencies and a resumable issue handoff before coding. |
 | `$create-pr` | Issue-linked PR with factual description, ownership, labels and review request. |
 | `$self-review PR #42` | Full diff review, findings and verification; review-only requests do not edit code. |
 | `$address-codex-comments PR #42` | Verified fixes, evidence replies, resolved addressed threads and fresh review when needed. |

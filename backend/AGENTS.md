@@ -1,5 +1,8 @@
 # Backend conventions
 
+Read root [AGENTS.md](../AGENTS.md) and the assigned issue's scope/handoff first;
+[delivery policy](../docs/delivery.md) governs ticket splitting and resume steps.
+
 Routes in app/api/v1 handle HTTP parsing and responses. Authentication dependencies
 live in app/api/deps.py. As commerce grows, domain services coordinate business
 transactions and CRUD helpers perform database operations. Provider adapters handle
