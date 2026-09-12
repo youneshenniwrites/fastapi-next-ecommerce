@@ -60,10 +60,13 @@ one hidden after mount; do not assume a visibility event always precedes setup.
   first-click behavior together rather than replacing one regression with another.
   Concealed interactive descendants must leave the tab order (opacity and
   aria-hidden alone are insufficient); preserve an in-progress pointer click
-  before applying inert.
+  before applying inert. Reset abandoned pointer activations on window blur and
+  page exit so a missing pointerup cannot permanently defeat concealment.
 - Rendering: slow private reads must not block unrelated route content. Suspending
   a second copy of interactive children can remount forms and discard input/focus.
   Test typing during slow reads and no-JavaScript rendering where promised.
+  Distinguish server-rendered markup from visible streamed content: Suspense
+  replacement needs JavaScript, even when its HTML includes authoritative data.
 
 Prefer the installed Next.js documentation and framework-managed reads/actions to
 another client cache or polling mechanism. These lessons constrain behavior, not a
