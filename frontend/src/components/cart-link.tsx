@@ -16,7 +16,7 @@ export function CartLink({
   const cart = useCart();
   const count = cart.count;
   const label =
-    cart.state.status === "ready" && count > 0
+    cart.state.status === "ready" && !cart.concealed && count > 0
       ? `Cart, ${count} ${count === 1 ? "item" : "items"}`
       : "Cart";
   const content = (
@@ -27,6 +27,8 @@ export function CartLink({
         <span className="sr-only">(loading)</span>
       ) : cart.state.status === "ready" && count > 0 ? (
         <Badge
+          aria-hidden={cart.concealed || undefined}
+          style={{ opacity: cart.concealed ? 0 : 1 }}
           variant="secondary"
           data-testid="cart-count"
           className="rounded-md px-1.5 py-0.5 text-[10px] leading-none"
