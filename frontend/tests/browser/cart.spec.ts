@@ -469,6 +469,7 @@ test("same-account failed reads keep a visible warning and recover", async ({
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toHaveCount(1);
   await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+  await expect(page).toHaveTitle("Your cart | VINDOR");
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await fault(page, request, {});
   await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
@@ -975,4 +976,138 @@ test("a late streamed cart cannot reveal a session already known to be signed ou
   await expect(
     page.getByRole("heading", { name: "Sign in to view your saved cart" }),
   ).toBeVisible();
+});
+
+test("lost action and refresh responses recover from an authoritative reload", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true });
+  await expect(add).toBeEnabled();
+  let lostAction = false;
+  let failedRefreshes = 0;
+  await page.route("**/*", async (route) => {
+    const headers = route.request().headers();
+    if (headers["next-action"]) {
+      await route.fetch(); // The backend commits; only delivery to the browser fails.
+      lostAction = true;
+      await route.abort("failed");
+    } else if (lostAction && headers.rsc) {
+      failedRefreshes += 1;
+      await route.abort("failed");
+    } else await route.continue();
+  });
+  await add.click();
+  await expect.poll(() => failedRefreshes).toBeGreaterThan(0);
+  // Next falls back to a document navigation for a rejected RSC fetch.
+  // The new document must reflect the committed write, without repeating it.
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await expect(add).toBeEnabled();
+});
+
+test("a late ready snapshot stays concealed after the observed account changes", async ({
+  page,
+  request,
+}) => {
+  const email = `late-ready-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await savedCart(page, request);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true });
+  await expect(add).toBeEnabled();
+  let releaseAction!: () => void;
+  const heldAction = new Promise<void>((resolve) => {
+    releaseAction = resolve;
+  });
+  let captured!: () => void;
+  const capturedAction = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  let releaseRead!: () => void;
+  const heldRead = new Promise<void>((resolve) => {
+    releaseRead = resolve;
+  });
+  let readStarted = false;
+  let actionReleased = false;
+  await page.route("**/*", async (route) => {
+    const headers = route.request().headers();
+    if (headers["next-action"]) {
+      const response = await route.fetch();
+      captured();
+      await heldAction;
+      await route.fulfill({ response });
+      actionReleased = true;
+    } else if (headers.rsc) {
+      readStarted = true;
+      await heldRead;
+      await route.continue();
+    } else await route.continue();
+  });
+  try {
+    await add.click();
+    await capturedAction;
+    const observedB = page.waitForResponse(
+      async (response) =>
+        response.url().endsWith("/api/session/me") &&
+        response.ok() &&
+        (await response.json()).email === email,
+    );
+    await page.evaluate(
+      async ({ email, password }) => {
+        await fetch("/api/session/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        window.dispatchEvent(new Event("focus"));
+      },
+      { email, password },
+    );
+    await observedB;
+    releaseAction();
+    await expect.poll(() => actionReleased && readStarted).toBe(true);
+    await expect(page.getByTestId("cart-count").first()).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+    await expect(page.getByTestId("cart-count").first()).toHaveCSS(
+      "opacity",
+      "0",
+    );
+    releaseRead();
+    await expect(add).toBeEnabled();
+    await expect(page.getByTestId("cart-count")).toHaveCount(0);
+  } finally {
+    releaseAction();
+    releaseRead();
+  }
+});
+
+test("a lost focus refresh recovers through Next document fallback", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  let failed = false;
+  await page.route("**/*", async (route) => {
+    if (route.request().headers().rsc) {
+      failed = true;
+      await route.abort("failed");
+    } else await route.continue();
+  });
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect.poll(() => failed).toBe(true);
+  // A failed RSC fetch triggers Next's hard-navigation recovery.
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await expect(page.getByTestId("cart-count").first()).toHaveCSS(
+    "opacity",
+    "1",
+  );
 });
