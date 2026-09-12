@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, LoaderCircle, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
-import { useSession } from "@/components/session-provider";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/lib/catalog";
 
@@ -15,15 +14,20 @@ export function AddToCartButton({
   product: Product;
   compact?: boolean;
 }) {
-  const session = useSession();
   const cart = useCart();
   const [added, setAdded] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
   const pending = Boolean(cart.pending[product.id]);
   const error = cart.errors[product.id];
   const outOfStock = product.stock === 0;
 
-  if (session.status === "loading" || cart.state.status === "loading") {
+  if (cart.state.status === "loading") {
     return (
       <Button
         disabled
@@ -35,7 +39,7 @@ export function AddToCartButton({
     );
   }
 
-  if (session.status === "guest" || cart.state.status === "guest") {
+  if (cart.state.status === "guest") {
     return (
       <Button asChild className={compact ? "h-10" : "h-12 w-full"}>
         <Link href="/login" prefetch={false}>
@@ -46,7 +50,7 @@ export function AddToCartButton({
     );
   }
 
-  if (session.status === "error" || cart.state.status === "error") {
+  if (cart.state.status === "error") {
     return (
       <div className="space-y-2">
         <Button
@@ -77,7 +81,7 @@ export function AddToCartButton({
     <div className="space-y-2">
       <Button
         onClick={() => void add()}
-        disabled={pending || outOfStock}
+        disabled={pending || outOfStock || cart.readOnly}
         aria-busy={pending}
         className={compact ? "h-10" : "h-12 w-full"}
       >
@@ -108,7 +112,6 @@ export function AddToCartButton({
           .
         </p>
       )}
-      {cart.notice && added && <span className="sr-only">{cart.notice}</span>}
       {error && (
         <p role="alert" className="text-xs text-destructive">
           {error}{" "}

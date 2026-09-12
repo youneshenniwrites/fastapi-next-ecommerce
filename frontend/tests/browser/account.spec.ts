@@ -151,8 +151,16 @@ test("private profile, account navigation and logout on desktop and mobile", asy
     page.getByRole("region", { name: "Customer profile" }),
   ).toContainText(email);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-  const html = await (await page.request.get("/account")).text();
-  expect(html).not.toContain(email);
+  // The cart is now rendered on the server: signed-in HTML is private, and
+  // only safe display data may be serialized (never the bearer cookie).
+  const document = await page.request.get("/account");
+  expect(document.headers()["cache-control"]).toContain("no-store");
+  const html = await document.text();
+  const sessionCookie = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "local-session",
+  );
+  expect(sessionCookie).toBeDefined();
+  expect(html).not.toContain(sessionCookie!.value);
   const me = await page.request.get("/api/session/me");
   expect(me.headers()["cache-control"]).toContain("no-store");
   await page.route("**/api/session/logout", (route) =>

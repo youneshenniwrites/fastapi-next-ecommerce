@@ -57,8 +57,9 @@ function QuantityForm({ item }: { item: CartItem }) {
   }
 
   const shortage = !item.available;
-  const decreaseDisabled = pending || item.quantity <= 1;
-  const increaseDisabled = pending || shortage || item.quantity >= 99;
+  const decreaseDisabled = pending || cart.readOnly || item.quantity <= 1;
+  const increaseDisabled =
+    pending || cart.readOnly || shortage || item.quantity >= 99;
 
   return (
     <div className="space-y-2">
@@ -92,7 +93,7 @@ function QuantityForm({ item }: { item: CartItem }) {
             min={1}
             max={99}
             required
-            disabled={pending}
+            disabled={pending || cart.readOnly}
             aria-invalid={Boolean(errors.quantity || error)}
             aria-describedby={
               errors.quantity || error
@@ -105,7 +106,7 @@ function QuantityForm({ item }: { item: CartItem }) {
             type="submit"
             variant="secondary"
             size="sm"
-            disabled={pending}
+            disabled={pending || cart.readOnly}
             className="h-10"
           >
             {pending ? (
@@ -194,7 +195,7 @@ function CartLine({ item }: { item: CartItem }) {
           type="button"
           variant="ghost"
           size="sm"
-          disabled={pending}
+          disabled={pending || cart.readOnly}
           onClick={() => void cart.removeItem(item.product.id)}
           aria-label={`Remove ${item.product.name} from cart`}
         >
