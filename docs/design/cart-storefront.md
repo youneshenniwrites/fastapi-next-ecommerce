@@ -36,7 +36,10 @@ frontend `/api/cart` routes were internal to this unmerged feature and are remov
 the FastAPI [cart API](cart-api.md) is unchanged.
 
 The cart shell reads behind a Next.js Suspense boundary that contains only a
-snapshot delivery component, not route content. Public forms remain mounted
+snapshot delivery component and the header, not route content. The resolved
+header receives the server snapshot directly, so its count is in server HTML
+before hydration. The fallback retains a plain Cart link; without JavaScript,
+streamed header replacement may not display the count. Public forms remain mounted
 while server reads settle. The cart page separately server-renders its private
 view, including when JavaScript is disabled. Snapshot delivery does not fetch or
 cache data in the browser.

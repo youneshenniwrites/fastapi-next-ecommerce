@@ -5,7 +5,11 @@ import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 import { SessionProvider } from "@/components/session-provider";
 import { CartRefreshWarning } from "@/components/cart-refresh-warning";
-import { CartRoot, CartSnapshotUpdate } from "@/components/cart-provider";
+import {
+  CartRoot,
+  CartSnapshotUpdate,
+  CartProvider,
+} from "@/components/cart-provider";
 import { readCartSnapshot } from "@/lib/cart-data";
 export const metadata: Metadata = {
   title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
@@ -13,7 +17,15 @@ export const metadata: Metadata = {
     "Considered objects for a calmer workspace. A fictional ecommerce portfolio.",
 };
 async function CartShell() {
-  return <CartSnapshotUpdate snapshot={await readCartSnapshot()} />;
+  const snapshot = await readCartSnapshot();
+  return (
+    <>
+      <CartSnapshotUpdate snapshot={snapshot} />
+      <CartProvider snapshot={snapshot}>
+        <SiteHeader />
+      </CartProvider>
+    </>
+  );
 }
 
 export default function RootLayout({
@@ -32,10 +44,9 @@ export default function RootLayout({
         </a>
         <SessionProvider>
           <CartRoot>
-            <Suspense fallback={null}>
+            <Suspense fallback={<SiteHeader />}>
               <CartShell />
             </Suspense>
-            <SiteHeader />
             <CartRefreshWarning />
             {children}
           </CartRoot>

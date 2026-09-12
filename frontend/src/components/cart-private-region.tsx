@@ -23,10 +23,14 @@ export function CartPrivateRegion({
     }
     window.addEventListener("pointerup", finish);
     window.addEventListener("pointercancel", finish);
+    window.addEventListener("blur", finish);
+    window.addEventListener("pagehide", finish);
     return () => {
       clearTimeout(timer);
       window.removeEventListener("pointerup", finish);
       window.removeEventListener("pointercancel", finish);
+      window.removeEventListener("blur", finish);
+      window.removeEventListener("pagehide", finish);
     };
   }, []);
   return (

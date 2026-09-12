@@ -699,6 +699,9 @@ test("server-rendered cart is private and cannot submit before hydration", async
     const serverPage = await context.newPage();
     const response = await serverPage.goto("/cart");
     expect(response!.headers()["cache-control"]).toContain("no-store");
+    await expect(serverPage.getByTestId("cart-count").first()).toHaveText("1");
+    // The count is server-rendered; streamed header replacement requires JS.
+    // The fallback keeps a usable Cart link when scripting is disabled.
     await expect(
       serverPage.getByRole("link", { name: item.name }),
     ).toBeVisible();
@@ -1243,3 +1246,17 @@ for (const view of ["product", "cart"] as const) {
     }
   });
 }
+
+test("abandoned pointer activation cannot keep concealed controls focusable", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  const region = page.locator("[data-cart-private]").first();
+  await expect(region).toHaveCSS("opacity", "1");
+  await region.dispatchEvent("pointerdown", { button: 0, pointerId: 1 });
+  await page.evaluate(() => window.dispatchEvent(new Event("blur")));
+  await fault(page, request, { identity: "delay" });
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(region).toHaveAttribute("inert", "");
+});
