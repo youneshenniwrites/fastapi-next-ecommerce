@@ -449,6 +449,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const retry = useCallback(() => {
+    // An explicit retry must recover the session as well as the cart. Keep
+    // background refreshes separate to avoid automatic reload loops.
+    if (sessionRef.current.status === "error") window.location.reload();
+    else refresh();
+  }, [refresh]);
+
   const value = useMemo<CartContextValue>(() => {
     const state = snapshot ?? { status: "loading" as const };
     return {
@@ -458,7 +465,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       errors,
       notice,
       staleNotice,
-      refresh,
+      refresh: retry,
       setQuantity,
       removeItem,
       addItem,
@@ -470,7 +477,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     errors,
     notice,
     staleNotice,
-    refresh,
+    retry,
     setQuantity,
     removeItem,
     addItem,

@@ -518,3 +518,25 @@ test("post-write refresh timeout offers a visible retry", async ({
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toHaveCount(0);
 });
+
+test("cart retry recovers a failed session check", async ({
+  page,
+  request,
+}) => {
+  const email = `cart-session-retry-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await login(page, email, password);
+  await page.route("**/api/session/me", (route) =>
+    route.fulfill({ status: 503, body: "{}" }),
+  );
+  await page.goto("/cart");
+  await expect(
+    page.getByRole("button", { name: "Try again", exact: true }),
+  ).toBeVisible();
+  await page.unroute("**/api/session/me");
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
+});
