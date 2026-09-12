@@ -332,6 +332,18 @@ test("a stale cart cannot write into a different signed-in account", async ({
     .click();
   await expect(page.getByTestId("cart-count").first()).toHaveText("1");
   await page.goto("/cart");
+  await expect(
+    page
+      .getByRole("link", {
+        name: "My account",
+        exact: true,
+        includeHidden: true,
+      })
+      .first(),
+  ).toHaveAttribute("href", "/account");
+  await expect(
+    page.getByRole("button", { name: `Increase quantity of ${item.name}` }),
+  ).toBeEnabled();
   // Change the cookie without notifying React, as another window can do.
   await page.evaluate(
     async ({ email, password }) => {
@@ -752,4 +764,17 @@ test("session poll expiry clears the cart without a focus event", async ({
     page.getByRole("heading", { name: "Sign in to view your saved cart" }),
   ).toBeVisible();
   await expect(page.getByTestId("cart-count")).toHaveCount(0);
+});
+
+test("static login content streams while private cart reads are pending", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  await fault(page, request, { identity: "timeout" });
+  await page.goto("/login", { waitUntil: "commit" });
+  await expect(
+    page.getByRole("heading", { name: "Welcome back." }),
+  ).toBeVisible({ timeout: 3000 });
+  await fault(page, request, {});
 });
