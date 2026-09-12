@@ -142,3 +142,7 @@ Feedback remains on GitHub; this index retains provenance without copying full t
 #1, #2, #3, #4, #5, #6, #7, #8, #9, #10, #11, #12, #13, #14, #15, #16, #17, #18, #19, #20, #21, #22, #23, #33, #35, #37, #40, #41, #43, #47, #48, #49, #50, #52, #55, #56, #59, #61, #62, #64, #65, #66, #69, #70, #75, #78, #79, #80, #83, #86
 
 Refresh using paginated `pulls?state=all`, `pulls/comments`, `issues/comments` and each PR’s `reviews` endpoints. Do not treat API failures as empty history. Read new substantive feedback, assess its current applicability and update the lessons separately from this provenance index.
+
+## Feedback after the initial snapshot
+
+- [PR 88: document preflight review in the invocation guide](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997096911). Apply the documentation-consistency lesson to the canonical discovery guide as well as AGENTS and skill entrypoints.

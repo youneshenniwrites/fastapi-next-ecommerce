@@ -4,11 +4,11 @@ These are review questions derived from historical findings, not claims that the
 current implementation still has those defects. Follow current project policy
 when a historical remedy conflicts with a later architectural decision.
 
-## Documentation and contracts — PRs 35, 41, 47, 49, 59, 79
+## Documentation and contracts — PRs 35, 41, 47, 49, 59, 79, 88
 
 Search the repository for the superseded claim when changing architecture, hosting,
 assets or delivered features. Include scoped skills, README, API guide, roadmap,
-CI summaries, example configuration and anchors. A new correct paragraph does not
+CI summaries, the canonical skill invocation guide, example configuration and anchors. A new correct paragraph does not
 remove an old contradictory instruction. Verify local launch URLs against exact
 origin checks. Preserve self-review disclosure and distinguish informational
 review status from enforced approval.

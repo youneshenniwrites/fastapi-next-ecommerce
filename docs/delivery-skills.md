@@ -8,6 +8,7 @@ create a background service or replace external Codex review.
 | --- | --- |
 | `$refine-tickets` | Scoped linked stories, dependencies and a resumable issue handoff before coding. |
 | `$create-pr` | Issue-linked PR with factual description, ownership, labels and review request. |
+| `$preflight-review PR #42` | Apply repository Codex review lessons to the full diff and interacting regressions before external review. |
 | `$self-review PR #42` | Full diff review, findings and verification; review-only requests do not edit code. |
 | `$address-codex-comments PR #42` | Verified fixes, evidence replies, resolved addressed threads and fresh review when needed. |
 | `$update-delivery-board` | Board reconciled with actual delivery and acceptance evidence. |
@@ -15,7 +16,7 @@ create a background service or replace external Codex review.
 
 Replace #42 with the actual PR. Natural-language requests can also select the
 skills. Codex CLI/IDE provides `/skills` selection and `$skill-name` mentions;
-these files do not register arbitrary `/create-pr` commands. Desktop picker
+these files do not register arbitrary `/create-pr` or `/preflight-review` commands. Desktop picker
 availability depends on the installed host. See the
 [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
 
