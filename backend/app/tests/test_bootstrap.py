@@ -8,14 +8,14 @@ from app.models.user import User
 
 
 def test_seed_preserves_edits_and_does_not_duplicate(db):
-    assert bootstrap.seed_demo(db) == 6
+    assert bootstrap.seed_demo(db) == 12
     db.commit()
     product = db.scalar(select(Product).order_by(Product.id))
     product.name = "Edited name"
     product.stock = 1
     db.commit()
     assert bootstrap.seed_demo(db) == 0
-    assert db.scalar(select(func.count()).select_from(Product)) == 6
+    assert db.scalar(select(func.count()).select_from(Product)) == 12
     assert product.stock == 1
     assert product.name == "Edited name"
     assert all(p.currency == "GBP" for p in db.scalars(select(Product)))
@@ -115,3 +115,96 @@ def test_cli_rolls_back_partial_seed(db, monkeypatch, capsys):
         bootstrap.main(["seed-demo", "--confirm-demo"])
     assert db.scalar(select(func.count()).select_from(Product)) == 0
     assert "sensitive" not in capsys.readouterr().err
+
+
+def test_expansion_preserves_legacy_edits_and_cart_and_runs_once(db, user):
+    from app.models.cart import CartLine
+
+    for name, description, price, stock in bootstrap.DEMO_PRODUCTS[:6]:
+        db.add(
+            Product(
+                name=name,
+                description=description,
+                price=price,
+                stock=stock,
+                currency="GBP",
+            )
+        )
+    db.flush()
+    original = db.scalars(select(Product).order_by(Product.id)).all()
+    original[0].name = "Renamed original"
+    original[0].price = "91.25"
+    original[0].stock = 0
+    db.add(CartLine(user_id=user.id, product_id=original[0].id, quantity=2))
+    db.commit()
+    before = [(p.id, p.name, p.description, str(p.price), p.stock) for p in original]
+    assert bootstrap.expand_demo(db) == 6
+    db.commit()
+    after = db.scalars(select(Product).order_by(Product.id)).all()
+    assert [
+        (p.id, p.name, p.description, str(p.price), p.stock) for p in after[:6]
+    ] == before
+    assert db.get(CartLine, (user.id, original[0].id)).quantity == 2
+    # Tracking cannot depend on a product's mutable name or stock.
+    after[6].name = "Renamed addition"
+    after[6].stock = 0
+    db.delete(after[7])
+    db.commit()
+    assert bootstrap.expand_demo(db) == 0
+    assert bootstrap.seed_demo(db) == 0
+    assert db.scalar(select(func.count()).select_from(Product)) == 11
+    assert after[6].stock == 0
+
+
+def test_expansion_on_empty_catalog_is_complete_and_repeatable(db):
+    assert bootstrap.expand_demo(db) == 12
+    db.commit()
+    assert bootstrap.expand_demo(db) == 0
+    assert bootstrap.seed_demo(db) == 0
+    assert db.scalar(select(func.count()).select_from(Product)) == 12
+
+
+def test_expansion_refuses_name_collision_without_writes(db):
+    from app.models.demo_catalog import DemoCatalog
+
+    db.add(
+        Product(
+            name=bootstrap.ADDITIONAL_DEMO_PRODUCTS[0][0],
+            price="1.00",
+            stock=0,
+            currency="GBP",
+        )
+    )
+    db.commit()
+    with pytest.raises(ValueError, match="already exist"):
+        bootstrap.expand_demo(db)
+    assert db.scalar(select(func.count()).select_from(Product)) == 1
+    assert db.get(DemoCatalog, bootstrap.CATALOG_EDITION) is None
+
+
+def test_expansion_cli_requires_confirmation_and_rolls_back(db, monkeypatch, capsys):
+    from sqlalchemy import event
+    from sqlalchemy.exc import SQLAlchemyError
+    from sqlalchemy.orm import sessionmaker
+
+    from app.models.demo_catalog import DemoCatalog
+
+    monkeypatch.setattr(bootstrap, "SessionLocal", sessionmaker(bind=db.get_bind()))
+    with pytest.raises(SystemExit):
+        bootstrap.main(["expand-demo"])
+
+    def fail_marker(*_):
+        raise SQLAlchemyError("sensitive error")
+
+    event.listen(DemoCatalog, "before_insert", fail_marker)
+    try:
+        with pytest.raises(SystemExit):
+            bootstrap.main(["expand-demo", "--confirm-demo"])
+    finally:
+        event.remove(DemoCatalog, "before_insert", fail_marker)
+    assert db.scalar(select(func.count()).select_from(Product)) == 0
+    assert db.get(DemoCatalog, bootstrap.CATALOG_EDITION) is None
+    assert "sensitive error" not in capsys.readouterr().err
+    bootstrap.main(["expand-demo", "--confirm-demo"])
+    bootstrap.main(["expand-demo", "--confirm-demo"])
+    assert db.scalar(select(func.count()).select_from(Product)) == 12

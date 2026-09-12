@@ -36,6 +36,12 @@ const artwork: Record<string, string> = {
   "Cable Tray": "tray",
   "Notebook Set": "notebooks",
   "Ceramic Pen Cup": "cup",
+  "Compact Keyboard": "keyboard",
+  "Focus Headphones": "headphones",
+  "Insulated Bottle": "bottle",
+  "Handled Planter": "planter",
+  "Analogue Desk Clock": "clock",
+  "Wireless Mouse": "mouse",
 };
 export function productArt(name: string) {
   return Object.hasOwn(artwork, name)
