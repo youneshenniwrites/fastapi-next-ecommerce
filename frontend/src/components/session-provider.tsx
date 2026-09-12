@@ -20,8 +20,8 @@ export function useSession() {
   return useContext(SessionContext);
 }
 
-// Only the public shell is rendered on the server. Private data is fetched with
-// cookies through the same-origin handler; never serialize a token into React.
+// Profile/navigation state uses the same-origin session handler. The cart has
+// its own server-rendered snapshot; never serialize a bearer token into React.
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<Session>();
   useEffect(() => {

@@ -5,16 +5,18 @@ import "./globals.css";
 import { SessionProvider } from "@/components/session-provider";
 import { CartRefreshWarning } from "@/components/cart-refresh-warning";
 import { CartProvider } from "@/components/cart-provider";
+import { readCartSnapshot } from "@/lib/cart-data";
 export const metadata: Metadata = {
   title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
   description:
     "Considered objects for a calmer workspace. A fictional ecommerce portfolio.",
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cart = await readCartSnapshot();
   return (
     <html lang="en">
       <body>
@@ -25,7 +27,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <SessionProvider>
-          <CartProvider>
+          <CartProvider key={cart.owner ?? cart.status} snapshot={cart}>
             <SiteHeader />
             <CartRefreshWarning />
             {children}

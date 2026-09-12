@@ -45,6 +45,21 @@ async function login(
   ).toBe(0);
 }
 
+async function fault(
+  page: import("@playwright/test").Page,
+  request: import("@playwright/test").APIRequestContext,
+  settings: Record<string, string>,
+) {
+  const token = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "local-session",
+  )?.value;
+  expect(token).toBeTruthy();
+  const response = await request.post(`${API}/__test/cart-fault`, {
+    data: { token, fault: settings },
+  });
+  expect(response.ok()).toBe(true);
+}
+
 function updateButton(
   page: import("@playwright/test").Page,
   productName: string,
@@ -217,8 +232,8 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   // button (or the in-flight guard before re-render) swallows the second
   // activation instead of serializing it into a second PUT.
   let writes = 0;
-  await page.route("**/api/cart/items/*", async (route) => {
-    if (route.request().method() === "PUT") {
+  await page.route("**/*", async (route) => {
+    if (route.request().headers()["next-action"]) {
       writes++;
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
@@ -233,7 +248,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await page.keyboard.press("Enter");
   await expect(page.getByTestId("cart-count").first()).toHaveText("2");
   expect(writes).toBe(1);
-  await page.unroute("**/api/cart/items/*");
+  await page.unroute("**/*");
 
   // Invalid quantities are rejected client-side without any API write, so
   // only the validation message can satisfy this assertion.
@@ -260,15 +275,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await openCartLink(page, info.project.name);
   const scarce = page.getByLabel(`Quantity of ${second.name}, 1 to 99`);
   await scarce.fill("99");
-  const [shortage] = await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/cart/items/") &&
-        response.request().method() === "PUT",
-    ),
-    updateButton(page, second.name).click(),
-  ]);
-  expect(shortage.status()).toBe(409);
+  await updateButton(page, second.name).click();
   await expect(page.getByRole("alert").first()).toContainText(
     /Not enough stock|exceeds current stock/,
   );
@@ -276,19 +283,13 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   // Failed writes surface the handler's generic recoverable message (the
   // real Next handler never passes backend internals through) and succeed
   // on retry.
-  await page.route("**/api/cart/items/*", (route) =>
-    route.fulfill({
-      status: 503,
-      contentType: "application/json",
-      body: '{"error":"Your cart is temporarily unavailable. Please try again."}',
-    }),
-  );
+  await fault(page, request, { write: "fail" });
   await scarce.fill("2");
   await updateButton(page, second.name).click();
   await expect(page.getByRole("alert").first()).toContainText(
     /temporarily unavailable/,
   );
-  await page.unroute("**/api/cart/items/*");
+  await fault(page, request, {});
   await updateButton(page, second.name).click();
   await expect(page.getByText("Qty 2", { exact: true })).toHaveCount(2);
 
@@ -311,32 +312,27 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await expect(page.getByTestId("cart-count").first()).toHaveText("6");
 });
 
-test("switching accounts without sign-out never shows the previous cart", async ({
+test("a stale cart cannot write into a different signed-in account", async ({
   page,
   request,
 }) => {
-  const all = await products(request);
-  const first = all.find((p) => p.name === "Notebook Set")!;
-  const emailA = `cart-switch-a-${crypto.randomUUID()}@example.com`;
-  const emailB = `cart-switch-b-${crypto.randomUUID()}@example.com`;
+  const item = (await products(request)).find(
+    (p) => p.name === "Notebook Set",
+  )!;
+  const emailA = `cart-a-${crypto.randomUUID()}@example.com`;
+  const emailB = `cart-b-${crypto.randomUUID()}@example.com`;
   const password = "disposable-cart-password";
   await register(request, emailA, password);
   await register(request, emailB, password);
-
   await login(page, emailA, password);
-  await page.goto(`/products/${first.id}`);
+  await page.goto(`/products/${item.id}`);
   await page
     .getByRole("main")
-    .getByRole("button", { name: /Add to cart|Saved to cart/ })
+    .getByRole("button", { name: "Add to cart", exact: true })
     .click();
   await expect(page.getByTestId("cart-count").first()).toHaveText("1");
   await page.goto("/cart");
-  await expect(page.getByRole("link", { name: first.name })).toBeVisible();
-
-  // Fail the new account's re-read: the previous customer's rendered cart
-  // must be invalidated (loading, then the error state) instead of preserved
-  // with a stale banner.
-  await page.route("**/api/cart", (route) => route.abort());
+  // Change the cookie without notifying React, as another window can do.
   await page.evaluate(
     async ({ email, password }) => {
       const response = await fetch("/api/session/login", {
@@ -344,28 +340,60 @@ test("switching accounts without sign-out never shows the previous cart", async 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (!response.ok)
-        throw new Error(`in-page login failed: ${response.status}`);
+      if (!response.ok) throw new Error("fixture login failed");
     },
     { email: emailB, password },
   );
-  let releaseIdentity!: () => void;
-  const identityWait = new Promise<void>((resolve) => {
-    releaseIdentity = resolve;
-  });
-  await page.route("**/api/session/me", async (route) => {
-    await identityWait;
-    await route.continue();
-  });
-  let writes = 0;
-  page.on("request", (request) => {
-    if (
-      request.url().includes("/api/cart/items/") &&
-      request.method() !== "GET"
-    )
-      writes++;
-  });
-  // Even a click in the same focus event must not write through the new cookie.
+  // Intentionally activate the OLD enabled control. Server authorization must
+  // reject this even without client focus/visibility protection.
+  await page
+    .getByRole("button", { name: `Increase quantity of ${item.name}` })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
+  await login(page, emailA, password);
+  await page.goto("/cart");
+  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+});
+
+test("failed new-account reads never preserve the previous cart", async ({
+  page,
+  request,
+}) => {
+  const item = (await products(request)).find(
+    (p) => p.name === "Notebook Set",
+  )!;
+  const password = "disposable-cart-password";
+  const emailA = `cart-old-${crypto.randomUUID()}@example.com`;
+  const emailB = `cart-new-${crypto.randomUUID()}@example.com`;
+  await register(request, emailA, password);
+  await register(request, emailB, password);
+  await login(page, emailA, password);
+  await page.goto(`/products/${item.id}`);
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true })
+    .click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await page.goto("/cart");
+  await page.evaluate(
+    async ({ email, password }) => {
+      const response = await fetch("/api/session/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) throw new Error("fixture login failed");
+    },
+    { email: emailB, password },
+  );
+  await fault(page, request, { read: "fail", identity: "delay" });
   await page.evaluate(() => {
     window.dispatchEvent(new Event("focus"));
     document
@@ -374,147 +402,25 @@ test("switching accounts without sign-out never shows the previous cart", async 
       )
       ?.click();
   });
-  await expect(page.getByRole("link", { name: first.name })).toHaveCount(0);
-  expect(writes).toBe(0);
-  releaseIdentity();
-  // The session provider reloads identity on window focus without remounting
-  // the cart provider, exercising the confirmed account-change path.
-  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-  await expect(page.getByRole("link", { name: first.name })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
-  await page.unroute("**/api/cart");
-  await page.unroute("**/api/session/me");
-});
-
-test("stale cart shows a visible warning and recovers on refresh", async ({
-  page,
-  request,
-}) => {
-  const all = await products(request);
-  const item =
-    all.find((p) => p.name === "Notebook Set") ?? all.find((p) => p.stock > 5)!;
-  const email = `cart-stale-${crypto.randomUUID()}@example.com`;
-  const password = "disposable-cart-password";
-  await register(request, email, password);
-  await login(page, email, password);
-  await page.goto(`/products/${item.id}`);
-  await page
-    .getByRole("main")
-    .getByRole("button", { name: /Add to cart|Saved to cart/ })
-    .click();
-  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
-  await page.goto("/cart");
-  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
-
-  // A failed background refresh keeps the rendered cart and surfaces a
-  // visible warning instead of wiping private UI.
-  await page.route("**/api/cart", async (route) => {
-    if (route.request().method() === "GET") {
-      await route.fulfill({
-        status: 503,
-        contentType: "application/json",
-        body: '{"error":"Your cart is temporarily unavailable. Please try again."}',
-      });
-      return;
-    }
-    await route.continue();
-  });
-  const [failedRefresh] = await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        response.url().endsWith("/api/cart") &&
-        response.request().method() === "GET",
-    ),
-    page.evaluate(() => window.dispatchEvent(new Event("focus"))),
-  ]);
-  expect(failedRefresh.status()).toBe(503);
-  const warning = page
-    .getByRole("status")
-    .filter({ hasText: "Couldn't update your cart" });
-  await expect(warning).toBeVisible();
-  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-
-  // The next successful refresh clears the warning.
-  await page.unroute("**/api/cart");
-  const [recoveredRefresh] = await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        response.url().endsWith("/api/cart") &&
-        response.request().method() === "GET",
-    ),
-    page.getByRole("button", { name: "Refresh cart", exact: true }).click(),
-  ]);
-  expect(recoveredRefresh.ok()).toBe(true);
-  await expect(warning).toHaveCount(0);
-  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
-});
-
-test("mutation timeout shows a recoverable error and reconciles", async ({
-  page,
-  request,
-}) => {
-  const all = await products(request);
-  const item =
-    all.find((p) => p.name === "Notebook Set") ?? all.find((p) => p.stock > 5)!;
-  const email = `cart-timeout-${crypto.randomUUID()}@example.com`;
-  const password = "disposable-cart-password";
-  await register(request, email, password);
-  await login(page, email, password);
-  await page.goto(`/products/${item.id}`);
-  const add = page
-    .getByRole("main")
-    .getByRole("button", { name: /Add to cart|Saved to cart/ });
-  await add.click();
-  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
-
-  // Let the server process the write, then delay its response past the
-  // 10s client timeout: the aborted request still settles server-side, so
-  // the timeout message must appear and reconciliation must converge on
-  // the persisted cart.
-  await page.route("**/api/cart/items/*", async (route) => {
-    if (route.request().method() === "PUT") {
-      const upstream = await route.fetch();
-      await new Promise((resolve) => setTimeout(resolve, 11000));
-      // The client aborts at 10s, so this fulfill is expectedly rejected;
-      // the server already processed the write above.
-      await route.fulfill({ response: upstream }).catch(() => {});
-      return;
-    }
-    await route.continue();
-  });
-  await page.route("**/api/cart", (route) =>
-    route.fulfill({ status: 503, body: "{}" }),
-  );
-  await add.click();
+  await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
   await expect(
-    page.getByRole("alert").filter({ hasText: "timed out" }),
-  ).toBeVisible({ timeout: 20000 });
-  await page.unroute("**/api/cart/items/*");
-  await expect(
-    page.getByRole("button", { name: "Refresh cart", exact: true }),
+    page.getByRole("button", { name: "Try again", exact: true }),
   ).toBeVisible();
-  await page.unroute("**/api/cart");
-  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
-  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await fault(page, request, {});
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
   await expect(
-    page.getByRole("alert").filter({ hasText: "timed out" }),
-  ).toHaveCount(0);
-
-  // Let the cart page settle once, then wait for client and server to agree
-  // again. Navigating inside the poll loop would abort each in-flight
-  // re-read with a fresh reload and livelock on the loading state.
-  await page.goto("/cart");
-  await expect(page.getByText("Qty 2")).toBeVisible({ timeout: 30000 });
-  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
 });
 
-test("post-write refresh timeout offers a visible retry", async ({
-  page,
-  request,
-}) => {
-  const item = (await products(request)).find((product) => product.stock > 5)!;
-  const email = `cart-refresh-${crypto.randomUUID()}@example.com`;
+async function savedCart(
+  page: import("@playwright/test").Page,
+  request: import("@playwright/test").APIRequestContext,
+) {
+  const item = (await products(request)).find(
+    (p) => p.name === "Notebook Set",
+  )!;
+  const email = `cart-${crypto.randomUUID()}@example.com`;
   const password = "disposable-cart-password";
   await register(request, email, password);
   await login(page, email, password);
@@ -524,21 +430,73 @@ test("post-write refresh timeout offers a visible retry", async ({
     .getByRole("button", { name: "Add to cart", exact: true })
     .click();
   await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  return item;
+}
+
+test("same-account failed reads keep a visible warning and recover", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
   await page.goto("/cart");
-  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
-  // Leave reads unanswered until the client's real timeout expires.
-  await page.route("**/api/cart", () => {});
+  await fault(page, request, { read: "fail" });
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  const warning = page
+    .getByRole("status")
+    .filter({ hasText: "Couldn't update your cart" });
+  await expect(warning).toBeVisible();
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await fault(page, request, {});
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(warning).toHaveCount(0);
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+});
+
+test("committed-write timeout recovers without duplicating the add", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  await fault(page, request, { write: "timeout-after" });
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ })
+    .click();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
+  ).toBeVisible({ timeout: 15000 });
+  await fault(page, request, {});
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
+  ).toHaveCount(0);
+  await page.goto("/cart");
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+});
+
+test("post-write read timeout and empty-cart failures offer retry", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  await page.goto("/cart");
+  await fault(page, request, { read: "timeout-after-write" });
+  const actionRequest = page.waitForRequest(
+    (r) => Boolean(r.headers()["next-action"]),
+    { timeout: 5000 },
+  );
   await page
     .getByRole("button", { name: `Increase quantity of ${item.name}` })
     .click();
+  await actionRequest;
   await expect(
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toBeVisible({ timeout: 15000 });
-  await page.unroute("**/api/cart");
+  await fault(page, request, {});
   await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Refresh cart", exact: true }),
-  ).toHaveCount(0);
   await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
   await page
     .getByRole("button", { name: `Remove ${item.name} from cart` })
@@ -546,39 +504,111 @@ test("post-write refresh timeout offers a visible retry", async ({
   await expect(
     page.getByRole("heading", { name: "Your cart is empty" }),
   ).toBeVisible();
-  // An empty saved cart can be stale too (for example, another tab added a line).
-  await page.route("**/api/cart", (route) =>
-    route.fulfill({ status: 503, body: "{}" }),
-  );
+  await fault(page, request, { read: "fail" });
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toBeVisible();
-  await page.unroute("**/api/cart");
+  await fault(page, request, {});
   await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toHaveCount(0);
 });
 
-test("cart retry recovers a failed session check", async ({
+test("cart retry recovers a failed server session check", async ({
   page,
   request,
 }) => {
-  const email = `cart-session-retry-${crypto.randomUUID()}@example.com`;
-  const password = "disposable-cart-password";
-  await register(request, email, password);
-  await login(page, email, password);
-  await page.route("**/api/session/me", (route) =>
-    route.fulfill({ status: 503, body: "{}" }),
-  );
+  await savedCart(page, request);
+  await fault(page, request, { identity: "fail" });
   await page.goto("/cart");
   await expect(
     page.getByRole("button", { name: "Try again", exact: true }),
   ).toBeVisible();
-  await page.unroute("**/api/session/me");
+  await fault(page, request, {});
   await page.getByRole("button", { name: "Try again", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "Your cart is empty" }),
-  ).toBeVisible();
+  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+});
+
+test("add uses the latest backend quantity instead of the rendered count", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  const token = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "local-session",
+  )!.value;
+  // Another client changes the cart while this page still displays quantity one.
+  const changed = await request.put(`${API}/api/v1/cart/items/${item.id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    data: { quantity: 5 },
+  });
+  expect(changed.status()).toBe(200);
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ })
+    .click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("6");
+  await page.reload();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("6");
+});
+
+test("server-rendered cart is private and cannot submit before hydration", async ({
+  page,
+  request,
+  browser,
+}) => {
+  const item = await savedCart(page, request);
+  const cookies = await page.context().cookies();
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: "http://127.0.0.1:3300",
+  });
+  try {
+    await context.addCookies(cookies);
+    const serverPage = await context.newPage();
+    const response = await serverPage.goto("/cart");
+    expect(response!.headers()["cache-control"]).toContain("no-store");
+    await expect(
+      serverPage.getByRole("link", { name: item.name }),
+    ).toBeVisible();
+    await expect(
+      serverPage.getByLabel(`Quantity of ${item.name}, 1 to 99`),
+    ).toBeDisabled();
+    await expect(
+      serverPage.getByRole("button", {
+        name: `Increase quantity of ${item.name}`,
+      }),
+    ).toBeDisabled();
+    await expect(updateButton(serverPage, item.name)).toBeDisabled();
+    expect(await response!.text()).not.toContain(
+      cookies.find((cookie) => cookie.name === "local-session")!.value,
+    );
+  } finally {
+    await context.close();
+  }
+});
+
+test("focus refresh does not swallow the first quantity click", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  await page.goto("/cart");
+  const increase = page.getByRole("button", {
+    name: `Increase quantity of ${item.name}`,
+  });
+  await expect(increase).toBeEnabled();
+  await fault(page, request, { identity: "delay" });
+  await increase.scrollIntoViewIfNeeded();
+  const box = (await increase.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  // A real focus refresh between pointer down/up must not replace the target.
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await page.mouse.up();
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await fault(page, request, {});
 });

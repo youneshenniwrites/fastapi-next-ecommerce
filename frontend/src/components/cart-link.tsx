@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
-import { useSession } from "@/components/session-provider";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +13,6 @@ export function CartLink({
   className?: string;
   onClick?: () => void;
 }) {
-  const session = useSession();
   const cart = useCart();
   const count = cart.count;
   const label =
@@ -39,7 +37,7 @@ export function CartLink({
     </>
   );
   const classes = cn("inline-flex items-center gap-2", className);
-  if (session.status === "authenticated") {
+  if (cart.state.status === "ready") {
     // Full navigation discards cached private cart state on account changes.
     return (
       <a href="/cart" aria-label={label} className={classes} onClick={onClick}>
