@@ -58,6 +58,9 @@ one hidden after mount; do not assume a visibility event always precedes setup.
 - Interaction: focus may occur between pointer-down and click. Concealing private
   state must not accidentally replace the activation target. Test privacy and
   first-click behavior together rather than replacing one regression with another.
+  Concealed interactive descendants must leave the tab order (opacity and
+  aria-hidden alone are insufficient); preserve an in-progress pointer click
+  before applying inert.
 - Rendering: slow private reads must not block unrelated route content. Suspending
   a second copy of interactive children can remount forms and discard input/focus.
   Test typing during slow reads and no-JavaScript rendering where promised.
@@ -71,3 +74,5 @@ Follow-up examples: [late ready identity](https://github.com/youneshenniwrites/f
 [concealed refresh recovery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997191653).
 
 [Snapshot preceding session resolution](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997240114).
+
+[Concealed focus targets](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997271714).

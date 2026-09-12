@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CartPrivateRegion } from "@/components/cart-private-region";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -211,18 +212,10 @@ function CartLine({ item }: { item: CartItem }) {
 }
 
 export function CartView() {
-  const cart = useCart();
   return (
-    <div
-      data-cart-private
-      onFocusCapture={(event) => {
-        if (cart.concealed) event.target.blur();
-      }}
-      aria-hidden={cart.concealed || undefined}
-      style={{ opacity: cart.concealed ? 0 : 1 }}
-    >
+    <CartPrivateRegion>
       <CartContent />
-    </div>
+    </CartPrivateRegion>
   );
 }
 

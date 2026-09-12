@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CartPrivateRegion } from "@/components/cart-private-region";
 import { useEffect, useRef, useState } from "react";
 import { Check, LoaderCircle, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
@@ -91,15 +92,7 @@ function AddToCartControl({
   }
 
   return (
-    <div
-      className="space-y-2"
-      data-cart-private
-      onFocusCapture={(event) => {
-        if (cart.concealed) event.target.blur();
-      }}
-      aria-hidden={cart.concealed || undefined}
-      style={{ opacity: cart.concealed ? 0 : 1 }}
-    >
+    <CartPrivateRegion className="space-y-2">
       <Button
         onClick={() => void add()}
         disabled={pending || outOfStock || cart.readOnly}
@@ -148,6 +141,6 @@ function AddToCartControl({
           This object is currently out of stock.
         </p>
       )}
-    </div>
+    </CartPrivateRegion>
   );
 }

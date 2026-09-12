@@ -57,7 +57,8 @@ Explicit retry and focus/page restoration use `router.refresh()`. Explicit retry
 also refreshes the existing session observer so an identity failure can recover. There is no
 periodic cart poll. Focus and page restoration conceal private cart content until refreshed, using
 opacity and accessibility hiding while keeping activation targets mounted.
-Private controls release keyboard focus during concealment; the Server Action
+Private controls use native inert during concealment after any already-started
+pointer activation completes, removing hidden controls from the tab order; the Server Action
 verifies ownership before accepting an activation already in progress. The cart page provider is keyed by verified owner; the shared shell resets
 private feedback during the render when its verified owner changes.
 
