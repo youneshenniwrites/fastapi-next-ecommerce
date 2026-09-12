@@ -1,0 +1,44 @@
+name: Scoped story or epic
+description: Define one testable outcome, or a parent outcome to refine before coding.
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Work category
+      options:
+        - Story
+        - Epic
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and scope
+      description: Describe the outcome, included behavior and explicit exclusions. Follow docs/delivery.md; refine epics into linked stories before implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Parent, children and dependencies
+      description: Link related issues and blockers, or state none. Subtasks can be a checklist; they do not replace story acceptance criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and validation
+      description: Testable outcomes with necessary security, error recovery, tests and documentation. Explain any substantial indivisible review scope.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Handoff
+      description: Keep current when pausing or transferring work; verify evidence on resume.
+      value: |
+        - Implementing PR/branch: not started
+        - Completed: none
+        - Remaining/blockers:
+        - Tested revision and results: not tested
+        - Next action:

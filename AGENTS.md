@@ -6,6 +6,16 @@ are implemented; checkout is planned. Read
 docs/plans/portfolio.md, docs/architecture.md, and docs/plans/roadmap.md before choosing work; update their
 factual status when a feature lands.
 
+## Start here in every new session
+
+Read [delivery policy](docs/delivery.md#starting-without-conversation-history),
+the assigned issue and its current handoff before editing. Refine broad work with
+[refine-tickets](.agents/skills/refine-tickets/SKILL.md); follow the canonical
+[ticket boundaries](docs/delivery.md#ticket-hierarchy-and-review-scope).
+Read scoped AGENTS.md files and [framework guidance](docs/framework-agent-guidance.md)
+for installed-version Next.js/FastAPI references. Conversation history is optional;
+verify current task state in Git and GitHub rather than assuming a handoff is fresh.
+
 ## Commands
 
 - `make setup`: preserve or create local credentials and install locked dependencies.

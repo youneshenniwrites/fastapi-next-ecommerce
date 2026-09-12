@@ -6,6 +6,8 @@ What changed and why—in 1–3 sentences.
 ## Issue
 Closes #<!-- actual issue number; use Refs #N for partial work -->
 
+<!-- State the single outcome and important exclusions; link parent/dependencies and the issue handoff. If scope grew substantially, explain the split or why this PR remains coherent. See docs/delivery.md. -->
+
 ## Before / After
 <!-- Optional: include for meaningful behaviour changes; add screenshots if useful. -->
 | Before | After |

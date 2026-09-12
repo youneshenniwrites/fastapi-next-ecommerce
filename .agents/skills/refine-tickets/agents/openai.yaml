@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refine tickets"
+  short_description: "Split broad work into reviewable stories"
+  default_prompt: "Use $refine-tickets to scope the current ecommerce backlog item before implementation."
