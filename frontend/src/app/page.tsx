@@ -54,7 +54,7 @@ export default function Home() {
           />
           <div className="absolute inset-x-5 bottom-5 flex justify-between bg-background/95 p-3 text-[8px] tracking-widest">
             <span>THE EVERYDAY EDIT</span>
-            <span>01 / 06</span>
+            <span>01 / 12</span>
           </div>
         </div>
       </section>

@@ -7,14 +7,14 @@ test("browse, filter and view the real FastAPI catalog", async ({
   await expect(
     page.getByRole("heading", { name: "Room to think. Space to create." }),
   ).toBeVisible();
-  await expect(page.getByRole("status")).toHaveText("6 objects");
+  await expect(page.getByRole("status")).toHaveText("12 objects");
   await page.getByRole("searchbox").fill("not present");
   await expect(
     page.getByRole("heading", { name: "No objects found." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
   await page.getByLabel("In stock only").check();
-  await expect(page.getByRole("status")).toHaveText("5 objects");
+  await expect(page.getByRole("status")).toHaveText("11 objects");
   await page.getByLabel("Sort products").click();
   await page
     .getByRole("option", { name: "Price: low to high", exact: true })
@@ -38,7 +38,7 @@ test("out-of-stock, missing products and responsive keyboard navigation", async 
   page,
 }, info) => {
   await page.goto("/");
-  await expect(page.getByRole("status")).toHaveText("6 objects");
+  await expect(page.getByRole("status")).toHaveText("12 objects");
   await page.keyboard.press("Tab");
   await expect(
     page.getByRole("link", { name: "Skip to content" }),
@@ -165,9 +165,9 @@ test("VINDOR branding and local photographs load", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle("VINDOR — Room to think");
   await expect(page.getByRole("link", { name: "VINDOR home" })).toHaveCount(2);
-  await expect(page.getByRole("status")).toHaveText("6 objects");
+  await expect(page.getByRole("status")).toHaveText("12 objects");
   const photos = page.getByRole("main").locator("img");
-  await expect(photos).toHaveCount(7);
+  await expect(photos).toHaveCount(13);
   for (const photo of await photos.all()) {
     await photo.scrollIntoViewIfNeeded();
     await expect
@@ -179,4 +179,38 @@ test("VINDOR branding and local photographs load", async ({ page }) => {
     await expect(photo).not.toHaveAttribute("src", /\.svg/);
   }
   await expect(page.getByRole("link", { name: "Photo credits" })).toBeVisible();
+});
+
+test("new products have distinct photographs and working detail pages", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const sources = await page
+    .locator(".product img")
+    .evaluateAll((images) => images.map((image) => image.getAttribute("src")));
+  expect(new Set(sources).size).toBe(12);
+  for (const name of [
+    "Compact Keyboard",
+    "Focus Headphones",
+    "Insulated Bottle",
+    "Handled Planter",
+    "Analogue Desk Clock",
+    "Wireless Mouse",
+  ]) {
+    await page.goto("/");
+    await page.getByRole("searchbox").fill(name);
+    await expect(page.getByRole("status")).toHaveText("1 object");
+    await page.getByRole("link", { name: new RegExp(name) }).click();
+    await expect(
+      page.getByRole("heading", { name, exact: true }),
+    ).toBeVisible();
+    await expect(page.locator(".detail-price")).toContainText("£");
+    await expect(page.getByRole("main").getByText(/Fictional/)).toBeVisible();
+    const photo = page.getByRole("main").locator("img");
+    await expect
+      .poll(() =>
+        photo.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+  }
 });
