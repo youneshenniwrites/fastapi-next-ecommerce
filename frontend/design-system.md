@@ -83,15 +83,15 @@ container. Reserve inline form-error space so corrections do not move submit con
 
 ## Cart storefront
 
-Signed-in cart state lives in an in-memory CartProvider fed by same-origin
-`/api/cart` handlers; bearer tokens never reach the browser. AddToCartButton,
-CartLink (navigation count) and CartView (lines, quantity forms, subtotal)
-compose Button, Badge, Input and Skeleton with the shared 4px corners and
-48px/40px control heights. Quantity forms use React Hook Form with a Zod
-1–99 schema; the backend remains authoritative for prices, totals and stock.
-Concurrent writes serialize per product with an in-flight guard, the last
-settled write triggers an authoritative re-read, and background failures keep
-the rendered cart behind a visible warning with a Refresh cart button, including
-an empty saved cart. Post-write refresh timeouts use the same recovery path.
-Quantity errors are programmatically associated with their input.
-Signed-out visitors get a sign-in action; no guest storage exists.
+Cart data is read in a Next.js Server Component and passed to an owner-keyed
+CartProvider. Server Actions validate input and identity, call FastAPI, and refresh
+the server tree. There is no separate fetch/cache library or cart polling loop. See the
+[cart architecture](../docs/design/cart-storefront.md) for boundaries and recovery.
+
+AddToCartButton, CartLink and CartView compose shadcn Button, Badge, Input and
+Skeleton using the shared 4px corners and 48px/40px control heights. Quantity forms
+use React Hook Form and Zod; FastAPI owns prices, totals and stock. Controls show
+pending feedback and associated inline errors. Failed same-account cart reads
+preserve a read-only view with a visible Refresh cart action, including empty carts.
+Unknown identities discard private content. Signed-out visitors get a sign-in
+action; no guest storage exists.
