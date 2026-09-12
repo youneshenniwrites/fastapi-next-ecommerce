@@ -47,6 +47,34 @@ def review_request(comment):
     )
 
 
+# Observed integration footer; accept whitespace variation, not additional prose.
+CLEAN_RESULT_FOOTER = """
+<details> <summary>ℹ️ About Codex in GitHub</summary>
+<br/>
+[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general).
+Reviews are triggered when you
+- Open a pull request for review
+- Mark a draft as ready
+- Comment "@codex review".
+If Codex has suggestions, it will comment; otherwise it will react with 👍.
+Codex can also answer questions or update the PR. Try commenting "@codex address that feedback".
+</details>
+"""
+
+
+def clean_result(body, sha):
+    """Match the complete observed result, optionally followed by its known footer."""
+    normalized = " ".join(body.split())
+    for signoff in ("Can't wait for the next one!", "Swish!"):
+        result = (
+            f"Codex Review: Didn't find any major issues. {signoff} "
+            f"**Reviewed commit:** `{sha[:10]}`"
+        )
+        if normalized in (result, result + " " + " ".join(CLEAN_RESULT_FOOTER.split())):
+            return True
+    return False
+
+
 def evaluate(sha, comments, reactions, unresolved, reviews=()):
     if unresolved:
         return "pending", "Resolve review conversations and obtain a clean re-review"
@@ -92,16 +120,7 @@ def evaluate(sha, comments, reactions, unresolved, reviews=()):
         if trusted(c)
         and c.get("created_at", "") >= request["created_at"]
         and c.get("updated_at") == c.get("created_at")
-        and c.get("body", "").startswith(
-            (
-                "Codex Review: Didn't find any major issues. Can't wait for the next one!\n\n",
-                "Codex Review: Didn't find any major issues. Swish!\n\n",
-            )
-        )
-        and re.search(
-            r"\*\*Reviewed commit:\*\* `" + re.escape(sha[:10]) + r"`(?:\n|$)",
-            c["body"],
-        )
+        and clean_result(c.get("body", ""), sha)
     ]
     positive = marker in request["body"] and any(
         trusted(r) and r.get("content") == "+1"

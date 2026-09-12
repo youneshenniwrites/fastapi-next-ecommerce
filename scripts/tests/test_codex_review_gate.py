@@ -1,3 +1,4 @@
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -326,3 +327,34 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
             )[0],
             "pending",
         )
+
+
+    def test_observed_full_comment(self):
+        comment = self.clean_comment()
+        comment["body"] = (
+            Path(__file__).with_name("fixtures") / "codex-clean-swish.txt"
+        ).read_text().replace("59fbb6437d", self.sha[:10])
+        self.assertEqual(
+            evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
+            "success",
+        )
+
+    def test_inserted_or_trailing_prose_stays_pending(self):
+        for body in (
+            self.clean_comment()["body"].replace(
+                "**Reviewed commit:**", "But I found a blocking issue\n\n**Reviewed commit:**"
+            ),
+            self.clean_comment()["body"] + "But I found a blocking issue",
+            (Path(__file__).with_name("fixtures") / "codex-clean-swish.txt")
+            .read_text()
+            .replace("59fbb6437d", self.sha[:10])
+            .replace("</details>", "But I found a blocking issue</details>"),
+        ):
+            with self.subTest(body=body):
+                comment = dict(self.clean_comment(), body=body)
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [self.request, self.summary, comment], {}, False
+                    )[0],
+                    "pending",
+                )

@@ -13,7 +13,7 @@ remove an old contradictory instruction. Verify local launch URLs against exact
 origin checks. Preserve self-review disclosure and distinguish informational
 review status from enforced approval.
 
-## Review automation trust — PR 37
+## Review automation trust — PRs 37, 93
 
 Check who can create authoritative requests, exact request syntax and verified
 bot identity. Trace submitted, edited and dismissed findings after a clean signal;
@@ -21,6 +21,11 @@ resolving or dismissing a finding does not create new approval. Check failed or
 late refreshes, reopened PRs and multiple PRs sharing a SHA. A commit status is not
 inherently PR-bound. Respect the explicit deferred enforcement work in #38; do not
 claim the historical inherited-status finding has been eliminated.
+
+When adapting clean-result wording, match the complete observed message and known
+footer; a trusted prefix plus a commit anywhere in the body can admit contradictory
+prose. Preserve actual protocol fixtures and reject inserted/trailing findings
+([PR #93](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/93#discussion_r3997324325)).
 
 ## UI lifecycle and accessibility — PRs 56, 66, 78
 
