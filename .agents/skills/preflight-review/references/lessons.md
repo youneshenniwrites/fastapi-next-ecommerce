@@ -40,7 +40,9 @@ one hidden after mount; do not assume a visibility event always precedes setup.
 - Identity: test guest→A, A→guest/expired and A→B, with focus, without a hide event,
   and through the existing session observer. Invalidate private snapshots before
   displaying a new identity. Compare every arriving snapshot with the observed
-  session, including late ready results, not only initial loading results. Server mutations must independently verify ownership.
+  session, including late ready results, not only initial loading results. Test both
+  response orders: a snapshot must remain concealed while session resolution is
+  pending or failed, not only when a resolved identity already mismatches. Server mutations must independently verify ownership.
 - Operation lifetime: account changes must invalidate pending guards, errors and
   success timers. Late A completion must not overwrite B feedback or clear B’s
   in-flight operation. Check both admission and completion, including A→guest→A.
@@ -67,3 +69,5 @@ requirement to preserve the old cart implementation.
 Follow-up examples: [late ready identity](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997171787),
 [new read evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997171789),
 [concealed refresh recovery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997191653).
+
+[Snapshot preceding session resolution](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997240114).

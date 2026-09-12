@@ -70,7 +70,8 @@ A newly published successful authoritative read clears that uncertainty after th
 Next transition settles; an old ready snapshot is not confirmation. If the read
 fails, editing stays disabled until retry succeeds. Every arriving snapshot is
 compared with the observed session, including late responses after an account
-switch. A concealed cart offers recovery if refreshing settles without publishing
+switch. After hydration, loading or failed session checks keep private snapshots
+concealed until identity resolves. A concealed cart offers recovery if refreshing settles without publishing
 a snapshot; it never reveals private data merely because the transition ended.
 
 ## Verification
