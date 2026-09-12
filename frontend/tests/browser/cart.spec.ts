@@ -1201,3 +1201,45 @@ test("a late snapshot stays concealed while the new session is unresolved", asyn
     releaseRead();
   }
 });
+
+for (const view of ["product", "cart"] as const) {
+  test(`concealed ${view} controls are excluded from keyboard navigation`, async ({
+    page,
+    request,
+  }) => {
+    await savedCart(page, request);
+    if (view === "cart")
+      await page.goto("/cart", { waitUntil: "domcontentloaded" });
+    const region = page.locator("[data-cart-private]").first();
+    await expect(region).toHaveCSS("opacity", "1");
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      if (
+        route.request().headers().rsc ||
+        route.request().url().endsWith("/api/session/me")
+      )
+        await held;
+      await route.continue();
+    });
+    try {
+      await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+      await expect(region).toHaveAttribute("inert", "");
+      for (let i = 0; i < 12; i++) {
+        await page.keyboard.press("Tab");
+        expect(
+          await page.evaluate(() =>
+            Boolean(document.activeElement?.closest("[data-cart-private]")),
+          ),
+        ).toBe(false);
+      }
+      release();
+      await expect(region).not.toHaveAttribute("inert", "");
+      await expect(region).toHaveCSS("opacity", "1");
+    } finally {
+      release();
+    }
+  });
+}
