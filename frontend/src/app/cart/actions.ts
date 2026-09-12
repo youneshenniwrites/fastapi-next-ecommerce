@@ -18,6 +18,13 @@ const changeSchema = z.discriminatedUnion("kind", [
     })
     .strict(),
   z.object({ kind: z.literal("add"), productId }).strict(),
+  z
+    .object({
+      kind: z.literal("step"),
+      productId,
+      delta: z.union([z.literal(-1), z.literal(1)]),
+    })
+    .strict(),
   z.object({ kind: z.literal("remove"), productId }).strict(),
 ]);
 
@@ -53,17 +60,22 @@ export async function changeCart(
       };
       const client = apiClient();
       let quantity = change.kind === "set" ? change.quantity : 1;
-      if (change.kind === "add") {
+      if (change.kind === "add" || change.kind === "step") {
         const current = await client.GET("/api/v1/cart/", {
           redirect: options.redirect,
           headers: options.headers,
         });
         if (current.response.status !== 200 || !current.data)
           throw new Error("Cart unavailable");
-        quantity +=
-          current.data.items.find(
-            (item) => item.product.id === change.productId,
-          )?.quantity ?? 0;
+        const item = current.data.items.find(
+          (item) => item.product.id === change.productId,
+        );
+        if (change.kind === "step" && !item)
+          throw new Error("Cart line unavailable");
+        quantity = Math.max(
+          1,
+          (item?.quantity ?? 0) + (change.kind === "step" ? change.delta : 1),
+        );
       }
       if (quantity > 99) {
         refresh();

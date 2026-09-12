@@ -24,6 +24,7 @@ type CartContextValue = {
   staleNotice: string;
   refresh: () => void;
   setQuantity: (productId: number, quantity: number) => Promise<boolean>;
+  stepQuantity: (productId: number, delta: -1 | 1) => Promise<boolean>;
   removeItem: (productId: number) => Promise<boolean>;
   addItem: (productId: number) => Promise<boolean>;
   clearError: (productId: number) => void;
@@ -188,6 +189,8 @@ export function CartProvider({
         },
         setQuantity: (productId, quantity) =>
           mutate({ kind: "set", productId, quantity }),
+        stepQuantity: (productId, delta) =>
+          mutate({ kind: "step", productId, delta }),
         addItem: (productId) => mutate({ kind: "add", productId }),
         removeItem: (productId) => mutate({ kind: "remove", productId }),
         clearError,

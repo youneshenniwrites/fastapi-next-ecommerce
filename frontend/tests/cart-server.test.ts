@@ -154,6 +154,30 @@ describe("cart Server Action", () => {
     expect(await request.json()).toEqual({ quantity: 3 });
     expect(runtime.refresh).toHaveBeenCalledOnce();
   });
+  it.each([
+    [5, 1, 6],
+    [5, -1, 4],
+    [1, -1, 1],
+  ] as const)(
+    "steps server quantity %s by %s",
+    async (quantity, delta, expected) => {
+      upstream({ quantity });
+      expect(
+        await changeCart(owner, { kind: "step", productId: 1, delta }),
+      ).toEqual({ ok: true });
+      expect(
+        await (vi.mocked(fetch).mock.calls.at(-1)![0] as Request).json(),
+      ).toEqual({ quantity: expected });
+      expect(runtime.refresh).toHaveBeenCalledOnce();
+    },
+  );
+  it("does not recreate a removed line through a stale step", async () => {
+    expect(
+      await changeCart(owner, { kind: "step", productId: 2, delta: 1 }),
+    ).toMatchObject({ ok: false });
+    expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
+    expect(runtime.refresh).toHaveBeenCalledOnce();
+  });
   it("adds a new line with quantity one", async () => {
     expect(await changeCart(owner, { kind: "add", productId: 2 })).toEqual({
       ok: true,

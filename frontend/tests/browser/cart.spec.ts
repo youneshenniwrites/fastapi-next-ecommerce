@@ -590,6 +590,40 @@ test("add uses the latest backend quantity instead of the rendered count", async
   await expect(page.getByTestId("cart-count").first()).toHaveText("6");
 });
 
+test("quantity steps use the latest backend value", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  await page.goto("/cart");
+  const token = (await page.context().cookies()).find(
+    (c) => c.name === "local-session",
+  )!.value;
+  async function otherClient(quantity: number) {
+    expect(
+      (
+        await request.put(`${API}/api/v1/cart/items/${item.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { quantity },
+        })
+      ).status(),
+    ).toBe(200);
+  }
+  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  await otherClient(5);
+  await page
+    .getByRole("button", { name: `Increase quantity of ${item.name}` })
+    .click();
+  await expect(page.getByText("Qty 6", { exact: true })).toBeVisible();
+  await otherClient(3);
+  await page
+    .getByRole("button", { name: `Decrease quantity of ${item.name}` })
+    .click();
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+});
+
 test("server-rendered cart is private and cannot submit before hydration", async ({
   page,
   request,
