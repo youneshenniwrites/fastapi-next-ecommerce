@@ -18,6 +18,7 @@ export type { Cart, CartItem } from "@/lib/cart-state";
 type CartContextValue = {
   state: CartSnapshot | { status: "loading" };
   count: number;
+  concealed: boolean;
   pending: Record<number, boolean>;
   errors: Record<number, string>;
   readOnly: boolean;
@@ -87,10 +88,16 @@ export function CartProvider({
     // Another visible window can change the cookie without a hide event.
     // Conceal private data until the server verifies the returning identity.
     function refresh() {
-      setConcealed(true);
+      hide();
       startRefresh(() => router.refresh());
     }
     function hide() {
+      const active = document.activeElement;
+      if (
+        active instanceof HTMLElement &&
+        active.closest("[data-cart-private]")
+      )
+        active.blur();
       setConcealed(true);
     }
     function visible() {
@@ -160,13 +167,12 @@ export function CartProvider({
     snapshot.status === "error" && lastReady?.owner === snapshot.owner
       ? lastReady
       : null;
-  const state = concealed
-    ? { status: "loading" as const }
-    : (stale ?? snapshot);
+  const state = stale ?? snapshot;
   return (
     <CartContext.Provider
       value={{
         state,
+        concealed,
         count:
           state.status === "ready"
             ? state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
@@ -178,7 +184,6 @@ export function CartProvider({
         readOnly:
           !hydrated ||
           Boolean(stale) ||
-          concealed ||
           Object.values(errors).some((failure) => failure.uncertain),
         staleNotice:
           stale || Object.values(errors).some((failure) => failure.uncertain)

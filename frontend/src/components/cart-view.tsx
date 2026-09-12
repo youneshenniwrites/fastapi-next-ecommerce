@@ -212,6 +212,22 @@ function CartLine({ item }: { item: CartItem }) {
 
 export function CartView() {
   const cart = useCart();
+  return (
+    <div
+      data-cart-private
+      onFocusCapture={(event) => {
+        if (cart.concealed) event.target.blur();
+      }}
+      aria-hidden={cart.concealed || undefined}
+      style={{ opacity: cart.concealed ? 0 : 1 }}
+    >
+      <CartContent />
+    </div>
+  );
+}
+
+function CartContent() {
+  const cart = useCart();
 
   if (cart.state.status === "loading") {
     return (

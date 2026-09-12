@@ -42,7 +42,10 @@ between pointer-down and pointer-up cannot swallow the first click. Editing is
 disabled until hydration attaches its handlers.
 
 Explicit retry and focus/page restoration use `router.refresh()`. There is no
-periodic cart poll. Hidden pages conceal cart content until refreshed. The provider
+periodic cart poll. Focus and page restoration conceal private cart content until refreshed, using
+opacity and accessibility hiding while keeping activation targets mounted.
+Private controls release keyboard focus during concealment; the Server Action
+verifies ownership before accepting an activation already in progress. The provider
 is keyed by the server-verified owner, so switching accounts discards old cart,
 error and pending state during the render itself.
 

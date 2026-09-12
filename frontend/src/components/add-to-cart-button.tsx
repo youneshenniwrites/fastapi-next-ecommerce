@@ -78,7 +78,15 @@ export function AddToCartButton({
   }
 
   return (
-    <div className="space-y-2">
+    <div
+      className="space-y-2"
+      data-cart-private
+      onFocusCapture={(event) => {
+        if (cart.concealed) event.target.blur();
+      }}
+      aria-hidden={cart.concealed || undefined}
+      style={{ opacity: cart.concealed ? 0 : 1 }}
+    >
       <Button
         onClick={() => void add()}
         disabled={pending || outOfStock || cart.readOnly}

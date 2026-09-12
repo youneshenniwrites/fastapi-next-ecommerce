@@ -670,7 +670,10 @@ test("focus refresh conceals private cart until identity is verified", async ({
   await fault(page, request, { identity: "delay" });
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
-  await expect(page.getByTestId("cart-count")).toHaveCount(0);
+  await expect(page.getByTestId("cart-count").first()).toHaveCSS(
+    "opacity",
+    "0",
+  );
   await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
   await fault(page, request, {});
   await page
@@ -678,5 +681,58 @@ test("focus refresh conceals private cart until identity is verified", async ({
       name: `Increase quantity of ${item.name}`,
     })
     .click();
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+});
+
+test("focus revalidation preserves the activating quantity click", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  await page.goto("/cart");
+  const increase = page.getByRole("button", {
+    name: `Increase quantity of ${item.name}`,
+  });
+  await expect(increase).toBeEnabled();
+  await fault(page, request, { identity: "delay" });
+  const box = (await increase.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
+  expect(
+    await page.evaluate(() =>
+      Boolean(document.activeElement?.closest("[data-cart-private]")),
+    ),
+  ).toBe(false);
+  await page.mouse.up();
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await fault(page, request, {});
+});
+
+test("focus revalidation preserves the activating add click", async ({
+  page,
+  request,
+}) => {
+  const item = await savedCart(page, request);
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true });
+  await page.reload();
+  await expect(add).toBeEnabled();
+  await fault(page, request, { identity: "delay" });
+  const box = (await add.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByTestId("cart-count").first()).toHaveCSS(
+    "opacity",
+    "0",
+  );
+  await page.mouse.up();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await fault(page, request, {});
+  await page.goto("/cart");
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
   await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
 });
