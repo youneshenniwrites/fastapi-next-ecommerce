@@ -8,7 +8,6 @@ export default defineConfig({
       include: [
         "src/lib/catalog.ts",
         "src/lib/session.ts",
-        "src/lib/cart.ts",
         "src/lib/cart-validation.ts",
         "src/lib/cart-data.ts",
         "src/app/cart/actions.ts",
