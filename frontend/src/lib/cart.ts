@@ -2,41 +2,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { apiClient } from "./api/client";
 
-function policy() {
-  const raw = process.env.APP_ORIGIN;
-  if (!raw) throw new Error("APP_ORIGIN is required for sessions");
-  const origin = new URL(raw);
-  if (origin.origin !== raw || origin.username || origin.password)
-    throw new Error("APP_ORIGIN must be an origin");
-  const secure = origin.protocol === "https:";
-  if (
-    !secure &&
-    !(
-      origin.protocol === "http:" &&
-      ["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname) &&
-      process.env.ALLOW_LOCAL_HTTP_SESSIONS === "true"
-    )
-  )
-    throw new Error(
-      "Sessions require HTTPS or explicit loopback development mode",
-    );
-  const aliases: unknown = JSON.parse(process.env.APP_ORIGIN_ALIASES || "[]");
-  if (!Array.isArray(aliases) || aliases.length > 5)
-    throw new Error(
-      "APP_ORIGIN_ALIASES must be an array of at most five origins",
-    );
-  for (const alias of aliases) {
-    if (typeof alias !== "string") throw new Error("Invalid origin alias");
-    const parsed = new URL(alias);
-    if (!secure || parsed.protocol !== "https:" || parsed.origin !== alias)
-      throw new Error("Origin aliases must be exact HTTPS origins");
-  }
-  return {
-    origins: [raw, ...aliases],
-    secure,
-    name: secure ? "__Host-session" : "local-session",
-  };
-}
+import { sessionPolicy as policy } from "./session";
 
 function reply(body: object, status = 200) {
   return NextResponse.json(body, {
