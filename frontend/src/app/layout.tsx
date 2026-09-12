@@ -1,24 +1,19 @@
 import type { Metadata } from "next";
-import { Suspense, type ReactNode } from "react";
+import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 import { SessionProvider } from "@/components/session-provider";
 import { CartRefreshWarning } from "@/components/cart-refresh-warning";
-import { CartProvider } from "@/components/cart-provider";
+import { CartRoot, CartSnapshotUpdate } from "@/components/cart-provider";
 import { readCartSnapshot } from "@/lib/cart-data";
 export const metadata: Metadata = {
   title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
   description:
     "Considered objects for a calmer workspace. A fictional ecommerce portfolio.",
 };
-async function CartShell({ children }: { children: ReactNode }) {
-  const cart = await readCartSnapshot();
-  return (
-    <SessionProvider key={cart.owner ?? cart.status}>
-      <CartProvider snapshot={cart}>{children}</CartProvider>
-    </SessionProvider>
-  );
+async function CartShell() {
+  return <CartSnapshotUpdate snapshot={await readCartSnapshot()} />;
 }
 
 export default function RootLayout({
@@ -26,13 +21,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const content = (
-    <>
-      <SiteHeader />
-      <CartRefreshWarning />
-      {children}
-    </>
-  );
   return (
     <html lang="en">
       <body>
@@ -42,17 +30,16 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Suspense
-          fallback={
-            <SessionProvider>
-              <CartProvider snapshot={{ status: "loading", owner: null }}>
-                {content}
-              </CartProvider>
-            </SessionProvider>
-          }
-        >
-          <CartShell>{content}</CartShell>
-        </Suspense>
+        <SessionProvider>
+          <CartRoot>
+            <Suspense fallback={null}>
+              <CartShell />
+            </Suspense>
+            <SiteHeader />
+            <CartRefreshWarning />
+            {children}
+          </CartRoot>
+        </SessionProvider>
         <SiteFooter />
       </body>
     </html>

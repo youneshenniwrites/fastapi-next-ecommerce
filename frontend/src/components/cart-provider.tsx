@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useTransition,
@@ -32,6 +33,30 @@ type CartContextValue = {
   clearError: (productId: number) => void;
 };
 const subscribe = () => () => {};
+const SnapshotContext = createContext<
+  ((snapshot: CartSnapshot) => void) | null
+>(null);
+
+export function CartSnapshotUpdate({ snapshot }: { snapshot: CartSnapshot }) {
+  const publish = useContext(SnapshotContext);
+  useLayoutEffect(() => {
+    publish?.(snapshot);
+  }, [publish, snapshot]);
+  return null;
+}
+
+export function CartRoot({ children }: { children: ReactNode }) {
+  const [snapshot, setSnapshot] = useState<CartSnapshot>({
+    status: "loading",
+    owner: null,
+  });
+  return (
+    <SnapshotContext.Provider value={setSnapshot}>
+      <CartProvider snapshot={snapshot}>{children}</CartProvider>
+    </SnapshotContext.Provider>
+  );
+}
+
 const CartContext = createContext<CartContextValue | null>(null);
 export function useCart() {
   const value = useContext(CartContext);
@@ -50,11 +75,18 @@ export function CartProvider({
 }) {
   const router = useRouter();
   const session = useSession();
-  const sessionChanged =
-    snapshot.owner !== null &&
-    (session.status === "guest" ||
-      (session.status === "authenticated" &&
-        session.user.email !== snapshot.owner));
+  const [observedSession, setObservedSession] = useState(session);
+  const [sessionChanged, setSessionChanged] = useState(false);
+  if (session !== observedSession) {
+    setObservedSession(session);
+    if (
+      snapshot.status !== "loading" &&
+      ((session.status === "guest" && snapshot.owner !== null) ||
+        (session.status === "authenticated" &&
+          session.user.email !== snapshot.owner))
+    )
+      setSessionChanged(true);
+  }
   const hydrated = useSyncExternalStore(
     subscribe,
     () => true,
@@ -68,6 +100,10 @@ export function CartProvider({
 
   const [pending, setPending] = useState<Record<number, boolean>>({});
   const busy = useRef(new Set<number>());
+  const ownerRef = useRef(snapshot.owner);
+  useLayoutEffect(() => {
+    ownerRef.current = snapshot.owner;
+  }, [snapshot.owner]);
   const [errors, setErrors] = useState<Record<number, CartFailure>>({});
   const [concealed, setConcealed] = useState(false);
   const [previous, setPrevious] = useState(snapshot);
@@ -75,10 +111,15 @@ export function CartProvider({
     snapshot.status === "ready" ? snapshot : null,
   );
   if (snapshot !== previous) {
+    setSessionChanged(false);
+    if (snapshot.owner !== previous.owner) {
+      setErrors({});
+      setPending({});
+      setLastReady(snapshot.status === "ready" ? snapshot : null);
+    }
     setPrevious(snapshot);
     setConcealed(false);
-    // The server keys this provider by verified owner; unknown/different
-    // identities remount it, so a fallback never crosses accounts.
+    // Reset private state synchronously when the verified owner changes.
     if (snapshot.status === "ready") setLastReady(snapshot);
   }
   // A completed Next transition has applied the action's refreshed server tree.
@@ -144,6 +185,10 @@ export function CartProvider({
       startMutation(async () => {
         try {
           const result = await changeCart(snapshot.owner, change);
+          if (ownerRef.current !== snapshot.owner) {
+            resolve(false);
+            return;
+          }
           if (!result.ok)
             setErrors((current) => ({
               ...current,
@@ -151,6 +196,10 @@ export function CartProvider({
             }));
           resolve(result.ok);
         } catch {
+          if (ownerRef.current !== snapshot.owner) {
+            resolve(false);
+            return;
+          }
           setErrors((current) => ({
             ...current,
             [change.productId]: {

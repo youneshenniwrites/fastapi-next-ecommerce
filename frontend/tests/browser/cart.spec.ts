@@ -291,7 +291,9 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   );
   await fault(page, request, {});
   await updateButton(page, second.name).click();
-  await expect(page.getByText("Qty 2", { exact: true })).toHaveCount(2);
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toHaveCount(2);
 
   // Concurrent writes to different lines settle to the server state: both
   // increases land, the final UI matches the authoritative cart, and a
@@ -371,7 +373,9 @@ test("a stale cart cannot write into a different signed-in account", async ({
   ).toBeVisible();
   await login(page, emailA, password);
   await page.goto("/cart");
-  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test("failed new-account reads never preserve the previous cart", async ({
@@ -494,7 +498,9 @@ test("committed-write timeout recovers without duplicating the add", async ({
     page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
   ).toHaveCount(0);
   await page.goto("/cart");
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: item.name })).toBeVisible();
 });
 
@@ -544,7 +550,9 @@ test("post-write read timeout and empty-cart failures offer retry", async ({
   ).toBeVisible({ timeout: 15000 });
   await fault(page, request, {});
   await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: `Remove ${item.name} from cart` })
     .click();
@@ -575,7 +583,9 @@ test("cart retry recovers a failed server session check", async ({
   ).toBeVisible();
   await fault(page, request, {});
   await page.getByRole("button", { name: "Try again", exact: true }).click();
-  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test("add uses the latest backend quantity instead of the rendered count", async ({
@@ -621,19 +631,27 @@ test("quantity steps use the latest backend value", async ({
       ).status(),
     ).toBe(200);
   }
-  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await otherClient(5);
   await page
     .getByRole("button", { name: `Increase quantity of ${item.name}` })
     .click();
-  await expect(page.getByText("Qty 6", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 6", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await otherClient(3);
   await page
     .getByRole("button", { name: `Decrease quantity of ${item.name}` })
     .click();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await page.reload();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test("server-rendered cart is private and cannot submit before hydration", async ({
@@ -678,7 +696,10 @@ test("focus refresh conceals private cart until identity is verified", async ({
 }) => {
   const item = await savedCart(page, request);
   await page.goto("/cart");
-  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
   await fault(page, request, { identity: "delay" });
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
@@ -686,14 +707,18 @@ test("focus refresh conceals private cart until identity is verified", async ({
     "opacity",
     "0",
   );
-  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await fault(page, request, {});
   await page
     .getByRole("button", {
       name: `Increase quantity of ${item.name}`,
     })
     .click();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test("focus revalidation preserves the activating quantity click", async ({
@@ -706,6 +731,7 @@ test("focus revalidation preserves the activating quantity click", async ({
     name: `Increase quantity of ${item.name}`,
   });
   await expect(increase).toBeEnabled();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
   await fault(page, request, { identity: "delay" });
   const box = (await increase.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -718,7 +744,9 @@ test("focus revalidation preserves the activating quantity click", async ({
     ),
   ).toBe(false);
   await page.mouse.up();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
   await fault(page, request, {});
 });
 
@@ -732,6 +760,7 @@ test("focus revalidation preserves the activating add click", async ({
     .getByRole("button", { name: "Add to cart", exact: true });
   await page.reload();
   await expect(add).toBeEnabled();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
   await fault(page, request, { identity: "delay" });
   const box = (await add.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -746,7 +775,9 @@ test("focus revalidation preserves the activating add click", async ({
   await fault(page, request, {});
   await page.goto("/cart");
   await expect(page.getByRole("link", { name: item.name })).toBeVisible();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test("session poll expiry clears the cart without a focus event", async ({
@@ -776,5 +807,30 @@ test("static login content streams while private cart reads are pending", async 
   await expect(
     page.getByRole("heading", { name: "Welcome back." }),
   ).toBeVisible({ timeout: 3000 });
+  const email = page.getByLabel("Email address", { exact: true });
+  await email.fill("retained@example.com");
+  await page.waitForLoadState("load");
+  await expect(email).toHaveValue("retained@example.com");
+  await expect(email).toBeFocused();
   await fault(page, request, {});
+});
+
+test("session poll restores an ownerless cart after another window signs in", async ({
+  page,
+  request,
+}) => {
+  await page.clock.install();
+  await savedCart(page, request);
+  const cookies = await page.context().cookies();
+  await page.context().clearCookies();
+  await page.goto("/cart");
+  await expect(
+    page.getByRole("heading", { name: "Sign in to view your saved cart" }),
+  ).toBeVisible();
+  await page.context().addCookies(cookies);
+  await page.clock.fastForward(60001);
+  await expect(
+    page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
 });
