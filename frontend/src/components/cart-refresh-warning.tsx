@@ -13,7 +13,7 @@ export function CartRefreshWarning({
   const pathname = usePathname();
   const cart = useCart();
   if (scope === "shell" && pathname === "/cart") return null;
-  if (cart.state.status !== "ready" || !cart.staleNotice) return null;
+  if (!cart.staleNotice) return null;
   return (
     <div
       role="status"

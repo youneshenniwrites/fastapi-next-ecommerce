@@ -13,7 +13,7 @@ import {
 } from "react";
 import { CartOperations } from "@/lib/cart-operations";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/components/session-provider";
+import { useSession, useSessionRefresh } from "@/components/session-provider";
 import { changeCart } from "@/app/cart/actions";
 import type { CartChange, CartSnapshot, CartFailure } from "@/lib/cart-state";
 export type { Cart, CartItem } from "@/lib/cart-state";
@@ -76,17 +76,20 @@ export function CartProvider({
 }) {
   const router = useRouter();
   const session = useSession();
+  const refreshSession = useSessionRefresh();
   const [observedSession, setObservedSession] = useState(session);
   const [sessionChanged, setSessionChanged] = useState(false);
   if (session !== observedSession) {
     setObservedSession(session);
     if (
       snapshot.status !== "loading" &&
-      ((session.status === "guest" && snapshot.owner !== null) ||
-        (session.status === "authenticated" &&
-          session.user.email !== snapshot.owner))
+      (session.status === "guest" || session.status === "authenticated")
     )
-      setSessionChanged(true);
+      setSessionChanged(
+        session.status === "guest"
+          ? snapshot.owner !== null
+          : session.user.email !== snapshot.owner,
+      );
   }
   const hydrated = useSyncExternalStore(
     subscribe,
@@ -96,27 +99,36 @@ export function CartProvider({
   const [refreshing, startRefresh] = useTransition();
   const [mutating, startMutation] = useTransition();
   useEffect(() => {
-    if (sessionChanged) startRefresh(() => router.refresh());
-  }, [sessionChanged, router]);
+    if (sessionChanged) {
+      refreshSession();
+      startRefresh(() => router.refresh());
+    }
+  }, [sessionChanged, router, refreshSession]);
 
   const [pending, setPending] = useState<Record<number, boolean>>({});
   const busy = useRef(new CartOperations(snapshot.owner));
   useLayoutEffect(() => {
     busy.current.reset(snapshot.owner);
   }, [snapshot.owner]);
-  const [errors, setErrors] = useState<Record<number, CartFailure>>({});
+  const publishedSnapshot = useRef(snapshot);
+  useLayoutEffect(() => {
+    publishedSnapshot.current = snapshot;
+  }, [snapshot]);
+  const [errors, setErrors] = useState<
+    Record<number, CartFailure & { beforeRefresh?: CartSnapshot }>
+  >({});
   const [concealed, setConcealed] = useState(false);
   const [previous, setPrevious] = useState(snapshot);
   const [lastReady, setLastReady] = useState(
     snapshot.status === "ready" ? snapshot : null,
   );
   if (snapshot !== previous) {
-    const arrivedAfterSession =
-      previous.status === "loading" &&
-      ((session.status === "guest" && snapshot.owner !== null) ||
-        (session.status === "authenticated" &&
-          session.user.email !== snapshot.owner));
-    setSessionChanged(arrivedAfterSession);
+    if (session.status === "guest" || session.status === "authenticated")
+      setSessionChanged(
+        session.status === "guest"
+          ? snapshot.owner !== null
+          : session.user.email !== snapshot.owner,
+      );
     if (snapshot.owner !== previous.owner) {
       setErrors({});
       setPending({});
@@ -127,17 +139,22 @@ export function CartProvider({
     // Reset private state synchronously when the verified owner changes.
     if (snapshot.status === "ready") setLastReady(snapshot);
   }
-  // A completed Next transition has applied the action's refreshed server tree.
-  // A successful read settles uncertainty even if the write response was lost.
+  // Settled transitions alone do not prove that an RSC response arrived.
+  // Require a new ready publication after the failure before clearing it.
   if (
     !mutating &&
     !refreshing &&
     snapshot.status === "ready" &&
-    Object.values(errors).some((failure) => failure.uncertain)
+    Object.values(errors).some(
+      (failure) => failure.uncertain && failure.beforeRefresh !== snapshot,
+    )
   ) {
     setErrors(
       Object.fromEntries(
-        Object.entries(errors).filter(([, failure]) => !failure.uncertain),
+        Object.entries(errors).filter(
+          ([, failure]) =>
+            !failure.uncertain || failure.beforeRefresh === snapshot,
+        ),
       ),
     );
   }
@@ -194,23 +211,28 @@ export function CartProvider({
             resolve(false);
             return;
           }
-          if (!result.ok)
+          if (!result.ok) {
+            const beforeRefresh = publishedSnapshot.current;
             setErrors((current) => ({
               ...current,
-              [change.productId]: result,
+              [change.productId]: { ...result, beforeRefresh },
             }));
+            if (result.uncertain) startRefresh(() => router.refresh());
+          }
           resolve(result.ok);
         } catch {
           if (!busy.current.current(change.productId, operation)) {
             resolve(false);
             return;
           }
+          const beforeRefresh = publishedSnapshot.current;
           setErrors((current) => ({
             ...current,
             [change.productId]: {
               error:
                 "We couldn't confirm the change. Refresh your cart before trying again.",
               uncertain: true,
+              beforeRefresh,
             },
           }));
           // Transport failures can happen after a committed write. Never retry
@@ -253,10 +275,13 @@ export function CartProvider({
           Boolean(stale) ||
           Object.values(errors).some((failure) => failure.uncertain),
         staleNotice:
-          stale || Object.values(errors).some((failure) => failure.uncertain)
+          stale ||
+          ((concealed || sessionChanged) && !refreshing) ||
+          Object.values(errors).some((failure) => failure.uncertain)
             ? "Couldn't update your cart. Please try again."
             : "",
         refresh: () => {
+          refreshSession();
           startRefresh(() => router.refresh());
         },
         setQuantity: (productId, quantity) =>
