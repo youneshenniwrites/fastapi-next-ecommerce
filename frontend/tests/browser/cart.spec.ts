@@ -736,3 +736,20 @@ test("focus revalidation preserves the activating add click", async ({
   await expect(page.getByRole("link", { name: item.name })).toBeVisible();
   await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
 });
+
+test("session poll expiry clears the cart without a focus event", async ({
+  page,
+  request,
+}) => {
+  await page.clock.install();
+  const item = await savedCart(page, request);
+  await page.goto("/cart");
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+  await page.context().clearCookies();
+  await page.clock.fastForward(60001);
+  await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Sign in to view your saved cart" }),
+  ).toBeVisible();
+  await expect(page.getByTestId("cart-count")).toHaveCount(0);
+});
