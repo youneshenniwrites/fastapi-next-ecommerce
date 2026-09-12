@@ -72,7 +72,9 @@ Use the PR template headings and reference the GitHub issue. Use Closes #N
 for completed tickets and Refs #N for partial work. Never invent a ticket reference.
 
 Explain the problem and resulting behavior, then give the commands/results and
-material limitations. Include relevant screenshots for UI changes, or API/test
+material limitations. Keep the Review section to a brief self-review disclosure
+and links to current-head Codex review and CI evidence, stating their actual
+status. Assignment and labels belong in the sidebar. Include relevant screenshots for UI changes, or API/test
 output for backend changes. Do not include tokens, passwords, or customer data.
 
 Review the exact pushed revision. Address actionable findings and rerun affected
