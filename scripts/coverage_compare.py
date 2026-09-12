@@ -71,8 +71,12 @@ def changed_lines(diff):
     """Read zero-context git diff without treating filenames as commands."""
     result = {}
     current = None
+    file_header = True
     for line in diff.splitlines():
-        if line.startswith("+++ "):
+        if line.startswith("diff --git "):
+            current = None
+            file_header = True
+        elif file_header and line.startswith("+++ "):
             current = None
             if line.startswith("+++ b/"):
                 current = source_path(line[6:], "")
@@ -80,6 +84,7 @@ def changed_lines(diff):
             elif line != "+++ /dev/null":
                 raise ValueError("Unsupported diff filename encoding")
         elif line.startswith("@@ ") and current is not None:
+            file_header = False
             match = re.match(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", line)
             if not match:
                 raise ValueError("Invalid diff hunk")

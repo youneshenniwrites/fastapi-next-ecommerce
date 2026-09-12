@@ -44,7 +44,7 @@ class ComparisonTests(unittest.TestCase):
         self.assertIn("Baseline unavailable or incompatible", self.result())
 
     def test_unmeasured_file_is_not_credited_and_deleted_lines_not_counted(self):
-        self.diff += "+++ b/frontend/src/untested.ts\n@@ -0,0 +1,2 @@\n+x\n+y\n"
+        self.diff += "diff --git a/frontend/src/untested.ts b/frontend/src/untested.ts\n+++ b/frontend/src/untested.ts\n@@ -0,0 +1,2 @@\n+x\n+y\n"
         self.assertIn("outside the measured scope: **2**", self.result())
         self.diff = "+++ b/backend/app/example.py\n@@ -3 +2,0 @@\n-old\n"
         self.assertIn("N/A (none measured)", self.result())
@@ -60,6 +60,20 @@ class ComparisonTests(unittest.TestCase):
             executable_lines("backend", self.head)
         with self.assertRaises(ValueError):
             changed_lines("+++ b/../../secret\n@@ -0,0 +1 @@\n+x")
+
+    def test_added_header_shaped_text_cannot_redirect_later_hunks(self):
+        diff = """diff --git a/text.ts b/text.ts
+--- a/text.ts
++++ b/text.ts
+@@ -0,0 +1,3 @@
++const example = `
++++ b/not-this-file.ts
++`;
+@@ -5 +8 @@
+-old
++new
+"""
+        self.assertEqual(changed_lines(diff), {"text.ts": {1, 2, 3, 8}})
 
     def test_changed_backend_source_root_is_not_mapped_to_app(self):
         self.head.write_text(
