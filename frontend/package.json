@@ -13,12 +13,14 @@
     "start": "node .next/standalone/server.js",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "vitest run --coverage",
+    "test": "node --test scripts/patch-next-image.test.mjs && vitest run --coverage",
     "test:e2e": "playwright test",
     "api:generate": "openapi-typescript openapi.json -o src/lib/api/schema.d.ts",
     "api:check": "npm run api:generate && git diff --exit-code -- openapi.json src/lib/api/schema.d.ts",
     "format:check": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "postinstall": "node scripts/patch-next-image.mjs",
+    "prebuild": "node scripts/patch-next-image.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
