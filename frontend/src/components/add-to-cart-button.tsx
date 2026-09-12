@@ -7,7 +7,20 @@ import { useCart } from "@/components/cart-provider";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/lib/catalog";
 
-export function AddToCartButton({
+export function AddToCartButton(props: {
+  product: Product;
+  compact?: boolean;
+}) {
+  const cart = useCart();
+  return (
+    <AddToCartControl
+      key={cart.state.status === "ready" ? cart.state.owner : cart.state.status}
+      {...props}
+    />
+  );
+}
+
+function AddToCartControl({
   product,
   compact = false,
 }: {
