@@ -35,6 +35,11 @@ navigation count without a separate browser fetch/reconciliation loop. The old
 frontend `/api/cart` routes were internal to this unmerged feature and are removed;
 the FastAPI [cart API](cart-api.md) is unchanged.
 
+The cart shell reads behind a Next.js Suspense boundary. Its loading provider
+renders the public page immediately while authenticated identity/cart reads
+settle. Session and cart providers reset together when the verified owner changes.
+The existing session poll also triggers server revalidation when a session ends.
+
 ## Recovery and account isolation
 
 Visible controls remain mounted during a background refresh, so a focus event

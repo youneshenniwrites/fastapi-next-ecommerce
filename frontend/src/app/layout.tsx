@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
@@ -11,12 +12,27 @@ export const metadata: Metadata = {
   description:
     "Considered objects for a calmer workspace. A fictional ecommerce portfolio.",
 };
-export default async function RootLayout({
+async function CartShell({ children }: { children: ReactNode }) {
+  const cart = await readCartSnapshot();
+  return (
+    <SessionProvider key={cart.owner ?? cart.status}>
+      <CartProvider snapshot={cart}>{children}</CartProvider>
+    </SessionProvider>
+  );
+}
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cart = await readCartSnapshot();
+  const content = (
+    <>
+      <SiteHeader />
+      <CartRefreshWarning />
+      {children}
+    </>
+  );
   return (
     <html lang="en">
       <body>
@@ -26,13 +42,17 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        <SessionProvider>
-          <CartProvider key={cart.owner ?? cart.status} snapshot={cart}>
-            <SiteHeader />
-            <CartRefreshWarning />
-            {children}
-          </CartProvider>
-        </SessionProvider>
+        <Suspense
+          fallback={
+            <SessionProvider>
+              <CartProvider snapshot={{ status: "loading", owner: null }}>
+                {content}
+              </CartProvider>
+            </SessionProvider>
+          }
+        >
+          <CartShell>{content}</CartShell>
+        </Suspense>
         <SiteFooter />
       </body>
     </html>
