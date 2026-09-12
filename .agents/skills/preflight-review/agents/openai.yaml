@@ -1,0 +1,4 @@
+interface:
+  display_name: "Preflight Review"
+  short_description: "Review changes using repository review lessons"
+  default_prompt: "Use $preflight-review on the current ecommerce PR before external review."

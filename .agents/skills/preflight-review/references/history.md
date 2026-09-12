@@ -148,3 +148,6 @@ Refresh using paginated `pulls?state=all`, `pulls/comments`, `issues/comments` a
 - [PR 88: document preflight review in the invocation guide](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997096911). Apply the documentation-consistency lesson to the canonical discovery guide as well as AGENTS and skill entrypoints.
 
 - [PR 88: run preflight before the review request](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997115518). Place prerequisites before actions in sequential skill instructions.
+
+- [PR 88: cover comment follow-up](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997140827). Apply review prerequisites to both initial and follow-up requests.
+- [PR 88: picker metadata](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997140833). Keep advertised discovery metadata consistent with the skill package.
