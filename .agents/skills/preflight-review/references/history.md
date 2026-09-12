@@ -146,3 +146,5 @@ Refresh using paginated `pulls?state=all`, `pulls/comments`, `issues/comments` a
 ## Feedback after the initial snapshot
 
 - [PR 88: document preflight review in the invocation guide](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997096911). Apply the documentation-consistency lesson to the canonical discovery guide as well as AGENTS and skill entrypoints.
+
+- [PR 88: run preflight before the review request](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997115518). Place prerequisites before actions in sequential skill instructions.
