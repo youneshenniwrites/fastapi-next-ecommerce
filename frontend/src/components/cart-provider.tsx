@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/components/session-provider";
 import { changeCart } from "@/app/cart/actions";
 import type { CartChange, CartSnapshot, CartFailure } from "@/lib/cart-state";
 export type { Cart, CartItem } from "@/lib/cart-state";
@@ -48,6 +49,12 @@ export function CartProvider({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const session = useSession();
+  const sessionChanged =
+    snapshot.owner !== null &&
+    (session.status === "guest" ||
+      (session.status === "authenticated" &&
+        session.user.email !== snapshot.owner));
   const hydrated = useSyncExternalStore(
     subscribe,
     () => true,
@@ -55,6 +62,10 @@ export function CartProvider({
   );
   const [refreshing, startRefresh] = useTransition();
   const [mutating, startMutation] = useTransition();
+  useEffect(() => {
+    if (sessionChanged) startRefresh(() => router.refresh());
+  }, [sessionChanged, router]);
+
   const [pending, setPending] = useState<Record<number, boolean>>({});
   const busy = useRef(new Set<number>());
   const [errors, setErrors] = useState<Record<number, CartFailure>>({});
@@ -172,7 +183,7 @@ export function CartProvider({
     <CartContext.Provider
       value={{
         state,
-        concealed,
+        concealed: concealed || sessionChanged,
         count:
           state.status === "ready"
             ? state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
@@ -183,6 +194,7 @@ export function CartProvider({
         ),
         readOnly:
           !hydrated ||
+          sessionChanged ||
           Boolean(stale) ||
           Object.values(errors).some((failure) => failure.uncertain),
         staleNotice:
