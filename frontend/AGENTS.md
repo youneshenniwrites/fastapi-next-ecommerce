@@ -29,3 +29,8 @@ Use Tailwind semantic tokens and shadcn primitives for new UI. Read
 [design-system.md](design-system.md) before adding components or changing global
 CSS. Preserve the documented reset strategy and server/client boundaries.
 Use lucide-react for UI icons; do not create custom SVG artwork.
+
+Before Next.js changes, read relevant version-matched guides under
+`node_modules/next/dist/docs/` from this frontend directory. Inspect runtime
+errors and verify affected pages in the browser; use documented fixes. See
+[framework guidance](../docs/framework-agent-guidance.md) for discovery and fallback.

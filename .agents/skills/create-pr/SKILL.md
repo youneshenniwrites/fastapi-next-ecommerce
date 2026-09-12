@@ -12,3 +12,7 @@ Use [self-review](../self-review/SKILL.md) before requesting external review. Fi
 Within existing push/PR authorization, commit and push the intended changes, then create or refresh the PR using gh/API. Pass multiline text through a body file or structured JSON, never shell interpolation of PR content. Apply the ownership helper and read back title, base/head, body, owner assignment and labels. Request only Codex using the current-head protocol in [review documentation](../../../docs/codex-review.md); avoid duplicate requests for an unchanged head.
 
 Use [update-delivery-board](../update-delivery-board/SKILL.md) to move the linked ticket to In review. Report the PR URL, checks and review state. Creating a PR does not itself authorize merging or deployment; continue a separately authorized delivery task under the repository merge policy.
+
+Follow AGENTS.md for small coherent commits and regular verified pushes within
+existing authorization. Keep code and its tests together; do not save all changes
+for one final large commit. A push does not waive fresh current-head review.

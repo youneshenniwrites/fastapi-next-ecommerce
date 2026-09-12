@@ -19,3 +19,8 @@ stack for PostgreSQL checks. Do not stamp or downgrade an existing user database
 
 Run make check; require container CI for database or startup changes. Regenerate
 OpenAPI-derived frontend types when that frontend has been introduced.
+
+Consult the installed official FastAPI skill and relevant references before
+implementation; [framework guidance](../../../docs/framework-agent-guidance.md)
+explains discovery. Apply compatible patterns without replacing the approved
+SQLAlchemy stack or expanding the task to an unsolicited framework migration.
