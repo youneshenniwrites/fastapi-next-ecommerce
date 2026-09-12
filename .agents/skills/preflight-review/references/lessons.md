@@ -33,12 +33,14 @@ one hidden after mount; do not assume a visibility event always precedes setup.
 
 - Recovery: exercise empty and populated states, initial failure, later failure,
   catalog controls and cart page. Every stale consumer needs a visible explanation
-  and a working retry. Trace the provider used by each warning; a healthy outer
+  and a working retry. Include lost RSC transport responses that publish no snapshot;
+  transition completion alone must not reveal concealed data. Trace the provider used by each warning; a healthy outer
   provider cannot report a failed inner provider. Retry must revalidate the failed
   dependency, including identity, and restore usable controls.
 - Identity: test guest→A, A→guest/expired and A→B, with focus, without a hide event,
   and through the existing session observer. Invalidate private snapshots before
-  displaying a new identity. Server mutations must independently verify ownership.
+  displaying a new identity. Compare every arriving snapshot with the observed
+  session, including late ready results, not only initial loading results. Server mutations must independently verify ownership.
 - Operation lifetime: account changes must invalidate pending guards, errors and
   success timers. Late A completion must not overwrite B feedback or clear B’s
   in-flight operation. Check both admission and completion, including A→guest→A.
@@ -48,7 +50,8 @@ one hidden after mount; do not assume a visibility event always precedes setup.
   write as atomic across clients.
 - Uncertain outcomes: a timeout may follow a committed write. Do not automatically
   retry a relative mutation. Reconcile against an authoritative read; clear
-  uncertainty only with evidence of successful reconciliation, and keep recovery
+  uncertainty only with a new successful snapshot after the failure (an old ready
+  value is not confirmation), and keep recovery
   available when that read fails. Check ordering of action result and refreshed UI.
 - Interaction: focus may occur between pointer-down and click. Concealing private
   state must not accidentally replace the activation target. Test privacy and
@@ -60,3 +63,7 @@ one hidden after mount; do not assume a visibility event always precedes setup.
 Prefer the installed Next.js documentation and framework-managed reads/actions to
 another client cache or polling mechanism. These lessons constrain behavior, not a
 requirement to preserve the old cart implementation.
+
+Follow-up examples: [late ready identity](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997171787),
+[new read evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997171789),
+[concealed refresh recovery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997191653).
