@@ -9,6 +9,7 @@ export type CartSnapshot =
 export type CartChange =
   | { kind: "set"; productId: number; quantity: number }
   | { kind: "add"; productId: number }
+  | { kind: "step"; productId: number; delta: -1 | 1 }
   | { kind: "remove"; productId: number };
 export type CartFailure = { error: string; uncertain?: true };
 export type CartActionResult = { ok: true } | ({ ok: false } & CartFailure);

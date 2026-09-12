@@ -22,7 +22,8 @@ allowlist, and verifies the cookie's current identity through FastAPI. It reject
 an old page's expected identity if another window has changed the account. The
 expected email is a consistency check, never an authorization credential.
 
-Add reads the current backend quantity instead of incrementing a browser snapshot.
+Add and the +/− quantity controls read the current backend quantity instead of
+stepping a browser snapshot. Explicit quantity entry remains an absolute set.
 Next serializes action dispatch within a client; an immediate per-product guard
 suppresses double activation. FastAPI still uses absolute-quantity PUT semantics:
 independent clients can race between an add's read and write, and the last

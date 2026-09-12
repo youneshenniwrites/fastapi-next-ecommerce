@@ -51,9 +51,9 @@ function QuantityForm({ item }: { item: CartItem }) {
     await cart.setQuantity(productId, values.quantity);
   }
 
-  async function step(next: number) {
+  async function step(delta: -1 | 1) {
     cart.clearError(productId);
-    await cart.setQuantity(productId, next);
+    await cart.stepQuantity(productId, delta);
   }
 
   const shortage = !item.available;
@@ -70,7 +70,7 @@ function QuantityForm({ item }: { item: CartItem }) {
           size="icon-sm"
           aria-label={`Decrease quantity of ${item.product.name}`}
           disabled={decreaseDisabled}
-          onClick={() => void step(item.quantity - 1)}
+          onClick={() => void step(-1)}
         >
           <Minus aria-hidden="true" />
         </Button>
@@ -125,7 +125,7 @@ function QuantityForm({ item }: { item: CartItem }) {
           size="icon-sm"
           aria-label={`Increase quantity of ${item.product.name}`}
           disabled={increaseDisabled}
-          onClick={() => void step(item.quantity + 1)}
+          onClick={() => void step(1)}
         >
           <Plus aria-hidden="true" />
         </Button>
