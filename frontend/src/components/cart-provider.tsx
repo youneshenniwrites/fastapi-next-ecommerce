@@ -111,7 +111,12 @@ export function CartProvider({
     snapshot.status === "ready" ? snapshot : null,
   );
   if (snapshot !== previous) {
-    setSessionChanged(false);
+    const arrivedAfterSession =
+      previous.status === "loading" &&
+      ((session.status === "guest" && snapshot.owner !== null) ||
+        (session.status === "authenticated" &&
+          session.user.email !== snapshot.owner));
+    setSessionChanged(arrivedAfterSession);
     if (snapshot.owner !== previous.owner) {
       setErrors({});
       setPending({});
@@ -252,7 +257,6 @@ export function CartProvider({
             ? "Couldn't update your cart. Please try again."
             : "",
         refresh: () => {
-          setErrors({});
           startRefresh(() => router.refresh());
         },
         setQuantity: (productId, quantity) =>
