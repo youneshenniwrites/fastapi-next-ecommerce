@@ -258,3 +258,71 @@ class EditedReviews(unittest.TestCase):
             )[0],
             "success",
         )
+
+
+class SwishCleanEvidence(ReviewEvidence, EditedReviews):
+    """Replay all clean-result trust checks with the observed PR #91 wording."""
+
+    def clean_comment(self):
+        comment = super().clean_comment()
+        comment["body"] = comment["body"].replace(
+            "Can't wait for the next one!", "Swish!"
+        )
+        return comment
+
+    def test_unrecognized_clean_wording_stays_pending(self):
+        for suffix in (
+            "Swish! But there are issues.",
+            "Swish?",
+            "Everything looks fine!",
+            "",
+        ):
+            with self.subTest(suffix=suffix):
+                comment = self.clean_comment()
+                comment["body"] = comment["body"].replace("Swish!", suffix)
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [self.request, self.summary, comment], {}, False
+                    )[0],
+                    "pending",
+                )
+
+    def test_edited_clean_comment_stays_pending(self):
+        comment = self.clean_comment()
+        comment["updated_at"] = "2026-09-08T10:02:00Z"
+        self.assertEqual(
+            evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
+            "pending",
+        )
+
+    def test_stale_clean_comment_stays_pending(self):
+        comment = self.clean_comment()
+        comment["created_at"] = comment["updated_at"] = "2026-09-08T09:59:00Z"
+        self.assertEqual(
+            evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
+            "pending",
+        )
+
+    def test_clean_wording_does_not_replace_required_evidence(self):
+        cases = (
+            ("request", "updated_at", "2026-09-08T10:02:00Z"),
+            ("request", "author_association", "NONE"),
+            ("summary", "body", "Unexpected summary"),
+            ("summary", "updated_at", "2026-09-08T09:59:00Z"),
+        )
+        for target, key, value in cases:
+            with self.subTest(target=target, key=key):
+                request, summary = dict(self.request), dict(self.summary)
+                (request if target == "request" else summary)[key] = value
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [request, summary, self.clean_comment()], {}, False
+                    )[0],
+                    "pending",
+                )
+        self.assertEqual(
+            evaluate(
+                self.sha, [self.request, self.summary, self.clean_comment()], {}, True
+            )[0],
+            "pending",
+        )

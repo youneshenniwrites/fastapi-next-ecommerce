@@ -93,7 +93,10 @@ def evaluate(sha, comments, reactions, unresolved, reviews=()):
         and c.get("created_at", "") >= request["created_at"]
         and c.get("updated_at") == c.get("created_at")
         and c.get("body", "").startswith(
-            "Codex Review: Didn't find any major issues. Can't wait for the next one!\n\n"
+            (
+                "Codex Review: Didn't find any major issues. Can't wait for the next one!\n\n",
+                "Codex Review: Didn't find any major issues. Swish!\n\n",
+            )
         )
         and re.search(
             r"\*\*Reviewed commit:\*\* `" + re.escape(sha[:10]) + r"`(?:\n|$)",
