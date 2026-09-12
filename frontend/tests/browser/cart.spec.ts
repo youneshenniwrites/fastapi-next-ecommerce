@@ -349,12 +349,41 @@ test("switching accounts without sign-out never shows the previous cart", async 
     },
     { email: emailB, password },
   );
+  let releaseIdentity!: () => void;
+  const identityWait = new Promise<void>((resolve) => {
+    releaseIdentity = resolve;
+  });
+  await page.route("**/api/session/me", async (route) => {
+    await identityWait;
+    await route.continue();
+  });
+  let writes = 0;
+  page.on("request", (request) => {
+    if (
+      request.url().includes("/api/cart/items/") &&
+      request.method() !== "GET"
+    )
+      writes++;
+  });
+  // Even a click in the same focus event must not write through the new cookie.
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event("focus"));
+    document
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label^="Increase quantity"]',
+      )
+      ?.click();
+  });
+  await expect(page.getByRole("link", { name: first.name })).toHaveCount(0);
+  expect(writes).toBe(0);
+  releaseIdentity();
   // The session provider reloads identity on window focus without remounting
   // the cart provider, exercising the confirmed account-change path.
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByRole("link", { name: first.name })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   await page.unroute("**/api/cart");
+  await page.unroute("**/api/session/me");
 });
 
 test("stale cart shows a visible warning and recovers on refresh", async ({

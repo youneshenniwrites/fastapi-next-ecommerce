@@ -90,6 +90,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // into another customer's session.
   const accountGen = useRef(0);
   const busy = useRef(new Set<number>());
+  const writesAllowed = useRef(false);
   const lastEmail = useRef<string | null>(null);
   const sessionRef = useRef(session);
   const snapshotRef = useRef<CartSnapshot | undefined>(undefined);
@@ -243,6 +244,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   useEffect(() => {
+    writesAllowed.current = session.status === "authenticated";
     function load() {
       if (document.visibilityState !== "visible") {
         requestId.current += 1;
@@ -252,12 +254,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       refreshRef.current();
     }
     load();
-    const rerender = () => load();
+    const rerender = () => {
+      writesAllowed.current = false;
+      load();
+    };
     function hide() {
+      writesAllowed.current = false;
       requestId.current += 1;
       setSnapshot(undefined);
     }
     function visibility() {
+      writesAllowed.current = false;
       if (document.visibilityState === "visible") load();
       else hide();
     }
@@ -285,6 +292,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // Completions from a previous account generation must not clear the
       // new account's busy/pending entries (which would allow duplicate
       // writes) or trigger a re-read against the wrong identity.
+      if (
+        !writesAllowed.current ||
+        sessionRef.current.status !== "authenticated"
+      )
+        return false;
       const gen = accountGen.current;
       const email = lastEmail.current;
       if (busy.current.has(productId)) return false;
@@ -470,7 +482,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const value = useMemo<CartContextValue>(() => {
-    const state = snapshot ?? { status: "loading" as const };
+    const state =
+      session.status === "loading"
+        ? { status: "loading" as const }
+        : (snapshot ?? { status: "loading" as const });
     return {
       state,
       count: state.status === "ready" ? cartCount(state.cart) : 0,
@@ -485,6 +500,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clearError,
     };
   }, [
+    session.status,
     snapshot,
     pending,
     errors,
