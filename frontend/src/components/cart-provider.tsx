@@ -260,7 +260,12 @@ export function CartProvider({
     <CartContext.Provider
       value={{
         state,
-        concealed: concealed || sessionChanged,
+        concealed:
+          concealed ||
+          sessionChanged ||
+          (hydrated &&
+            state.status === "ready" &&
+            (session.status === "loading" || session.status === "error")),
         count:
           state.status === "ready"
             ? state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
@@ -276,6 +281,7 @@ export function CartProvider({
           Object.values(errors).some((failure) => failure.uncertain),
         staleNotice:
           stale ||
+          (state.status === "ready" && session.status === "error") ||
           ((concealed || sessionChanged) && !refreshing) ||
           Object.values(errors).some((failure) => failure.uncertain)
             ? "Couldn't update your cart. Please try again."

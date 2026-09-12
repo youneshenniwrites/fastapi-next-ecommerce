@@ -787,7 +787,7 @@ test("focus revalidation preserves the activating add click", async ({
   const add = page
     .getByRole("main")
     .getByRole("button", { name: "Add to cart", exact: true });
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(add).toBeEnabled();
   await expect(page.getByTestId("cart-count").first()).toHaveText("1");
   await fault(page, request, { identity: "delay" });
@@ -1110,4 +1110,94 @@ test("a lost focus refresh recovers through Next document fallback", async ({
     "opacity",
     "1",
   );
+});
+
+test("a late snapshot stays concealed while the new session is unresolved", async ({
+  page,
+  request,
+}) => {
+  const email = `late-ready-${crypto.randomUUID()}@example.com`;
+  const password = "disposable-cart-password";
+  await register(request, email, password);
+  await savedCart(page, request);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: "Add to cart", exact: true });
+  await expect(add).toBeEnabled();
+  let releaseAction!: () => void;
+  const heldAction = new Promise<void>((resolve) => {
+    releaseAction = resolve;
+  });
+  let captured!: () => void;
+  const capturedAction = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  let releaseRead!: () => void;
+  const heldRead = new Promise<void>((resolve) => {
+    releaseRead = resolve;
+  });
+  let releaseSession!: () => void;
+  const heldSession = new Promise<void>((resolve) => {
+    releaseSession = resolve;
+  });
+  let sessionStarted = false;
+  let readStarted = false;
+  let actionReleased = false;
+  await page.route("**/*", async (route) => {
+    const headers = route.request().headers();
+    if (route.request().url().endsWith("/api/session/me")) {
+      sessionStarted = true;
+      await heldSession;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ email, created_at: "2026-09-12T00:00:00Z" }),
+      });
+    } else if (headers["next-action"]) {
+      const response = await route.fetch();
+      captured();
+      await heldAction;
+      await route.fulfill({ response });
+      actionReleased = true;
+    } else if (headers.rsc) {
+      readStarted = true;
+      await heldRead;
+      await route.continue();
+    } else await route.continue();
+  });
+  try {
+    await add.click();
+    await capturedAction;
+    await page.evaluate(
+      async ({ email, password }) => {
+        await fetch("/api/session/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        window.dispatchEvent(new Event("focus"));
+      },
+      { email, password },
+    );
+    await expect.poll(() => sessionStarted).toBe(true);
+    releaseAction();
+    await expect.poll(() => actionReleased && readStarted).toBe(true);
+    await expect(page.getByTestId("cart-count").first()).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+    await expect(page.getByTestId("cart-count").first()).toHaveCSS(
+      "opacity",
+      "0",
+    );
+    releaseSession();
+    releaseRead();
+    await expect(add).toBeEnabled();
+    await expect(page.getByTestId("cart-count")).toHaveCount(0);
+  } finally {
+    releaseSession();
+    releaseAction();
+    releaseRead();
+  }
 });
