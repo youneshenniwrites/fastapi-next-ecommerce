@@ -10,3 +10,6 @@ Trace the changed behavior through success and failure paths. Examine permission
 For each concrete finding, record severity, location, trigger and consequence. In a review-only request report findings without editing. During an authorized implementation/fix task, reproduce and fix findings, add meaningful regression coverage, and rerun relevant checks. Review the final diff after fixes. Do not add tests that merely repeat implementation wording.
 
 Report reviewed base/head, findings and their disposition, checks actually run and remaining limitations. “No findings” means none found in this review, not proof of correctness. Identify this as self-review when the same agent implemented the change. It never substitutes for the external current-head review required by [delivery policy](../../../docs/delivery.md).
+
+Before concluding, apply [preflight-review’s historical lessons](../preflight-review/references/lessons.md)
+to the changed behavior and check interacting regressions.

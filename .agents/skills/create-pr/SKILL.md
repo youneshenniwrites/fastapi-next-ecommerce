@@ -18,3 +18,6 @@ Use [update-delivery-board](../update-delivery-board/SKILL.md) to move the linke
 Follow AGENTS.md for small coherent commits and regular verified pushes within
 existing authorization. Keep code and its tests together; do not save all changes
 for one final large commit. A push does not waive fresh current-head review.
+
+Before requesting external review, complete [preflight-review](../preflight-review/SKILL.md)
+and record actual evidence; it does not replace independent Codex review.
