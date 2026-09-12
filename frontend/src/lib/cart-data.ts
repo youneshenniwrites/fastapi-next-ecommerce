@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { apiClient } from "./api/client";
 import { sessionPolicy } from "./session";
@@ -19,7 +20,9 @@ export async function cartIdentity() {
   return { token, owner: result.data.email };
 }
 
-export async function readCartSnapshot(): Promise<CartSnapshot> {
+// Share one private result across the layout and page in this server render.
+// React cache is request-scoped: no data is reused across requests or users.
+export const readCartSnapshot = cache(async (): Promise<CartSnapshot> => {
   let owner: string | null = null;
   try {
     const identity = await cartIdentity();
@@ -36,4 +39,4 @@ export async function readCartSnapshot(): Promise<CartSnapshot> {
   } catch {
     return { status: "error", owner };
   }
-}
+});

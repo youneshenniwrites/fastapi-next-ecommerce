@@ -1,11 +1,18 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { Button } from "@/components/ui/button";
 
-export function CartRefreshWarning() {
+export function CartRefreshWarning({
+  scope = "shell",
+}: {
+  scope?: "shell" | "page";
+}) {
+  const pathname = usePathname();
   const cart = useCart();
+  if (scope === "shell" && pathname === "/cart") return null;
   if (cart.state.status !== "ready" || !cart.staleNotice) return null;
   return (
     <div
