@@ -1,0 +1,153 @@
+# Codex review source index
+
+Snapshot: 2026-09-12. Repository: youneshenniwrites/fastapi-next-ecommerce.
+
+Paginated REST retrieval covered all 50 visible open/closed PRs, their submitted reviews, repository inline review comments and issue conversation comments. Filter: verified Codex user ID 199175422. Retrieved 37 inline comments, 32 submitted reviews and 53 conversation comments. Deleted or inaccessible history cannot be recovered; edited summaries expose their current contents. This is a snapshot, not a live completeness claim.
+
+Feedback remains on GitHub; this index retains provenance without copying full transcripts. Titles are historical reported findings, not independently verified present-day defects. PR 35 has a duplicate disclosure finding. Clean summaries and usage-limit notices are not additional defect lessons.
+
+## Inline findings
+
+- [</sub>  Reconcile the conflicting external-review requirements](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#discussion_r3956640425)
+- [</sub>  Restore the self-review disclosure](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#discussion_r3956685409)
+- [</sub>  Restore the self-review disclosure](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#discussion_r3956686779)
+- [</sub>  Restrict review requests to authorized commenters](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#discussion_r3956806115)
+- [</sub>  Trigger reevaluation on review submissions](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#discussion_r3956889365)
+- [</sub>  Keep dismissed Codex findings invalidating prior approval](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#discussion_r3956957052)
+- [</sub>  Revoke approval when Codex edits an existing review](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#discussion_r3957032617)
+- [</sub>  Prevent old SHA status from approving a new PR](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#discussion_r3957143465)
+- [</sub>  Align the configured origin with the documented launch URL](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#discussion_r3960158692)
+- [</sub>  Remove the contradictory no-session statement](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#discussion_r3960158700)
+- [</sub>  Reconcile the remaining Azure deployment guidance](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#discussion_r3960364747)
+- [</sub>  Update the scoped frontend skill to use Vercel](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#discussion_r3960495194)
+- [</sub>  Keep the required status documents in sync](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/49#discussion_r3960825299)
+- [</sub>  Dismiss the mobile sheet at the desktop breakpoint](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/56#discussion_r3961521324)
+- [</sub>  Remove the stale artwork statement](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/59#discussion_r3961859190)
+- [</sub>  Avoid refreshing sessions while the document is hidden](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/66#discussion_r3981946454)
+- [</sub>  Remove the extra input focus ring](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/78#discussion_r3989154037)
+- [</sub>  Update the API guide when exposing cart routes](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/79#discussion_r3992097609)
+- [</sub>  Show stale warnings for empty cart snapshots](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996358696)
+- [</sub>  Make cart retry revalidate a failed session](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996386957)
+- [</sub>  Clear timeout errors after successful reconciliation](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996407895)
+- [</sub>  Surface stale-cart warnings outside the cart page](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996407898)
+- [</sub>  Prevent writes while session identity is reloading](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996431405)
+- [</sub>  Block additions based on a stale cart snapshot](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996453483)
+- [</sub>  Keep the cart hidden until the confirmed identity is applied](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996480436)
+- [</sub>  Clear uncertainty after the action refresh succeeds](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996741942)
+- [</sub>  Refresh after rejecting an add at the quantity limit](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996741944)
+- [</sub>  Apply quantity steps to the latest server value](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996798927)
+- [</sub>  Conceal the previous cart during a focus refresh](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996845942)
+- [</sub>  Preserve the click that triggers focus revalidation](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996875970)
+- [</sub>  Revalidate the cart when the session poll expires](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996908411)
+- [</sub>  Keep cart reads from blocking the entire storefront](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996932502)
+- [</sub>  Keep route content outside the cart fallback](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996962672)
+- [</sub>  Refresh an ownerless cart after authentication](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3996962676)
+- [</sub>  Reset the in-flight guard when the cart owner changes](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997008692)
+- [</sub>  Clear add-success feedback after an account switch](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997008694)
+- [</sub>  Surface the cart page provider's stale state](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997056894)
+
+## Submitted reviews
+
+- [PR 80, review 5186566643](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5186566643)
+- [PR 80, review 5186597086](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5186597086)
+- [PR 80, review 5186620723](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5186620723)
+- [PR 80, review 5186643708](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5186643708)
+- [PR 80, review 5186665493](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5186665493)
+- [PR 80, review 5186690421](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5186690421)
+- [PR 80, review 5187021082](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187021082)
+- [PR 80, review 5187081809](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187081809)
+- [PR 80, review 5187134196](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187134196)
+- [PR 80, review 5187193561](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187193561)
+- [PR 80, review 5187262389](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187262389)
+- [PR 80, review 5187290270](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187290270)
+- [PR 80, review 5187324544](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187324544)
+- [PR 80, review 5187366725](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187366725)
+- [PR 80, review 5187412308](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#pullrequestreview-5187412308)
+- [PR 79, review 5182030315](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/79#pullrequestreview-5182030315)
+- [PR 78, review 5178667619](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/78#pullrequestreview-5178667619)
+- [PR 66, review 5170498428](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/66#pullrequestreview-5170498428)
+- [PR 59, review 5146560354](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/59#pullrequestreview-5146560354)
+- [PR 56, review 5146153494](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/56#pullrequestreview-5146153494)
+- [PR 49, review 5145281709](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/49#pullrequestreview-5145281709)
+- [PR 47, review 5144748043](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#pullrequestreview-5144748043)
+- [PR 47, review 5144904762](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#pullrequestreview-5144904762)
+- [PR 41, review 5144478419](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#pullrequestreview-5144478419)
+- [PR 37, review 5140429354](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#pullrequestreview-5140429354)
+- [PR 37, review 5140517631](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#pullrequestreview-5140517631)
+- [PR 37, review 5140589306](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#pullrequestreview-5140589306)
+- [PR 37, review 5140674349](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#pullrequestreview-5140674349)
+- [PR 37, review 5140803855](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#pullrequestreview-5140803855)
+- [PR 35, review 5140222981](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#pullrequestreview-5140222981)
+- [PR 35, review 5140283247](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#pullrequestreview-5140283247)
+- [PR 35, review 5140285113](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#pullrequestreview-5140285113)
+
+## Conversation evidence
+
+- [Activity summary 5583036102](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#issuecomment-5583036102)
+- [Review result 5583402646](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/35#issuecomment-5583402646)
+- [Activity summary 5583584522](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/37#issuecomment-5583584522)
+- [Activity summary 5584327940](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/40#issuecomment-5584327940)
+- [Review result 5584368045](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/40#issuecomment-5584368045)
+- [Activity summary 5588505421](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#issuecomment-5588505421)
+- [Review result 5588642618](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#issuecomment-5588642618)
+- [Activity summary 5588835271](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#issuecomment-5588835271)
+- [Review result 5589206806](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#issuecomment-5589206806)
+- [Review result 5589315133](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#issuecomment-5589315133)
+- [Activity summary 5589389900](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/48#issuecomment-5589389900)
+- [Review result 5589439404](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/48#issuecomment-5589439404)
+- [Activity summary 5589554035](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/49#issuecomment-5589554035)
+- [Review result 5589707421](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/49#issuecomment-5589707421)
+- [Activity summary 5589797128](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/50#issuecomment-5589797128)
+- [Review result 5589830239](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/50#issuecomment-5589830239)
+- [Activity summary 5590032136](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/52#issuecomment-5590032136)
+- [Review result 5590060595](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/52#issuecomment-5590060595)
+- [Activity summary 5590314013](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/55#issuecomment-5590314013)
+- [Review result 5590363080](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/55#issuecomment-5590363080)
+- [Activity summary 5590641366](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/56#issuecomment-5590641366)
+- [Review result 5590909399](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/56#issuecomment-5590909399)
+- [Activity summary 5591183737](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/59#issuecomment-5591183737)
+- [Review result 5591367357](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/59#issuecomment-5591367357)
+- [Activity summary 5607565247](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/61#issuecomment-5607565247)
+- [Review result 5607605381](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/61#issuecomment-5607605381)
+- [Activity summary 5607668793](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/62#issuecomment-5607668793)
+- [Review result 5607706486](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/62#issuecomment-5607706486)
+- [Activity summary 5607913385](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/64#issuecomment-5607913385)
+- [Review result 5607957182](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/64#issuecomment-5607957182)
+- [Activity summary 5608145841](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/65#issuecomment-5608145841)
+- [Review result 5608186140](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/65#issuecomment-5608186140)
+- [Activity summary 5622957721](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/66#issuecomment-5622957721)
+- [Review result 5623229661](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/66#issuecomment-5623229661)
+- [Activity summary 5624140464](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/69#issuecomment-5624140464)
+- [Review result 5624172788](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/69#issuecomment-5624172788)
+- [Activity summary 5624341438](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/70#issuecomment-5624341438)
+- [Review result 5624374727](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/70#issuecomment-5624374727)
+- [Activity summary 5634052620](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/75#issuecomment-5634052620)
+- [Review result 5634094152](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/75#issuecomment-5634094152)
+- [Activity summary 5634463130](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/78#issuecomment-5634463130)
+- [Review result 5634727290](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/78#issuecomment-5634727290)
+- [Activity summary 5638596361](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/79#issuecomment-5638596361)
+- [Review result 5638664691](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/79#issuecomment-5638664691)
+- [Review result 5638816584](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/79#issuecomment-5638816584)
+- [Review result 5639008104](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/79#issuecomment-5639008104)
+- [Usage limit notice 5640322602](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#issuecomment-5640322602)
+- [Usage limit notice 5640690305](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#issuecomment-5640690305)
+- [Activity summary 5646220311](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#issuecomment-5646220311)
+- [Activity summary 5646359091](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/83#issuecomment-5646359091)
+- [Review result 5646371070](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/83#issuecomment-5646371070)
+- [Activity summary 5647125640](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/86#issuecomment-5647125640)
+- [Review result 5647141255](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/86#issuecomment-5647141255)
+
+## PR inventory checked
+
+#1, #2, #3, #4, #5, #6, #7, #8, #9, #10, #11, #12, #13, #14, #15, #16, #17, #18, #19, #20, #21, #22, #23, #33, #35, #37, #40, #41, #43, #47, #48, #49, #50, #52, #55, #56, #59, #61, #62, #64, #65, #66, #69, #70, #75, #78, #79, #80, #83, #86
+
+Refresh using paginated `pulls?state=all`, `pulls/comments`, `issues/comments` and each PR’s `reviews` endpoints. Do not treat API failures as empty history. Read new substantive feedback, assess its current applicability and update the lessons separately from this provenance index.
+
+## Feedback after the initial snapshot
+
+- [PR 88: document preflight review in the invocation guide](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997096911). Apply the documentation-consistency lesson to the canonical discovery guide as well as AGENTS and skill entrypoints.
+
+- [PR 88: run preflight before the review request](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997115518). Place prerequisites before actions in sequential skill instructions.
+
+- [PR 88: cover comment follow-up](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997140827). Apply review prerequisites to both initial and follow-up requests.
+- [PR 88: picker metadata](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997140833). Keep advertised discovery metadata consistent with the skill package.

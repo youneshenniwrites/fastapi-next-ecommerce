@@ -119,3 +119,6 @@ review. Keep coupled code, tests and generated outputs together; do not split by
 arbitrary line counts. Within push authorization, push each verified milestone
 regularly rather than accumulating the entire feature locally. Report blockers
 and failed checks honestly. Each new head requires fresh external review before merge.
+
+Before external review, use [preflight-review](.agents/skills/preflight-review/SKILL.md)
+to apply relevant lessons from the repository’s Codex review history.
