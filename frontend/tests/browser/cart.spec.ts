@@ -660,24 +660,23 @@ test("server-rendered cart is private and cannot submit before hydration", async
   }
 });
 
-test("focus refresh does not swallow the first quantity click", async ({
+test("focus refresh conceals private cart until identity is verified", async ({
   page,
   request,
 }) => {
   const item = await savedCart(page, request);
   await page.goto("/cart");
-  const increase = page.getByRole("button", {
-    name: `Increase quantity of ${item.name}`,
-  });
-  await expect(increase).toBeEnabled();
+  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
   await fault(page, request, { identity: "delay" });
-  await increase.scrollIntoViewIfNeeded();
-  const box = (await increase.boundingBox())!;
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  // A real focus refresh between pointer down/up must not replace the target.
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-  await page.mouse.up();
-  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: item.name })).toHaveCount(0);
+  await expect(page.getByTestId("cart-count")).toHaveCount(0);
+  await expect(page.getByText("Qty 1", { exact: true })).toBeVisible();
   await fault(page, request, {});
+  await page
+    .getByRole("button", {
+      name: `Increase quantity of ${item.name}`,
+    })
+    .click();
+  await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
 });

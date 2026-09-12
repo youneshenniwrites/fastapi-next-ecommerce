@@ -84,9 +84,10 @@ export function CartProvider({
     );
   }
   useEffect(() => {
-    // Keep visible controls stable through pointer events. Each Server Action
-    // verifies the expected owner, even while a focus refresh is in flight.
+    // Another visible window can change the cookie without a hide event.
+    // Conceal private data until the server verifies the returning identity.
     function refresh() {
+      setConcealed(true);
       startRefresh(() => router.refresh());
     }
     function hide() {
