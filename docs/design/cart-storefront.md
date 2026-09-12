@@ -42,6 +42,11 @@ view, including when JavaScript is disabled. Snapshot delivery does not fetch or
 cache data in the browser.
 The existing session poll also triggers server revalidation when a session ends.
 
+Cart reads use React request memoization so the layout and cart page share one
+private result per server render. This is not persistent caching and does not
+share data across requests or users. The cart page renders recovery inside its
+own provider; other routes use the shell warning.
+
 ## Recovery and account isolation
 
 Visible controls remain mounted during a background refresh, so a focus event

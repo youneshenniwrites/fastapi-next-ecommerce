@@ -191,7 +191,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
 
   // Account A saves one product.
   await login(page, emailA, password);
-  await page.goto(`/products/${first.id}`);
+  await page.goto(`/products/${first.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
@@ -207,7 +207,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await expect(
     page.getByRole("heading", { name: "Your cart is empty" }),
   ).toBeVisible();
-  await page.goto(`/products/${second.id}`);
+  await page.goto(`/products/${second.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
@@ -239,7 +239,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
     }
     await route.continue();
   });
-  await page.goto(`/products/${first.id}`);
+  await page.goto(`/products/${first.id}`, { waitUntil: "domcontentloaded" });
   const add = page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ });
@@ -267,7 +267,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   // Quantities beyond stock are rejected with a 409 and a stock-specific
   // message (Task Light has stock 8): asserting the status and the message
   // keeps a generic server failure from passing as stock handling.
-  await page.goto(`/products/${second.id}`);
+  await page.goto(`/products/${second.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
@@ -461,9 +461,13 @@ test("same-account failed reads keep a visible warning and recover", async ({
   await fault(page, request, { read: "fail" });
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   const warning = page
+    .getByRole("main")
     .getByRole("status")
     .filter({ hasText: "Couldn't update your cart" });
   await expect(warning).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toHaveCount(1);
   await expect(page.getByRole("link", { name: item.name })).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await fault(page, request, {});
@@ -478,10 +482,32 @@ test("committed-write timeout recovers without duplicating the add", async ({
 }) => {
   const item = await savedCart(page, request);
   await fault(page, request, { write: "timeout-after" });
+  const action = page.waitForRequest((request) =>
+    Boolean(request.headers()["next-action"]),
+  );
   await page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
     .click();
+  await action;
+  const token = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "local-session",
+  )!.value;
+  await expect
+    .poll(
+      async () => {
+        const response = await request.get(`${API}/api/v1/cart/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        return data.items.find(
+          (line: { product: { id: number }; quantity: number }) =>
+            line.product.id === item.id,
+        )?.quantity;
+      },
+      { timeout: 15000 },
+    )
+    .toBe(2);
   await expect(page.getByTestId("cart-count").first()).toHaveText("2", {
     timeout: 15000,
   });

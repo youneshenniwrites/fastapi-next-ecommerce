@@ -1,3 +1,4 @@
+import { CartRefreshWarning } from "@/components/cart-refresh-warning";
 import { CartProvider } from "@/components/cart-provider";
 import { readCartSnapshot } from "@/lib/cart-data";
 import { CartView } from "@/components/cart-view";
@@ -21,6 +22,7 @@ export default async function Page() {
         Saved to your account. Prices are current and stock is not reserved.
       </p>
       <CartProvider key={snapshot.owner ?? snapshot.status} snapshot={snapshot}>
+        <CartRefreshWarning scope="page" />
         <CartView />
       </CartProvider>
     </main>
