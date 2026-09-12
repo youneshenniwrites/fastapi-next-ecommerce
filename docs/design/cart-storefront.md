@@ -35,9 +35,11 @@ navigation count without a separate browser fetch/reconciliation loop. The old
 frontend `/api/cart` routes were internal to this unmerged feature and are removed;
 the FastAPI [cart API](cart-api.md) is unchanged.
 
-The cart shell reads behind a Next.js Suspense boundary. Its loading provider
-renders the public page immediately while authenticated identity/cart reads
-settle. Session and cart providers reset together when the verified owner changes.
+The cart shell reads behind a Next.js Suspense boundary that contains only a
+snapshot delivery component, not route content. Public forms remain mounted
+while server reads settle. The cart page separately server-renders its private
+view, including when JavaScript is disabled. Snapshot delivery does not fetch or
+cache data in the browser.
 The existing session poll also triggers server revalidation when a session ends.
 
 ## Recovery and account isolation
@@ -50,9 +52,8 @@ Explicit retry and focus/page restoration use `router.refresh()`. There is no
 periodic cart poll. Focus and page restoration conceal private cart content until refreshed, using
 opacity and accessibility hiding while keeping activation targets mounted.
 Private controls release keyboard focus during concealment; the Server Action
-verifies ownership before accepting an activation already in progress. The provider
-is keyed by the server-verified owner, so switching accounts discards old cart,
-error and pending state during the render itself.
+verifies ownership before accepting an activation already in progress. The cart page provider is keyed by verified owner; the shared shell resets
+private feedback during the render when its verified owner changes.
 
 When identity is known and unchanged, failed cart reads may preserve the last
 rendered cart with a visible Refresh cart warning. These stale controls are
