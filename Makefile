@@ -24,7 +24,7 @@ lint:
 	cd backend && uv run ruff check . && uv run ruff format --check .
 
 coverage:
-	cd backend && uv run pytest --cov --cov-report=term-missing --cov-report=xml
+	cd backend && uv run pytest --cov --cov-report=term-missing --cov-report=xml --cov-report=html
 
 audit:
 	cd backend && uv run pip-audit --strict

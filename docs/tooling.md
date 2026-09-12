@@ -20,8 +20,9 @@ CI remains authoritative when hooks are not installed.
 
 Coverage measures executable code under backend/app, excluding tests. Migration
 subprocesses and browser behavior are verified separately; the report does not
-measure a complete ecommerce product. The initial measured coverage is 89.4%.
-CI retains coverage XML and dependency-audit JSON artifacts for 14 days.
+measure a complete ecommerce product. See [coverage reports](coverage.md) for current run summaries, exact frontend
+scope and thresholds. CI retains browsable HTML, raw coverage and dependency-audit
+JSON artifacts for 14 days.
 
 The dependency audit runs for PRs, main pushes, weekly, and on manual dispatch.
 It audits development dependencies too. A failure must be investigated: dependency
