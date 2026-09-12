@@ -290,18 +290,19 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   );
   await page.unroute("**/api/cart/items/*");
   await updateButton(page, second.name).click();
-  await expect(page.getByText("Qty 2").first()).toBeVisible();
+  await expect(page.getByText("Qty 2", { exact: true })).toHaveCount(2);
 
   // Concurrent writes to different lines settle to the server state: both
   // increases land, the final UI matches the authoritative cart, and a
   // reload confirms persistence instead of a predated snapshot.
+  // Dispatch distinct controls without racing Playwright's single mouse pointer.
   await Promise.all([
     page
       .getByRole("button", { name: `Increase quantity of ${first.name}` })
-      .click(),
+      .evaluate((button) => (button as HTMLButtonElement).click()),
     page
       .getByRole("button", { name: `Increase quantity of ${second.name}` })
-      .click(),
+      .evaluate((button) => (button as HTMLButtonElement).click()),
   ]);
   await expect(page.getByText("Qty 3")).toHaveCount(2);
   await expect(page.getByTestId("cart-count").first()).toHaveText("6");
@@ -453,11 +454,23 @@ test("mutation timeout shows a recoverable error and reconciles", async ({
     }
     await route.continue();
   });
+  await page.route("**/api/cart", (route) =>
+    route.fulfill({ status: 503, body: "{}" }),
+  );
   await add.click();
   await expect(
     page.getByRole("alert").filter({ hasText: "timed out" }),
   ).toBeVisible({ timeout: 20000 });
   await page.unroute("**/api/cart/items/*");
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toBeVisible();
+  await page.unroute("**/api/cart");
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "timed out" }),
+  ).toHaveCount(0);
 
   // Let the cart page settle once, then wait for client and server to agree
   // again. Navigating inside the poll loop would abort each in-flight

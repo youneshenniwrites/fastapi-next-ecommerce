@@ -139,7 +139,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
         const cart = (await response.json()) as Cart;
         if (!fresh()) return;
-        if (requestId.current === id) setStaleNotice("");
+        if (requestId.current === id) {
+          setStaleNotice("");
+          // A successful authoritative read removes uncertainty from a timed-out
+          // write. Preserve validation/stock failures that still need attention.
+          setErrors((previous) =>
+            Object.fromEntries(
+              Object.entries(previous).filter(
+                ([, message]) =>
+                  message !==
+                  "The request timed out. Refresh to confirm your cart.",
+              ),
+            ),
+          );
+        }
         applySnapshot(id, { status: "ready", cart });
       } catch {
         if (!signal.aborted && gen === accountGen.current) markStale(id, gen);

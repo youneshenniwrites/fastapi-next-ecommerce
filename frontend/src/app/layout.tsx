@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 import { SessionProvider } from "@/components/session-provider";
+import { CartRefreshWarning } from "@/components/cart-refresh-warning";
 import { CartProvider } from "@/components/cart-provider";
 export const metadata: Metadata = {
   title: { default: "VINDOR — Room to think", template: "%s | VINDOR" },
@@ -26,6 +27,7 @@ export default function RootLayout({
         <SessionProvider>
           <CartProvider>
             <SiteHeader />
+            <CartRefreshWarning />
             {children}
           </CartProvider>
         </SessionProvider>
