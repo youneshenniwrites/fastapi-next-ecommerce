@@ -32,8 +32,10 @@ again, to avoid blindly repeating a write.
 
 FastAPI owns authentication and active-user checks. The browser calls same-origin
 Next.js session handlers, which keep the bearer token in a host-only HttpOnly
-cookie. The profile page is a public shell; private details load from a no-store
-endpoint. Tokens are not placed in local storage or rendered into client props.
+cookie. Profile details load from a no-store endpoint; the shared cart is
+server-rendered, so signed-in documents are private/no-store. Tokens are not placed
+in local storage or rendered into HTML/client props. See the
+[cart architecture](design/cart-storefront.md).
 
 A missing or expired session shows the sign-in prompt. Hidden account pages clear
 private snapshots and defer profile requests until visible. Logout clears this

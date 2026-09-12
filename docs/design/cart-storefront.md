@@ -1,0 +1,89 @@
+# Cart storefront architecture
+
+The cart uses Next.js Server Components for its initial data and Server Actions
+for changes. FastAPI remains the authority for the authenticated customer,
+permissions, persistence, prices, stock and GBP totals. No React Query, browser
+cart storage or client polling layer is used.
+
+## Read and write flow
+
+The root Server Component reads the session cookie and resolves the customer
+through FastAPI, then fetches that customer's cart using the generated OpenAPI
+client. Both calls are no-store and bounded by the shared five-second upstream
+timeout. Only the verified email and cart display data reach client props; the
+HttpOnly bearer stays on the server. Since the shared navigation displays a
+private cart count, pages are dynamically rendered with private/no-store HTML.
+Public catalog content is still rendered by Server Components.
+
+The client provider receives the server snapshot and supplies shadcn controls
+with pending/error feedback. It does not fetch the cart. Add, set and remove call
+one Server Action, which validates input with Zod, checks the configured Origin
+allowlist, and verifies the cookie's current identity through FastAPI. It rejects
+an old page's expected identity if another window has changed the account. The
+expected email is a consistency check, never an authorization credential.
+
+Add reads the current backend quantity instead of incrementing a browser snapshot.
+Next serializes action dispatch within a client; an immediate per-product guard
+suppresses double activation. FastAPI still uses absolute-quantity PUT semantics:
+independent clients can race between an add's read and write, and the last
+serialized absolute write wins. This is not an atomic increment API.
+
+The action calls Next's `refresh()` after writes and recoverable failures. The
+same response includes a freshly rendered server tree, updating the cart and
+navigation count without a separate browser fetch/reconciliation loop. The old
+frontend `/api/cart` routes were internal to this unmerged feature and are removed;
+the FastAPI [cart API](cart-api.md) is unchanged.
+
+## Recovery and account isolation
+
+Visible controls remain mounted during a background refresh, so a focus event
+between pointer-down and pointer-up cannot swallow the first click. Editing is
+disabled until hydration attaches its handlers.
+
+Explicit retry and focus/page restoration use `router.refresh()`. There is no
+periodic cart poll. Hidden pages conceal cart content until refreshed. The provider
+is keyed by the server-verified owner, so switching accounts discards old cart,
+error and pending state during the render itself.
+
+When identity is known and unchanged, failed cart reads may preserve the last
+rendered cart with a visible Refresh cart warning. These stale controls are
+read-only. Unknown or changed identities never reuse that snapshot. Empty carts
+have the same retry behavior. A timed-out mutation has an uncertain outcome:
+show recovery feedback and refresh rather than automatically repeating an add.
+
+## Verification
+
+`frontend/tests/cart-server.test.ts` exercises origin/input/identity boundaries,
+private server reads, status mapping and action refreshes. The browser cart suite
+uses the real disposable FastAPI database and a test-only loopback wrapper to
+inject per-session upstream failures, including a response delayed after commit.
+The wrapper is not imported by the deployed API.
+
+Desktop/mobile journeys cover persistence, removal, quantity validation, stock
+rejection, rapid and queued actions, stale account rejection, cross-account read
+failures, stale quantity adds, unavailable sessions and timeout recovery, with
+keyboard and axe checks. Existing account tests verify private HTML cache headers
+and ensure bearer cookies never appear in the document.
+
+## Manual acceptance walkthrough
+
+Use fictional details on the deployment being verified; checkout is not available.
+
+1. Signed out, open `/cart`: expect a sign-in prompt and no saved products.
+2. Register and sign in. Open an in-stock product, press Add to cart, and check
+   the navigation count. Reload: the count should remain.
+3. Open the cart. Increase/decrease a quantity, enter a quantity and press Update,
+   then remove a line. Check that quantities, count and GBP subtotal agree.
+4. Submit 0, 100 and a fractional quantity: expect an inline validation error.
+   Request more than available stock: expect a stock error, with the saved quantity
+   unchanged. Out-of-stock products must not offer an enabled Add button.
+5. Sign out and sign back in: saved items return. Use a second fictional account:
+   its cart starts independently, without the first account's products.
+6. Keep the first account's cart open in another tab, change the signed-in account,
+   then return and try a quantity control. The old cart must not modify the new
+   account; refresh should show the current account's cart.
+7. Use keyboard-only navigation and a narrow mobile viewport. Check focus,
+   labels, pending buttons and readable error messages.
+
+Do not simulate outages or alter inventory on the shared live demo. The disposable
+browser suite covers faults and uncertain writes safely.
