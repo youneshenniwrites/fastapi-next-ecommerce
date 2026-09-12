@@ -27,8 +27,8 @@ async def cart_fault(request: Request, call_next):
     if path != '/api/v1/auth/me' and not path.startswith('/api/v1/cart/'):
         return await call_next(request)
     mode = fault.get(kind)
-    if mode == 'timeout-after-write':
-        mode = 'timeout' if fault.get('written') else None
+    if mode in ('timeout-after-write', 'fail-after-write'):
+        mode = mode.removesuffix('-after-write') if fault.get('written') else None
     if mode == 'fail':
         return JSONResponse({'detail': 'fixture failure'}, status_code=503)
     if mode == 'timeout':

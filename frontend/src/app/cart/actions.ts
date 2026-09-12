@@ -65,11 +65,13 @@ export async function changeCart(
             (item) => item.product.id === change.productId,
           )?.quantity ?? 0;
       }
-      if (quantity > 99)
+      if (quantity > 99) {
+        refresh();
         return {
           ok: false,
           error: "You can keep up to 99 of each object in your cart.",
         };
+      }
       const response =
         change.kind === "remove"
           ? await client.DELETE("/api/v1/cart/items/{product_id}", options)
@@ -103,6 +105,7 @@ export async function changeCart(
       ok: false,
       error:
         "We couldn't confirm the change. Refresh your cart before trying again.",
+      uncertain: true,
     };
   }
   // Reads are private/no-store. Next includes the refreshed server tree with

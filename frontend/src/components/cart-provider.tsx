@@ -12,7 +12,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { changeCart } from "@/app/cart/actions";
-import type { CartChange, CartSnapshot } from "@/lib/cart-state";
+import type { CartChange, CartSnapshot, CartFailure } from "@/lib/cart-state";
 export type { Cart, CartItem } from "@/lib/cart-state";
 
 type CartContextValue = {
@@ -51,11 +51,11 @@ export function CartProvider({
     () => true,
     () => false,
   );
-  const [, startRefresh] = useTransition();
-  const [, startMutation] = useTransition();
+  const [refreshing, startRefresh] = useTransition();
+  const [mutating, startMutation] = useTransition();
   const [pending, setPending] = useState<Record<number, boolean>>({});
   const busy = useRef(new Set<number>());
-  const [errors, setErrors] = useState<Record<number, string>>({});
+  const [errors, setErrors] = useState<Record<number, CartFailure>>({});
   const [concealed, setConcealed] = useState(false);
   const [previous, setPrevious] = useState(snapshot);
   const [lastReady, setLastReady] = useState(
@@ -67,6 +67,20 @@ export function CartProvider({
     // The server keys this provider by verified owner; unknown/different
     // identities remount it, so a fallback never crosses accounts.
     if (snapshot.status === "ready") setLastReady(snapshot);
+  }
+  // A completed Next transition has applied the action's refreshed server tree.
+  // A successful read settles uncertainty even if the write response was lost.
+  if (
+    !mutating &&
+    !refreshing &&
+    snapshot.status === "ready" &&
+    Object.values(errors).some((failure) => failure.uncertain)
+  ) {
+    setErrors(
+      Object.fromEntries(
+        Object.entries(errors).filter(([, failure]) => !failure.uncertain),
+      ),
+    );
   }
   useEffect(() => {
     // Keep visible controls stable through pointer events. Each Server Action
@@ -113,14 +127,17 @@ export function CartProvider({
           if (!result.ok)
             setErrors((current) => ({
               ...current,
-              [change.productId]: result.error,
+              [change.productId]: result,
             }));
           resolve(result.ok);
         } catch {
           setErrors((current) => ({
             ...current,
-            [change.productId]:
-              "We couldn't confirm the change. Refresh your cart before trying again.",
+            [change.productId]: {
+              error:
+                "We couldn't confirm the change. Refresh your cart before trying again.",
+              uncertain: true,
+            },
           }));
           // Transport failures can happen after a committed write. Never retry
           // an add automatically: ask Next for the authoritative server view.
@@ -153,13 +170,16 @@ export function CartProvider({
             ? state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
             : 0,
         pending,
-        errors,
-        readOnly: !hydrated || Boolean(stale) || concealed,
+        errors: Object.fromEntries(
+          Object.entries(errors).map(([id, failure]) => [id, failure.error]),
+        ),
+        readOnly:
+          !hydrated ||
+          Boolean(stale) ||
+          concealed ||
+          Object.values(errors).some((failure) => failure.uncertain),
         staleNotice:
-          stale ||
-          Object.values(errors).some((message) =>
-            message.includes("couldn't confirm"),
-          )
+          stale || Object.values(errors).some((failure) => failure.uncertain)
             ? "Couldn't update your cart. Please try again."
             : "",
         refresh: () => {

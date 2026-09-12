@@ -162,12 +162,13 @@ describe("cart Server Action", () => {
       await (vi.mocked(fetch).mock.calls.at(-1)![0] as Request).json(),
     ).toEqual({ quantity: 1 });
   });
-  it("does not increment beyond the quantity limit", async () => {
+  it("refreshes the displayed cart when an add reaches the quantity limit", async () => {
     upstream({ quantity: 99 });
     expect(
       await changeCart(owner, { kind: "add", productId: 1 }),
     ).toMatchObject({ ok: false, error: expect.stringContaining("99") });
     expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
+    expect(runtime.refresh).toHaveBeenCalledOnce();
   });
   it("does not write when the pre-add read fails", async () => {
     upstream({ read: 503 });
@@ -205,6 +206,7 @@ describe("cart Server Action", () => {
       ok: false,
       error:
         "We couldn't confirm the change. Refresh your cart before trying again.",
+      uncertain: true,
     });
     expect(runtime.refresh).toHaveBeenCalledOnce();
   });
