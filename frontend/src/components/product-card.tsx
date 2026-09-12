@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { money, type Product } from "@/lib/catalog";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product min-w-0">
@@ -33,6 +34,9 @@ export function ProductCard({ product }: { product: Product }) {
           {product.description || "A considered object for your workspace."}
         </p>
       </Link>
+      <div className="mt-3">
+        <AddToCartButton product={product} compact />
+      </div>
     </article>
   );
 }

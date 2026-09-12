@@ -54,8 +54,9 @@ products use a neutral Lucide placeholder.
 
 The catalog currently loads at most 100 products and filters those loaded items;
 a notice appears at that limit. Server-side search/pagination is a future increment
-before a larger catalog. Registration and login screens are implemented; there are no carts, payments or purchase
-controls yet. Automated accessibility checks supplement manual keyboard/mobile
+before a larger catalog. Registration, login and the signed-in cart are implemented;
+checkout and payments remain planned. See the [cart architecture and manual
+walkthrough](../docs/design/cart-storefront.md). Automated accessibility checks supplement manual keyboard/mobile
 review; they do not constitute a full accessibility certification.
 
 ESLint 10 uses the official Next plugin directly with typescript-eslint and React

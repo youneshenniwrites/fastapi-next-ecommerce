@@ -80,3 +80,18 @@ without global smooth scrolling, so validation focus does not animate the viewpo
 use shadcn ScrollArea when a bounded custom scroll panel is needed. Select retains
 its own Radix viewport and scroll controls. Do not wrap its menu in a second scroll
 container. Reserve inline form-error space so corrections do not move submit controls.
+
+## Cart storefront
+
+Cart data is read in a Next.js Server Component and passed to an owner-keyed
+CartProvider. Server Actions validate input and identity, call FastAPI, and refresh
+the server tree. There is no separate fetch/cache library or cart polling loop. See the
+[cart architecture](../docs/design/cart-storefront.md) for boundaries and recovery.
+
+AddToCartButton, CartLink and CartView compose shadcn Button, Badge, Input and
+Skeleton using the shared 4px corners and 48px/40px control heights. Quantity forms
+use React Hook Form and Zod; FastAPI owns prices, totals and stock. Controls show
+pending feedback and associated inline errors. Failed same-account cart reads
+preserve a read-only view with a visible Refresh cart action, including empty carts.
+Unknown identities discard private content. Signed-out visitors get a sign-in
+action; no guest storage exists.

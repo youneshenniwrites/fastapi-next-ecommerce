@@ -24,7 +24,7 @@ Verify keyboard access, mobile layout and automated accessibility checks. Produc
 photography is licensed and stored locally; unknown names use a Lucide placeholder.
 Read PHOTO_CREDITS.md before replacing assets. Never create custom SVG artwork.
 
-Server-mediated sessions, registration/login screens and profile/navigation are implemented; cart and checkout remain planned. Development and production demos are deployed.
+Server-mediated sessions, registration/login screens, profile/navigation and the signed-in cart storefront are implemented; checkout remains planned. Development and production demos are deployed.
 Read deploy/environments/README.md in the repository root for the approved hosting plan. Do not
 present working purchase controls until the corresponding transaction exists.
 

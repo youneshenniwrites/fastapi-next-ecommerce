@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { container, eyebrow } from "@/components/storefront-layout";
 import { cn } from "@/lib/utils";
 import { money, type Product } from "@/lib/catalog";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 export function ProductDetails({ product }: { product: Product }) {
   return (
     <main id="main" className={cn(container, "py-10 pb-20")}>
@@ -39,12 +40,17 @@ export function ProductDetails({ product }: { product: Product }) {
             )}
             {product.stock ? "In stock" : "Out of stock"}
           </Badge>
+          <div className="mt-8">
+            <AddToCartButton product={product} />
+          </div>
           <div className="mt-8 border border-border p-5 text-sm [&_p]:mt-2 [&_p]:text-muted-foreground">
-            <strong>A collection to explore.</strong>
+            <strong>Saved to your account.</strong>
             <p>
-              This is a portfolio demonstration. Cart and checkout are coming
-              next; no purchases can be made. Photography shows representative
-              workspace objects, not exact products or brand endorsements.
+              Signed-in carts persist across visits. Prices are current backend
+              prices and can change; adding objects does not reserve stock.
+              Checkout is coming next; no purchases can be made yet. Photography
+              shows representative workspace objects, not exact products or
+              brand endorsements.
             </p>
           </div>
           <dl className="mt-8 text-xs [&_div]:flex [&_div]:justify-between [&_div]:gap-4 [&_div]:border-b [&_div]:border-border [&_div]:py-3">
