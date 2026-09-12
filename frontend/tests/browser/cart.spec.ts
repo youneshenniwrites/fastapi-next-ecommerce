@@ -439,6 +439,9 @@ test("same-account failed reads keep a visible warning and recover", async ({
 }) => {
   const item = await savedCart(page, request);
   await page.goto("/cart");
+  await expect(
+    page.getByRole("button", { name: `Increase quantity of ${item.name}` }),
+  ).toBeEnabled();
   await fault(page, request, { read: "fail" });
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   const warning = page
@@ -463,18 +466,50 @@ test("committed-write timeout recovers without duplicating the add", async ({
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
     .click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2", {
+    timeout: 15000,
+  });
   await expect(
-    page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
-  ).toBeVisible({ timeout: 15000 });
+    page
+      .getByRole("main")
+      .getByRole("button", { name: /Add to cart|Saved to cart/ }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toHaveCount(0);
   await fault(page, request, {});
-  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
-  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
   await expect(
     page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
   ).toHaveCount(0);
   await page.goto("/cart");
   await expect(page.getByText("Qty 2", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+});
+
+test("uncertain writes stay read-only until the cart can be read again", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  await fault(page, request, {
+    write: "timeout-after",
+    read: "fail-after-write",
+  });
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ });
+  await add.click();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toBeVisible({ timeout: 15000 });
+  await expect(add).toBeDisabled();
+  await fault(page, request, {});
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("2");
+  await expect(add).toBeEnabled();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
+  ).toHaveCount(0);
 });
 
 test("post-write read timeout and empty-cart failures offer retry", async ({

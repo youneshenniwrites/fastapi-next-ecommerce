@@ -10,4 +10,5 @@ export type CartChange =
   | { kind: "set"; productId: number; quantity: number }
   | { kind: "add"; productId: number }
   | { kind: "remove"; productId: number };
-export type CartActionResult = { ok: true } | { ok: false; error: string };
+export type CartFailure = { error: string; uncertain?: true };
+export type CartActionResult = { ok: true } | ({ ok: false } & CartFailure);

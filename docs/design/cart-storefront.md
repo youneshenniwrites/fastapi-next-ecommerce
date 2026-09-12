@@ -50,6 +50,8 @@ rendered cart with a visible Refresh cart warning. These stale controls are
 read-only. Unknown or changed identities never reuse that snapshot. Empty carts
 have the same retry behavior. A timed-out mutation has an uncertain outcome:
 show recovery feedback and refresh rather than automatically repeating an add.
+A successful authoritative read clears that uncertainty after the Next transition
+settles; if the read fails, editing stays disabled until retry succeeds.
 
 ## Verification
 
