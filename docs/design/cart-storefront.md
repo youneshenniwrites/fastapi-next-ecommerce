@@ -53,7 +53,8 @@ Visible controls remain mounted during a background refresh, so a focus event
 between pointer-down and pointer-up cannot swallow the first click. Editing is
 disabled until hydration attaches its handlers.
 
-Explicit retry and focus/page restoration use `router.refresh()`. There is no
+Explicit retry and focus/page restoration use `router.refresh()`. Explicit retry
+also refreshes the existing session observer so an identity failure can recover. There is no
 periodic cart poll. Focus and page restoration conceal private cart content until refreshed, using
 opacity and accessibility hiding while keeping activation targets mounted.
 Private controls release keyboard focus during concealment; the Server Action
@@ -65,8 +66,12 @@ rendered cart with a visible Refresh cart warning. These stale controls are
 read-only. Unknown or changed identities never reuse that snapshot. Empty carts
 have the same retry behavior. A timed-out mutation has an uncertain outcome:
 show recovery feedback and refresh rather than automatically repeating an add.
-A successful authoritative read clears that uncertainty after the Next transition
-settles; if the read fails, editing stays disabled until retry succeeds.
+A newly published successful authoritative read clears that uncertainty after the
+Next transition settles; an old ready snapshot is not confirmation. If the read
+fails, editing stays disabled until retry succeeds. Every arriving snapshot is
+compared with the observed session, including late responses after an account
+switch. A concealed cart offers recovery if refreshing settles without publishing
+a snapshot; it never reveals private data merely because the transition ended.
 
 ## Verification
 
