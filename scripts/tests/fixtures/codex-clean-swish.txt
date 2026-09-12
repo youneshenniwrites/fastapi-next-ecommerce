@@ -16,5 +16,5 @@ If Codex has suggestions, it will comment; otherwise it will react with 👍.
 
 
 Codex can also answer questions or update the PR. Try commenting "@codex address that feedback".
-            
+
 </details>
