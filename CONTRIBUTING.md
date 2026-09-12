@@ -90,3 +90,10 @@ Report vulnerabilities privately through [SECURITY.md](SECURITY.md).
 
 Follow [delivery workflow](docs/delivery.md) for issue scope, board transitions,
 PR linkage and completion evidence. The project board is the live work queue.
+
+## Agent framework references and checkpoints
+
+Use [framework guidance](docs/framework-agent-guidance.md) for installed-version
+Next.js documentation and the official FastAPI skill. Follow AGENTS.md for small
+coherent commits and regular verified pushes within the authorized task. Review
+these references when upgrading dependencies; preserve local architectural rules.

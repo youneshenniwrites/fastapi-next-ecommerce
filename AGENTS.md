@@ -97,3 +97,15 @@ README, Wiki and contract documentation. Read the selected SKILL.md under
 .agents/skills before using it. These reuse the policies above; they do not
 replace external review or expand authorization. See docs/delivery-skills.md
 for invocation and discovery, including tasks started outside the repository.
+
+## Framework guidance and incremental delivery
+
+Before framework changes, read the installed version-matched documentation and
+applicable official skills as described in [framework guidance](docs/framework-agent-guidance.md).
+Keep project architecture and security constraints authoritative.
+
+Make small, coherent Conventional Commits after relevant checks and staged-diff
+review. Keep coupled code, tests and generated outputs together; do not split by
+arbitrary line counts. Within push authorization, push each verified milestone
+regularly rather than accumulating the entire feature locally. Report blockers
+and failed checks honestly. Each new head requires fresh external review before merge.
