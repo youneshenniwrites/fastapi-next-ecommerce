@@ -1,12 +1,14 @@
 """Render existing coverage reports for read-only Actions job summaries."""
 
 import argparse
+import json
 import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 MAX_REPORT_BYTES = 5_000_000
+FRONTEND_ROOT = Path(__file__).resolve().parents[1] / "frontend"
 SCOPES = {
     "backend": (
         (
@@ -17,10 +19,14 @@ SCOPES = {
     ),
     "frontend": (
         (
-            "Only src/lib/catalog.ts and src/lib/session.ts. This is NOT whole-frontend "
-            "coverage; components, routes and all other files are outside this scope."
+            "All maintained src/lib TypeScript plus AccountForm and RetryCatalog. "
+            "Generated API declarations are excluded. This is NOT whole-frontend "
+            "coverage; other components and routes have separate browser evidence."
         ),
-        "95% statements, 90% branches, 100% functions and 95% lines (Vitest).",
+        (
+            "95% statements, 90% branches, 100% functions and 95% lines (Vitest), "
+            "enforced globally and separately for the original catalog/session group."
+        ),
     ),
 }
 
@@ -30,6 +36,36 @@ def counts(covered, total):
     if not 0 <= covered <= total:
         raise ValueError("Invalid coverage counts")
     return covered, total
+
+
+def frontend_files():
+    """Use the same include/exclude patterns as Vitest, including untested files."""
+    scope = json.loads((FRONTEND_ROOT / "coverage-scope.json").read_text())
+    included = set()
+    for key in ("include", "exclude"):
+        patterns = scope[key]
+        if not isinstance(patterns, list) or not patterns:
+            raise ValueError("Invalid frontend coverage scope")
+        matched = set()
+        for pattern in patterns:
+            if (
+                not isinstance(pattern, str)
+                or not pattern.startswith("src/")
+                or ".." in pattern
+            ):
+                raise ValueError("Invalid frontend coverage pattern")
+            matched.update(
+                path.relative_to(FRONTEND_ROOT).as_posix()
+                for path in FRONTEND_ROOT.glob(pattern)
+                if path.is_file()
+            )
+        if key == "include":
+            included = matched
+        else:
+            included -= matched
+    if not included:
+        raise ValueError("Empty frontend coverage scope")
+    return sorted(included)
 
 
 def parse_report(kind, report):
@@ -58,7 +94,7 @@ def parse_report(kind, report):
             totals[field] += int(fields[field])
         counts(fields["LH"], fields["LF"])
         counts(fields["BRH"], fields["BRF"])
-    if sorted(files) != ["src/lib/catalog.ts", "src/lib/session.ts"]:
+    if sorted(files) != frontend_files():
         raise ValueError("Frontend report does not match the documented measured scope")
     return {
         "Lines": counts(totals["LH"], totals["LF"]),

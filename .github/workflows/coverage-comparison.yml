@@ -82,10 +82,10 @@ jobs:
         run: |
           mkdir -p "$EVIDENCE"
           report=backend/coverage.xml
-          config=backend/pyproject.toml
+          configs=(backend/pyproject.toml)
           if [ "$KIND" = frontend ]; then
             report=frontend/coverage/lcov.info
-            config=frontend/vitest.config.ts
+            configs=(frontend/vitest.config.ts frontend/coverage-scope.json)
           fi
           if [ -f "$report" ]; then cp "$report" "$EVIDENCE/head-report"; fi
           if [ -f "$BASE_TREE/$report" ]; then cp "$BASE_TREE/$report" "$EVIDENCE/base-report"; fi
@@ -95,10 +95,11 @@ jobs:
           fi
           base_sha=$(cat "$EVIDENCE/base-sha")
           baseline="$EVIDENCE/unavailable-baseline"
-          if [ "$BASE_RESULT" = success ] && [ -f "$BASE_TREE/$report" ] && git diff --quiet "$base_sha" "$HEAD_SHA" -- "$config"; then
+          if [ "$BASE_RESULT" = success ] && [ -f "$BASE_TREE/$report" ] && git diff --quiet "$base_sha" "$HEAD_SHA" -- "${configs[@]}"; then
             baseline="$EVIDENCE/base-report"
           fi
           python3 scripts/coverage_compare.py --kind "$KIND" --head-report "$EVIDENCE/head-report" --base-report "$baseline" --head "$HEAD_SHA" --base "$base_sha" | tee "$EVIDENCE/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+          python3 scripts/coverage_gate.py --kind "$KIND" --head-report "$EVIDENCE/head-report" --base-report "$baseline" --head "$HEAD_SHA" --base "$base_sha" | tee "$EVIDENCE/gates.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Retain comparison evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
