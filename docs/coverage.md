@@ -55,10 +55,26 @@ are generated in `backend/htmlcov` and `frontend/coverage/lcov-report`.
 
 Reporting runs in existing read-only PR jobs, including forks. It writes only the
 job summary and uploads reports; it posts no PR comment and runs no privileged
-workflow against PR code or artifacts. Coverage comparison/publishing needs its
-own reviewed trust boundary in #96.
+workflow against PR code or artifacts. See [base comparison](coverage-comparison.md) for exact-head and isolated-baseline evidence.
 
 Scope labels describe the checked-in coverage configuration. Backend XML totals
 are read from coverage.py; the renderer does not reconstruct the configured
 source/omit rules from XML. Update the scope label/documentation whenever those
 rules change. Frontend report filenames must exactly match the shared include/exclude scope expanded against the checkout; missing, duplicate and unexpected files fail validation.
+
+
+## Regression policy
+
+The comparison job enforces a maximum **0.5 percentage-point decrease** in line
+and branch coverage against a valid compatible baseline, and **90% coverage of
+changed measured executable lines**. Ratios are compared exactly before display
+rounding. The half-point allowance bounds small denominator changes near 100%
+without weakening the existing absolute gates. Backend remains at 85% combined;
+frontend remains at 95% statements/lines, 90% branches and 100% functions both
+globally and independently for the original catalog/session group.
+
+An unavailable/incompatible baseline skips only the total-regression comparison;
+the changed-line gate still applies. No changed measured executable lines means
+N/A, not invented coverage. Source scope changes are disclosed as incompatible,
+and generated/unmeasured lines never count as covered. Include/exclude patterns
+in `frontend/coverage-scope.json` are shared by collection and report validation.

@@ -9,12 +9,12 @@ summary shows compatible totals and coverage of changed measured executable line
 Added lines outside the measured scope are disclosed, not counted as covered.
 
 A failed or missing base report, a different measured file set, or changes to
-`backend/pyproject.toml` / `frontend/vitest.config.ts` make the baseline unavailable
+`backend/pyproject.toml` / `frontend/vitest.config.ts` / `frontend/coverage-scope.json` make the baseline unavailable
 or incompatible. Configuration comparison is deliberately conservative: even an
 unrelated change to those files suppresses total comparison. No regression is
 inferred without a compatible baseline. Failed head tests fail the job, even
 though evidence collection runs afterward. Existing thresholds remain enforced;
-the comparison adds information, not a new regression threshold.
+the [regression policy](coverage.md#regression-policy) additionally limits line/branch decline to 0.5 percentage points and requires 90% coverage of changed measured executable lines. Missing baseline skips only total regression; no changed measured lines is N/A.
 
 The workflow runs only on `pull_request`, with only `contents: read`, no secrets,
 PR-comment publishing or credential persistence. All test execution stays in this

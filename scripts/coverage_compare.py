@@ -151,7 +151,7 @@ def compare(kind, head_report, base_report, diff, head, base):
             "These are not counted as covered; they may include non-executable content."
         ),
         "",
-        "Comparison is supporting evidence, not an additional gate. Existing test thresholds remain enforced.",
+        "See the coverage regression gate result for enforced limits. Existing absolute test thresholds remain required.",
         "",
     ]
     return "\n".join(lines)
