@@ -16,13 +16,11 @@ describe("server API client", () => {
       vi.stubEnv("API_BASE_URL", origin);
       const signal = new AbortController().signal;
       const timeout = vi.spyOn(AbortSignal, "timeout").mockReturnValue(signal);
-      const fetchRequest = vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify([]), {
-            headers: { "Content-Type": "application/json" },
-          }),
-        );
+      const fetchRequest = vi.fn().mockResolvedValue(
+        new Response(JSON.stringify([]), {
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
       vi.stubGlobal("fetch", fetchRequest);
 
       const result = await apiClient().GET("/api/v1/products/");
