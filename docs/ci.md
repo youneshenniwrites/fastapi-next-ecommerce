@@ -15,7 +15,7 @@ pinned action SHAs, timeouts and cancellation of superseded runs.
 | Dependency audit / Python and frontend | Audit locked dependencies on PR/push, weekly, or manually | JSON reports |
 
 The frontend browser job depends on its quality job. Backend jobs run independently
-so failures do not hide other evidence. Frontend unit coverage measures only catalog/money and session utilities;
+so failures do not hide other evidence. Frontend unit coverage measures maintained library TypeScript plus AccountForm and RetryCatalog;
 route rendering, API integration and failure screens are covered by browser tests.
 FastAPI's generated OpenAPI snapshot is checked in CI so API drift fails the PR.
 
