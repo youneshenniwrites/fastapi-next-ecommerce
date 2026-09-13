@@ -19,12 +19,13 @@ jobs:
       KIND: ${{ matrix.kind }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       BASE_TIP: ${{ github.event.pull_request.base.sha }}
-      EVIDENCE: ${{ runner.temp }}/coverage-comparison
-      BASE_TREE: ${{ runner.temp }}/coverage-base
     defaults:
       run:
         shell: bash
     steps:
+      - name: Set runner-local evidence paths
+        run: |
+          printf 'EVIDENCE=%s/coverage-comparison\nBASE_TREE=%s/coverage-base\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Check out exact PR head without stored credentials
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
