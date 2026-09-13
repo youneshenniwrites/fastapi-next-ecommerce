@@ -97,6 +97,16 @@ class ComparisonTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             executable_lines("frontend", self.head)
 
+    def test_malformed_line_cannot_disappear_from_zero_totals(self):
+        self.head.write_text(
+            "\n".join(
+                f"SF:src/lib/{name}.ts\nDA:-1,0\nLH:0\nLF:0\nBRH:0\nBRF:0\nend_of_record"
+                for name in ("catalog", "session")
+            )
+        )
+        with self.assertRaises(ValueError):
+            executable_lines("frontend", self.head)
+
     def test_zero_context_hunks_and_non_executable_additions(self):
         self.assertEqual(changed_lines("+++ b/a.py\n@@ -1 +1,2 @@\n"), {"a.py": {1, 2}})
         self.diff = "+++ b/backend/app/example.py\n@@ -0,0 +1 @@\n+# comment"

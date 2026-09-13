@@ -52,10 +52,13 @@ def executable_lines(kind, report):
             if name in result:
                 raise ValueError("Duplicate source")
             result[name] = {}
-            for number, hits in re.findall(
-                r"^DA:(\d+),(\d+)(?:,[^\n]*)?$", record, re.MULTILINE
-            ):
-                number = int(number)
+            for line in record.splitlines():
+                if not line.startswith("DA:"):
+                    continue
+                match = re.fullmatch(r"DA:(\d+),(\d+)(?:,.*)?", line)
+                if not match:
+                    raise ValueError("Malformed LCOV line record")
+                number, hits = int(match[1]), int(match[2])
                 if number in result[name] or number < 1:
                     raise ValueError("Invalid line record")
                 result[name][number] = int(hits) > 0
