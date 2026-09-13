@@ -65,3 +65,11 @@ one hidden after mount; do not assume a visibility event always precedes setup.
 Prefer the installed Next.js documentation and framework-managed reads/actions to
 another client cache or polling mechanism. These lessons constrain behavior, not a
 requirement to preserve the old cart implementation.
+
+## Dependency backports — PR 100
+
+For an idempotent multi-part patch, require the complete patched form as well as
+its verified original source. Reversing independent edits can accidentally accept
+half-applied imports/bodies that leave runtime names undefined. Test each partial
+state and reject it before writing either distribution file
+([PR #100](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/100#discussion_r3997433244)).

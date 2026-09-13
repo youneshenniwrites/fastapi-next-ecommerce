@@ -58,3 +58,26 @@ behavior and its necessary tests together; generated files may make a legitimate
 commit larger. After relevant checks and staged-diff review, push verified
 milestones regularly within the user's existing authorization. Do not force-push
 or weaken CI to meet this cadence. Re-request current-head review after changes.
+
+### Temporary Next.js image backport (#98)
+
+Next.js 16.3.4's standalone image optimizer can permanently hang an uncached
+variant when the first client disconnects. This caused repeated browser CI
+failures after navigation. See [upstream issue #96538](https://github.com/vercel/next.js/issues/96538)
+and the accepted [fix #98168](https://github.com/vercel/next.js/pull/98168).
+Stable 16.3.5 still lacks that fix as verified on 12 September 2026.
+
+`frontend/scripts/patch-next-image.mjs` applies the response-socket-only backport
+after `npm ci` and before `npm run build`. It preserves the request socket for
+protocol/address handling and the response-body size limit. Both distributed
+module formats are checked against exact 16.3.4 source hashes before either is
+written; unexpected versions/content fail the command. It is idempotent and
+changes no application code or image assertions. `npm test` checks disconnected
+and live callers, request metadata, size limits and the patch guards.
+
+When upgrading Next.js, verify the stable release contains upstream #98168, run
+the disconnected-caller regression against it, then remove the backport script
+and its install/build hooks in the same PR. Never simply loosen the version/hash
+guards. Keep the runtime regression; adapt its internal API if upstream changes.
+The standalone production build copies the patched dependency. Vercel's hosted
+image optimization is separate from this local/standalone optimizer.
