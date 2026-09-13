@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from coverage_compare import changed_lines, compare, executable_lines
+from coverage_summary import frontend_files
 
 HEAD = "a" * 40
 BASE = "b" * 40
@@ -85,8 +86,8 @@ class ComparisonTests(unittest.TestCase):
     def test_frontend_lcov_and_inconsistent_totals(self):
         self.head.write_text(
             "\n".join(
-                f"SF:src/lib/{name}.ts\nDA:3,1\nLH:1\nLF:1\nBRH:0\nBRF:0\nend_of_record"
-                for name in ("catalog", "session")
+                f"SF:{name}\nDA:3,1\nLH:1\nLF:1\nBRH:0\nBRF:0\nend_of_record"
+                for name in frontend_files()
             )
         )
         self.assertEqual(
@@ -100,8 +101,8 @@ class ComparisonTests(unittest.TestCase):
     def test_malformed_line_cannot_disappear_from_zero_totals(self):
         self.head.write_text(
             "\n".join(
-                f"SF:src/lib/{name}.ts\nDA:-1,0\nLH:0\nLF:0\nBRH:0\nBRF:0\nend_of_record"
-                for name in ("catalog", "session")
+                f"SF:{name}\nDA:-1,0\nLH:0\nLF:0\nBRH:0\nBRF:0\nend_of_record"
+                for name in frontend_files()
             )
         )
         with self.assertRaises(ValueError):
