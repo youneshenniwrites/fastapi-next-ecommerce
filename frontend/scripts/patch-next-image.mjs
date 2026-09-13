@@ -74,7 +74,11 @@ export function patchNextImage(nextDirectory) {
     }
     const reverted = source.replace(after, before);
     const restored = esm ? reverted.replace(newImport, oldImport) : reverted;
-    if (sha256(restored) !== file.hash) {
+    const completePatch = restored.replace(before, after);
+    const expected = esm
+      ? completePatch.replace(oldImport, newImport)
+      : completePatch;
+    if (sha256(restored) !== file.hash || source !== expected) {
       throw new Error(
         `Unexpected Next source hash: ${file.path}; refusing to patch`,
       );

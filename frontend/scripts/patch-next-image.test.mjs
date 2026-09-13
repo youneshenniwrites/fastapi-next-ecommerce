@@ -89,6 +89,34 @@ test("patch is idempotent and rejects unexpected versions or source", () => {
     }
     patchNextImage(fixture);
     patchNextImage(fixture);
+    const esmPath = join(fixture, "dist/esm/server/image-optimizer.js");
+    const esmPatched = readFileSync(esmPath, "utf8");
+    const newImport =
+      "import { MockedRequest, MockedResponse } from './lib/mock-request';";
+    const oldImport =
+      "import { createRequestResponseMocks } from './lib/mock-request';";
+    // Either half of the ESM edit leaves identifiers undefined at runtime.
+    const bodyOnly = esmPatched.replace(newImport, oldImport);
+    const importOnly = esmPatched.replace(
+      / {8}const mocked = \{\n {12}req: new MockedRequest\([\s\S]*?\n {8}\};/,
+      `        const mocked = createRequestResponseMocks({
+            url: href,
+            method,
+            socket: _req.socket,
+            maximumResponseBody
+        });`,
+    );
+    assert.notEqual(bodyOnly, esmPatched);
+    assert.notEqual(importOnly, esmPatched);
+    for (const partial of [bodyOnly, importOnly]) {
+      writeFileSync(esmPath, partial);
+      assert.throws(
+        () => patchNextImage(fixture),
+        /Unexpected Next source hash/,
+      );
+      assert.equal(readFileSync(esmPath, "utf8"), partial);
+    }
+    writeFileSync(esmPath, esmPatched);
     const target = join(fixture, "dist/server/image-optimizer.js");
     const content = readFileSync(target, "utf8");
     writeFileSync(target, content + "\n// unexpected modification\n");
