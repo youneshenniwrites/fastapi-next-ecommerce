@@ -7,17 +7,20 @@ pinned action SHAs, timeouts and cancellation of superseded runs.
 
 | Workflow / job | Ordered work | Evidence |
 | --- | --- | --- |
-| Backend / Lint, contract and unit tests | Locked install → lint → format → export consistency → tests/coverage | Backend coverage XML |
+| Backend / Lint, contract and unit tests | Locked install → lint → format → export consistency → tests/coverage | Coverage summary, XML and HTML |
 | Backend / PostgreSQL integration tests | Start disposable PostgreSQL → create separate migration DB → full tests | Test logs |
 | Backend / Container build and migration smoke tests | Image build → migrations/startup → HTTP smoke → schema consistency → rollback/reapply | Failure logs |
-| Frontend / Lint, types, contract and unit tests | npm ci → regenerate/check API contract → formatting → lint → types → unit coverage → audit | LCOV coverage |
+| Frontend / Lint, types, contract and unit tests | npm ci → regenerate/check API contract → formatting → lint → types → unit coverage → audit | Scoped coverage summary, LCOV and HTML |
 | Frontend / Production build and browser tests | Production build → disposable real API → desktop/mobile/axe and fault tests → package | Browser report, traces, screenshots, standalone build |
 | Dependency audit / Python and frontend | Audit locked dependencies on PR/push, weekly, or manually | JSON reports |
 
 The frontend browser job depends on its quality job. Backend jobs run independently
-so failures do not hide other evidence. Unit coverage measures catalog/money logic;
+so failures do not hide other evidence. Frontend unit coverage measures only catalog/money and session utilities;
 route rendering, API integration and failure screens are covered by browser tests.
 FastAPI's generated OpenAPI snapshot is checked in CI so API drift fails the PR.
+
+See [coverage reports](coverage.md) for measured scope, unchanged thresholds, report
+links and local reproduction. Missing reports are labelled unavailable, never 0%.
 
 ## Build versus deployment
 

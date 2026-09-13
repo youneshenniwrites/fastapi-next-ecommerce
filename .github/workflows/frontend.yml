@@ -48,16 +48,27 @@ jobs:
       - name: Check TypeScript and route types
         run: npm run typecheck
       - name: Run unit tests and enforce coverage
+        id: coverage_tests
         run: npm test
       - name: Audit frontend dependencies
         run: npm audit
       - name: Upload frontend unit coverage
+        id: coverage_artifact
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: frontend-unit-coverage
           path: frontend/coverage
           retention-days: 14
+      - name: Summarize measured frontend coverage
+        if: always()
+        env:
+          COVERAGE_OUTCOME: ${{ steps.coverage_tests.outcome }}
+          COVERAGE_ARTIFACT_URL: ${{ steps.coverage_artifact.outputs.artifact-url }}
+        run: >-
+          python3 ../scripts/coverage_summary.py --kind frontend --report coverage/lcov.info
+          --outcome "$COVERAGE_OUTCOME" --artifact-url "$COVERAGE_ARTIFACT_URL"
+          >> "$GITHUB_STEP_SUMMARY"
   browser:
     name: Frontend · Production build and browser tests
     needs: quality

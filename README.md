@@ -193,6 +193,8 @@ Coverage and audit artifacts remain available for 14 days. Dependabot proposes
 weekly Python, CI action, and Docker updates; updates still need review and checks.
 CI actions are pinned to commit SHAs. [Tooling details](docs/tooling.md) explain
 coverage scope, local hooks, and how to handle dependency-update failures.
+[Coverage reports](docs/coverage.md) explains Actions summaries, downloadable HTML
+and the deliberately limited frontend measurement.
 
 Static type checking, code scanning, and repository-level required-check rules are
 future tooling increments. We do not claim those controls are enabled today.

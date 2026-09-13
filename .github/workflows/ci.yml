@@ -33,14 +33,28 @@ jobs:
       - name: Verify lockfile and requirements consistency
         run: uv run python scripts/check_requirements.py
       - name: Run backend tests and enforce coverage
-        run: uv run pytest -q --cov --cov-report=term-missing --cov-report=xml
+        id: coverage_tests
+        run: uv run pytest -q --cov --cov-report=term-missing --cov-report=xml --cov-report=html
       - name: Upload coverage report
+        id: coverage_artifact
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: backend-coverage
-          path: backend/coverage.xml
+          path: |
+            backend/coverage.xml
+            backend/htmlcov
+          if-no-files-found: warn
           retention-days: 14
+      - name: Summarize measured backend coverage
+        if: always()
+        env:
+          COVERAGE_OUTCOME: ${{ steps.coverage_tests.outcome }}
+          COVERAGE_ARTIFACT_URL: ${{ steps.coverage_artifact.outputs.artifact-url }}
+        run: >-
+          python ../scripts/coverage_summary.py --kind backend --report coverage.xml
+          --outcome "$COVERAGE_OUTCOME" --artifact-url "$COVERAGE_ARTIFACT_URL"
+          >> "$GITHUB_STEP_SUMMARY"
   container:
     name: Backend · Container build and migration smoke tests
     runs-on: ubuntu-latest
