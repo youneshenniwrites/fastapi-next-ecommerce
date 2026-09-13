@@ -13,9 +13,13 @@ Existing bot/contributor PRs retain their real authors.
 
 Use .github/pull_request_template.md as the canonical description structure:
 Summary, Issue, optional Before / After, Acceptance criteria, Testing, Review,
-and optional Deployment / Compatibility. Fill it with actual evidence; remove
-unused optional sections. Link real issues and never pre-check unverified review
-or test claims. Use this structure when maintaining bot PRs, preserving useful
+and optional Deployment notes. Lead with the customer or contributor outcome,
+use acceptance criteria from the issue, and report the tested commit and results.
+Keep Review to a brief self-review disclosure and links to current-head external
+review and CI evidence, explicitly noting pending or failed results. Remove
+unused optional sections. Keep owner assignment and labels in the sidebar; do
+not duplicate them or add review checkboxes to the body. Link real issues and
+never claim unverified review or test success. Use this structure when maintaining bot PRs, preserving useful
 upstream release information.
 
 After creating a PR, choose labels that describe its actual scope: bug,

@@ -1,39 +1,32 @@
-<!-- PR title: type(scope): description. Replace placeholders; remove optional sections when irrelevant. -->
+<!-- PR title: type(scope): description. Replace prompts and remove irrelevant optional sections. -->
 
 ## Summary
-What changed and why—in 1–3 sentences.
+
+Describe the customer or contributor outcome in 1–3 sentences: what changes and why.
 
 ## Issue
+
 Closes #<!-- actual issue number; use Refs #N for partial work -->
 
-<!-- State the single outcome and important exclusions; link parent/dependencies and the issue handoff. If scope grew substantially, explain the split or why this PR remains coherent. See docs/delivery.md. -->
-
 ## Before / After
-<!-- Optional: include for meaningful behaviour changes; add screenshots if useful. -->
-| Before | After |
-| --- | --- |
-| Previous behaviour | New behaviour |
+
+<!-- Optional: show a meaningful behavior change with a short comparison or screenshots. -->
 
 ## Acceptance criteria
-- [ ] Required outcome from the linked issue
-- [ ] Relevant error and edge cases handled
-- [ ] Documentation updated where needed
+
+<!-- Use the linked issue's criteria; check only verified outcomes. -->
+- [ ] Required outcome
 
 ## Testing
-- Checks run:
-- Results and tested commit:
-- Not tested / limitations:
+
+Give the tested commit, checks and results. Note skipped checks and relevant limitations.
 
 ## Review
-- Implementation review: self-review / independent review (identify which)
-- Owner: @youneshenniwrites
-- External reviewer: Codex Code Review
-- [ ] External review completed for the latest commit
-- [ ] Review findings addressed
-- [ ] Required CI checks passed
-- [ ] Current-head external review verified, or explicit owner-approved deferral linked
-<!-- Keep the owner as assignee; request only Codex as reviewer. Trigger Codex review through its integration; naming it here does not request a review. The Codex review status is informational pending #38; verify actual review evidence as described in docs/codex-review.md; a human Approve review is not required. -->
 
-## Deployment / Compatibility
-<!-- Optional: omit if not applicable. -->
-Migrations, configuration changes, breaking changes, or rollback notes.
+Briefly disclose self-review and its outcome. Link the current-head Codex review and CI results, stating pending or failed results honestly; refresh after changes.
+
+<!-- Assignment and labels belong in the sidebar. Follow docs/codex-review.md: required CI and current-head external review still gate merge; the Codex review status is informational pending #38. -->
+
+## Deployment notes
+
+<!-- Optional: include relevant migrations, configuration, compatibility or deployment limitations. -->
