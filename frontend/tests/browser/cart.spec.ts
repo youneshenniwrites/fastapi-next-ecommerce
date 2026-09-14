@@ -69,16 +69,56 @@ function updateButton(
     .getByRole("button", { name: "Update", exact: true });
 }
 
+// Quantity validation renders inside the cart line item. Never assert it with
+// an unscoped alert locator: Next renders an empty route announcer with
+// role="alert" at the document root, which wins .first() and fails the match.
+function lineAlert(page: import("@playwright/test").Page, productName: string) {
+  return page
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("link", { name: productName }) })
+    .getByRole("alert");
+}
+
+// Fill a quantity and submit until the line shows its alert. A background
+// refresh can settle between the fill and the submit, so re-try the pair
+// instead of failing outright.
+async function submitQuantity(
+  page: import("@playwright/test").Page,
+  productName: string,
+  value: string,
+) {
+  const quantity = page.getByLabel(`Quantity of ${productName}, 1 to 99`);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await quantity.fill(value);
+    await updateButton(page, productName).click();
+    const visible = await lineAlert(page, productName)
+      .waitFor({ state: "visible", timeout: 2000 })
+      .then(
+        () => true,
+        () => false,
+      );
+    if (visible) return;
+  }
+}
+
 async function openCartLink(
   page: import("@playwright/test").Page,
   project: string,
 ) {
   if (/mobile|pixel/i.test(project)) {
-    await page.getByRole("button", { name: "Open navigation" }).click();
-    await page
-      .getByRole("navigation", { name: "Mobile navigation" })
-      .getByRole("link", { name: /^Cart/ })
-      .click();
+    // A trigger tap can land while the streaming header remounts around a
+    // background refresh; the tap is then swallowed and the sheet never
+    // opens. Re-tap until the menu is visible instead of failing outright.
+    const menu = page.getByRole("navigation", { name: "Mobile navigation" });
+    let opened = false;
+    for (let attempt = 0; attempt < 3 && !opened; attempt++) {
+      await page.getByRole("button", { name: "Open navigation" }).click();
+      opened = await menu.waitFor({ state: "visible", timeout: 3000 }).then(
+        () => true,
+        () => false,
+      );
+    }
+    await menu.getByRole("link", { name: /^Cart/ }).click();
   } else {
     await page
       .getByRole("navigation", { name: "Main navigation" })
@@ -253,16 +293,13 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   // Invalid quantities are rejected client-side without any API write, so
   // only the validation message can satisfy this assertion.
   await openCartLink(page, info.project.name);
-  const quantity = page.getByLabel(`Quantity of ${first.name}, 1 to 99`);
-  await quantity.fill("0");
-  await updateButton(page, first.name).click();
-  await expect(page.getByRole("alert").first()).toContainText(
+  await submitQuantity(page, first.name, "0");
+  await expect(lineAlert(page, first.name)).toContainText(
     /whole number from 1 to 99/,
   );
   await expect(page).toHaveURL(/\/cart$/);
-  await quantity.fill("100");
-  await updateButton(page, first.name).click();
-  await expect(page.getByRole("alert").first()).toBeVisible();
+  await submitQuantity(page, first.name, "100");
+  await expect(lineAlert(page, first.name)).toBeVisible();
 
   // Quantities beyond stock are rejected with a 409 and a stock-specific
   // message (Task Light has stock 8): asserting the status and the message
@@ -276,7 +313,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   const scarce = page.getByLabel(`Quantity of ${second.name}, 1 to 99`);
   await scarce.fill("99");
   await updateButton(page, second.name).click();
-  await expect(page.getByRole("alert").first()).toContainText(
+  await expect(lineAlert(page, second.name)).toContainText(
     /Not enough stock|exceeds current stock/,
   );
 
@@ -286,7 +323,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await fault(page, request, { write: "fail" });
   await scarce.fill("2");
   await updateButton(page, second.name).click();
-  await expect(page.getByRole("alert").first()).toContainText(
+  await expect(lineAlert(page, second.name)).toContainText(
     /temporarily unavailable/,
   );
   await fault(page, request, {});

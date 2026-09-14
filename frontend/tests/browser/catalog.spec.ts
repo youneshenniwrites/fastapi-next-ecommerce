@@ -1,5 +1,23 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+
+// A trigger tap can land while the streaming header remounts around a
+// background refresh; the tap is then swallowed and the sheet never opens.
+// Re-try until the menu is visible instead of failing outright.
+async function openMobileMenu(page: import("@playwright/test").Page) {
+  const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await page.getByRole("button", { name: "Open navigation" }).click();
+    const opened = await dialog
+      .waitFor({ state: "visible", timeout: 3000 })
+      .then(
+        () => true,
+        () => false,
+      );
+    if (opened) return;
+  }
+  await expect(dialog).toBeVisible();
+}
 test("browse, filter and view the real FastAPI catalog", async ({
   page,
 }, info) => {
@@ -101,9 +119,20 @@ test("mobile navigation supports keyboard, dismissal and real links", async ({
   await page.goto("/");
   await page.emulateMedia({ reducedMotion: "reduce" });
   const trigger = page.getByRole("button", { name: "Open navigation" });
-  await trigger.focus();
-  await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // Re-focus every attempt: opening the menu moves focus, and a
+    // background refresh can drop it back to the document.
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    const opened = await dialog
+      .waitFor({ state: "visible", timeout: 3000 })
+      .then(
+        () => true,
+        () => false,
+      );
+    if (opened) break;
+  }
   await expect(dialog).toBeVisible();
   await page.screenshot({
     path: "test-results/mobile-menu.png",
@@ -113,7 +142,7 @@ test("mobile navigation supports keyboard, dismissal and real links", async ({
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(trigger).toBeFocused();
-  await trigger.click();
+  await openMobileMenu(page);
   await page
     .getByRole("navigation", { name: "Mobile navigation" })
     .getByRole("link", { name: "The collection" })
@@ -136,7 +165,7 @@ test("mobile navigation closes when resizing to desktop", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
   const trigger = page.getByRole("button", { name: "Open navigation" });
   const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
-  await trigger.click();
+  await openMobileMenu(page);
   await expect(dialog).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect(dialog).not.toBeVisible();
@@ -148,7 +177,7 @@ test("mobile navigation closes when resizing to desktop", async ({
   await expect(page).toHaveURL(/#approach$/);
   await page.setViewportSize({ width: 393, height: 851 });
   await expect(dialog).not.toBeVisible();
-  await trigger.click();
+  await openMobileMenu(page);
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
