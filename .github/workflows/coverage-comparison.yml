@@ -1,0 +1,111 @@
+name: PR coverage comparison
+on:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: coverage-comparison-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compare:
+    name: Coverage comparison · ${{ matrix.kind }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [backend, frontend]
+    env:
+      KIND: ${{ matrix.kind }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      BASE_TIP: ${{ github.event.pull_request.base.sha }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Set runner-local evidence paths
+        run: |
+          printf 'EVIDENCE=%s/coverage-comparison\nBASE_TREE=%s/coverage-base\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Check out exact PR head without stored credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve merge base and isolate its sources
+        id: revisions
+        run: |
+          mkdir -p "$EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          base_sha=$(git merge-base "$HEAD_SHA" "$BASE_TIP")
+          git worktree add --detach "$BASE_TREE" "$base_sha"
+          printf '%s\n' "$base_sha" > "$EVIDENCE/base-sha"
+          printf 'Head: %s\nTarget base: %s\nMerge base: %s\n' "$HEAD_SHA" "$BASE_TIP" "$base_sha" > "$EVIDENCE/revisions.txt"
+      - name: Set up pinned Python tooling
+        if: matrix.kind == 'backend'
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.8.22"
+      - name: Set up pinned Node.js
+        if: matrix.kind == 'frontend'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: frontend/.nvmrc
+      - name: Set up pinned npm
+        if: matrix.kind == 'frontend'
+        run: npm install --global npm@11.19.1
+      - name: Test exact head with existing coverage gates
+        id: head
+        continue-on-error: true
+        run: |
+          if [ "$KIND" = backend ]; then
+            (cd backend && uv sync --locked --python 3.12 && uv run pytest -q --cov --cov-report=term-missing --cov-report=xml)
+          else
+            (cd frontend && npm ci && npm test)
+          fi 2>&1 | tee "$EVIDENCE/head-tests.log"
+      - name: Test isolated merge base with its locked dependencies
+        id: baseline
+        if: always() && steps.revisions.outcome == 'success'
+        continue-on-error: true
+        run: |
+          if [ "$KIND" = backend ]; then
+            (cd "$BASE_TREE/backend" && uv sync --locked --python 3.12 && uv run pytest -q --cov --cov-report=term-missing --cov-report=xml)
+          else
+            (cd "$BASE_TREE/frontend" && npm ci && npm test)
+          fi 2>&1 | tee "$EVIDENCE/base-tests.log"
+      - name: Compare reports and disclose unavailable evidence
+        if: always()
+        env:
+          HEAD_RESULT: ${{ steps.head.outcome }}
+          BASE_RESULT: ${{ steps.baseline.outcome }}
+          REVISIONS_RESULT: ${{ steps.revisions.outcome }}
+        run: |
+          mkdir -p "$EVIDENCE"
+          report=backend/coverage.xml
+          config=backend/pyproject.toml
+          if [ "$KIND" = frontend ]; then
+            report=frontend/coverage/lcov.info
+            config=frontend/vitest.config.ts
+          fi
+          if [ -f "$report" ]; then cp "$report" "$EVIDENCE/head-report"; fi
+          if [ -f "$BASE_TREE/$report" ]; then cp "$BASE_TREE/$report" "$EVIDENCE/base-report"; fi
+          if [ "$REVISIONS_RESULT" != success ] || [ "$HEAD_RESULT" != success ]; then
+            printf '## %s coverage comparison\n\nHead `%s`; target base `%s`.\n\nComparison unavailable: revision setup or head tests did not succeed.\n' "$KIND" "$HEAD_SHA" "$BASE_TIP" | tee "$EVIDENCE/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          base_sha=$(cat "$EVIDENCE/base-sha")
+          baseline="$EVIDENCE/unavailable-baseline"
+          if [ "$BASE_RESULT" = success ] && [ -f "$BASE_TREE/$report" ] && git diff --quiet "$base_sha" "$HEAD_SHA" -- "$config"; then
+            baseline="$EVIDENCE/base-report"
+          fi
+          python3 scripts/coverage_compare.py --kind "$KIND" --head-report "$EVIDENCE/head-report" --base-report "$baseline" --head "$HEAD_SHA" --base "$base_sha" | tee "$EVIDENCE/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain comparison evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-comparison-${{ matrix.kind }}
+          path: ${{ runner.temp }}/coverage-comparison
+          retention-days: 14
+      - name: Preserve head-test failure
+        if: always() && steps.head.outcome != 'success'
+        run: exit 1
