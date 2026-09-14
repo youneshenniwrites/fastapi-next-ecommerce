@@ -16,11 +16,19 @@ API = "https://vindor-api-development.vercel.app"
 WEB = "https://vindor-ecommerce-development.vercel.app"
 
 
+def protection_headers():
+    bypass = os.environ.get("VERCEL_PROTECTION_BYPASS")
+    return {"x-vercel-protection-bypass": bypass} if bypass else {}
+
+
 def read(url, expected=200, retry=False):
+    headers = protection_headers()
     attempts = 6 if retry else 1
     for attempt in range(attempts):
         try:
-            with urllib.request.urlopen(url, timeout=30) as response:
+            with urllib.request.urlopen(
+                urllib.request.Request(url, headers=headers), timeout=30
+            ) as response:
                 status, body = response.status, response.read()
         except urllib.error.HTTPError as error:
             status, body = error.code, error.read()
@@ -91,6 +99,7 @@ def main():
             headers={
                 "Content-Type": "application/json",
                 "Origin": "https://untrusted.example",
+                **protection_headers(),
             },
         )
         try:
