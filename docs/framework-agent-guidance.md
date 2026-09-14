@@ -24,6 +24,17 @@ Follow documented error remedies and retain production CI and browser regression
 checks. Do not enable caching or other architectural features merely because a
 generic guide demonstrates them.
 
+For this storefront, prefer Server Components for reads and authenticated Server
+Actions for UI mutations, with small shadcn Client Components for interaction.
+Use Next's refresh/revalidation APIs instead of building an extra browser server-state
+layer. Do not add React Query without a demonstrated requirement and explicit
+agreement. FastAPI retains business authority. Consult the installed Server Actions,
+server/client boundaries and data-security guides, the official
+[mutation tutorial](https://nextjs.org/learn/dashboard-app/mutating-data), and
+[Vercel Commerce](https://github.com/vercel/commerce) for patterns; adapt its Shopify
+integration to our FastAPI contract. Cross-check video tutorials against the locked
+framework version. See [our cart implementation](design/cart-storefront.md).
+
 ## FastAPI
 
 Use the [official FastAPI skill](https://github.com/fastapi/fastapi/blob/master/fastapi/.agents/skills/fastapi/SKILL.md).

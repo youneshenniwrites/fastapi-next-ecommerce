@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { AccountLink } from "@/components/account-link";
-import { useEffect, useState } from "react";
+import { CartLink } from "@/components/cart-link";
+import { useEffect, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,26 +14,59 @@ import {
   SheetDescription,
   SheetClose,
 } from "@/components/ui/sheet";
+
+// The sheet trigger lives in the streaming server-rendered header: focus and
+// session revalidation can remount it while a tap is in flight. Capture the
+// intent at press time and keep the open flag in a module store, so a tap
+// swallowed before click dispatch still opens the menu in whichever header
+// instance renders next. Dismissal paths are unchanged.
+let navigationOpen = false;
+const navigationListeners = new Set<() => void>();
+function subscribeNavigation(notify: () => void) {
+  navigationListeners.add(notify);
+  return () => {
+    navigationListeners.delete(notify);
+  };
+}
+function setNavigationOpen(next: boolean) {
+  if (navigationOpen === next) return;
+  navigationOpen = next;
+  navigationListeners.forEach((notify) => notify());
+}
+function useNavigationOpen() {
+  return useSyncExternalStore(
+    subscribeNavigation,
+    () => navigationOpen,
+    () => false,
+  );
+}
 export function MobileNavigation() {
-  const [open, setOpen] = useState(false);
+  const open = useNavigationOpen();
   useEffect(() => {
     // Match Tailwind's sm breakpoint; the sheet is portaled outside its wrapper.
     const desktop = window.matchMedia("(min-width: 40rem)");
     const closeOnDesktop = (event: MediaQueryListEvent) => {
-      if (event.matches) setOpen(false);
+      if (event.matches) setNavigationOpen(false);
     };
     desktop.addEventListener("change", closeOnDesktop);
     return () => desktop.removeEventListener("change", closeOnDesktop);
   }, []);
   return (
     <div className="sm:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={open} onOpenChange={setNavigationOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
             className="size-11"
             aria-label="Open navigation"
+            onPointerDown={(event) => {
+              // Capture the menu intent at press time: a background refresh
+              // can unmount this trigger before click dispatch, swallowing
+              // the tap. The module store carries the intent to whichever
+              // header instance renders next; the later click is a no-op.
+              if (event.button === 0 && !event.ctrlKey) setNavigationOpen(true);
+            }}
           >
             <Menu aria-hidden="true" />
           </Button>
@@ -65,7 +99,11 @@ export function MobileNavigation() {
             </SheetClose>
             <AccountLink
               className="border-b border-border py-5 text-base"
-              onClick={() => setOpen(false)}
+              onClick={() => setNavigationOpen(false)}
+            />
+            <CartLink
+              className="border-b border-border py-5 text-base"
+              onClick={() => setNavigationOpen(false)}
             />
           </nav>
           <p className="mt-auto p-6 text-xs text-muted-foreground">

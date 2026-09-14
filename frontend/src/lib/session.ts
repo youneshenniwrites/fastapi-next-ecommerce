@@ -2,7 +2,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { apiClient } from "./api/client";
 
-function policy() {
+export function sessionPolicy() {
   const raw = process.env.APP_ORIGIN;
   if (!raw) throw new Error("APP_ORIGIN is required for sessions");
   const origin = new URL(raw);
@@ -48,7 +48,10 @@ function reply(body: object, status = 200) {
   });
 }
 
-function clear(response: NextResponse, config: ReturnType<typeof policy>) {
+function clear(
+  response: NextResponse,
+  config: ReturnType<typeof sessionPolicy>,
+) {
   response.cookies.set(config.name, "", {
     httpOnly: true,
     secure: config.secure,
@@ -61,7 +64,7 @@ function clear(response: NextResponse, config: ReturnType<typeof policy>) {
 
 export async function login(request: NextRequest) {
   try {
-    const config = policy();
+    const config = sessionPolicy();
     if (!config.origins.includes(request.headers.get("origin") ?? ""))
       return reply({ error: "Origin rejected" }, 403);
     if (!request.headers.get("content-type")?.startsWith("application/json"))
@@ -122,7 +125,7 @@ export async function login(request: NextRequest) {
 
 export async function profile(request: NextRequest) {
   try {
-    const config = policy();
+    const config = sessionPolicy();
     const token = request.cookies.get(config.name)?.value;
     if (!token) return reply({ error: "Sign in required" }, 401);
     const result = await apiClient().GET("/api/v1/auth/me", {
@@ -141,7 +144,7 @@ export async function profile(request: NextRequest) {
 
 export async function logout(request: NextRequest) {
   try {
-    const config = policy();
+    const config = sessionPolicy();
     if (!config.origins.includes(request.headers.get("origin") ?? ""))
       return reply({ error: "Origin rejected" }, 403);
     return clear(reply({ authenticated: false }), config);
@@ -152,7 +155,7 @@ export async function logout(request: NextRequest) {
 
 export async function register(request: NextRequest) {
   try {
-    const config = policy();
+    const config = sessionPolicy();
     if (!config.origins.includes(request.headers.get("origin") ?? ""))
       return reply({ error: "Origin rejected" }, 403);
     if (!request.headers.get("content-type")?.startsWith("application/json"))

@@ -87,9 +87,10 @@ Password reset, email verification and rate limiting remain separate work.
 
 ## Profile and navigation (#26)
 
-`/account` renders a public loading shell and retrieves only the current customer
-through GET `/api/session/me`. No profile data or bearer token is included in
-shared page HTML. The private endpoint remains no-store; UI state is held only
+The profile component on `/account` renders a loading shell and retrieves the
+current customer through GET `/api/session/me`. The shared cart now renders safe
+customer/cart display data on the server; page HTML is private/no-store and never
+contains bearer tokens. The private profile endpoint remains no-store; UI state is held only
 in memory. The account page displays email and membership date, never admin flags.
 A missing/expired session shows a sign-in prompt; an outage hides details and
 shows a retry action without claiming the customer is signed out.

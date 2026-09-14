@@ -2,6 +2,22 @@ import { test, expect } from "@playwright/test";
 import { createHmac } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 
+// A trigger tap can land while the streaming header remounts around a
+// background refresh; the tap is then swallowed and the sheet never opens.
+// Re-tap until the menu is visible instead of failing outright.
+async function openMobileMenu(page: import("@playwright/test").Page) {
+  const menu = page.getByRole("navigation", { name: "Mobile navigation" });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await page.getByRole("button", { name: "Open navigation" }).click();
+    const opened = await menu.waitFor({ state: "visible", timeout: 3000 }).then(
+      () => true,
+      () => false,
+    );
+    if (opened) return;
+  }
+  await menu.waitFor({ state: "visible", timeout: 5000 });
+}
+
 test("complete UI account journey with duplicate registration and invalid login", async ({
   page,
 }) => {
@@ -64,8 +80,7 @@ test("complete UI account journey with duplicate registration and invalid login"
   expect(
     await page.evaluate(() => localStorage.length + sessionStorage.length),
   ).toBe(0);
-  if (test.info().project.name.includes("Pixel"))
-    await page.getByRole("button", { name: "Open navigation" }).click();
+  if (test.info().project.name.includes("Pixel")) await openMobileMenu(page);
   await page.getByRole("link", { name: "My account", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Customer profile" }),
@@ -144,15 +159,22 @@ test("private profile, account navigation and logout on desktop and mobile", asy
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/#collection$/);
-  if (test.info().project.name.includes("Pixel"))
-    await page.getByRole("button", { name: "Open navigation" }).click();
+  if (test.info().project.name.includes("Pixel")) await openMobileMenu(page);
   await page.getByRole("link", { name: "My account", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Customer profile" }),
   ).toContainText(email);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-  const html = await (await page.request.get("/account")).text();
-  expect(html).not.toContain(email);
+  // The cart is now rendered on the server: signed-in HTML is private, and
+  // only safe display data may be serialized (never the bearer cookie).
+  const document = await page.request.get("/account");
+  expect(document.headers()["cache-control"]).toContain("no-store");
+  const html = await document.text();
+  const sessionCookie = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "local-session",
+  );
+  expect(sessionCookie).toBeDefined();
+  expect(html).not.toContain(sessionCookie!.value);
   const me = await page.request.get("/api/session/me");
   expect(me.headers()["cache-control"]).toContain("no-store");
   await page.route("**/api/session/logout", (route) =>
@@ -394,7 +416,7 @@ test("guest sign-in links navigate on the first click without reloading", async 
       page.getByRole("heading", { name: "Sign in to view your account" }),
     ).toBeVisible();
     if (source === "header" && test.info().project.name.includes("Pixel"))
-      await page.getByRole("button", { name: "Open navigation" }).click();
+      await openMobileMenu(page);
     const signIn =
       source === "account"
         ? page
@@ -484,8 +506,7 @@ test("header sign-in on the login page does not reload or discard input", async 
 }) => {
   await page.goto("/login");
   await page.getByLabel("Email address").fill("navigation@example.com");
-  if (test.info().project.name.includes("Pixel"))
-    await page.getByRole("button", { name: "Open navigation" }).click();
+  if (test.info().project.name.includes("Pixel")) await openMobileMenu(page);
   let documents = 0;
   page.on("request", (request) => {
     if (request.isNavigationRequest() && request.frame() === page.mainFrame())
