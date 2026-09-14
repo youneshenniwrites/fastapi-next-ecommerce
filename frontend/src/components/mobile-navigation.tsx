@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { AccountLink } from "@/components/account-link";
 import { CartLink } from "@/components/cart-link";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,20 +14,45 @@ import {
   SheetDescription,
   SheetClose,
 } from "@/components/ui/sheet";
+
+// The sheet trigger lives in the streaming server-rendered header: focus and
+// session revalidation can remount it while a tap is in flight, which would
+// discard a useState open flag and swallow the tap. Keep the open flag in a
+// module store so every header instance observes the same menu intent.
+let navigationOpen = false;
+const navigationListeners = new Set<() => void>();
+function subscribeNavigation(notify: () => void) {
+  navigationListeners.add(notify);
+  return () => {
+    navigationListeners.delete(notify);
+  };
+}
+function setNavigationOpen(next: boolean) {
+  if (navigationOpen === next) return;
+  navigationOpen = next;
+  navigationListeners.forEach((notify) => notify());
+}
+function useNavigationOpen() {
+  return useSyncExternalStore(
+    subscribeNavigation,
+    () => navigationOpen,
+    () => false,
+  );
+}
 export function MobileNavigation() {
-  const [open, setOpen] = useState(false);
+  const open = useNavigationOpen();
   useEffect(() => {
     // Match Tailwind's sm breakpoint; the sheet is portaled outside its wrapper.
     const desktop = window.matchMedia("(min-width: 40rem)");
     const closeOnDesktop = (event: MediaQueryListEvent) => {
-      if (event.matches) setOpen(false);
+      if (event.matches) setNavigationOpen(false);
     };
     desktop.addEventListener("change", closeOnDesktop);
     return () => desktop.removeEventListener("change", closeOnDesktop);
   }, []);
   return (
     <div className="sm:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={open} onOpenChange={setNavigationOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
@@ -66,11 +91,11 @@ export function MobileNavigation() {
             </SheetClose>
             <AccountLink
               className="border-b border-border py-5 text-base"
-              onClick={() => setOpen(false)}
+              onClick={() => setNavigationOpen(false)}
             />
             <CartLink
               className="border-b border-border py-5 text-base"
-              onClick={() => setOpen(false)}
+              onClick={() => setNavigationOpen(false)}
             />
           </nav>
           <p className="mt-auto p-6 text-xs text-muted-foreground">
