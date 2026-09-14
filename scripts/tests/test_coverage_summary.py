@@ -2,6 +2,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location(
     "coverage_summary", Path(__file__).parents[1] / "coverage_summary.py"
@@ -31,6 +32,12 @@ class CoverageSummaryTests(unittest.TestCase):
         self.report.write_text(
             "SF:src/lib/catalog.ts\nLH:1\nLF:1\nBRH:0\nBRF:0\nend_of_record\nSF:src/lib/session.ts\nLH:1\nLF:9\nBRH:0\nBRF:0\nend_of_record\n"
         )
+        with self.report.open("a") as stream:
+            for name in coverage.frontend_files():
+                if name not in ("src/lib/catalog.ts", "src/lib/session.ts"):
+                    stream.write(
+                        f"SF:{name}\nLH:0\nLF:0\nBRH:0\nBRF:0\nend_of_record\n"
+                    )
         text, valid = coverage.render(
             "frontend",
             self.report,
@@ -77,3 +84,29 @@ class CoverageSummaryTests(unittest.TestCase):
             )
         with self.assertRaises(ValueError):
             coverage.render("backend", self.report, "success", revision="`injected`")
+
+    def test_scope_includes_untested_files_and_excludes_generated_declarations(self):
+        root = Path(self.directory.name)
+        (root / "src/lib/api").mkdir(parents=True)
+        (root / "src/lib/untested.ts").write_text("export const value = 1")
+        (root / "src/lib/api/schema.d.ts").write_text("export type Value = string")
+        (root / "coverage-scope.json").write_text(
+            '{"include":["src/lib/**/*.ts"],"exclude":["src/lib/api/schema.d.ts"]}'
+        )
+        with patch.object(coverage, "FRONTEND_ROOT", root):
+            self.assertEqual(coverage.frontend_files(), ["src/lib/untested.ts"])
+            self.report.write_text(
+                "SF:src/lib/untested.ts\nLH:0\nLF:1\nBRH:0\nBRF:0\nend_of_record\n"
+            )
+            self.assertTrue(coverage.render("frontend", self.report, "success")[1])
+            self.report.write_text("")
+            self.assertFalse(coverage.render("frontend", self.report, "success")[1])
+
+    def test_duplicate_and_missing_frontend_files_are_rejected(self):
+        rows = [
+            f"SF:{name}\nLH:0\nLF:1\nBRH:0\nBRF:0\nend_of_record\n"
+            for name in coverage.frontend_files()
+        ]
+        for content in ("".join(rows[:-1]), "".join(rows + rows[:1])):
+            self.report.write_text(content)
+            self.assertFalse(coverage.render("frontend", self.report, "success")[1])
