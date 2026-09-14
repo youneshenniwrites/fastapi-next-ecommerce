@@ -9,6 +9,7 @@ WORKFLOWS = ("ci.yml", "frontend.yml", "dependency-audit.yml", "review-gate-test
 
 
 def passed(runs, sha):
+    """Return whether the latest matching main push run passed for the revision."""
     candidates = [
         r
         for r in runs
@@ -21,10 +22,12 @@ def passed(runs, sha):
 
 
 def api(path):
+    """Return the decoded JSON response for a GitHub API path."""
     return json.loads(subprocess.check_output(["gh", "api", path], text=True))
 
 
 def main():
+    """Determine and publish whether a main revision can deploy to development."""
     repo = os.environ["GITHUB_REPOSITORY"]
     sha = os.environ["CANDIDATE_SHA"]
     assert re.fullmatch(r"[0-9a-f]{40}", sha), "Invalid revision"

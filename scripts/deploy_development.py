@@ -17,11 +17,13 @@ WEB = "https://vindor-ecommerce-development.vercel.app"
 
 
 def protection_headers():
+    """Return the optional Vercel protection bypass header for automation."""
     bypass = os.environ.get("VERCEL_PROTECTION_BYPASS")
     return {"x-vercel-protection-bypass": bypass} if bypass else {}
 
 
 def read(url, expected=200, retry=False):
+    """Read a deployment URL and return its body when the status is expected."""
     headers = protection_headers()
     attempts = 6 if retry else 1
     for attempt in range(attempts):
@@ -45,6 +47,7 @@ def read(url, expected=200, retry=False):
 
 
 def main():
+    """Deploy the release archive and smoke-test the development environment."""
     sha = os.environ["RELEASE_SHA"]
     archive = subprocess.check_output(["git", "archive", sha])
     with tempfile.TemporaryDirectory(prefix="dev-release-") as directory:

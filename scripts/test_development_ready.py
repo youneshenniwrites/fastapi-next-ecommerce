@@ -1,3 +1,5 @@
+"""Tests for development deployment eligibility."""
+
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -9,6 +11,7 @@ SHA = "a" * 40
 
 
 def run(id=1):
+    """Build a successful main push workflow run fixture."""
     return {
         "id": id,
         "head_sha": SHA,
@@ -20,6 +23,7 @@ def run(id=1):
 
 class DevelopmentGateTests(unittest.TestCase):
     def test_requires_exact_main_push(self):
+        """Require a successful workflow run for the exact main push revision."""
         self.assertTrue(passed([run()], SHA))
         for key, value in [
             ("head_sha", "b" * 40),
@@ -34,13 +38,17 @@ class DevelopmentGateTests(unittest.TestCase):
         self.assertFalse(passed([], SHA))
 
     def test_new_failed_or_pending_run_invalidates_old_success(self):
+        """Reject a revision when its latest run failed or remains pending."""
         for conclusion in ["failure", None]:
             latest = run(id=2)
             latest["conclusion"] = conclusion
             self.assertFalse(passed([latest, run()], SHA))
 
     def evaluate(self, missing=None, deployed=False, current=SHA):
+        """Run the eligibility entry point against controlled GitHub responses."""
+
         def api(path):
+            """Return a response fixture based on the requested GitHub API path."""
             if path.endswith("commits/main"):
                 return {"sha": current}
             if "/actions/workflows/" in path:
@@ -68,6 +76,7 @@ class DevelopmentGateTests(unittest.TestCase):
             return output.read()
 
     def test_deploys_verified_main_revision_once(self):
+        """Allow only the current fully verified revision before its first deploy."""
         self.assertIn("ready=true", self.evaluate())
         self.assertIn("ready=false", self.evaluate(current="b" * 40))
         self.assertIn("ready=false", self.evaluate(missing="ci.yml"))
