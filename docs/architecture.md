@@ -19,7 +19,8 @@ preserved across reruns. Compose volumes persist until explicitly removed.
 
 Authentication uses PyJWT and Argon2, with bcrypt verification and upgrade on login.
 Active admins may mutate products. Customers may read the catalog and their own
-profile. No public route creates an admin.
+profile. No public route creates an admin. In-app fixed-window throttling rejects
+abusive auth/write rates with 429 responses; see [api.md](api.md#abuse-protection-rate-limits).
 
 The Next.js registration and login screens call same-origin session handlers.
 Login stores the API token in an HttpOnly cookie; server-mediated profile calls
@@ -50,7 +51,8 @@ on 8 September 2026. Both environments are deployed and verified: production
 [Swagger](https://vindor-api-production.vercel.app/docs). The production workflow
 requires successful exact-main CI, applies migrations, deploys the API before the
 frontend and checks public endpoints. GitHub-triggered production delivery is
-verified (#46); frontend PR previews remain #45. See the
+verified (#46); development delivery mirrors that gate for the dev environment
+(#108, hostname fix #113). Frontend PR previews remain #45. See the
 [environment plan](../deploy/environments/README.md) for configuration and rollout.
 Azure is retained as optional future migration (#31), not the immediate target.
 The legacy AWS Terraform is not used for this deployment.
