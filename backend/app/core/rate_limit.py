@@ -83,8 +83,8 @@ class RateLimiter:
                 # the full expired sweep only periodically so a distinct-key
                 # flood cannot keep the lock busy scanning.
                 overflow = len(self._buckets) - MAX_BUCKETS
-                for old in list(self._buckets)[:overflow]:
-                    del self._buckets[old]
+                for _ in range(overflow):
+                    del self._buckets[next(iter(self._buckets))]
                 if self._overflow_count % OVERFLOW_SWEEP_EVERY == 0:
                     self._purge_expired(now)
             return True, 0
