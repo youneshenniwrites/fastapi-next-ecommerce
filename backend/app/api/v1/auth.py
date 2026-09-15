@@ -7,13 +7,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.rate_limit import enforce_auth_login_limit, enforce_auth_register_limit
 from app.core.security import DUMMY_HASH, create_access_token, password_hash
 from app.core.settings import settings
 from app.crud import user as crud_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import Token
-from app.schemas.errors import ErrorResponse
+from app.schemas.errors import RATE_LIMITED_RESPONSE, ErrorResponse
 from app.schemas.user import UserCreate, UserRead
 
 router = APIRouter()
@@ -26,8 +27,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
     summary="Register a customer account",
+    dependencies=[Depends(enforce_auth_register_limit)],
     responses={
-        400: {"model": ErrorResponse, "description": "Email is already registered."}
+        400: {"model": ErrorResponse, "description": "Email is already registered."},
+        **RATE_LIMITED_RESPONSE,
     },
 )
 def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
@@ -55,11 +58,13 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     "/login",
     response_model=Token,
     summary="Sign in with email and password",
+    dependencies=[Depends(enforce_auth_login_limit)],
     responses={
         401: {
             "model": ErrorResponse,
             "description": "Invalid credentials or disabled account.",
-        }
+        },
+        **RATE_LIMITED_RESPONSE,
     },
 )
 def login(
