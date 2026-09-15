@@ -7,8 +7,10 @@ and the standard {"detail": ...} error body.
 
 Enforced limits (per client, 60-second fixed windows):
 
-- POST /api/v1/auth/register: 20 requests. Registration is single-shot for
-  legitimate visitors; this blunts registration spam.
+- POST /api/v1/auth/register: 60 requests. Registration is single-shot for
+  legitimate visitors; this blunts registration spam while leaving headroom
+  for suites that register many accounts from one shared origin. Do not
+  tighten below proven suite volume: CI failed at 20/min (PR #110).
 - POST /api/v1/auth/login: 60 requests. Normal sign-in is single-shot and the
   headroom covers test and browser suites sharing one origin.
 - Cart and product writes: 300 requests. Flood protection; genuine customer
@@ -36,7 +38,7 @@ from collections.abc import Callable
 from fastapi import Request, status
 from fastapi.exceptions import HTTPException
 
-AUTH_REGISTER_LIMIT = 20
+AUTH_REGISTER_LIMIT = 60
 AUTH_LOGIN_LIMIT = 60
 WRITE_LIMIT = 300
 WINDOW_SECONDS = 60

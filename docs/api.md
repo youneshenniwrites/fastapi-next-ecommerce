@@ -146,7 +146,7 @@ normal use is unaffected. No paid WAF or extra service is involved.
 
 | Scope | Limit per client (60-second fixed window) |
 | --- | --- |
-| `POST /api/v1/auth/register` | 20 requests |
+| `POST /api/v1/auth/register` | 60 requests |
 | `POST /api/v1/auth/login` | 60 requests |
 | Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests |
 
