@@ -57,6 +57,17 @@ Retain TLS parameters. Migrations use direct connections. Verify runtime connect
 recovery and bounded connection use before public deployment; suspended Neon compute
 or serverless process reuse must not result in permanently stale connections.
 
+## Development protection bypass
+
+The development API keeps Vercel Deployment Protection enabled so its demo
+database does not take public traffic; the production demo stays openly
+accessible. Automation passes Protection Bypass for Automation instead of
+weakening that wall: the server-only frontend API client sends
+`x-vercel-protection-bypass` from `VERCEL_PROTECTION_BYPASS` (set on the
+development frontend project, never a `NEXT_PUBLIC_` variable), and the
+development delivery smoke checks send the same header from the GitHub
+development secret. Production leaves the variable unset and is unaffected.
+
 ## Provisioning and verification
 
 1. Keep Vercel on Hobby and Neon on Free; no card or upgrade. Free quotas may pause
