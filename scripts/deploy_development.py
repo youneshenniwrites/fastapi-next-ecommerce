@@ -12,8 +12,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-API = "https://vindor-api-development.vercel.app"
-WEB = "https://vindor-ecommerce-development.vercel.app"
+API = "https://forme-api-development.vercel.app"
+WEB = "https://forme-ecommerce-development.vercel.app"
 
 
 def protection_headers():
