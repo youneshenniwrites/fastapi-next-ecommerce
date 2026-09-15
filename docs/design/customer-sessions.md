@@ -57,8 +57,9 @@ or authentication responses.
 Logout clears the browser cookie using matching path/name attributes. With current
 stateless JWTs, this does not revoke a copied token; it remains usable until expiry
 unless backend user checks reject it. Document this limitation rather than claiming
-server-side revocation. Password reset, MFA, global logout and rate limiting are
-separate work, not delivered by this note.
+server-side revocation. Password reset, MFA and global logout are
+separate work, not delivered by this note. Auth/write endpoint throttling is
+delivered; see [api.md](../api.md#abuse-protection-rate-limits).
 
 ## Required evidence
 
@@ -82,7 +83,7 @@ Registration asks users to sign in after success; it does not retry writes or
 silently authenticate. An uncertain response advises trying sign-in before
 registering again. Login always navigates to `/#collection`, ignoring query-string
 redirect destinations. Credentials are not persisted in browser storage or traces.
-Password reset, email verification and rate limiting remain separate work.
+Password reset and email verification remain separate work.
 
 
 ## Profile and navigation (#26)
