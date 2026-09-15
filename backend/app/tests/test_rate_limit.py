@@ -72,6 +72,22 @@ def test_active_flood_cannot_grow_memory_without_bound(monkeypatch):
     assert len(limiter._buckets) == 2
 
 
+def test_periodic_sweep_clears_expired_keys_but_keeps_active_ones(monkeypatch):
+    monkeypatch.setattr(rate_limit, "MAX_BUCKETS", 3)
+    now = [1000.0]
+    limiter = RateLimiter(100, window_seconds=60, clock=lambda: now[0])
+    limiter.consume("expired-a")
+    limiter.consume("expired-b")
+    now[0] += 61
+    limiter.consume("active")
+    limiter._overflow_count = 63
+    limiter.consume("fresh")
+    assert "expired-a" not in limiter._buckets
+    assert "expired-b" not in limiter._buckets
+    assert "active" in limiter._buckets
+    assert "fresh" in limiter._buckets
+
+
 def test_client_key_prefers_first_forwarded_address():
     request = Request(
         {

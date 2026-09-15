@@ -403,6 +403,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {
@@ -483,6 +489,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {
@@ -583,6 +595,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {
@@ -630,6 +648,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {
@@ -722,6 +746,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {
@@ -833,6 +863,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {
@@ -898,6 +934,12 @@ export interface operations {
             /** @description Too many requests. Retry after the Retry-After delay (seconds). */
             429: {
                 headers: {
+                    /** @description Seconds until the current window expires. */
+                    "Retry-After"?: number;
+                    /** @description Request limit for the current window. */
+                    "X-RateLimit-Limit"?: number;
+                    /** @description Requests remaining in the current window. */
+                    "X-RateLimit-Remaining"?: number;
                     [name: string]: unknown;
                 };
                 content: {

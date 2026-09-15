@@ -43,6 +43,7 @@ AUTH_LOGIN_LIMIT = 60
 WRITE_LIMIT = 300
 WINDOW_SECONDS = 60
 MAX_BUCKETS = 10_000
+OVERFLOW_SWEEP_EVERY = 64
 
 
 class RateLimiter:
@@ -63,6 +64,7 @@ class RateLimiter:
         self.clock = clock
         self._buckets: dict[str, tuple[float, int]] = {}
         self._lock = threading.Lock()
+        self._overflow_count = 0
 
     def consume(self, key: str) -> tuple[bool, int]:
         """Record one request. Return (allowed, retry_after_seconds)."""
@@ -76,7 +78,15 @@ class RateLimiter:
                 return False, max(retry_after, 1)
             self._buckets[key] = (start, count + 1)
             if len(self._buckets) > MAX_BUCKETS:
-                self._purge_expired(now)
+                self._overflow_count += 1
+                # Amortized bound: evict oldest first (cheap, no scan), and run
+                # the full expired sweep only periodically so a distinct-key
+                # flood cannot keep the lock busy scanning.
+                overflow = len(self._buckets) - MAX_BUCKETS
+                for old in list(self._buckets)[:overflow]:
+                    del self._buckets[old]
+                if self._overflow_count % OVERFLOW_SWEEP_EVERY == 0:
+                    self._purge_expired(now)
             return True, 0
 
     def reset(self) -> None:
@@ -85,21 +95,13 @@ class RateLimiter:
             self._buckets.clear()
 
     def _purge_expired(self, now: float) -> None:
-        """Bound the table so distinct-client floods cannot grow memory.
-
-        Expired windows go first; if active buckets alone still exceed the cap
-        (e.g. spoofed client keys), drop the oldest-inserted ones. Losing a
-        count fails open toward availability, which is the safe direction.
-        """
+        """Evict closed windows. Called periodically, never on every overflow."""
         expired = [
             key
             for key, (start, _) in self._buckets.items()
             if now - start >= self.window_seconds
         ]
         for key in expired:
-            del self._buckets[key]
-        overflow = len(self._buckets) - MAX_BUCKETS
-        for key in list(self._buckets)[: max(overflow, 0)]:
             del self._buckets[key]
 
 
