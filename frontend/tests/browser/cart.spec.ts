@@ -69,9 +69,8 @@ function updateButton(
     .getByRole("button", { name: "Update", exact: true });
 }
 
-// Quantity validation renders inside the cart line item. Never assert it with
-// an unscoped alert locator: Next renders an empty route announcer with
-// role="alert" at the document root, which wins .first() and fails the match.
+// Assert quantity validation with a scoped locator: Next renders an empty route
+// announcer with role="alert" at the document root, which wins an unscoped .first().
 function lineAlert(page: import("@playwright/test").Page, productName: string) {
   return page
     .getByRole("listitem")
@@ -79,9 +78,7 @@ function lineAlert(page: import("@playwright/test").Page, productName: string) {
     .getByRole("alert");
 }
 
-// Fill a quantity and submit until the line shows its alert. A background
-// refresh can settle between the fill and the submit, so re-try the pair
-// instead of failing outright.
+// Re-try the fill+submit pair until the alert shows: a refresh can settle between them.
 async function submitQuantity(
   page: import("@playwright/test").Page,
   productName: string,
@@ -106,9 +103,8 @@ async function openCartLink(
   project: string,
 ) {
   if (/mobile|pixel/i.test(project)) {
-    // A trigger tap can land while the streaming header remounts around a
-    // background refresh; the tap is then swallowed and the sheet never
-    // opens. Re-tap until the menu is visible instead of failing outright.
+    // A tap can land mid-remount and be swallowed, so re-tap until the menu is visible
+    // instead of failing outright.
     const menu = page.getByRole("navigation", { name: "Mobile navigation" });
     let opened = false;
     for (let attempt = 0; attempt < 3 && !opened; attempt++) {
@@ -267,10 +263,8 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await expect(page.getByRole("link", { name: second.name })).toHaveCount(0);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 
-  // Rapid duplicate submissions collapse into a single write. Keyboard
-  // presses dispatch without actionability waits, so the pending disabled
-  // button (or the in-flight guard before re-render) swallows the second
-  // activation instead of serializing it into a second PUT.
+  // Rapid duplicates collapse into one write: without actionability waits, the pending
+  // disabled button (or pre-render in-flight guard) swallows the second activation.
   let writes = 0;
   await page.route("**/*", async (route) => {
     if (route.request().headers()["next-action"]) {
@@ -301,9 +295,8 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
   await submitQuantity(page, first.name, "100");
   await expect(lineAlert(page, first.name)).toBeVisible();
 
-  // Quantities beyond stock are rejected with a 409 and a stock-specific
-  // message (Task Light has stock 8): asserting the status and the message
-  // keeps a generic server failure from passing as stock handling.
+  // Over-stock quantities return 409 with a stock-specific message (Task Light stock is 8);
+  // assert both so a generic failure cannot pass as stock handling.
   await page.goto(`/products/${second.id}`, { waitUntil: "domcontentloaded" });
   await page
     .getByRole("main")
@@ -317,9 +310,7 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
     /Not enough stock|exceeds current stock/,
   );
 
-  // Failed writes surface the handler's generic recoverable message (the
-  // real Next handler never passes backend internals through) and succeed
-  // on retry.
+  // Failed writes surface the generic recoverable message (never backend internals) and succeed on retry.
   await fault(page, request, { write: "fail" });
   await scarce.fill("2");
   await updateButton(page, second.name).click();
@@ -332,10 +323,8 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
     page.getByText("Qty 2", { exact: true }).filter({ visible: true }),
   ).toHaveCount(2);
 
-  // Concurrent writes to different lines settle to the server state: both
-  // increases land, the final UI matches the authoritative cart, and a
-  // reload confirms persistence instead of a predated snapshot.
-  // Dispatch distinct controls without racing Playwright's single mouse pointer.
+  // Concurrent writes to different lines settle to server state (both land; reload confirms
+  // persistence). Dispatch distinct controls without racing the single mouse pointer.
   await Promise.all([
     page
       .getByRole("button", { name: `Increase quantity of ${first.name}` })

@@ -111,9 +111,8 @@ def evaluate(sha, comments, reactions, unresolved, reviews=()):
         return "pending", "Codex has not reviewed the latest commit"
     if "✅ **Completed**" not in columns[2]:
         return "pending", "Codex review is running or has not completed successfully"
-    # Codex currently emits either a thumbs-up or an explicit clean-result
-    # comment. The latter carries its own reviewed commit; match its exact
-    # observed protocol, never an arbitrary mention of 'no issues'.
+    # Match the exact observed clean-result protocol (thumbs-up or explicit comment with
+    # its own reviewed commit), never an arbitrary mention of 'no issues'.
     clean = [
         c
         for c in comments
