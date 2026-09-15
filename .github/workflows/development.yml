@@ -41,7 +41,7 @@ jobs:
     timeout-minutes: 20
     environment:
       name: development
-      url: https://vindor-ecommerce-development.vercel.app
+      url: https://forme-ecommerce-development.vercel.app
     steps:
       - name: Check out the verified revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
