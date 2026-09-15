@@ -25,7 +25,11 @@ def protection_headers():
 def read(url, expected=200, retry=False):
     """Read a deployment URL and return its body when the status is expected."""
     headers = protection_headers()
-    attempts = 6 if retry else 1
+    # Fresh production deploys re-point the alias, which can serve a
+    # non-application placeholder for ~30-60s (observed 2/2 failures inside a
+    # 30s window, fine minutes later). Allow ~60s to settle; the success path
+    # still returns on the first attempt.
+    attempts = 12 if retry else 1
     for attempt in range(attempts):
         try:
             with urllib.request.urlopen(
