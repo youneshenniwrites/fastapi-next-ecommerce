@@ -2,9 +2,8 @@ import { test, expect } from "@playwright/test";
 import { createHmac } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 
-// A trigger tap can land while the streaming header remounts around a
-// background refresh; the tap is then swallowed and the sheet never opens.
-// Re-tap until the menu is visible instead of failing outright.
+// A tap can land mid-remount and be swallowed, so re-tap until the menu is
+// visible instead of failing outright.
 async function openMobileMenu(page: import("@playwright/test").Page) {
   const menu = page.getByRole("navigation", { name: "Mobile navigation" });
   for (let attempt = 0; attempt < 3; attempt++) {

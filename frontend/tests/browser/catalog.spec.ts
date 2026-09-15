@@ -1,9 +1,8 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-// A trigger tap can land while the streaming header remounts around a
-// background refresh; the tap is then swallowed and the sheet never opens.
-// Re-try until the menu is visible instead of failing outright.
+// A tap can land mid-remount and be swallowed, so re-try until the menu is visible
+// instead of failing outright.
 async function openMobileMenu(page: import("@playwright/test").Page) {
   const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -90,9 +89,8 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   await expect(action).toHaveCSS("background-color", "rgb(48, 78, 60)");
   await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(action).toHaveCSS("border-radius", "4px");
-  // Role locators exclude the hidden React Suspense copy of the filter bar,
-  // so streaming hydration cannot fail these assertions with strict-mode
-  // violations.
+  // Role locators exclude the hidden Suspense copy of the filter bar, so hydration
+  // cannot fail these assertions with strict-mode violations.
   const search = page.getByRole("searchbox", { name: "Search collection" });
   const sort = page.getByRole("combobox", { name: "Sort products" });
   await expect(search).toHaveCSS("border-radius", "4px");

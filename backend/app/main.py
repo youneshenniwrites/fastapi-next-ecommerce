@@ -7,15 +7,11 @@ from fastapi.responses import RedirectResponse
 
 from app.api.v1 import auth, cart, products
 
-# --------------------------
-# Logging Configuration
-# --------------------------
+# Logging configuration.
 logging.basicConfig(level=logging.INFO)
 logger = structlog.get_logger()
 
-# --------------------------
-# App Initialization
-# --------------------------
+# App initialization.
 app = FastAPI(
     title="E-Commerce API",
     description=(
@@ -42,9 +38,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# --------------------------
-# CORS Middleware
-# --------------------------
+# CORS middleware.
 origins = [
     "http://localhost:3000",  # Next.js dev frontend
     "http://127.0.0.1:3000",
@@ -66,9 +60,7 @@ async def documentation_home() -> RedirectResponse:
     return RedirectResponse(url="/docs", status_code=307)
 
 
-# --------------------------
-# Health Check Endpoint
-# --------------------------
+# Health check endpoint.
 @app.get("/health", tags=["Health"], summary="Check API process liveness")
 async def health_check() -> dict[str, str]:
     """
@@ -79,9 +71,7 @@ async def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-# --------------------------
-# Placeholder for Routers
-# --------------------------
+# Routers.
 # from app.api.v1 import products, users
 app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
