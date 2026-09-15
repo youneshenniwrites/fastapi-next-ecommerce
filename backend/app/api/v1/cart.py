@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, Path, Response
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.rate_limit import enforce_write_limit
 from app.crud.cart import read_cart, remove_line, set_quantity
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.cart import CartQuantity, CartRead
-from app.schemas.errors import ErrorResponse
+from app.schemas.errors import RATE_LIMITED_RESPONSE, ErrorResponse
 
 router = APIRouter(responses={401: {"model": ErrorResponse}})
 ProductId = Annotated[int, Path(ge=1, le=2147483647)]
@@ -38,7 +39,12 @@ def get_cart(db: Session = Depends(get_db), user: User = Depends(get_current_use
     response_model=CartRead,
     summary="Set an absolute cart quantity",
     description="Idempotent quantity 1–99. New lines/increases require stock; reductions and unchanged quantities remain allowed during shortages. Concurrent writes serialize per customer: last serialized write wins. Prices and ownership cannot be supplied.",
-    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+    dependencies=[Depends(enforce_write_limit)],
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        **RATE_LIMITED_RESPONSE,
+    },
 )
 def put_cart_item(
     product_id: ProductId,
@@ -55,6 +61,8 @@ def put_cart_item(
     status_code=204,
     summary="Remove a product from your cart",
     description="Idempotent: missing lines also return 204. Only your own line can be removed.",
+    dependencies=[Depends(enforce_write_limit)],
+    responses={**RATE_LIMITED_RESPONSE},
 )
 def delete_cart_item(
     product_id: ProductId,

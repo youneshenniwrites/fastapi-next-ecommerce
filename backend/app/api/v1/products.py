@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_admin
+from app.core.rate_limit import enforce_write_limit
 from app.crud.product import (
     create_product,
     delete_product,
@@ -12,7 +13,7 @@ from app.crud.product import (
     update_product,
 )
 from app.db.session import get_db
-from app.schemas.errors import ErrorResponse
+from app.schemas.errors import RATE_LIMITED_RESPONSE, ErrorResponse
 from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
 
 router = APIRouter()
@@ -24,6 +25,7 @@ AUTH_ERRORS = {
     403: {"model": ErrorResponse, "description": "Admin privileges required."},
 }
 NOT_FOUND = {404: {"model": ErrorResponse, "description": "Product does not exist."}}
+WRITE_ERRORS = {**AUTH_ERRORS, **RATE_LIMITED_RESPONSE}
 
 
 @router.get(
@@ -58,9 +60,9 @@ def read_product(product_id: int, db: Session = Depends(get_db)):
     response_model=ProductRead,
     summary="Create a product",
     description="Active admin only. GBP price has at most two decimal places; stock is a nonnegative integer. Unknown fields are rejected.",
-    responses=AUTH_ERRORS,
+    responses=WRITE_ERRORS,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_admin), Depends(enforce_write_limit)],
 )
 def create_new_product(product_in: ProductCreate, db: Session = Depends(get_db)):
     return create_product(db=db, obj_in=product_in)
@@ -69,10 +71,10 @@ def create_new_product(product_in: ProductCreate, db: Session = Depends(get_db))
 @router.put(
     "/{product_id}",
     response_model=ProductRead,
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_admin), Depends(enforce_write_limit)],
     summary="Partially update a product",
     description="Active admin only. Omitted fields retain their values; only description may explicitly be null. This PUT intentionally has partial-update semantics.",
-    responses={**AUTH_ERRORS, **NOT_FOUND},
+    responses={**WRITE_ERRORS, **NOT_FOUND},
 )
 def update_existing_product(
     product_id: int, product_in: ProductUpdate, db: Session = Depends(get_db)
@@ -88,8 +90,8 @@ def update_existing_product(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a product",
     description="Active admin only. Returns no body on success.",
-    responses={**AUTH_ERRORS, **NOT_FOUND},
-    dependencies=[Depends(require_admin)],
+    responses={**WRITE_ERRORS, **NOT_FOUND},
+    dependencies=[Depends(require_admin), Depends(enforce_write_limit)],
 )
 def delete_existing_product(product_id: int, db: Session = Depends(get_db)):
     db_obj = get_product(db=db, product_id=product_id)

@@ -10,9 +10,18 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from app.core.rate_limit import reset_rate_limit_state
 from app.db.session import get_db
 from app.main import app
 from app.models.base import Base
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    """Isolate throttling buckets so tests never inherit each other's windows."""
+    reset_rate_limit_state()
+    yield
+    reset_rate_limit_state()
 
 
 @pytest.fixture

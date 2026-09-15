@@ -111,6 +111,7 @@ implemented.
 | Login returns 422 | Use form-encoded `username` and `password`, not JSON. |
 | Profile returns 401 | Log in again and send the returned bearer token. |
 | Product write returns 403 | A customer token cannot perform admin operations. |
+| Auth or write returns 429 | Abusive rate tripped throttling; wait for `Retry-After` seconds, then retry. |
 
 From the repository root:
 
@@ -136,6 +137,30 @@ use current backend prices, and adding a line does not reserve stock. Deleted
 products are removed from saved carts. See [the cart contract](design/cart-api.md)
 for persistence and concurrency semantics. The signed-in cart storefront is
 implemented; checkout and payment endpoints remain planned.
+
+## Abuse protection (rate limits)
+
+The public demo throttles in application code so registration spam, credential
+stuffing, and write floods are rejected with `429 Too Many Requests` while
+normal use is unaffected. No paid WAF or extra service is involved.
+
+| Scope | Limit per client (60-second fixed window) |
+| --- | --- |
+| `POST /api/v1/auth/register` | 60 requests |
+| `POST /api/v1/auth/login` | 60 requests |
+| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests |
+
+A 429 body is the standard `{"detail": ...}` error shape with no client data,
+plus `Retry-After` (seconds until the window resets), `X-RateLimit-Limit`, and
+`X-RateLimit-Remaining: 0` headers. Throttling also applies to failed attempts
+(wrong passwords, duplicate registrations), which is what makes stuffing
+expensive. Public catalog reads are intentionally unthrottled so legitimate
+visitors are never harmed.
+
+Limits to be aware of: counters live in process memory (per-instance and
+ephemeral on serverless hosts), and client identity is the first
+`X-Forwarded-For` entry falling back to the peer address, so buckets are
+best-effort fairness rather than a distributed security boundary.
 
 ## Contract workflow
 
