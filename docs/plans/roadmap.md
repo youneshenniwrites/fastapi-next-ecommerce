@@ -29,6 +29,9 @@ Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
 - Isolated Vercel/Neon development and production configuration (#44 / #47).
 - Both environments publicly deployed and smoke tested from reviewed main 4606e67; idle PostgreSQL connection recovery is merged (#48).
 - Production delivery workflow in #49: exact-main CI checks, migration, API then frontend deployment and smoke verification. GitHub-triggered release acceptance is verified (#46).
+- Persistent cart API and signed-in cart storefront: quantities, stock rules and concurrency covered by API and browser tests (#28 / #72 / #80).
+- Development auto-delivery from verified main revisions, mirroring the production gate (#108, hostname fix #113).
+- Public-demo abuse throttling: fixed-window 429s on auth/write endpoints with documented limits and headers (#109, eviction follow-up #115).
 
 ## Frontend design-system work
 

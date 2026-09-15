@@ -127,6 +127,8 @@ and generated frontend types.
 
 All resource routes use `/api/v1`. Authentication uses an OAuth2-style password
 form and bearer access tokens. Registration never grants admin privileges.
+Abusive auth/write request rates are throttled with `429` responses; see the
+[abuse-protection section](docs/api.md#abuse-protection-rate-limits).
 
 | Method | Path | Access |
 | --- | --- | --- |
