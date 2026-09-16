@@ -24,10 +24,18 @@ tracked files. Source-map upload stays disabled until the owner provides
 ## Sampling and quota guardrails
 
 Free quotas (5k errors, 5M spans, 5GB logs, 5GB metrics per month) are protected
-by low trace sampling (0.1 in production, 1.0 in local dev), spike protection in
-the Sentry project settings, and the existing auth/write throttling
-([abuse protection](api.md#abuse-protection-rate-limits)). If quotas are ever at
-risk, cut sampling first; never add payment.
+by signal-specific controls:
+
+- **Traces and spans** — low `SENTRY_TRACES_SAMPLE_RATE` (0.1 in production, 1.0
+  in local dev). If span quota is at risk, reduce this value first; never add
+  payment.
+- **Errors** — spike protection in the Sentry project settings (inbound data
+  filters, rate limits per DSN). The existing auth/write throttling
+  ([abuse protection](api.md#abuse-protection-rate-limits)) limits abusive
+  error-generating traffic at the application layer.
+- **Logs** — structured log emission is guarded by severity level (INFO in
+  production). Reduce log verbosity in Sentry project settings if quota is at
+  risk.
 
 ## Privacy scrubbing
 
