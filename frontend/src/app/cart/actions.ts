@@ -28,6 +28,7 @@ const changeSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("remove"), productId }).strict(),
 ]);
 
+/** Mutate the signed-in cart, then revalidate it. */
 export async function changeCart(
   expectedOwner: string,
   input: CartChange,
