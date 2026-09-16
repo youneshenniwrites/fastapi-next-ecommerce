@@ -1,4 +1,5 @@
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer
+from sqlalchemy import CheckConstraint, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 
@@ -11,13 +12,12 @@ class CartLine(Base):
         CheckConstraint("quantity >= 1 AND quantity <= 99", name="ck_cart_quantity"),
     )
 
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    product_id = Column(
-        Integer,
+    product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE"),
         primary_key=True,
         index=True,
     )
-    quantity = Column(Integer, nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False)
