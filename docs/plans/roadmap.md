@@ -56,9 +56,12 @@ until the working shopping journey has a measured need.
 ## Further engineering controls
 
 Add typed SQLAlchemy models and static type checking, then code scanning and
-repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented. Add observability, operational
-runbooks, and release/restore verification alongside hosted development. These are
-planned controls, not features already enabled by the documentation.
+repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented.
+Application telemetry is delivered: Sentry error/tracing SDKs ship in the API
+and storefront with scrubbing and quota guardrails (#121, backend #122,
+frontend #123); live development evidence lands once the owner provides DSNs.
+Operational runbooks and release/restore verification continue alongside hosted
+development.
 
 ## Tracked delivery
 

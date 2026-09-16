@@ -21,6 +21,8 @@ Authentication uses PyJWT and Argon2, with bcrypt verification and upgrade on lo
 Active admins may mutate products. Customers may read the catalog and their own
 profile. No public route creates an admin. In-app fixed-window throttling rejects
 abusive auth/write rates with 429 responses; see [api.md](api.md#abuse-protection-rate-limits).
+Sentry error/tracing SDKs ship in both runtimes and stay silent without a DSN;
+see the [observability runbook](observability.md).
 
 The Next.js registration and login screens call same-origin session handlers.
 Login stores the API token in an HttpOnly cookie; server-mediated profile calls

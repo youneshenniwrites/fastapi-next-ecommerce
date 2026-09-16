@@ -37,6 +37,9 @@ rejection and logout were exercised on hosting with fictional data.
 | DATABASE_URL | Development database only | Production database only |
 | SECRET_KEY | Independent generated key | Independent generated key |
 | Frontend API_BASE_URL | Development API HTTPS URL | Production API HTTPS URL |
+| Backend SENTRY_DSN | Development Sentry DSN (server-only) | Production Sentry DSN (server-only) |
+| Frontend SENTRY_DSN | Development Sentry DSN (server-only) | Production Sentry DSN (server-only) |
+| Frontend NEXT_PUBLIC_SENTRY_DSN | Development browser key (public by design) | Production browser key (public by design) |
 | APP_ORIGIN | Exact trusted deployment HTTPS origin | Exact production HTTPS origin |
 | ALLOW_LOCAL_HTTP_SESSIONS | Unset on hosting | Unset |
 | GitHub environment | development | production |
