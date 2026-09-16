@@ -42,11 +42,18 @@ account, cart and checkout components are added with their feature tickets.
 ## Next PRs, in dependency order
 
 1. Finish frontend PR previews with safe development data and exact origins (#45).
-2. Orders and checkout: price snapshots, authoritative totals, atomic inventory
-   handling, idempotency, and concurrent last-item purchase tests.
+2. Orders and checkout, refined into #118 (records/totals) → #119 (atomic
+   inventory, idempotency) → #120 (confirmation/history UI): price snapshots,
+   authoritative totals, atomic inventory handling, idempotency, and concurrent
+   last-item purchase tests.
 3. Sandbox payments: verify webhooks, handle duplicate/failure/cancellation events,
    and connect confirmation/order history.
 4. Optional Azure migration (#31), only if justified by the portfolio and budget.
+
+Beyond the shopping journey, the [enterprise readiness epic](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/125)
+sequences security hardening, reliability, and scale/compliance work, with scoped
+tickets for security headers (#126), password reset (#127), refunds (#128), SLOs
+(#129), restore drills (#130), and the WCAG audit (#131).
 
 Each PR includes acceptance evidence, self-review findings, and passing CI before
 merge under the user's authorization. Production/cloud deployment and paid external
@@ -56,9 +63,12 @@ until the working shopping journey has a measured need.
 ## Further engineering controls
 
 Add typed SQLAlchemy models and static type checking, then code scanning and
-repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented. Add observability, operational
-runbooks, and release/restore verification alongside hosted development. These are
-planned controls, not features already enabled by the documentation.
+repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented.
+Application telemetry is delivered: Sentry error/tracing SDKs ship in the API
+and storefront with scrubbing and quota guardrails (#121, backend #122,
+frontend #123); live development evidence lands once the owner provides DSNs.
+Operational runbooks and release/restore verification continue alongside hosted
+development.
 
 ## Tracked delivery
 
