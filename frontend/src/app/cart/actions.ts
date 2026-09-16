@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { apiClient } from "@/lib/api/client";
@@ -28,6 +28,7 @@ const changeSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("remove"), productId }).strict(),
 ]);
 
+/** Mutate the signed-in cart, then revalidate it. */
 export async function changeCart(
   expectedOwner: string,
   input: CartChange,
@@ -78,7 +79,7 @@ export async function changeCart(
         );
       }
       if (quantity > 99) {
-        refresh();
+        revalidatePath("/cart");
         return {
           ok: false,
           error: "You can keep up to 99 of each object in your cart.",
@@ -122,6 +123,6 @@ export async function changeCart(
   }
   // Reads are private/no-store. Next includes the refreshed server tree with
   // this action response, including after a write with an uncertain outcome.
-  refresh();
+  revalidatePath("/cart");
   return result;
 }
