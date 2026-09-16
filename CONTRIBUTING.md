@@ -66,6 +66,22 @@ information in the squash message. This policy applies to future work; do not
 rewrite merged history. The ecommerce-naming skill guides agents through these
 checks. This is a documented review policy, not an automated CI naming gate.
 
+## Fetching and pushing
+
+Keep the default full fetch refspec (`+refs/heads/*:refs/remotes/origin/*`).
+Single-branch clones leave branch tracking refs missing or stale, which makes
+`--force-with-lease` fail with a misleading "stale info" rejection that looks
+like a server-side force-push block. First-push a new branch with
+`git push -u origin <branch>` so its upstream tracks the branch itself, never
+main. When rewriting an agent-owned branch, push with the branch-scoped form
+`git push --force-with-lease origin <branch>` after confirming `<branch>` is
+agent-owned and is not `main`; never force-push `main` or another author's
+branch. If a push is rejected with "stale info", restore the full refspec and
+re-fetch before retrying (`git config remote.origin.fetch
+'+refs/heads/*:refs/remotes/origin/*'` then `git fetch origin --prune`), and
+inspect `git branch -vv` upstream wiring before assuming the server blocks the
+push.
+
 ## PR ownership
 
 Repository ownership is recorded in .github/CODEOWNERS. Assign maintenance PRs to
