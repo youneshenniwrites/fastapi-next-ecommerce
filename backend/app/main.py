@@ -6,10 +6,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app.api.v1 import auth, cart, products
+from app.core.observability import init_observability
+from app.core.settings import settings
 
 # Logging configuration.
 logging.basicConfig(level=logging.INFO)
 logger = structlog.get_logger()
+
+# Sentry observability stays silent until SENTRY_DSN is configured.
+observability_enabled = init_observability(settings)
+logger.info("Observability initialized", enabled=observability_enabled)
 
 # App initialization.
 app = FastAPI(
