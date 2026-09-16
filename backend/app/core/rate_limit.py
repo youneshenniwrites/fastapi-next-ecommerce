@@ -38,6 +38,8 @@ from collections.abc import Callable
 from fastapi import Request, status
 from fastapi.exceptions import HTTPException
 
+from app.core.observability import count_rate_limit_rejection
+
 AUTH_REGISTER_LIMIT = 60
 AUTH_LOGIN_LIMIT = 60
 WRITE_LIMIT = 300
@@ -123,6 +125,7 @@ def _enforce(request: Request, limiter: RateLimiter) -> None:
     """Reject over-limit requests with 429 and standard throttling headers."""
     allowed, retry_after = limiter.consume(client_key(request))
     if not allowed:
+        count_rate_limit_rejection(request.url.path)
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many requests. Wait briefly, then try again.",
