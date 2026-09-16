@@ -21,7 +21,16 @@ SENSITIVE_KEYS = frozenset(
         "email",
     }
 )
-SCRUBBED_HEADERS = frozenset({"authorization", "cookie", "set-cookie"})
+SCRUBBED_HEADERS = frozenset(
+    {
+        "authorization",
+        "cookie",
+        "set-cookie",
+        "x-api-key",
+        "x-auth-token",
+        "x-vercel-protection-bypass",
+    }
+)
 FILTERED = "[Filtered]"
 
 

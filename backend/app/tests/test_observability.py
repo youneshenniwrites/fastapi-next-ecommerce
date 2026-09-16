@@ -69,6 +69,8 @@ def test_scrub_event_removes_credentials_and_pii():
             "headers": {
                 "Authorization": "Bearer abc",
                 "Cookie": "session=xyz",
+                "X-Vercel-Protection-Bypass": "bypass-secret",
+                "X-Api-Key": "api-key",
                 "Content-Type": "application/json",
             },
             "data": {
@@ -86,6 +88,8 @@ def test_scrub_event_removes_credentials_and_pii():
     headers = scrubbed["request"]["headers"]
     assert headers["Authorization"] == FILTERED
     assert headers["Cookie"] == FILTERED
+    assert headers["X-Vercel-Protection-Bypass"] == FILTERED
+    assert headers["X-Api-Key"] == FILTERED
     assert headers["Content-Type"] == "application/json"
     data = scrubbed["request"]["data"]
     assert data["email"] == FILTERED
