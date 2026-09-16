@@ -37,6 +37,6 @@
 | Stub files | Stub files like `models/order.py` and `services/payments.py` exist as placeholders. | **No finding** | Expected, these are targets for #118-#120. |
 
 ## Sequence recommendation
-1. **Refactor Backend Models (P1)**: Update to SQLAlchemy 2.0 syntax (`Mapped`, `mapped_column`, `select()`) as a prerequisite task before starting checkout.
-2. **Fix Next.js `refresh` API (P2)**: Small change to use `revalidatePath` in cart actions.
+1. **Refactor Backend Models (P1)** — delivered in #132: SQLAlchemy 2.0 syntax (`Mapped`, `mapped_column`, `select()`) landed as the prerequisite before checkout.
+2. **Fix Next.js `refresh` API (P2)** — delivered in #132: cart actions use `revalidatePath`.
 3. Proceed with **#118 Checkout Implementation** safely.
