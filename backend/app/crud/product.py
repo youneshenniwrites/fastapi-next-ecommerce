@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.product import Product
@@ -7,11 +8,13 @@ from app.schemas.product import ProductCreate, ProductUpdate
 
 
 def get_products(db: Session, skip: int = 0, limit: int = 10) -> List[Product]:
-    return db.query(Product).order_by(Product.id).offset(skip).limit(limit).all()
+    return list(
+        db.scalars(select(Product).order_by(Product.id).offset(skip).limit(limit)).all()
+    )
 
 
 def get_product(db: Session, product_id: int) -> Optional[Product]:
-    return db.query(Product).filter(Product.id == product_id).first()
+    return db.scalar(select(Product).where(Product.id == product_id))
 
 
 def create_product(db: Session, obj_in: ProductCreate) -> Product:
