@@ -84,6 +84,8 @@ def test_scrub_event_removes_credentials_and_pii():
     }
     original_headers = event["request"]["headers"]
     original_data = event["request"]["data"]
+    original_request = event["request"]
+    original_user = event["user"]
     scrubbed = scrub_event(event, {})
     headers = scrubbed["request"]["headers"]
     assert headers["Authorization"] == FILTERED
@@ -102,6 +104,8 @@ def test_scrub_event_removes_credentials_and_pii():
     assert scrubbed["user"] == {"id": "42"}
     assert original_headers["Authorization"] == "Bearer abc"
     assert original_data["password"] == "hunter2"
+    assert event["request"] is original_request
+    assert event["user"] is original_user
 
 
 def test_scrub_event_tolerates_unexpected_shapes():

@@ -65,6 +65,7 @@ def _scrub_query_string(raw: Any) -> Any:
 
 def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
     """Remove credentials and PII before any payload leaves the process."""
+    event = dict(event)
     request = event.get("request")
     if isinstance(request, dict):
         request = dict(request)
