@@ -62,8 +62,11 @@ until the working shopping journey has a measured need.
 
 ## Further engineering controls
 
-Add typed SQLAlchemy models and static type checking, then code scanning and
-repository required-check rules in separate PRs. Frontend lint/type/build and browser checks are now implemented.
+Typed SQLAlchemy 2.0 models are delivered (#132) and the framework audit is
+published with its P1/P2 fixes merged (#133, #84 findings); the remaining #84
+guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
+Still open in separate PRs: static type checking, then code scanning and
+repository required-check rules. Frontend lint/type/build and browser checks are now implemented.
 Application telemetry is delivered: Sentry error/tracing SDKs ship in the API
 and storefront with scrubbing and quota guardrails (#121, backend #122,
 frontend #123); live development evidence lands once the owner provides DSNs.
