@@ -3,7 +3,7 @@ vi.mock("server-only", () => ({}));
 const runtime = vi.hoisted(() => ({
   token: "private-token",
   origin: "https://shop.test",
-  refresh: vi.fn(),
+  revalidatePath: vi.fn(),
 }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({
@@ -12,7 +12,7 @@ vi.mock("next/headers", () => ({
   headers: async () =>
     new Headers(runtime.origin ? { origin: runtime.origin } : {}),
 }));
-vi.mock("next/cache", () => ({ refresh: runtime.refresh }));
+vi.mock("next/cache", () => ({ revalidatePath: runtime.revalidatePath }));
 import { readCartSnapshot } from "../src/lib/cart-data";
 import { changeCart } from "../src/app/cart/actions";
 import type { CartChange } from "../src/lib/cart-state";
@@ -54,7 +54,7 @@ beforeEach(() => {
   vi.stubEnv("APP_ORIGIN_ALIASES", "");
   runtime.token = "private-token";
   runtime.origin = "https://shop.test";
-  runtime.refresh.mockReset();
+  runtime.revalidatePath.mockReset();
   upstream();
 });
 afterEach(() => {
@@ -137,7 +137,7 @@ describe("cart Server Action", () => {
       error: expect.stringContaining("session changed"),
     });
     expect(vi.mocked(fetch).mock.calls).toHaveLength(1);
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
   it("requires a valid session for every mutation", async () => {
     runtime.token = "";
@@ -152,7 +152,7 @@ describe("cart Server Action", () => {
     });
     const request = vi.mocked(fetch).mock.calls.at(-1)![0] as Request;
     expect(await request.json()).toEqual({ quantity: 3 });
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
   it.each([
     [5, 1, 6],
@@ -168,7 +168,7 @@ describe("cart Server Action", () => {
       expect(
         await (vi.mocked(fetch).mock.calls.at(-1)![0] as Request).json(),
       ).toEqual({ quantity: expected });
-      expect(runtime.refresh).toHaveBeenCalledOnce();
+      expect(runtime.revalidatePath).toHaveBeenCalledOnce();
     },
   );
   it("does not recreate a removed line through a stale step", async () => {
@@ -176,7 +176,7 @@ describe("cart Server Action", () => {
       await changeCart(owner, { kind: "step", productId: 2, delta: 1 }),
     ).toMatchObject({ ok: false });
     expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
   it("adds a new line with quantity one", async () => {
     expect(await changeCart(owner, { kind: "add", productId: 2 })).toEqual({
@@ -192,7 +192,7 @@ describe("cart Server Action", () => {
       await changeCart(owner, { kind: "add", productId: 1 }),
     ).toMatchObject({ ok: false, error: expect.stringContaining("99") });
     expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
   it("does not write when the pre-add read fails", async () => {
     upstream({ read: 503 });
@@ -200,7 +200,7 @@ describe("cart Server Action", () => {
       await changeCart(owner, { kind: "add", productId: 1 }),
     ).toMatchObject({ ok: false });
     expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
   it.each([204, 404])("removal accepts idempotent status %s", async (write) => {
     upstream({ write });
@@ -222,7 +222,7 @@ describe("cart Server Action", () => {
     expect(
       await changeCart(owner, { kind: "set", productId: 1, quantity: 3 }),
     ).toMatchObject({ ok: false, error: expect.stringContaining(message) });
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
   it("refreshes after transport failure without claiming the write was undone", async () => {
     upstream({ fail: true });
@@ -232,6 +232,6 @@ describe("cart Server Action", () => {
         "We couldn't confirm the change. Refresh your cart before trying again.",
       uncertain: true,
     });
-    expect(runtime.refresh).toHaveBeenCalledOnce();
+    expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
 });
