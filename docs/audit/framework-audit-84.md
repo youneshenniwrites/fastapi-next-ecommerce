@@ -24,7 +24,7 @@
 
 | File/Area | Finding | Severity | Recommendation |
 | --- | --- | --- | --- |
-| `src/app/cart/actions.ts` | **Undocumented `refresh` import.** Uses `import { refresh } from "next/cache"`. While this works, the documented standard public API for clearing cache is `revalidatePath`. | **P2 (Should fix)** | Change to `revalidatePath("/cart")` or `revalidateTag` to adhere strictly to the public Next.js App Router API. |
+| `src/app/cart/actions.ts` | **Undocumented `refresh` import.** Uses `import { refresh } from "next/cache"`, which exports no such function; only the unit-test mock masked the failure. The documented standard public API for clearing cache is `revalidatePath`. | **P2 (Should fix)** | Change to `revalidatePath("/cart")` or `revalidateTag` to adhere strictly to the public Next.js App Router API. |
 | `src/app/` layout and page | Server Components vs Client Components boundary is correctly placed. `layout.tsx` fetches data securely on the server. | **No finding** | Continue current pattern. |
 | `src/lib/api/client.ts` | Excellent use of `openapi-fetch` restricted to server-side only (`import "server-only"`). Browser never talks directly to backend. | **No finding** | Continue current pattern. |
 
