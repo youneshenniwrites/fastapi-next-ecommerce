@@ -16,7 +16,10 @@ Choose status from evidence:
 Do not equate issue closure with delivery: not-planned, duplicate or superseded work needs its actual disposition recorded, not Done. Partial merges do not complete the parent issue. Record blockers without inventing a fifth status. Archive a redundant/historical card only within cleanup authorization and preserve useful context in a linked issue or Wiki page.
 
 Run this post-merge closeout after every merged PR, without being asked:
-1. Confirm the implementing issue is closed by the merge; set its board card Done.
+1. If the merge completes the whole ticket (Closes) and all required
+   implementing PRs are merged, confirm issue closure and set its board card
+   Done. For partial merges retain the parent status and report the blocker;
+   for issue-less maintenance PRs create or mark no issue card.
 2. Set any board card for the merged PR itself Done — PRs attached to the
    project do not follow their issue automatically.
 3. Refresh the issue handoff (merged commit, verification state, next ticket).
