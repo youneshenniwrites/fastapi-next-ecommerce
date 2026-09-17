@@ -7,6 +7,9 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+concurrency:
+  group: review-gate-tests-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   tests:
     name: Review gate · Evidence validation tests

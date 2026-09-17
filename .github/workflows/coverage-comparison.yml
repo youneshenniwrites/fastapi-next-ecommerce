@@ -7,8 +7,34 @@ concurrency:
   group: coverage-comparison-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  changes:
+    name: Detect docs-only changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      docs_only: ${{ steps.filter.outputs.docs_only }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect docs-only changes
+        id: filter
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          changed_files=$(git diff --name-only "$BASE_SHA...HEAD") || exit 1
+          if printf '%s\n' "$changed_files" | grep -qvE '(\.md$|^\.agents/skills/)'; then
+            printf 'docs_only=%s\n' "false" >> "$GITHUB_OUTPUT"
+          else
+            printf 'docs_only=%s\n' "true" >> "$GITHUB_OUTPUT"
+          fi
   compare:
     name: Coverage comparison · ${{ matrix.kind }}
+    needs: changes
+    if: needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
