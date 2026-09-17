@@ -15,4 +15,15 @@ Choose status from evidence:
 
 Do not equate issue closure with delivery: not-planned, duplicate or superseded work needs its actual disposition recorded, not Done. Partial merges do not complete the parent issue. Record blockers without inventing a fifth status. Archive a redundant/historical card only within cleanup authorization and preserve useful context in a linked issue or Wiki page.
 
+Run this post-merge closeout after every merged PR, without being asked:
+1. If the merge completes the whole ticket (Closes) and all required
+   implementing PRs are merged, confirm issue closure and set its board card
+   Done. For partial merges retain the parent status and report the blocker;
+   for issue-less maintenance PRs create or mark no issue card.
+2. Set any board card for the merged PR itself Done — PRs attached to the
+   project do not follow their issue automatically.
+3. Refresh the issue handoff (merged commit, verification state, next ticket).
+4. Run an [update-docs](../update-docs/SKILL.md) check for behavior the merge changed.
+5. Report the resulting board state; never leave a merged item In review.
+
 Make only necessary changes. Read back each changed item's status, linkage and assignment. Report updates and discrepancies that require a decision. Updating the board does not authorize implementing backlog work or merging PRs.
