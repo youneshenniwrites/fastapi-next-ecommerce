@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security review"
+  short_description: "Adversarial pass over auth, privilege and money"
+  default_prompt: "Use $security-review for the current ecommerce change touching auth, sessions, permissions, money or secrets."
