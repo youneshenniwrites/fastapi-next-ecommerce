@@ -16,7 +16,11 @@ implemented controls, not against framework defaults:
 
 - Sessions: string JWT subjects, disabled users rejected at login and on
   protected requests, HttpOnly same-origin cookies, exact origin checks,
-  logout clearing the cookie. Review each cookie-authenticated
+  logout clearing the cookie. Verify the pinned algorithm and signature,
+  required sub/iat/exp claims, expiry, subject parsing, active-user checks,
+  and the Bearer scheme at the authorization boundary; check iss, aud, nbf,
+  or a token-type claim only where the implementation defines them.
+  Review each cookie-authenticated
   state-changing request for CSRF defenses covering the implemented
   SameSite, origin-check, and any token controls.
 - Privilege: product writes behind require_admin, signup cannot grant admin,
