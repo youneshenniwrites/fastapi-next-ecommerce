@@ -6,6 +6,7 @@ create a background service or replace external Codex review.
 
 | Invoke | Outcome |
 | --- | --- |
+| `$product-discovery` | Product decisions, MVP boundary and exclusions recorded as a decision note before refinement. |
 | `$refine-tickets` | Scoped linked stories, dependencies and a resumable issue handoff before coding. |
 | `$create-pr` | Issue-linked PR with factual description, ownership, labels and review request. |
 | `$preflight-review PR #42` | Apply repository Codex review lessons to the full diff and interacting regressions before external review. |
@@ -15,7 +16,10 @@ create a background service or replace external Codex review.
 | `$update-docs for PR #42` | Relevant README, Wiki or API documentation updated and verified. |
 
 Replace #42 with the actual PR. Natural-language requests can also select the
-skills. Codex CLI/IDE provides `/skills` selection and `$skill-name` mentions;
+skills. For new product ideas, run `$product-discovery` before `$refine-tickets`
+so stories decompose from recorded decisions, not open questions.
+
+Codex CLI/IDE provides `/skills` selection and `$skill-name` mentions;
 these files do not register arbitrary `/create-pr` or `/preflight-review` commands. Desktop picker
 availability depends on the installed host. See the
 [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
