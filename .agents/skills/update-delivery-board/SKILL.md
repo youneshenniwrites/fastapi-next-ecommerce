@@ -9,7 +9,7 @@ Reuse the existing repository issue and board item; bot maintenance PRs may be w
 
 Choose status from evidence:
 - Backlog: planned, not started work, including explicitly deferred follow-ups.
-- In progress: implementation underway; retain the repository's one-active-implementation convention.
+- In progress: implementation underway; retain the repository's one-active-implementation convention. Set it when work starts, before any PR exists, so the board shows the phase instead of jumping Backlog to In review when the PR opens.
 - In review: an implementing PR is open, including while checks fail or review is pending.
 - Done: acceptance criteria are met and all required implementing PRs merged.
 

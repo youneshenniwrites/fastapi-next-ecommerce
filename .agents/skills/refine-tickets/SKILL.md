@@ -15,7 +15,7 @@ keep each behavior's required tests, security and recovery together. Preserve
 existing ownership, links and implementation evidence. Do not close a parent
 merely because it has been split or one child has merged.
 
-Record the next unblocked story and a compact handoff in the issue. Use
+Record the next unblocked story and a compact handoff in the issue. When writing acceptance criteria, name the proving vehicle for any outcome that cannot be observed before merge. Use
 [update-delivery-board](../update-delivery-board/SKILL.md) for actual statuses,
 not invented workflow columns. Read back changed issues and links. Refinement
 does not authorize implementation, parallel work, merge or deployment.
