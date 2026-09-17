@@ -7,7 +7,7 @@ Read root AGENTS.md, [delivery policy](../../../docs/delivery.md),
 [security policy](../../../SECURITY.md) and [backend conventions](../../../backend/AGENTS.md).
 For session changes also read [customer sessions](../../../docs/design/customer-sessions.md).
 Invoke this skill when the change touches authentication, sessions, permissions,
-money, stock, checkout, PII, secrets or dependencies — not on every PR.
+money, stock, checkout, PII, secrets, abuse, throttling or dependencies — not on every PR.
 
 Assume the attacker controls all browser input: forged or expired tokens,
 disabled-user sessions, cross-account IDs, null or out-of-range fields, and
@@ -16,11 +16,16 @@ implemented controls, not against framework defaults:
 
 - Sessions: string JWT subjects, disabled users rejected at login and on
   protected requests, HttpOnly same-origin cookies, exact origin checks,
-  logout clearing the cookie.
+  logout clearing the cookie. Review each cookie-authenticated
+  state-changing request for CSRF defenses covering the implemented
+  SameSite, origin-check, and any token controls.
 - Privilege: product writes behind require_admin, signup cannot grant admin,
   no public route creates an admin.
 - Money and inventory: server-owned prices, stock and future order totals;
   Decimal two-place GBP strings; Pydantic validation plus database enforcement.
+- Injection: trace attacker-controlled strings to SQL, shell, template, HTML,
+  and outbound-request sinks; verify parameterization and encoding beyond
+  shape validation.
 - Secrets and PII: never log passwords or bearer tokens; local credentials
   stay in the ignored file; no customer data in tests or seeds; report live
   vulnerabilities privately per the security policy.
