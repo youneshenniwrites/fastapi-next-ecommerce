@@ -12,6 +12,7 @@ create a background service or replace external Codex review.
 | `$preflight-review PR #42` | Apply repository Codex review lessons to the full diff and interacting regressions before external review. |
 | `$self-review PR #42` | Full diff review, findings and verification; review-only requests do not edit code. |
 | `$security-review PR #42` | Adversarial pass over auth, privilege, money, secrets and dependencies when relevant. |
+| `$release-readiness` | Pre-deploy gates (envs, migrations, secrets, CI, smoke, Sentry, rollback) before a release. |
 | `$address-codex-comments PR #42` | Verified fixes, evidence replies, resolved addressed threads and fresh review when needed. |
 | `$update-delivery-board` | Board reconciled with actual delivery and acceptance evidence. |
 | `$update-docs for PR #42` | Relevant README, Wiki or API documentation updated and verified. |

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release readiness"
+  short_description: "Pre-deploy gates for Vercel/Neon releases"
+  default_prompt: "Use $release-readiness before the current ecommerce development or production release."
