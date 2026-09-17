@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product discovery"
+  short_description: "Pin down product decisions before refinement"
+  default_prompt: "Use $product-discovery to interrogate the current ecommerce idea before refinement."
