@@ -127,6 +127,11 @@ jobs:
           version: "0.8.22"
       - name: Install locked API dependencies
         run: uv sync --locked --python 3.12 --project ../backend
+      - name: Cache Playwright browsers
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
       - name: Install Chromium and browser system dependencies
         run: npx playwright install --with-deps chromium
       - name: Test desktop, mobile, accessibility and failure states
