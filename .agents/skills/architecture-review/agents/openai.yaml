@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture review"
+  short_description: "Structural placement check before large epics"
+  default_prompt: "Use $architecture-review before the current ecommerce epic to check placement, boundaries and contracts."
