@@ -279,3 +279,25 @@ it("carries validated cart retry timing without replaying the write", async () =
   });
   expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
 });
+
+it.each(["add", "step"] as const)(
+  "preserves pre-write read throttling for %s without writing",
+  async (kind) => {
+    upstream({ read: 429, retryAfter: "12" });
+    const change: CartChange =
+      kind === "add"
+        ? { kind, productId: 1 }
+        : { kind, productId: 1, delta: 1 };
+    expect(await changeCart(owner, change)).toEqual({
+      ok: false,
+      kind: "rate-limit",
+      error: "Too many requests. Wait 12 seconds, then try again.",
+      retryAfterSeconds: 12,
+    });
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.every(([request]) => (request as Request).method === "GET"),
+    ).toBe(true);
+  },
+);

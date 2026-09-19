@@ -94,3 +94,11 @@ Follow-up cart examples: [late ready identity](https://github.com/youneshenniwri
 [Snapshot preceding session resolution](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997240114).
 
 [Concealed focus targets](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/80#discussion_r3997271714).
+
+## Throttling boundaries — PR 159
+
+Inspect every upstream call in a mutation, including preparatory reads. A known
+429 before a write is not an uncertain write; prove that no mutation was sent.
+Validate retry metadata against HTTP semantics, including obsolete HTTP-date
+forms and UTC interpretation, rather than JavaScript's permissive date parser
+([review](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/159)).

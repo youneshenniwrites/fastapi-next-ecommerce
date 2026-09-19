@@ -67,6 +67,17 @@ export async function changeCart(
           redirect: options.redirect,
           headers: options.headers,
         });
+        if (current.response.status === 429) {
+          const seconds = retryAfterSeconds(
+            current.response.headers.get("Retry-After"),
+          );
+          return {
+            ok: false,
+            kind: "rate-limit",
+            error: rateLimitMessage(seconds),
+            ...(seconds === undefined ? {} : { retryAfterSeconds: seconds }),
+          };
+        }
         if (current.response.status !== 200 || !current.data)
           throw new Error("Cart unavailable");
         const item = current.data.items.find(
