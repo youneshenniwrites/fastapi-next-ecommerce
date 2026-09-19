@@ -114,3 +114,11 @@ Use fictional details on the deployment being verified; checkout is not availabl
 
 Do not simulate outages or alter inventory on the shared live demo. The disposable
 browser suite covers faults and uncertain writes safely.
+
+## Rate-limit rejections
+
+A backend write response of 429 produces a typed rate-limit action failure with
+optional validated retry seconds and safe wait guidance. It is a known rejected
+write, not an uncertain transport outcome: existing cart data remains available,
+and the customer deliberately retries after waiting. The provider never replays
+the write automatically. This does not change limiter identity or thresholds.

@@ -519,3 +519,47 @@ test("header sign-in on the login page does not reload or discard input", async 
   await expect(page).toHaveURL(/\/login$/);
   expect(documents).toBe(0);
 });
+
+test("rate limits explain waiting and allow deliberate account retries", async ({
+  page,
+}) => {
+  const email = `limited-${crypto.randomUUID()}@example.com`;
+  for (const mode of ["register", "login"] as const) {
+    let calls = 0;
+    await page.route(`**/api/session/${mode}`, async (route) => {
+      calls++;
+      if (calls === 1)
+        await route.fulfill({
+          status: 429,
+          headers: { "Retry-After": "1" },
+          body: "{}",
+        });
+      else await route.continue();
+    });
+    await page.goto(`/${mode}`);
+    await page.getByLabel("Email address").fill(email);
+    await page
+      .getByLabel("Password", { exact: true })
+      .fill("disposable-password");
+    const submit = page.getByRole("button", {
+      name: mode === "register" ? "Create account" : "Sign in",
+      exact: true,
+    });
+    await submit.click();
+    const alert = page.getByRole("main").getByRole("alert");
+    await expect(alert).toHaveText(
+      "Too many requests. Wait 1 second, then try again.",
+    );
+    await expect(alert).toBeFocused();
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    expect(calls).toBe(1);
+    await submit.click();
+    if (mode === "register")
+      await expect(
+        page.getByRole("status").filter({ hasText: "Your account is ready" }),
+      ).toBeVisible();
+    else await expect(page).toHaveURL(/\/#collection$/);
+    expect(calls).toBe(2);
+    await page.unroute(`**/api/session/${mode}`);
+  }
+});

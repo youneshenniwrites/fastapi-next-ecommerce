@@ -344,3 +344,51 @@ describe("registration boundary", () => {
     expect((await register(request())).status).toBe(503);
   });
 });
+
+describe("rate-limited sessions", () => {
+  it.each([login, register])(
+    "preserves 429, retry guidance and existing cookies",
+    async (handler) => {
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockResolvedValue(
+            new Response(
+              JSON.stringify({ detail: "private upstream content" }),
+              { status: 429, headers: { "Retry-After": "12" } },
+            ),
+          ),
+      );
+      const response = await handler(request());
+      expect(response.status).toBe(429);
+      expect(response.headers.get("Retry-After")).toBe("12");
+      expect(response.headers.get("Cache-Control")).toContain("no-store");
+      expect(response.headers.get("set-cookie")).toBeNull();
+      expect(await response.json()).toEqual({
+        error: "Too many requests. Wait 12 seconds, then try again.",
+      });
+      expect(fetch).toHaveBeenCalledOnce();
+    },
+  );
+  it.each([login, register])(
+    "uses safe fallback without valid retry metadata",
+    async (handler) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          new Response("{}", {
+            status: 429,
+            headers: { "Retry-After": "not-a-delay" },
+          }),
+        ),
+      );
+      const response = await handler(request());
+      expect(response.status).toBe(429);
+      expect(response.headers.get("Retry-After")).toBeNull();
+      expect(await response.json()).toEqual({
+        error: "Too many requests. Wait briefly, then try again.",
+      });
+    },
+  );
+});

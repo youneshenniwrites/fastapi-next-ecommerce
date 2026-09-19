@@ -6,6 +6,7 @@ import { z } from "zod";
 import { apiClient } from "@/lib/api/client";
 import { cartIdentity } from "@/lib/cart-data";
 import { sessionPolicy } from "@/lib/session";
+import { rateLimitMessage, retryAfterSeconds } from "@/lib/rate-limit";
 import type { CartActionResult, CartChange } from "@/lib/cart-state";
 
 const productId = z.number().int().min(1).max(2147483647);
@@ -93,7 +94,17 @@ export async function changeCart(
               body: { quantity },
             });
       const status = response.response.status;
-      if (
+      if (status === 429) {
+        const seconds = retryAfterSeconds(
+          response.response.headers.get("Retry-After"),
+        );
+        result = {
+          ok: false,
+          kind: "rate-limit",
+          error: rateLimitMessage(seconds),
+          ...(seconds !== undefined ? { retryAfterSeconds: seconds } : {}),
+        };
+      } else if (
         status === 200 ||
         status === 204 ||
         (change.kind === "remove" && status === 404)

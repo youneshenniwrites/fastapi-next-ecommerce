@@ -1,6 +1,7 @@
 import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { apiClient } from "./api/client";
+import { retryAfterSeconds, rateLimitMessage } from "./rate-limit";
 
 export function sessionPolicy() {
   const raw = process.env.APP_ORIGIN;
@@ -46,6 +47,13 @@ function reply(body: object, status = 200) {
       Vary: "Cookie",
     },
   });
+}
+
+function rateLimited(response: Response) {
+  const seconds = retryAfterSeconds(response.headers.get("Retry-After"));
+  const result = reply({ error: rateLimitMessage(seconds) }, 429);
+  if (seconds !== undefined) result.headers.set("Retry-After", String(seconds));
+  return result;
 }
 
 function clear(
@@ -96,6 +104,7 @@ export async function login(request: NextRequest) {
         new URLSearchParams(body as Record<string, string>).toString(),
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
+    if (result.response.status === 429) return rateLimited(result.response);
     if (result.response.status === 401)
       return clear(reply({ error: "Invalid credentials" }, 401), config);
     if (!result.data || result.response.status !== 200)
@@ -183,6 +192,7 @@ export async function register(request: NextRequest) {
       redirect: "error",
       body: { email: input.email, password: input.password },
     });
+    if (result.response.status === 429) return rateLimited(result.response);
     if (result.response.status === 400)
       return reply(
         {
