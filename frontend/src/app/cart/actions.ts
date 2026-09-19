@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { apiClient } from "@/lib/api/client";
-import { cartIdentity } from "@/lib/cart-data";
+import { cartIdentity, CartRateLimitError } from "@/lib/cart-data";
 import { sessionPolicy } from "@/lib/session";
 import { rateLimitMessage, retryAfterSeconds } from "@/lib/rate-limit";
 import type { CartActionResult, CartChange } from "@/lib/cart-state";
@@ -135,7 +135,18 @@ export async function changeCart(
         result = { ok: false, error };
       }
     }
-  } catch {
+  } catch (error) {
+    // Identity throttling precedes any write; preserve the current snapshot so
+    // a failed follow-up identity read cannot conceal the retry explanation.
+    if (error instanceof CartRateLimitError) {
+      const seconds = error.retryAfterSeconds;
+      return {
+        ok: false,
+        kind: "rate-limit",
+        error: rateLimitMessage(seconds),
+        ...(seconds === undefined ? {} : { retryAfterSeconds: seconds }),
+      };
+    }
     result = {
       ok: false,
       error:

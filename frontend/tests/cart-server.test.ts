@@ -301,3 +301,23 @@ it.each(["add", "step"] as const)(
     ).toBe(true);
   },
 );
+
+it.each<CartChange>([
+  { kind: "add", productId: 1 },
+  { kind: "step", productId: 1, delta: 1 },
+  { kind: "set", productId: 1, quantity: 2 },
+  { kind: "remove", productId: 1 },
+])(
+  "preserves identity throttling without reading or writing the cart: $kind",
+  async (change) => {
+    upstream({ identity: 429, retryAfter: "12" });
+    expect(await changeCart(owner, change)).toEqual({
+      ok: false,
+      kind: "rate-limit",
+      error: "Too many requests. Wait 12 seconds, then try again.",
+      retryAfterSeconds: 12,
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(runtime.revalidatePath).not.toHaveBeenCalled();
+  },
+);
