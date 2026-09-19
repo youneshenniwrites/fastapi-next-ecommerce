@@ -3,7 +3,14 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { apiClient } from "./api/client";
 import { sessionPolicy } from "./session";
+import { retryAfterSeconds } from "./rate-limit";
 import type { CartSnapshot } from "./cart-state";
+
+export class CartRateLimitError extends Error {
+  constructor(readonly retryAfterSeconds: number | undefined) {
+    super("Cart request rate limited");
+  }
+}
 
 // Resolve identity through FastAPI. Neither client props nor decoded JWT claims
 // establish ownership. This result (including the token) stays server-only.
@@ -14,6 +21,10 @@ export async function cartIdentity() {
     redirect: "error",
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (result.response.status === 429)
+    throw new CartRateLimitError(
+      retryAfterSeconds(result.response.headers.get("Retry-After")),
+    );
   if (result.response.status === 401) return null;
   if (result.response.status !== 200 || !result.data)
     throw new Error("Session unavailable");

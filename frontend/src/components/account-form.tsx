@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { retryAfterSeconds, rateLimitMessage } from "@/lib/rate-limit";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { accountSchema, type AccountValues } from "@/lib/account-validation";
@@ -52,6 +53,14 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
         body: JSON.stringify(values),
         signal: AbortSignal.timeout(10000),
       });
+      if (response.status === 429) {
+        setError(
+          rateLimitMessage(
+            retryAfterSeconds(response.headers.get("Retry-After")),
+          ),
+        );
+        return;
+      }
       const result = await response.json();
       if (
         response.ok &&

@@ -28,6 +28,7 @@ function upstream({
   write = 200,
   fail = false,
   quantity = 2,
+  retryAfter = "",
 } = {}) {
   vi.stubGlobal(
     "fetch",
@@ -44,7 +45,10 @@ function upstream({
         : { ...cart, items: [{ product: { id: 1 }, quantity }] };
       return new Response(status === 204 ? null : JSON.stringify(body), {
         status,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(retryAfter ? { "Retry-After": retryAfter } : {}),
+        },
       });
     }),
   );
@@ -235,3 +239,85 @@ describe("cart Server Action", () => {
     expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
 });
+
+describe("rate-limited cart writes", () => {
+  it.each([
+    { kind: "set", productId: 1, quantity: 3 },
+    { kind: "add", productId: 1 },
+    { kind: "step", productId: 1, delta: 1 },
+    { kind: "remove", productId: 1 },
+  ] as const)(
+    "reports known rejection for %j without uncertain-write state",
+    async (change) => {
+      upstream({ write: 429 });
+      const result = await changeCart(owner, change);
+      expect(result).toEqual({
+        ok: false,
+        kind: "rate-limit",
+        error: "Too many requests. Wait briefly, then try again.",
+      });
+      const writes = vi
+        .mocked(fetch)
+        .mock.calls.filter(
+          ([request]) => (request as Request).method !== "GET",
+        );
+      expect(writes).toHaveLength(1);
+      expect(runtime.revalidatePath).toHaveBeenCalledOnce();
+    },
+  );
+});
+
+it("carries validated cart retry timing without replaying the write", async () => {
+  upstream({ write: 429, retryAfter: "20" });
+  expect(
+    await changeCart(owner, { kind: "set", productId: 1, quantity: 3 }),
+  ).toEqual({
+    ok: false,
+    kind: "rate-limit",
+    retryAfterSeconds: 20,
+    error: "Too many requests. Wait 20 seconds, then try again.",
+  });
+  expect(vi.mocked(fetch).mock.calls).toHaveLength(2);
+});
+
+it.each(["add", "step"] as const)(
+  "preserves pre-write read throttling for %s without writing",
+  async (kind) => {
+    upstream({ read: 429, retryAfter: "12" });
+    const change: CartChange =
+      kind === "add"
+        ? { kind, productId: 1 }
+        : { kind, productId: 1, delta: 1 };
+    expect(await changeCart(owner, change)).toEqual({
+      ok: false,
+      kind: "rate-limit",
+      error: "Too many requests. Wait 12 seconds, then try again.",
+      retryAfterSeconds: 12,
+    });
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.every(([request]) => (request as Request).method === "GET"),
+    ).toBe(true);
+  },
+);
+
+it.each<CartChange>([
+  { kind: "add", productId: 1 },
+  { kind: "step", productId: 1, delta: 1 },
+  { kind: "set", productId: 1, quantity: 2 },
+  { kind: "remove", productId: 1 },
+])(
+  "preserves identity throttling without reading or writing the cart: $kind",
+  async (change) => {
+    upstream({ identity: 429, retryAfter: "12" });
+    expect(await changeCart(owner, change)).toEqual({
+      ok: false,
+      kind: "rate-limit",
+      error: "Too many requests. Wait 12 seconds, then try again.",
+      retryAfterSeconds: 12,
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(runtime.revalidatePath).not.toHaveBeenCalled();
+  },
+);

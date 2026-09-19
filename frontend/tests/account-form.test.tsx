@@ -149,3 +149,27 @@ describe("account form feedback", () => {
     },
   );
 });
+
+it.each(["login", "register"] as const)(
+  "announces throttling in %s without replaying credentials",
+  async (mode) => {
+    const request = vi.fn().mockResolvedValue(
+      new Response("not JSON", {
+        status: 429,
+        headers: { "Retry-After": "1" },
+      }),
+    );
+    vi.stubGlobal("fetch", request);
+    render(<AccountForm mode={mode} />);
+    fillAndSubmit(mode);
+    const feedback = await screen.findByRole("alert");
+    expect(feedback.textContent).toBe(
+      "Too many requests. Wait 1 second, then try again.",
+    );
+    await waitFor(() => expect(document.activeElement).toBe(feedback));
+    expect(request).toHaveBeenCalledOnce();
+    expect(
+      (screen.getByLabelText("Password") as HTMLInputElement).disabled,
+    ).toBe(false);
+  },
+);

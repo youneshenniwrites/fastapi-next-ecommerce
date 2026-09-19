@@ -1286,3 +1286,54 @@ test("abandoned pointer activation cannot keep concealed controls focusable", as
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(region).toHaveAttribute("inert", "");
 });
+
+test("rate-limited cart actions keep saved data and allow deliberate retry", async ({
+  page,
+  request,
+}) => {
+  const item = (await products(request)).find((product) => product.stock > 5)!;
+  const email = `rate-cart-${crypto.randomUUID()}@example.com`;
+  await register(request, email, "disposable-cart-password");
+  await login(page, email, "disposable-cart-password");
+  await page.goto(`/products/${item.id}`);
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ });
+  await expect(add).toBeEnabled();
+  for (const boundary of ["identity", "read", "write"]) {
+    await fault(page, request, { [boundary]: "rate-limit" });
+    await add.click();
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
+      "Wait 1 second",
+    );
+    await expect(add).toBeEnabled();
+    await expect(
+      page.getByRole("button", { name: "Refresh cart", exact: true }),
+    ).toHaveCount(0);
+  }
+  await fault(page, request, {});
+  await add.click();
+  await expect(add).toHaveText("Saved to cart");
+  await page.goto("/cart");
+  const quantity = page.getByRole("spinbutton", {
+    name: `Quantity of ${item.name}, 1 to 99`,
+  });
+  await expect(quantity).toHaveValue("1");
+  await fault(page, request, { write: "rate-limit" });
+  const remove = page.getByRole("button", {
+    name: `Remove ${item.name} from cart`,
+  });
+  await remove.click();
+  await expect(lineAlert(page, item.name)).toContainText("Wait 1 second");
+  await expect(quantity).toHaveValue("1");
+  await expect(remove).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
+  ).toHaveCount(0);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await fault(page, request, {});
+  await remove.click();
+  await expect(
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
+});

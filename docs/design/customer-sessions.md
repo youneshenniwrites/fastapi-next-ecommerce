@@ -106,3 +106,11 @@ requests cannot restore it. The sign-out button posts to the origin-checked
 logout handler and then performs a full navigation to `/login` to discard the
 router cache. Failed sign-out shows an error and allows retry; it never claims
 success. Clearing a browser cookie still does not revoke copied JWTs.
+
+## Storefront throttling feedback
+
+Login and registration preserve upstream 429 responses with private/no-store
+headers and leave existing session cookies unchanged. Valid Retry-After deltas
+or HTTP dates are normalized to seconds; malformed values and delays beyond one
+day use generic wait guidance. The account form announces the limit and permits
+deliberate retry without automatically replaying credentials.
