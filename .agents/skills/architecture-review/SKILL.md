@@ -13,7 +13,10 @@ app/api/v1 handle HTTP parsing only, authentication dependencies live in
 app/api/deps.py, domain services own multi-step transactions, CRUD helpers
 perform database operations without committing inside another service's
 transaction, provider adapters isolate payments and email. Do not introduce a
-new abstraction without a concrete caller.
+new abstraction without a concrete caller. On the frontend, routes compose in
+src/app, shared UI lives in src/components, API access goes through
+src/lib/api against regenerated OpenAPI types; credentials and monetary
+decisions stay server-side and out of client bundles.
 
 Check coupling, transaction boundaries, API contracts and scalability: who owns
 permissions, money and inventory (FastAPI always does); whether totals and
@@ -24,6 +27,8 @@ ten times the load and what is deliberately left unscaled.
 
 Write or update a numbered record under docs/decisions/ following the
 established pattern when the epic sets a durable technical direction;
-otherwise record the placement decision and rejected alternatives in the epic
-issue. Architecture review does not authorize implementation, merge or
+never rewrite an accepted decision to change its direction — a new
+currency, for example, needs a new numbered record and PR, not an edit to
+Decision 0001. Otherwise record the placement decision and rejected alternatives
+in the epic issue. Architecture review does not authorize implementation, merge or
 deployment.
