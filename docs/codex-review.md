@@ -76,13 +76,11 @@ to merge: a new PR can inherit an old status attached to the same SHA. Refer to
 current review evidence and the owner's explicit delivery authorization instead.
 The reporter does not merge PRs. No admin bypass is used.
 
-## Operational note — review outage until 19 September 2026
+## Review service recovery — 19 September 2026
 
-Codex code reviews are disabled until 19 September 2026 (usage limits; the bot
-answers protocol requests with a limits message and produces no review). During
-the outage, do not waste cycles re-requesting or waiting on Codex: keep the
-single protocol request per head for the record, rely on CodeRabbit review plus
-the self-review skill, address all findings with evidence, and merge only with
-all required CI passing plus an explicitly recorded owner-authorized exception.
-Never describe such merges as clean reviews. Remove this note once reviews flow
-again and a fresh clean current-head review exists.
+Review activity has resumed: #153 has a completed Codex summary and a subsequent
+explicit result identifying merge commit 2c083d0. Its PR head was aa86869, so do
+not conflate those revisions or claim this proves pre-merge approval. The prior
+date-bound outage instruction is retired. Apply the normal current-head evidence
+protocol above to every new PR; the former owner exception is not standing merge
+authorization. #38 still owns safe enforced review gating.
