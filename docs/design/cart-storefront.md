@@ -29,7 +29,7 @@ suppresses double activation. FastAPI still uses absolute-quantity PUT semantics
 independent clients can race between an add's read and write, and the last
 serialized absolute write wins. This is not an atomic increment API.
 
-The action calls Next's `refresh()` after writes and recoverable failures. The
+The action calls Next's `revalidatePath("/cart")` after writes and recoverable failures. The
 same response includes a freshly rendered server tree, updating the cart and
 navigation count without a separate browser fetch/reconciliation loop. The old
 frontend `/api/cart` routes were internal to this unmerged feature and are removed;

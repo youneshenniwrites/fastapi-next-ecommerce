@@ -1,6 +1,9 @@
 # Delivery roadmap
 
-Purpose and priorities: [senior SWE portfolio plan](portfolio.md).
+Purpose: [senior SWE portfolio plan](portfolio.md).
+
+The owner-approved [portfolio completion plan](portfolio-completion.md) governs
+current priorities and acceptance gates; [#155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155) owns live delivery evidence.
 
 ## Landed foundation
 
@@ -41,14 +44,16 @@ account, cart and checkout components are added with their feature tickets.
 
 ## Next PRs, in dependency order
 
-1. Finish frontend PR previews with safe development data and exact origins (#45).
-2. Orders and checkout, refined into #118 (records/totals) → #119 (atomic
-   inventory, idempotency) → #120 (confirmation/history UI): price snapshots,
-   authoritative totals, atomic inventory handling, idempotency, and concurrent
-   last-item purchase tests.
-3. Sandbox payments: verify webhooks, handle duplicate/failure/cancellation events,
-   and connect confirmation/order history.
-4. Optional Azure migration (#31), only if justified by the portfolio and budget.
+1. Correct storefront rate-limit handling (#156), then cart recovery (#89) and
+   limiter trust; finish telemetry privacy (#121) and compatible headers (#126).
+2. Orders/checkout: draft records/totals (#118), atomic inventory/idempotency
+   (#119), confirmation/history (#120). No placement before correctness safeguards.
+3. Sandbox payments (#30), verified monitoring (#121) and safe PR previews (#45).
+   External credentials do not block independent implementation.
+4. Hosted journey, recovery/accessibility evidence and interview package.
+
+Azure (#31) and broader enterprise work remain deferred. See the completion plan
+for precise scope, validation and source-of-truth rules.
 
 Beyond the shopping journey, the [enterprise readiness epic](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/125)
 sequences security hardening, reliability, and scale/compliance work, with scoped
@@ -66,7 +71,7 @@ Typed SQLAlchemy 2.0 models are delivered (#132) and the framework audit is
 published with its P1/P2 fixes merged (#133, #84 findings); the remaining #84
 guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
 Still open in separate PRs: static type checking, then code scanning and
-repository required-check rules. Frontend lint/type/build and browser checks are now implemented.
+remaining review/coverage required-check rules. Frontend lint/type/build and browser checks are now implemented.
 Application telemetry is delivered: Sentry error/tracing SDKs ship in the API
 and storefront with scrubbing and quota guardrails (#121, backend #122,
 frontend #123); live development evidence lands once the owner provides DSNs.
