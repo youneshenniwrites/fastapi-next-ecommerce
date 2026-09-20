@@ -116,6 +116,11 @@ is not configured. Dependabot proposes updates weekly; it does not review or mer
 
 ## Common PR description and reviewers
 
+Use `VIN-N` for issues, where N is the actual GitHub issue number; use `PR #N`
+for pull requests. PR titles start `VIN-N: plain description`. The first body
+line links that issue and states the problem. Follow CONTRIBUTING.md for separate
+Conventional Commits commit/squash subjects; never copy the PR title into squash.
+
 The [PR template](../.github/pull_request_template.md) defines Summary, Issue,
 optional Before / After, Acceptance criteria, Testing, Review, and optional
 Deployment notes. Lead with a short customer or contributor outcome; fill
