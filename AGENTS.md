@@ -142,6 +142,8 @@ Do not create a replacement plan or another checklist for wording/status tweaks.
 
 Keep replies concise: outcome, blocker and next action, usually a few bullets.
 Avoid long paragraphs and repeating the plan unless the owner asks for detail.
+In messages and handoffs, identify tickets as `ISSUE #N` and pull requests as
+`PR #N`; never use an unqualified number that could mean either.
 Before repeating reviews solely after syncing main, apply the narrow
 [carry-forward exception](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 All other exact-head review and branch-protection rules still apply.
