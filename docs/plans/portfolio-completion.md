@@ -1,11 +1,16 @@
 # VINDOR: audit fixes to a complete portfolio demo
 
-Approved by the owner on 19 September 2026. [Tracking issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
-owns current status, linked stories, acceptance evidence and handoffs. This plan
-owns priorities and acceptance gates; the board owns workflow state. Update this
-plan and #155 before changing scope or sequence. Reuse existing tickets and
-preserve historical evidence. Keep one implementation story active at a time;
-external blockers must not prevent independent work.
+Approved by the owner on 19 September 2026. **This is the one canonical portfolio
+completion plan**, including its progress checklist, priorities and acceptance
+gates. Amend this file for tweaks; do not create replacement plans or copy its
+checklist into issues, the Wiki or separate dashboards. Visuals are views of this
+plan, not additional sources of truth.
+
+[Tracking issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
+contains current handoffs, evidence and links to this plan and implementation
+issues. The board owns workflow state. Record scope/sequence changes here and link
+them from #155. Preserve historical evidence. Keep one implementation story active
+at a time; external blockers must not prevent independent work.
 
 ## Progress at a glance — 20 September 2026
 
@@ -15,15 +20,15 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
-| 1. Accurate baseline | ✅ Complete | Historical evidence retained below |
-| 2. Reliable cart and rate limits | 🔵 Active | Finish #89 / #160, then #158; verify hosted revision |
+| 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
+| 2. Reliable cart and rate limits | 🔵 Active | Verify #160 delivery, then #158 |
 | 3. Security and monitoring | ☐ Outstanding | #121 privacy/live proof; #126 headers/CSP |
 | 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ☐ Outstanding | Previews, verification controls, restore, accessibility, demo |
 
-**Next action:** finish current-head CI and both reviews for #160, address blocking
-findings, then merge under the owner's recorded authorization and verify delivery.
+**Next action:** verify actual deployment and acceptance after the owner merged
+#160 as `b03d641` on 20 September. The merge is confirmed; hosted proof is pending.
 After that, implement #158. Only one implementation story is active.
 
 ### Delivery checklist
@@ -41,7 +46,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 - [x] Implement and merge readable 429/retry feedback — #156 / #159, `2cfc95f`.
 - [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
-- [ ] Complete cart read-timeout recovery — #89 / #160 **In review**, head `ea532d3`; not merged. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation.
+- [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
 - [ ] Correct limiter identity/trust — #158 **next**. Investigation and test matrix prepared; no implementation yet.
 
@@ -79,9 +84,9 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 **Finish line:** reproducible hosted sandbox purchase, correct money/inventory,
 useful monitoring, restore evidence and an understandable demonstration.
 
-This is a dated snapshot. [Issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
-owns the live checklist; update it at story handoff. Keep the detailed acceptance
-criteria in the plan, and refresh this snapshot when milestones land.
+Update this checklist in place when milestones land, linking evidence through
+[issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155).
+The sections below define the detailed scope and acceptance for these same items.
 
 
 ## Goal

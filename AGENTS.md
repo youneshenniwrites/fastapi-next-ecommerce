@@ -130,3 +130,10 @@ and failed checks honestly. Each new head requires fresh external review before 
 
 Before external review, use [preflight-review](.agents/skills/preflight-review/SKILL.md)
 to apply relevant lessons from the repository’s Codex review history.
+
+## One canonical portfolio plan
+
+Maintain `docs/plans/portfolio-completion.md` in place as the sole portfolio
+completion plan and progress checklist. Issue #155 holds handoffs, evidence and
+links, not a duplicate plan. Render requested visuals from the canonical plan.
+Do not create a replacement plan or another checklist for wording/status tweaks.
