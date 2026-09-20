@@ -27,10 +27,14 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Next action:** finish VIN-158's anonymous-identity implementation and regression
-verification, then configure the paired server-only key and prove hosted behavior.
+**Next action (tomorrow):** diagnose the sign-in field-focus browser failure on
+VIN-158, then complete review before configuring the paired server-only key and
+proving hosted behavior. Night handoff: 141 backend tests passed (2 PostgreSQL
+tests skipped locally), frontend unit checks/build/lint/types/format passed; browser
+suite finished with 98 passed, 2 skipped and 1 failed at `account.spec.ts:486`.
+The failure is unresolved; do not label it pre-existing or weaken the assertion.
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
-local and not yet merged/deployed. PR #162 merged review/naming policy as `aceea1d`.
+pushed on `fix/anonymous-limiter-identity`, not yet merged/deployed. PR #162 merged review/naming policy as `aceea1d`.
 Only VIN-158 is active implementation. PR #160's hosted acceptance remains separate.
 
 ### Blockers and unblock actions
@@ -68,7 +72,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
 - [x] Merge authenticated customer write-budget isolation — VIN-158 / PR #163, `b47be4a`; tests and both reviews completed.
-- [ ] Merge anonymous identity and test-threshold separation — VIN-158 **current**. Signed-context implementation is local; backend/frontend tests and production build pass, browser verification is running. This is not merged or hosted acceptance.
+- [ ] Merge anonymous identity and test-threshold separation — VIN-158 **current**. Signed-context implementation is pushed; backend/frontend unit tests and production build pass. Browser verification has one unresolved sign-in focus failure (98 passed, 2 skipped). This is not merged or hosted acceptance.
 - [ ] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Configuration availability is unverified; missing keys preserve fallback limiting but do not prove visitor isolation.
 
 #### 3 — Security and monitoring
