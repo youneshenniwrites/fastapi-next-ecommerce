@@ -65,7 +65,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
-- [ ] Correct limiter identity/trust — #158 **next**. Investigation and test matrix prepared; no implementation yet.
+- [ ] Correct limiter identity/trust — #158 **next**. Authenticated write-budget correction is in implementation; anonymous ingress trust, test-threshold separation and live topology evidence remain outstanding.
 
 #### 3 — Security and monitoring
 

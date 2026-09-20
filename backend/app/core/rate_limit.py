@@ -1,11 +1,11 @@
 """Fixed-window abuse throttling for the public demo (issue #109).
 
-Abuse protection without paid services: per-client fixed windows enforced as
+Abuse protection without paid services: fixed windows enforced as
 FastAPI dependencies on auth and write routes. Exceeding a window returns 429
 with a Retry-After delay plus X-RateLimit-Limit/X-RateLimit-Remaining headers
 and the standard {"detail": ...} error body.
 
-Enforced limits (per client, 60-second fixed windows):
+Enforced limits (60-second fixed windows):
 
 - POST /api/v1/auth/register: 60 requests. Registration is single-shot for
   legitimate visitors; this blunts registration spam while leaving headroom
@@ -13,32 +13,38 @@ Enforced limits (per client, 60-second fixed windows):
   tighten below proven suite volume: CI failed at 20/min (PR #110).
 - POST /api/v1/auth/login: 60 requests. Normal sign-in is single-shot and the
   headroom covers test and browser suites sharing one origin.
-- Cart and product writes: 300 requests. Flood protection; genuine customer
-  bursts and retry scenarios stay far below it.
+- Cart and product writes: 300 requests per verified active user. Cart and admin
+  product writes share that user's budget, never another customer's.
+  Genuine customer bursts and retry scenarios stay far below it.
 
 Deliberate limitations, recorded so they are not mistaken for guarantees:
 
 - Counters live in process memory, so they are per-instance and ephemeral on
   serverless hosts. This resists casual abuse on the Hobby demo; it is not a
   distributed WAF.
-- Client identity is the first X-Forwarded-For entry (the platform terminates
-  TLS upstream) falling back to the peer address. That header is spoofable, so
-  buckets are best-effort fairness, not a security boundary.
+- Anonymous auth identity uses first X-Forwarded-For or peer address. Local
+  callers can forge that header; Vercel overwrites it at ingress. The API
+  sees frontend egress on server-mediated calls. Anonymous trust/fairness
+  remains unfinished in issue #158.
 - Public catalog reads are intentionally unthrottled in this increment:
   throttling reads risked harming legitimate visitors, which #109 forbids.
-- Bucket keys hold IP strings in memory only. They are never logged,
-  persisted, or returned, and 429 bodies carry no client data.
+- Bucket keys hold anonymous IP strings or authenticated user IDs in memory
+  only. They are never logged, persisted, or returned; 429 bodies contain no
+  client data.
 """
 
 import math
 import threading
 import time
 from collections.abc import Callable
+from typing import Annotated
 
-from fastapi import Request, status
+from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 
+from app.api.deps import get_current_user
 from app.core.observability import count_rate_limit_rejection
+from app.models.user import User
 
 AUTH_REGISTER_LIMIT = 60
 AUTH_LOGIN_LIMIT = 60
@@ -121,9 +127,9 @@ def client_key(request: Request) -> str:
     return getattr(request.client, "host", "unknown")
 
 
-def _enforce(request: Request, limiter: RateLimiter) -> None:
+def _enforce(request: Request, limiter: RateLimiter, key: str | None = None) -> None:
     """Reject over-limit requests with 429 and standard throttling headers."""
-    allowed, retry_after = limiter.consume(client_key(request))
+    allowed, retry_after = limiter.consume(client_key(request) if key is None else key)
     if not allowed:
         count_rate_limit_rejection(request.url.path)
         raise HTTPException(
@@ -147,9 +153,11 @@ def enforce_auth_login_limit(request: Request) -> None:
     _enforce(request, auth_login_limiter)
 
 
-def enforce_write_limit(request: Request) -> None:
-    """Throttle cart and product writes per client (flood protection)."""
-    _enforce(request, write_limiter)
+def enforce_write_limit(
+    request: Request, user: Annotated[User, Depends(get_current_user)]
+) -> None:
+    """Throttle writes per verified active customer, independent of network egress."""
+    _enforce(request, write_limiter, key=f"user:{user.id}")
 
 
 def reset_rate_limit_state() -> None:
