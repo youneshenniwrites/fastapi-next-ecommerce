@@ -25,9 +25,16 @@ Give the tested commit, checks and results. Note skipped checks and relevant lim
 
 ## Review
 
-Briefly disclose self-review and its outcome. Link the current-head Codex review and CI results, stating pending or failed results honestly; refresh after changes.
+Briefly disclose self-review and its outcome. Normally link current-head external
+review and CI results, stating pending or failed results honestly. For a qualifying
+pure-main-sync exception, link the original reviews and the evidence comment
+required by docs/codex-review.md: full R/B/M/H revisions, reviewed-main evidence,
+merge-tree/exact-diff checks, interaction assessment and current-head CI. State
+“Owner-authorized review carry-forward; H not externally reviewed” and retain
+any explicit deferrals. Refresh evidence after changes; never imply that original
+reviews approve H.
 
-<!-- Assignment and labels belong in the sidebar. Follow docs/codex-review.md: required CI and current-head external review still gate merge; the Codex review status is informational pending #38. -->
+<!-- Assignment and labels belong in the sidebar. Follow docs/codex-review.md: required current-head CI and external review (or the fully evidenced pure-main-sync exception) gate merge; the Codex review status is informational pending #38. -->
 
 ## Deployment notes
 
