@@ -102,3 +102,12 @@ Inspect every upstream call in a mutation, including preparatory reads. A known
 Validate retry metadata against HTTP semantics, including obsolete HTTP-date
 forms and UTC interpretation, rather than JavaScript's permissive date parser
 ([review](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/159)).
+
+## Deadline ordering — PR 160
+
+A promise deadline can settle before an abort-ignoring transport finishes. Apply
+independent deadlines to reads only unless writes have an operation-status or
+idempotency protocol that orders recovery after their outcome. A fresh snapshot
+can precede a late commit; response-after-commit fixtures alone do not test this.
+Exercise a write that commits after the deadline, and do not claim that preserving
+existing transport timeouts solves general connection-loss ordering.

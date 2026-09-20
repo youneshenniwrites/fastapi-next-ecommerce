@@ -116,6 +116,9 @@ No real customer/payment data, paid services or card-required setup.
 The first code change is [storefront rate-limit handling #156](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/156).
 Brief planning/status reconciliation precedes it; wider documentation cleanup
 does not block it. Follow [delivery policy](../delivery.md) throughout.
+The owner's 20 September [bounded review and merge authorization](../delivery.md#bounded-review-cycles-and-standing-authorization) permits linked non-blocking deferrals
+and prompt merges after required checks and completed reviews; it does not waive
+blocking defects or authorize bypasses.
 
 ## 1. Establish an accurate baseline
 
