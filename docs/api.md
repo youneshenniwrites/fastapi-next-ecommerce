@@ -144,11 +144,11 @@ The public demo throttles in application code so registration spam, credential
 stuffing, and write floods are rejected with `429 Too Many Requests` while
 normal use is unaffected. No paid WAF or extra service is involved.
 
-| Scope | Limit per client (60-second fixed window) |
+| Scope | Limit (60-second fixed window) |
 | --- | --- |
-| `POST /api/v1/auth/register` | 60 requests |
-| `POST /api/v1/auth/login` | 60 requests |
-| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests |
+| `POST /api/v1/auth/register` | 60 requests per anonymous network bucket |
+| `POST /api/v1/auth/login` | 60 requests per anonymous network bucket |
+| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests per verified active customer |
 
 A 429 body is the standard `{"detail": ...}` error shape with no client data,
 plus `Retry-After` (seconds until the window resets), `X-RateLimit-Limit`, and
@@ -157,10 +157,22 @@ plus `Retry-After` (seconds until the window resets), `X-RateLimit-Limit`, and
 expensive. Public catalog reads are intentionally unthrottled so legitimate
 visitors are never harmed.
 
-Limits to be aware of: counters live in process memory (per-instance and
-ephemeral on serverless hosts), and client identity is the first
-`X-Forwarded-For` entry falling back to the peer address, so buckets are
-best-effort fairness rather than a distributed security boundary.
+Authenticated write budgets use the active user returned by the existing JWT and
+database authentication dependency. Different customers behind the same frontend
+egress have separate budgets; changing forwarded headers or renewing a token does
+not create a new budget for the same user. Cart and authorized admin product writes
+share that user's budget. Missing/invalid/disabled identities return 401 before
+consuming it; non-admin product requests retain 403. This is throttling after
+authentication, not protection against the cost of authentication itself.
+
+Counters remain process-local and ephemeral. Restarts, multiple instances and
+bounded-table eviction can reset or split allowances; this is not distributed
+abuse protection. Anonymous login/registration still use the first X-Forwarded-For
+entry or peer address. Direct local callers can forge that header; Vercel's ingress
+rewrites it, and a separate API deployment sees the frontend egress rather than
+the browser. Anonymous trust, shared-egress fairness and test-threshold separation
+remain unfinished work in ISSUE #158; this authenticated slice does not fix them.
+See [Vercel request headers](https://vercel.com/docs/headers/request-headers).
 
 ## Contract workflow
 
