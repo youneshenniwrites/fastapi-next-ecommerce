@@ -43,7 +43,7 @@ for database and configuration details. Coding agents should also read [AGENTS.m
 ## Naming conventions
 
 Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
-for commit subjects and PR titles: `type(scope): description`. Scope is optional.
+for commit and squash subjects: `type(scope): description`. Scope is optional.
 Use `feat` for features, `fix` for bugs; our other types are `docs`, `ci`, `build`,
 `test`, `refactor`, `perf`, `style`, `chore`, and `revert`. Use lowercase types and
 concise descriptions of the resulting change. Mark breaking changes with `!`
@@ -52,7 +52,7 @@ before the colon or a `BREAKING CHANGE:` footer, and explain migration effects.
 The specification does not define branch names. Our local adaptation is
 `type/short-kebab-description`, with an optional area in the description:
 
-| Branch | PR title / commit subject |
+| Branch | Commit subject |
 | --- | --- |
 | `feat/frontend-catalog` | `feat(frontend): add product catalog` |
 | `fix/auth-token-expiry` | `fix(auth): reject expired tokens` |
@@ -61,7 +61,12 @@ The specification does not define branch names. Our local adaptation is
 
 Do not create `agent/` branches. Existing Dependabot-managed branches keep their
 bot names; apply compliant PR titles and squash subjects when merging them.
-Use the final PR title as the squash commit subject. Preserve breaking-change
+PR titles use `VIN-N: plain description`, where N is the linked GitHub issue
+number, not the PR number. The first body line links `VIN-N` to that issue and
+states the problem. Use the same alias in issue titles and handoffs; no separate
+numbering system or duplicate issue is created. Refer to pull requests as `PR #N`.
+For squash merges, explicitly supply a Conventional Commits subject, for example
+`fix(security): isolate customer write limits (VIN-158)`; do not copy the PR title. Preserve breaking-change
 information in the squash message. This policy applies to future work; do not
 rewrite merged history. The ecommerce-naming skill guides agents through these
 checks. This is a documented review policy, not an automated CI naming gate.
@@ -122,3 +127,8 @@ Use [framework guidance](docs/framework-agent-guidance.md) for installed-version
 Next.js documentation and the official FastAPI skill. Follow AGENTS.md for small
 coherent commits and regular verified pushes within the authorized task. Review
 these references when upgrading dependencies; preserve local architectural rules.
+
+The exact-head review instructions above have one exception: the owner-authorized
+[pure-main-sync carry-forward procedure](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
+Apply every evidence and CI condition before omitting a repeat review; all other
+changes require current-head review. Branch protection remains enforced.

@@ -264,6 +264,11 @@ standing authorization from this plan. Verify acceptance and update issue/board/
 handoff, distinguishing implemented, merged, deployed and operationally verified.
 Report completed work, evidence, blockers and next action briefly.
 
+The exact-head review instructions above have one exception: the owner-authorized
+[pure-main-sync carry-forward procedure](../codex-review.md#review-carry-forward-for-a-pure-main-sync).
+Apply every evidence and CI condition before omitting a repeat review; all other
+changes require current-head review. This does not waive branch protection.
+
 Every outcome awaiting live proof retains its exact proving vehicle and expiry
 on its source/proving tickets under the acceptance-ledger rule. Do not mark a
 parent Done because its implementation scaffolding merged.

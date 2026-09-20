@@ -13,7 +13,7 @@ Before pushing or requesting another external review, complete
 [preflight-review](../preflight-review/SKILL.md), including assessing whether the
 new feedback adds a reusable lesson and checking interactions with prior fixes.
 
-After the consolidated changes and replies, request one fresh commit-bound Codex review if no request for the current head already exists. A new head invalidates previous review evidence. Inspect the actual bot result and remaining threads; resolving comments alone is not external approval. Refresh the PR description if scope or testing changed.
+After the consolidated changes and replies, request one fresh commit-bound Codex review if no request for the current head already exists. A new head invalidates previous review evidence unless the owner-authorized [pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync) is fully satisfied. Check that exception before requesting a repeat review. Inspect the actual bot result and remaining threads; resolving comments alone is not external approval. Refresh the PR description if scope or testing changed.
 
 Read back replies and resolution states before reporting addressed and outstanding findings. Continue follow-up within the active authorized task; do not imply background monitoring exists. Missing review evidence leaves the PR In review and open under [delivery rules](../../../docs/delivery.md).
 

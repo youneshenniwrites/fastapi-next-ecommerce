@@ -36,7 +36,7 @@ prerequisites. Do not claim checks passed if a missing prerequisite prevented th
 
 Use the ecommerce-naming skill for branch names, commits, PR titles, and squash
 subjects. Follow CONTRIBUTING.md: type/short-kebab-description branches, never
-agent/, and Conventional Commits subjects. Use a task branch. Respect an existing agent-managed worktree; otherwise use a
+agent/, VIN-N PR titles, and Conventional Commits commit/squash subjects. Use a task branch. Respect an existing agent-managed worktree; otherwise use a
 separate worktree when concurrent changes require isolation. Inspect git status
 and overlapping PRs before editing. Allocate separate ports, Compose project names,
 and databases for concurrent runs; worktrees do not isolate running services.
@@ -98,7 +98,7 @@ are permitted only when recorded with a linked issue; do not call them clean rev
 [the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,
 require all applicable CI, and independently verify ticket acceptance criteria.
 Self-review is disclosed and cannot replace external review. Request a new review
-after changes. No human reviewer is required. Never bypass protection or invent a
+after changes, except when the linked pure-main-sync carry-forward procedure applies. No human reviewer is required. Never bypass protection or invent a
 clean result. Missing, stale or unrecognized evidence keeps the PR open.
 
 The canonical PR format is .github/pull_request_template.md. Use the
@@ -126,7 +126,8 @@ Make small, coherent Conventional Commits after relevant checks and staged-diff
 review. Keep coupled code, tests and generated outputs together; do not split by
 arbitrary line counts. Within push authorization, push each verified milestone
 regularly rather than accumulating the entire feature locally. Report blockers
-and failed checks honestly. Each new head requires fresh external review before merge.
+and failed checks honestly. Each new head requires fresh external review before merge, except for the
+verified pure-main-sync carry-forward procedure linked below.
 
 Before external review, use [preflight-review](.agents/skills/preflight-review/SKILL.md)
 to apply relevant lessons from the repository’s Codex review history.
@@ -137,3 +138,15 @@ Maintain `docs/plans/portfolio-completion.md` in place as the sole portfolio
 completion plan and progress checklist. Issue #155 holds handoffs, evidence and
 links, not a duplicate plan. Render requested visuals from the canonical plan.
 Do not create a replacement plan or another checklist for wording/status tweaks.
+
+## Owner communication and review cost preferences
+
+Keep replies concise: outcome, blocker and next action, usually a few bullets.
+Avoid long paragraphs and repeating the plan unless the owner asks for detail.
+In messages and handoffs, identify issues as `VIN-N` (N is the actual GitHub
+issue number) and pull requests as `PR #N`; never use an unqualified number.
+PR titles start `VIN-N: plain description`; link that issue and state the problem
+on the first body line. Commits and squash subjects retain Conventional Commits.
+Before repeating reviews solely after syncing main, apply the narrow
+[carry-forward exception](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
+All other exact-head review and branch-protection rules still apply.

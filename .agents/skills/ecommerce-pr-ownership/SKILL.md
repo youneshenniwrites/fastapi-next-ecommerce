@@ -61,3 +61,8 @@ recorded and linked to deferred work. Verify ticket acceptance separately. No hu
 Self-review and CI alone are insufficient. Missing evidence keeps the PR open.
 Never bypass protection. After pushing, publish a pending Codex review status if
 the workflow has not yet run; never publish success without the evidence adapter.
+
+The exact-head review instructions above have one exception: the owner-authorized
+[pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
+Apply every evidence and CI condition before omitting a repeat review; all other
+changes require current-head review. This does not waive branch protection.
