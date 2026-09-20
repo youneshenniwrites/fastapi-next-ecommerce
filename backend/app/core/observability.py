@@ -29,6 +29,7 @@ SCRUBBED_HEADERS = frozenset(
         "x-api-key",
         "x-auth-token",
         "x-vercel-protection-bypass",
+        "x-vindor-client-context",
     }
 )
 FILTERED = "[Filtered]"

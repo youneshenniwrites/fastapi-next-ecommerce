@@ -191,3 +191,31 @@ Deploy the reviewed change before assigning storefront aliases to the current
 production target in each Vercel project. Verify both domains, `/api/session/me`,
 valid-origin logout, rejected untrusted-origin logout and image loading. Existing
 API_BASE_URL and delivery smoke URLs remain valid through retained FORME aliases.
+
+### Anonymous rate-limit identity (VIN-158)
+
+Separate Vercel frontend/API ingress does not preserve the original visitor via
+ordinary forwarded headers. Set `RATE_LIMIT_PROXY_SECRET` to the same dedicated
+random value (at least 32 characters, no surrounding whitespace) on the paired
+frontend and API. Use a different value for each environment, keep it server-only,
+and never reuse `SECRET_KEY` or `VERCEL_PROTECTION_BYPASS`. Do not paste it into
+issues/logs. Configure the verifier first, then the signer, and deploy reviewed
+revisions; mismatched/missing keys fall back to ordinary network limits rather
+than exempting traffic. Rotation requires coordinated configuration and resets
+anonymous buckets, so account for the brief fallback window.
+
+The frontend signs only login/register contexts in Vercel runtime. Direct API
+requests remain limited by platform IP; local forwarding headers are untrusted.
+The signing context expires after 60 seconds (five seconds of clock skew allowed).
+No browser-visible configuration is required. Backend positive limit settings are
+`RATE_LIMIT_AUTH_REGISTER` (60/minute), `RATE_LIMIT_AUTH_LOGIN` (60/minute) and
+`RATE_LIMIT_WRITE` (300/minute per verified user). Disposable browser fixtures
+set their own high limits; never raise production thresholds to make CI pass.
+
+Hosted acceptance remains pending until paired configuration is verified on the
+actual deployed revision: demonstrate two fictional visitor identities sharing
+frontend egress, deliberate 429/retry, and independently limited direct API calls.
+Do not publish raw IPs or signed context. Preserve evidence of project/revision and
+redacted outcomes on VIN-158. Missing configuration does not establish visitor
+isolation and does not block independent checkout work. Telemetry activation still
+requires VIN-121's complete privacy checks.

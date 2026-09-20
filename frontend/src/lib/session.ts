@@ -2,6 +2,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { apiClient } from "./api/client";
 import { retryAfterSeconds, rateLimitMessage } from "./rate-limit";
+import { rateLimitContextHeaders } from "./rate-limit-context";
 
 export function sessionPolicy() {
   const raw = process.env.APP_ORIGIN;
@@ -102,7 +103,10 @@ export async function login(request: NextRequest) {
       body: { username: input.email, password: input.password, scope: "" },
       bodySerializer: (body) =>
         new URLSearchParams(body as Record<string, string>).toString(),
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        ...rateLimitContextHeaders(request, "/api/v1/auth/login"),
+      },
     });
     if (result.response.status === 429) return rateLimited(result.response);
     if (result.response.status === 401)
@@ -189,6 +193,7 @@ export async function register(request: NextRequest) {
         422,
       );
     const result = await apiClient().POST("/api/v1/auth/register", {
+      headers: rateLimitContextHeaders(request, "/api/v1/auth/register"),
       redirect: "error",
       body: { email: input.email, password: input.password },
     });

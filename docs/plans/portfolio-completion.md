@@ -21,15 +21,17 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | 🔵 Active | Verify #160 delivery, then #158 |
+| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 anonymous identity and hosted proof |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Next action:** verify actual deployment and acceptance after the owner merged
-#160 as `b03d641` on 20 September. The merge is confirmed; hosted proof is pending.
-After that, implement #158. Only one implementation story is active.
+**Next action:** finish VIN-158's anonymous-identity implementation and regression
+verification, then configure the paired server-only key and prove hosted behavior.
+PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
+local and not yet merged/deployed. PR #162 merged review/naming policy as `aceea1d`.
+Only VIN-158 is active implementation. PR #160's hosted acceptance remains separate.
 
 ### Blockers and unblock actions
 
@@ -65,7 +67,9 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
-- [ ] Correct limiter identity/trust — #158 **next**. Authenticated write-budget correction merged in PR #163 (`b47be4a`); anonymous ingress trust, test-threshold separation and hosted evidence remain outstanding. VIN-158 stays open.
+- [x] Merge authenticated customer write-budget isolation — VIN-158 / PR #163, `b47be4a`; tests and both reviews completed.
+- [ ] Merge anonymous identity and test-threshold separation — VIN-158 **current**. Signed-context implementation is local; backend/frontend tests and production build pass, browser verification is running. This is not merged or hosted acceptance.
+- [ ] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Configuration availability is unverified; missing keys preserve fallback limiting but do not prove visitor isolation.
 
 #### 3 — Security and monitoring
 

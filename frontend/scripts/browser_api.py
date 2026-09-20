@@ -1,5 +1,11 @@
 """Loopback-only browser fixture; never imported by the deployed API."""
 import asyncio
+import os
+
+# Disposable fixture traffic must not determine production abuse thresholds.
+os.environ["RATE_LIMIT_AUTH_REGISTER"] = "10000"
+os.environ["RATE_LIMIT_AUTH_LOGIN"] = "10000"
+os.environ["RATE_LIMIT_WRITE"] = "10000"
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from app.main import app

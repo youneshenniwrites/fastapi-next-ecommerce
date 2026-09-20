@@ -5,35 +5,24 @@ FastAPI dependencies on auth and write routes. Exceeding a window returns 429
 with a Retry-After delay plus X-RateLimit-Limit/X-RateLimit-Remaining headers
 and the standard {"detail": ...} error body.
 
-Enforced limits (60-second fixed windows):
+Defaults: registration 60/minute and login 60/minute per anonymous identity;
+cart/admin writes 300/minute per verified active user. Validated environment
+settings can override them; disposable browser fixtures set their own thresholds.
 
-- POST /api/v1/auth/register: 60 requests. Registration is single-shot for
-  legitimate visitors; this blunts registration spam while leaving headroom
-  for suites that register many accounts from one shared origin. Do not
-  tighten below proven suite volume: CI failed at 20/min (PR #110).
-- POST /api/v1/auth/login: 60 requests. Normal sign-in is single-shot and the
-  headroom covers test and browser suites sharing one origin.
-- Cart and product writes: 300 requests per verified active user. Cart and admin
-  product writes share that user's budget, never another customer's.
-  Genuine customer bursts and retry scenarios stay far below it.
+Signed storefront context preserves anonymous visitor buckets across shared
+frontend egress. Unsigned/direct requests use trusted Vercel ingress IP, or peer
+address locally. No raw forwarded header is trusted outside Vercel. Configuring
+the paired dedicated signing key is required for storefront isolation.
 
-Deliberate limitations, recorded so they are not mistaken for guarantees:
-
-- Counters live in process memory, so they are per-instance and ephemeral on
-  serverless hosts. This resists casual abuse on the Hobby demo; it is not a
-  distributed WAF.
-- Anonymous auth identity uses first X-Forwarded-For or peer address. Local
-  callers can forge that header; Vercel overwrites it at ingress. The API
-  sees frontend egress on server-mediated calls. Anonymous trust/fairness
-  remains unfinished in issue #158.
-- Public catalog reads are intentionally unthrottled in this increment:
-  throttling reads risked harming legitimate visitors, which #109 forbids.
-- Bucket keys hold anonymous IP strings or authenticated user IDs in memory
-  only. They are never logged, persisted, or returned; 429 bodies contain no
-  client data.
+Counters remain process-local, bounded and ephemeral: restarts, multiple
+instances and eviction weaken protection. Shared NAT users still share anonymous
+budgets. Keys are never logged, persisted or returned. This is not a distributed
+WAF. Public reads remain unthrottled.
 """
 
+import ipaddress
 import math
+import os
 import threading
 import time
 from collections.abc import Callable
@@ -44,11 +33,13 @@ from fastapi.exceptions import HTTPException
 
 from app.api.deps import get_current_user
 from app.core.observability import count_rate_limit_rejection
+from app.core.proxy_identity import verified_proxy_key
+from app.core.settings import settings
 from app.models.user import User
 
-AUTH_REGISTER_LIMIT = 60
-AUTH_LOGIN_LIMIT = 60
-WRITE_LIMIT = 300
+AUTH_REGISTER_LIMIT = settings.RATE_LIMIT_AUTH_REGISTER
+AUTH_LOGIN_LIMIT = settings.RATE_LIMIT_AUTH_LOGIN
+WRITE_LIMIT = settings.RATE_LIMIT_WRITE
 WINDOW_SECONDS = 60
 MAX_BUCKETS = 10_000
 OVERFLOW_SWEEP_EVERY = 64
@@ -120,11 +111,18 @@ write_limiter = RateLimiter(WRITE_LIMIT)
 
 def client_key(request: Request) -> str:
     """Identify a throttling bucket without storing personal data elsewhere."""
-    forwarded = request.headers.get("x-forwarded-for", "")
-    candidate = forwarded.split(",")[0].strip()
-    if candidate:
-        return candidate
-    return getattr(request.client, "host", "unknown")
+    signed = verified_proxy_key(request)
+    if signed is not None:
+        return signed
+    # Only trust platform-overwritten forwarding metadata inside Vercel runtime.
+    # Local/direct clients cannot opt in by supplying a request header.
+    if os.environ.get("VERCEL") == "1":
+        try:
+            address = ipaddress.ip_address(request.headers.get("x-forwarded-for", ""))
+            return f"ip:{address.compressed}"
+        except ValueError:
+            pass
+    return f"peer:{getattr(request.client, 'host', 'unknown')}"
 
 
 def _enforce(request: Request, limiter: RateLimiter, key: str | None = None) -> None:
