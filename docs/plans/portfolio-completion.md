@@ -22,14 +22,31 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
 | 2. Reliable cart and rate limits | 🔵 Active | Verify #160 delivery, then #158 |
-| 3. Security and monitoring | ☐ Outstanding | #121 privacy/live proof; #126 headers/CSP |
+| 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
-| 6. Hosted demo and evidence | ☐ Outstanding | Previews, verification controls, restore, accessibility, demo |
+| 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
 **Next action:** verify actual deployment and acceptance after the owner merged
 #160 as `b03d641` on 20 September. The merge is confirmed; hosted proof is pending.
 After that, implement #158. Only one implementation story is active.
+
+### Blockers and unblock actions
+
+Both tickets below remain required for the finish line. Blocked does not mean
+abandoned or complete. Neither blocks unrelated checkout implementation.
+
+| Ticket / board status | Verified dependency | Next unblock action | Who acts | Completion evidence |
+| --- | --- | --- | --- | --- |
+| [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | Privacy coverage is incomplete; free Sentry organization/project configuration and DSN availability are unverified. SDK scaffolding and docs have merged. | Agent extends error/transaction/log/nested-context scrubbing and tests serialized SDK payloads before activation. Owner creates or confirms the free organization/projects and configures the required environment values securely. Then agent verifies live telemetry. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
+| [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
+
+**Unblock order:** #121 privacy work follows #158 in stage 3; configuration can be
+prepared independently, but telemetry activation waits for privacy checks. #45
+remains in stage 6; its design work must not be mistaken for an owner-only wait.
+Recheck each blocker at its story handoff and record evidence on the source issue.
+If either remains unresolved at portfolio acceptance, report the demo as incomplete
+for that outcome rather than ticking it off.
 
 ### Delivery checklist
 
@@ -52,8 +69,8 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 3 — Security and monitoring
 
-- [ ] Pass telemetry privacy tests before activation — #121.
-- [ ] Prove live errors, traces, releases/environments, logs/metrics and an alert — #121; configuration-dependent, must not block independent checkout work.
+- [ ] **#121 BLOCKED — agent action:** complete telemetry privacy coverage and pass serialized-payload tests before activation.
+- [ ] **#121 BLOCKED — owner configuration, then agent proof:** confirm free Sentry projects/environment configuration; prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
 #### 4 — Checkout
@@ -72,7 +89,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 6 — Hosted portfolio finish
 
-- [ ] Verify safe reviewed previews with isolated data and exact origins — #45.
+- [ ] **#45 BLOCKED — agent design/implementation:** deliver reviewed previews with isolated data, exact origins, safe credentials and verified login/cart; see unblock actions above.
 - [ ] Expand cart coverage measurement and validate comparison gates before requiring them.
 - [ ] Resolve exact-head review enforcement — #38; add types around new backend services.
 - [ ] Prove browser-cache speed benefit or record unproven by **1 October** — #146; implementation is already merged, measurement is not proven.
