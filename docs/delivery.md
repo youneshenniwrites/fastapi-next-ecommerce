@@ -166,3 +166,12 @@ This authorizes the merge and its existing automatic delivery workflows; it does
 not authorize protection bypasses, unrelated deployments, paid services or new
 scheduled tasks. Verify CI/deployment and update the board normally. The owner
 has requested no scheduled Codex wakeups to save credits.
+
+
+### Pure-sync review exception
+
+The owner-authorized [review carry-forward procedure](codex-review.md#review-carry-forward-for-a-pure-main-sync)
+is the sole exception to requesting fresh reviews after a conflict-free main sync.
+It requires preserved review evidence, reproducible merge/diff checks, interaction
+assessment and passing current-head CI. It does not waive branch protection or
+claim current-head external approval. Otherwise the exact-head rules above apply.

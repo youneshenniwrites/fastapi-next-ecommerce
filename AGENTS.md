@@ -137,3 +137,11 @@ Maintain `docs/plans/portfolio-completion.md` in place as the sole portfolio
 completion plan and progress checklist. Issue #155 holds handoffs, evidence and
 links, not a duplicate plan. Render requested visuals from the canonical plan.
 Do not create a replacement plan or another checklist for wording/status tweaks.
+
+## Owner communication and review cost preferences
+
+Keep replies concise: outcome, blocker and next action, usually a few bullets.
+Avoid long paragraphs and repeating the plan unless the owner asks for detail.
+Before repeating reviews solely after syncing main, apply the narrow
+[carry-forward exception](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
+All other exact-head review and branch-protection rules still apply.
