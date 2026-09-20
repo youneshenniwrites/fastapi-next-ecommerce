@@ -13,7 +13,7 @@
     "start": "node .next/standalone/server.js",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "node --test scripts/patch-next-image.test.mjs && vitest run --coverage",
+    "test": "node --test scripts/patch-next-image.test.mjs && node --conditions=react-server --expose-gc --test scripts/api-timeout.test.mjs && vitest run --coverage",
     "test:e2e": "playwright test",
     "api:generate": "openapi-typescript openapi.json -o src/lib/api/schema.d.ts",
     "api:check": "npm run api:generate && git diff --exit-code -- openapi.json src/lib/api/schema.d.ts",

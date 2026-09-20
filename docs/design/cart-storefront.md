@@ -122,3 +122,20 @@ optional validated retry seconds and safe wait guidance. It is a known rejected
 write, not an uncertain transport outcome: existing cart data remains available,
 and the customer deliberately retries after waiting. The provider never replays
 the write automatically. This does not change limiter identity or thresholds.
+
+## Request deadlines and timeout recovery
+
+The server API client bounds retrieval of the complete JSON response, including
+its body, to five seconds. An explicit promise deadline accompanies transport
+cancellation: cancellation alone was insufficient when Request copies and garbage
+collection interrupted signal propagation. The client drains a response clone
+within that deadline, preserves the original response metadata for openapi-fetch,
+and cancels both body branches on expiry. These API endpoints are JSON endpoints;
+this client is not a streaming-download adapter.
+
+A timed-out mutation still has an uncertain outcome and is never automatically
+replayed. Existing revalidation and read-only recovery require a fresh server
+snapshot; the deadline correction does not change cart ownership or last-writer-
+wins quantity semantics. Unit tests cover ignored aborts, delayed bodies and late
+responses; a real-fetch regression forces GC across Request copies. The unchanged
+browser cases cover committed writes, recovery controls and account isolation.
