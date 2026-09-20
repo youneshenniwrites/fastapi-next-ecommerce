@@ -36,24 +36,23 @@ current priorities and acceptance gates; [#155](https://github.com/youneshenniwr
 - Development auto-delivery from verified main revisions, mirroring the production gate (#108, hostname fix #113).
 - Public-demo abuse throttling: fixed-window 429s on auth/write endpoints with documented limits and headers (#109, eviction follow-up #115).
 
+- Storefront rate-limit feedback is merged (#156 / #159, `2cfc95f`).
+- Cart read-timeout correction is merged (#89 / #160, `b03d641`); merge does not establish hosted acceptance. See #89 for remaining verification.
+
 ## Frontend design-system work
 
 Tailwind v4 and shadcn Button, Badge and Skeleton establish the VINDOR component
 foundation (#53). Catalog/navigation layouts now compose shared components and Lucide icons (#54);
 account, cart and checkout components are added with their feature tickets.
 
-## Next PRs, in dependency order
+## Current priorities
 
-1. Correct storefront rate-limit handling (#156), then cart recovery (#89) and
-   limiter trust; finish telemetry privacy (#121) and compatible headers (#126).
-2. Orders/checkout: draft records/totals (#118), atomic inventory/idempotency
-   (#119), confirmation/history (#120). No placement before correctness safeguards.
-3. Sandbox payments (#30), verified monitoring (#121) and safe PR previews (#45).
-   External credentials do not block independent implementation.
-4. Hosted journey, recovery/accessibility evidence and interview package.
+Use the [single portfolio completion plan and checklist](portfolio-completion.md)
+for current work, dependencies, blockers and acceptance gates. This roadmap is an
+index of delivered capabilities, not a second ordered plan. Issue #155 holds
+handoffs and evidence; the board holds workflow state.
 
-Azure (#31) and broader enterprise work remain deferred. See the completion plan
-for precise scope, validation and source-of-truth rules.
+Azure (#31) and broader enterprise work remain deferred as specified in that plan.
 
 Beyond the shopping journey, the [enterprise readiness epic](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/125)
 sequences security hardening, reliability, and scale/compliance work, with scoped
@@ -74,9 +73,10 @@ refresh-import finding; the remaining #84
 guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
 Still open in separate PRs: static type checking, then code scanning and
 remaining review/coverage required-check rules. Frontend lint/type/build and browser checks are now implemented.
-Application telemetry is delivered: Sentry error/tracing SDKs ship in the API
-and storefront with scrubbing and quota guardrails (#121, backend #122,
-frontend #123); live development evidence lands once the owner provides DSNs.
+Sentry SDK scaffolding is merged in the API and storefront (#122/#123).
+#121 remains blocked: privacy handling and serialized-payload tests must pass
+before activation, then configured projects and live telemetry evidence are
+required. DSNs alone do not complete monitoring.
 Operational runbooks and release/restore verification continue alongside hosted
 development.
 
@@ -84,8 +84,8 @@ development.
 
 The [board](https://github.com/users/youneshenniwrites/projects/1) owns live status.
 Customer accounts are split into #24 secure sessions, #25 registration/login,
-#26 profile/navigation and #27 journey verification/documentation. Future work is
-#28 carts, #29 checkout/orders, #30 sandbox payments and #31 future Azure migration. Refine those
+#26 profile/navigation and #27 journey verification/documentation. Cart implementation #28 is delivered. Checkout/orders #29 and sandbox payments
+#30 remain outstanding; Azure #31 is deferred. Refine those
 broader items into focused PR tickets before implementation. See
 [session design](../design/customer-sessions.md) and [delivery rules](../delivery.md).
 
