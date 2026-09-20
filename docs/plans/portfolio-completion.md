@@ -7,6 +7,83 @@ plan and #155 before changing scope or sequence. Reuse existing tickets and
 preserve historical evidence. Keep one implementation story active at a time;
 external blockers must not prevent independent work.
 
+## Progress at a glance — 20 September 2026
+
+**We are in stage 2 of 6: customer-facing reliability.** The existing catalog,
+accounts and cart are the starting product; checkout and sandbox payments are
+still ahead. Stage counts are not an estimate of effort or time remaining.
+
+| Stage | Status | What remains |
+| --- | --- | --- |
+| 1. Accurate baseline | ✅ Complete | Historical evidence retained below |
+| 2. Reliable cart and rate limits | 🔵 Active | Finish #89 / #160, then #158; verify hosted revision |
+| 3. Security and monitoring | ☐ Outstanding | #121 privacy/live proof; #126 headers/CSP |
+| 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
+| 5. Sandbox payments | ☐ Outstanding | #30 |
+| 6. Hosted demo and evidence | ☐ Outstanding | Previews, verification controls, restore, accessibility, demo |
+
+**Next action:** finish current-head CI and both reviews for #160, address blocking
+findings, then merge under the owner's recorded authorization and verify delivery.
+After that, implement #158. Only one implementation story is active.
+
+### Delivery checklist
+
+Checked means the named outcome is verified. A merged code item is separate from
+its hosted proof. Existing scaffolding does not complete an outstanding outcome.
+
+#### 1 — Baseline
+
+- [x] Save approved plan and align roadmap/Wiki — #157, merged `70f5efd`.
+- [x] Reconcile disputed audit, skills/review and performance claims; mark unresolved evidence explicitly.
+- [x] Verify baseline dev/prod deployment and smoke checks for `70f5efd`.
+
+#### 2 — Reliability · CURRENT
+
+- [x] Implement and merge readable 429/retry feedback — #156 / #159, `2cfc95f`.
+- [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
+- [ ] Complete cart read-timeout recovery — #89 / #160 **In review**, head `ea532d3`; not merged. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation.
+- [ ] Verify merged recovery on hosted development using fictional data.
+- [ ] Correct limiter identity/trust — #158 **next**. Investigation and test matrix prepared; no implementation yet.
+
+#### 3 — Security and monitoring
+
+- [ ] Pass telemetry privacy tests before activation — #121.
+- [ ] Prove live errors, traces, releases/environments, logs/metrics and an alert — #121; configuration-dependent, must not block independent checkout work.
+- [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
+
+#### 4 — Checkout
+
+- [ ] Review architecture once and record transaction/state ADR — #29.
+- [ ] Persist owned order drafts and immutable GBP price snapshots — #118.
+- [ ] Place orders atomically with stock protection, rollback and customer-scoped idempotency — #119.
+- [ ] Deliver checkout, confirmation/detail and order history — #120.
+- [ ] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — #118–#120.
+
+#### 5 — Sandbox payment
+
+- [ ] Confirm provider setup satisfies free/no-card constraint — #30.
+- [ ] Deliver test-mode sessions, verified webhooks and payment lifecycle — #30.
+- [ ] Prove deduplication, cancellation/expiry, races and exactly-once inventory release — #30.
+
+#### 6 — Hosted portfolio finish
+
+- [ ] Verify safe reviewed previews with isolated data and exact origins — #45.
+- [ ] Expand cart coverage measurement and validate comparison gates before requiring them.
+- [ ] Resolve exact-head review enforcement — #38; add types around new backend services.
+- [ ] Prove browser-cache speed benefit or record unproven by **1 October** — #146; implementation is already merged, measurement is not proven.
+- [ ] Run complete hosted sandbox purchase with fictional data.
+- [ ] Perform disposable restore rehearsal and document recovery — scoped #130.
+- [ ] Review full journey for keyboard/mobile/accessibility — scoped #131, not formal full conformance.
+- [ ] Update architecture/setup/limits and deliver five-minute demo script.
+
+**Finish line:** reproducible hosted sandbox purchase, correct money/inventory,
+useful monitoring, restore evidence and an understandable demonstration.
+
+This is a dated snapshot. [Issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
+owns the live checklist; update it at story handoff. Keep the detailed acceptance
+criteria in the plan, and refresh this snapshot when milestones land.
+
+
 ## Goal
 
 Deliver a polished fictional GBP shop with account → cart → checkout → sandbox
