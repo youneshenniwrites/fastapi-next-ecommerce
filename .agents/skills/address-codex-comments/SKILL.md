@@ -16,3 +16,19 @@ new feedback adds a reusable lesson and checking interactions with prior fixes.
 After the consolidated changes and replies, request one fresh commit-bound Codex review if no request for the current head already exists. A new head invalidates previous review evidence. Inspect the actual bot result and remaining threads; resolving comments alone is not external approval. Refresh the PR description if scope or testing changed.
 
 Read back replies and resolution states before reporting addressed and outstanding findings. Continue follow-up within the active authorized task; do not imply background monitoring exists. Missing review evidence leaves the PR In review and open under [delivery rules](../../../docs/delivery.md).
+
+## Owner preference: bounded review cycles (20 September 2026)
+
+Use the standing [review deferral and merge authorization](../../../docs/delivery.md#bounded-review-cycles-and-standing-authorization).
+Consolidate findings, implement necessary fixes, self-review and test before one
+fresh full current-head review request. Never repeatedly request an unchanged
+head or make optional polish changes that restart review. Wait for both Codex and
+CodeRabbit to complete when both are requested, as on #160.
+
+Assess new findings by impact, not just their numeric label. Defer non-blocking
+findings to existing or new linked follow-up issues with impact, acceptance,
+validation and priority. Record the deferral in the review thread and PR; do not
+claim it is fixed or call a review with deferred findings clean. The owner has
+authorized these deferrals and prompt merge under the linked conditions; do not
+ask again for each qualifying follow-up. Necessary correctness/security fixes
+still block. Avoid indefinite review polling and scheduled wakeups.
