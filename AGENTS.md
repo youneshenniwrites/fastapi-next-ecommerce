@@ -98,7 +98,7 @@ are permitted only when recorded with a linked issue; do not call them clean rev
 [the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,
 require all applicable CI, and independently verify ticket acceptance criteria.
 Self-review is disclosed and cannot replace external review. Request a new review
-after changes. No human reviewer is required. Never bypass protection or invent a
+after changes, except when the linked pure-main-sync carry-forward procedure applies. No human reviewer is required. Never bypass protection or invent a
 clean result. Missing, stale or unrecognized evidence keeps the PR open.
 
 The canonical PR format is .github/pull_request_template.md. Use the
@@ -126,7 +126,8 @@ Make small, coherent Conventional Commits after relevant checks and staged-diff
 review. Keep coupled code, tests and generated outputs together; do not split by
 arbitrary line counts. Within push authorization, push each verified milestone
 regularly rather than accumulating the entire feature locally. Report blockers
-and failed checks honestly. Each new head requires fresh external review before merge.
+and failed checks honestly. Each new head requires fresh external review before merge, except for the
+verified pure-main-sync carry-forward procedure linked below.
 
 Before external review, use [preflight-review](.agents/skills/preflight-review/SKILL.md)
 to apply relevant lessons from the repository’s Codex review history.

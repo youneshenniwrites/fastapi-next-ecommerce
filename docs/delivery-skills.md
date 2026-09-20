@@ -47,6 +47,11 @@ resume rather than relying on conversation memory.
 A created PR is In review, not Done. Self-review and resolved comments are not
 external approval. Merge requires current-head external review and applicable CI
 under the existing policy; owner-approved deferrals must be explicitly recorded.
+The exact-head review instructions above have one exception: the owner-authorized
+[pure-main-sync carry-forward procedure](codex-review.md#review-carry-forward-for-a-pure-main-sync).
+Apply every evidence and CI condition before omitting a repeat review; all other
+changes require current-head review. This does not waive branch protection.
+
 Docs and board updates report what was verified and what remains outstanding.
 
 The proposed `finish-pr` orchestration skill is not included in this first set.

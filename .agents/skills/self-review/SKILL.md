@@ -13,3 +13,8 @@ Report reviewed base/head, findings and their disposition, checks actually run a
 
 Before concluding, apply [preflight-review’s historical lessons](../preflight-review/references/lessons.md)
 to the changed behavior and check interacting regressions.
+
+The exact-head review instructions above have one exception: the owner-authorized
+[pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
+Apply every evidence and CI condition before omitting a repeat review; all other
+changes require current-head review. This does not waive branch protection.
