@@ -137,3 +137,32 @@ remains required before merge, including maintenance PRs.
 
 Use the [delivery skill reference](delivery-skills.md) for repeatable PR creation,
 self-review, Codex follow-up, board reconciliation and documentation updates.
+
+## Bounded review cycles and standing authorization
+
+On 20 September 2026 the owner requested cost-efficient review cycles and
+explicitly authorized deferring new non-critical findings to follow-up tickets
+and merging the current PR promptly. This applies to VINDOR delivery work,
+including #160, until superseded by a later owner instruction.
+
+Consolidate fixes and local verification before one fresh full review request for
+the new head. Do not request repeat reviews on an unchanged head. Complete both
+Codex and CodeRabbit reviews when both are requested. Required CI must pass for
+the exact head; branch protection remains enforced. Completed current-head review
+with only documented owner-authorized non-blocking deferrals is eligible to merge;
+pending reviews or unresolved blocking defects are not. Do not represent deferrals
+as a clean review or fabricate a successful review status.
+
+Use impact to classify findings: security/privacy failures, data corruption,
+money/inventory errors, broken core behavior and unmet in-scope acceptance criteria
+block delivery regardless of priority label. Optional polish, maintenance and
+other demonstrated non-blocking findings can move to linked follow-up tickets.
+Reuse existing tickets where appropriate; record the finding, impact, rationale,
+acceptance, validation and priority in the ticket, and link it from the PR and
+review thread. Resolve deferred threads only with that explicit disposition.
+
+Once these conditions are met, merge promptly without another approval request.
+This authorizes the merge and its existing automatic delivery workflows; it does
+not authorize protection bypasses, unrelated deployments, paid services or new
+scheduled tasks. Verify CI/deployment and update the board normally. The owner
+has requested no scheduled Codex wakeups to save credits.
