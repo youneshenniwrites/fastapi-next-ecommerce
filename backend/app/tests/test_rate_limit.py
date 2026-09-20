@@ -205,3 +205,77 @@ def test_reset_rate_limit_state_clears_all_buckets():
     reset_rate_limit_state()
     assert rate_limit.auth_register_limiter.consume("reset-probe") == (True, 0)
     assert rate_limit.auth_login_limiter.consume("reset-probe") == (True, 0)
+
+
+def test_authenticated_write_budgets_isolate_customers(
+    client, user, token, db, monkeypatch
+):
+    """Customers sharing egress cannot consume one another's write allowance."""
+    from app.core.security import create_access_token
+    from app.models.user import User
+
+    other = User(email="second@example.com", hashed_password="unused", is_active=True)
+    db.add(other)
+    db.commit()
+    monkeypatch.setattr(rate_limit, "write_limiter", RateLimiter(1))
+    first_headers = {"Authorization": f"Bearer {token}"}
+    assert (
+        client.delete("/api/v1/cart/items/1", headers=first_headers).status_code == 204
+    )
+    assert (
+        client.delete("/api/v1/cart/items/1", headers=first_headers).status_code == 429
+    )
+    second_headers = {"Authorization": f"Bearer {create_access_token(other.id)}"}
+    assert (
+        client.delete("/api/v1/cart/items/1", headers=second_headers).status_code == 204
+    )
+    forged = {
+        **first_headers,
+        "X-Forwarded-For": "203.0.113.99",
+        "X-User-ID": str(other.id),
+    }
+    assert client.delete("/api/v1/cart/items/1", headers=forged).status_code == 429
+    renewed = {"Authorization": f"Bearer {create_access_token(user.id)}"}
+    assert client.delete("/api/v1/cart/items/1", headers=renewed).status_code == 429
+
+
+def test_invalid_identity_cannot_consume_customer_write_budget(
+    client, user, token, db, monkeypatch
+):
+    """Authentication and admin authorization remain distinct from throttling."""
+    limiter = RateLimiter(1)
+    monkeypatch.setattr(rate_limit, "write_limiter", limiter)
+    assert client.delete("/api/v1/cart/items/1").status_code == 401
+    assert (
+        client.delete(
+            "/api/v1/cart/items/1", headers={"Authorization": "Bearer invalid"}
+        ).status_code
+        == 401
+    )
+    headers = {"Authorization": f"Bearer {token}"}
+    assert client.delete("/api/v1/products/1", headers=headers).status_code == 403
+    assert limiter._buckets == {}
+    user.is_active = False
+    db.commit()
+    assert client.delete("/api/v1/cart/items/1", headers=headers).status_code == 401
+    assert limiter._buckets == {}
+    user.is_active = True
+    db.commit()
+    assert client.delete("/api/v1/cart/items/1", headers=headers).status_code == 204
+
+
+def test_authenticated_write_retry_and_process_reset(client, token, monkeypatch):
+    """A legitimate retry recovers, while a new process loses its local counters."""
+    now = [1000.0]
+    monkeypatch.setattr(
+        rate_limit, "write_limiter", RateLimiter(1, clock=lambda: now[0])
+    )
+    headers = {"Authorization": f"Bearer {token}"}
+    assert client.delete("/api/v1/cart/items/1", headers=headers).status_code == 204
+    denied = client.delete("/api/v1/cart/items/1", headers=headers)
+    assert denied.status_code == 429
+    assert denied.headers["Retry-After"] == "60"
+    now[0] += 60
+    assert client.delete("/api/v1/cart/items/1", headers=headers).status_code == 204
+    monkeypatch.setattr(rate_limit, "write_limiter", RateLimiter(1))
+    assert client.delete("/api/v1/cart/items/1", headers=headers).status_code == 204
