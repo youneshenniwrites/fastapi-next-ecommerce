@@ -125,13 +125,19 @@ the write automatically. This does not change limiter identity or thresholds.
 
 ## Request deadlines and timeout recovery
 
-The server API client bounds retrieval of the complete JSON response, including
+The server API client bounds retrieval of the complete JSON read response, including
 its body, to five seconds. An explicit promise deadline accompanies transport
 cancellation: cancellation alone was insufficient when Request copies and garbage
 collection interrupted signal propagation. The client drains a response clone
 within that deadline, preserves the original response metadata for openapi-fetch,
 and cancels both body branches on expiry. These API endpoints are JSON endpoints;
 this client is not a streaming-download adapter.
+
+The explicit promise deadline applies only to GET/HEAD. Mutations retain the
+existing transport timeout; an abort-ignoring write is not detached by a promise
+race. A fresh read alone cannot order a write still running upstream. Durable
+operation-status/idempotency support is outside this read-deadline fix, so this
+does not establish a general guarantee for delayed commits after connection loss.
 
 A timed-out mutation still has an uncertain outcome and is never automatically
 replayed. Existing revalidation and read-only recovery require a fresh server

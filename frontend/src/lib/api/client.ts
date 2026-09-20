@@ -2,6 +2,7 @@ import "server-only";
 import createClient from "openapi-fetch";
 import type { paths, components } from "./schema";
 export type Product = components["schemas"]["ProductRead"];
+/** Create the server-only client with bounded JSON reads and transport-managed writes. */
 export function apiClient() {
   // Server-only bypass for the Vercel-gated development API (never browser-exposed);
   // production leaves it unset and is unaffected.
@@ -11,6 +12,11 @@ export function apiClient() {
     cache: "no-store",
     headers: bypass ? { "x-vercel-protection-bypass": bypass } : undefined,
     fetch: async (request) => {
+      // Do not detach unfinished mutations: a recovery read could precede commit.
+      // Preserve write transport behavior until operation-status ordering exists.
+      if (request.method !== "GET" && request.method !== "HEAD") {
+        return fetch(request, { signal: AbortSignal.timeout(5000) });
+      }
       const controller = new AbortController();
       let timer: ReturnType<typeof setTimeout> | undefined;
       let response: Response | undefined;

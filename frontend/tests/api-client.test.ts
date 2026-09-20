@@ -120,3 +120,39 @@ it("discards a response arriving after the deadline instead of acknowledging it"
   expect(cancel).toHaveBeenCalledTimes(1);
   expect(fetch).toHaveBeenCalledTimes(1);
 });
+
+it("does not detach an abort-ignoring write before it commits", async () => {
+  vi.useFakeTimers();
+  let finish!: (response: Response) => void;
+  let committed = false;
+  let settled = false;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          finish = resolve;
+        }),
+    ),
+  );
+  const pending = apiClient()
+    .PUT("/api/v1/cart/items/{product_id}", {
+      params: { path: { product_id: 1 } },
+      body: { quantity: 2 },
+    })
+    .then((result) => {
+      settled = true;
+      expect(committed).toBe(true);
+      return result;
+    });
+  await vi.advanceTimersByTimeAsync(6000);
+  expect(settled).toBe(false);
+  expect(fetch).toHaveBeenCalledTimes(1);
+  committed = true;
+  finish(
+    new Response(JSON.stringify({ items: [] }), {
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+  expect((await pending).response.status).toBe(200);
+});
