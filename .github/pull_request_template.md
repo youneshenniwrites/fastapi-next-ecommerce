@@ -1,4 +1,6 @@
-<!-- PR title: type(scope): description. Replace prompts and remove irrelevant optional sections. -->
+[VIN-N](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/N): State the problem this PR solves.
+
+<!-- PR title: VIN-N: plain description. N is the actual issue number. Replace prompts and remove irrelevant optional sections. -->
 
 ## Summary
 

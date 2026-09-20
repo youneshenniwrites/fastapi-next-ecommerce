@@ -28,3 +28,7 @@ The exact-head review instructions above have one exception: the owner-authorize
 [pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. This does not waive branch protection.
+
+Use the naming policy: PR title `VIN-N: plain description`; first body line links
+that actual GitHub issue as `VIN-N` and states the problem. PR references remain
+`PR #N`; commits and squash subjects use Conventional Commits.
