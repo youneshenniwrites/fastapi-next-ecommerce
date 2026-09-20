@@ -70,6 +70,11 @@ commit larger. After relevant checks and staged-diff review, push verified
 milestones regularly within the user's existing authorization. Do not force-push
 or weaken CI to meet this cadence. Re-request current-head review after changes.
 
+The exact-head review instructions above have one exception: the owner-authorized
+[pure-main-sync carry-forward procedure](codex-review.md#review-carry-forward-for-a-pure-main-sync).
+Apply every evidence and CI condition before omitting a repeat review; all other
+changes require current-head review. This does not waive branch protection.
+
 ### Temporary Next.js image backport (#98)
 
 Next.js 16.3.4's standalone image optimizer can permanently hang an uncached

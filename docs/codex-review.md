@@ -84,3 +84,44 @@ not conflate those revisions or claim this proves pre-merge approval. The prior
 date-bound outage instruction is retired. Apply the normal current-head evidence
 protocol above to every new PR; the former owner exception is not standing merge
 authorization. #38 still owns safe enforced review gating.
+
+## Review carry-forward for a pure main sync
+
+Owner-authorized on 20 September 2026. This is a manual merge exception, not a
+claim that reviewers reviewed the new head. Automation belongs to #38. All of the
+following must hold; otherwise request fresh current-head review:
+
+1. Record the previously reviewed head R and its merge base B with main. Both
+   Codex and CodeRabbit completed review of R, with links to actual results and
+   no unresolved blocking findings. Preserve any authorized non-blocking deferrals.
+2. Record incorporated main revision M and verify its applicable review/CI
+   evidence. Main ancestry alone does not prove that M was reviewed. Every change
+   incorporated since B must have review evidence; missing evidence fails closed.
+3. The new head H is a single, conflict-free merge with exactly two parents, R
+   first and M second. No rebase, squash, manual resolution or additional edits.
+   Worktree and index must be clean before the merge. Reconstruct the merge with
+   `git merge-tree --write-tree R M`: it must succeed without conflicts and its
+   tree must equal `git rev-parse H^{tree}`.
+4. Compare `git diff --binary --full-index B R` with
+   `git diff --binary --full-index M H`. Require identical output, including
+   paths/modes; do not rely only on patch-id or a diff summary. A mismatch or
+   unsupported comparison means fresh review, not a relaxed comparison.
+5. Inspect the incoming main changes for interactions with the PR, including
+   dependencies, configuration, callers and contracts. Unchanged patch text alone
+   does not prove unchanged behavior. Any material interaction or uncertainty
+   requires fresh review. Record this as self-review, not external approval.
+6. Required CI passes on H and branch protection permits the merge. Recheck main,
+   head, reviews and unresolved threads immediately before merging. A further
+   change invalidates this evidence. Never bypass protection to use this exception.
+
+Publish one evidence comment on the same PR with R/B/M/H full SHAs, original
+review links, incorporated-main evidence, merge-tree and exact-diff comparison
+results, interaction assessment, current-head CI links and retained deferrals.
+Label the decision **Owner-authorized review carry-forward; H not externally
+reviewed**. Do not request another paid review solely for this verified sync.
+Do not fabricate or change the informational Codex status to success; it may stay
+pending. If that status becomes required, this manual exception cannot bypass it.
+
+The ordinary exact-head protocol remains the default. Already-running automatic
+reviews are not cancelled or claimed to be prevented by this policy. This policy
+change itself requires normal current-head review; it cannot approve itself.
