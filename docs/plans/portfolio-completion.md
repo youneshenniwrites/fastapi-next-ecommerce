@@ -36,9 +36,9 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Progress after PR #177 merges:** `██████░░░░░░░░░░░░░░` **9 / 29 outcomes (31%)**.
-PR #177 delivers the reviewed architecture decision and tested order-draft
-foundation. While that PR is open, merged progress remains **7 / 29 (24%)**.
+**Merged progress:** `██████░░░░░░░░░░░░░░` **9 / 29 outcomes (31%)**.
+PR #177 is merged and VIN-118 is Done: the reviewed architecture decision and
+tested order-draft foundation are delivered.
 This counts acceptance outcomes, not effort or a delivery-date forecast.
 Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 gains 2/5.
 Atomic placement, checkout UI and sandbox payments remain unbuilt. VIN-155's
@@ -57,7 +57,7 @@ The earlier revision was superseded before frontend CI completed; the deployment
 gate required a fully tested current main. Signed visitor isolation is still
 unverified; the Vercel connector currently lacks access to the project team.
 
-**Next action:** finish PR #177 review/merge, then implement VIN-119 atomic
+**Next action:** implement VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
 166 PostgreSQL tests pass, including draft ownership, exact totals, rollback and
 migration round trips; container smoke/schema checks and frontend types pass.
@@ -348,3 +348,29 @@ visible while the next independent story proceeds.
 Finish line: a reproducible sandbox shopping demo with verified money/inventory,
 useful monitoring, documented recovery and honest evidence—not completion of
 every enterprise-readiness ticket.
+
+## Evening handoff — 21 September 2026
+
+PR #179 merged as `4342dd1` after current-head Codex review, CodeRabbit approval,
+117 local script tests and passing required CI. VIN-178 remains open only for
+live naming-status verification and required-check activation; implementation
+is merged, not awaiting review. Confirm authorization before changing protections:
+the issue currently says no branch-protection changes.
+
+Vercel API retention was saved and verified after reloading: the Production
+Deployments setting is 7 days in vindor-api-development and 14 days in
+vindor-api-production. Frontends and other retention categories are unchanged.
+Storage reduction has not yet been measured. VIN-147 retains the unnecessary
+docs-only deployment finding; broader CI optimization remains Backlog.
+
+Tomorrow, in order:
+1. Complete the small VIN-178 activation closeout; do not start another CI redesign.
+2. Implement VIN-119: one transaction for order placement, current price/stock
+   validation, inventory protection, cart disposition and customer-scoped idempotency.
+3. Prove last-item concurrency, same-key concurrency, rollback, ownership and
+   response-loss retry behavior in PostgreSQL; open the focused VIN-119 PR.
+4. After VIN-119 acceptance, move to VIN-120 checkout, confirmation and history.
+   Sandbox Stripe payment VIN-30 follows. Hosted proof and monitoring remain
+   visible finish-line requirements; do not count them as completed.
+
+No scheduled agent monitoring or overnight work is enabled.
