@@ -31,7 +31,7 @@ must be recorded on VIN-172 before claiming operational automation.
 
 Python updates can leave `backend/requirements.txt` stale. The consistency check
 must continue failing until a maintainer exports it from the updated lockfile with
-`uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file requirements.txt`.
+`(cd backend && uv export --locked --no-dev --no-emit-project --format requirements-txt --output-file requirements.txt)`.
 That human-modified branch requires ordinary review. Automatic export repair is
 not implemented by this initial safe policy; these PRs remain visibly blocked.
 
