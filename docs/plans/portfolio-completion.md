@@ -27,7 +27,9 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Next action (tomorrow):** diagnose the sign-in field-focus browser failure on
+**Maintenance interruption (21 September):** VIN-172 automation merged in PR #173; PR #168 automatically merged as `08ea04c`. Remaining dependency repairs/reviews are in progress. VIN-158 is implemented in PR #164, not yet merged or hosted-verified.
+
+**Next action (21 September 2026):** diagnose the sign-in field-focus browser failure on
 VIN-158, then complete review before configuring the paired server-only key and
 proving hosted behavior. Night handoff: 141 backend tests passed (2 PostgreSQL
 tests skipped locally), frontend unit checks/build/lint/types/format passed; browser
@@ -36,6 +38,7 @@ The failure is unresolved; do not label it pre-existing or weaken the assertion.
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
 pushed on `fix/anonymous-limiter-identity`, not yet merged/deployed. PR #162 merged review/naming policy as `aceea1d`.
 Only VIN-158 is active implementation. PR #160's hosted acceptance remains separate.
+
 
 ### Blockers and unblock actions
 
