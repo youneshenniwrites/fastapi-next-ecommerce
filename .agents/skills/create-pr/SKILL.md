@@ -29,7 +29,11 @@ The exact-head review instructions above have one exception: the owner-authorize
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. This does not waive branch protection.
 
-Use the naming policy: PR title `[VIN-N] [type] Description`; open with
+For non-Dependabot PRs, use the title `[VIN-N] [type] Description`; open with
 `**Issue:** [VIN-N — Issue title](issue-url)`, then `Closes #N` or `Refs #N`,
 then a separate `**Problem:**` line. Omit a duplicate Issue section. PR references remain
 `PR #N`; commits and squash subjects use Conventional Commits.
+
+When creating or refreshing a Dependabot PR, preserve its upstream title under
+the VIN-172 exception. Do not rename it to the manual PR format. Commits and
+squash subjects still use Conventional Commits.

@@ -12,7 +12,7 @@ an agent/ branch. Preserve existing bot branch names and real authorship when
 maintaining Dependabot PRs. Do not rewrite merged history to apply this policy.
 
 Before pushing, inspect git status, the branch name, and the commit subjects.
-Use `[VIN-N] [type] Description` for PR titles and link the actual GitHub issue
+For non-Dependabot PRs, use `[VIN-N] [type] Description` for titles and link the actual GitHub issue
 as `**Issue:** [VIN-N — Issue title](issue-url)`. Follow with Closes/Refs and a
 separate **Problem:** line; do not repeat an Issue section. N is the issue
 number; PR identifiers remain `PR #N`.
@@ -22,3 +22,7 @@ Do not use the VIN-prefixed PR title as the squash commit subject.
 Retain exact-head CI and review requirements from AGENTS.md. If scope changes,
 update the PR title to describe the final diff; branch names need not be renamed
 solely for a minor scope adjustment. Use the ownership skill for assignment/labels.
+
+When creating or refreshing a Dependabot PR, preserve its upstream title under
+the VIN-172 exception. Do not rename it to the manual PR format. Commits and
+squash subjects still use Conventional Commits.
