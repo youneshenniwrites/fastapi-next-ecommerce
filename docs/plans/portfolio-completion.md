@@ -28,8 +28,7 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
 **Maintenance interruption (21 September):** VIN-172 automation merged in PR #173;
-PR #168 proved one live automatic policy approval and protected merge. PRs #165,
-#166 and #169 are also merged. PRs #167, #170 and #171 retain normal review after
+PR #168 proved one live automatic policy approval and protected merge. PRs #165, #166, #169 and #170 are also merged. PRs #167 and #171 retain normal review after
 workflow/backport or lockfile corrections. No deployment claim follows from merge.
 VIN-158 / PR #164 now passes the unchanged browser suite locally (99 passed,
 2 skipped) after correcting repeated validation focus; review and hosted proof
