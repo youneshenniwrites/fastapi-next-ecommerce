@@ -61,8 +61,11 @@ The specification does not define branch names. Our local adaptation is
 | `ci/vin-178-branch-naming` | `ci: enforce issue-linked branches` |
 
 New human PRs must match their branch issue key to the `[VIN-N]` title key.
-The required backend lint/test job validates the format and confirms N is an
-existing issue, not a PR. It runs for docs-only PRs too; title edits retrigger CI.
+A trusted main-branch workflow validates the format and confirms N is an
+existing issue, not a PR. It publishes a head-bound `Branch naming` status for
+all PRs including docs-only changes; title edits retrigger this lightweight check.
+After this policy merges, validate a real status before adding it to required
+checks, preserving all existing protections. Until then enforcement is pending.
 Only existing PR #177 (`feat/order-drafts`) is grandfathered. Verified Dependabot
 authorship is exempt; naming a human branch `dependabot/…` is not an exemption.
 
@@ -87,7 +90,7 @@ For squash merges, explicitly supply a Conventional Commits subject, for example
 `fix(security): isolate customer write limits (VIN-158)`; do not copy the PR title. Preserve breaking-change
 information in the squash message. This policy applies to future work; do not
 rewrite merged history. The ecommerce-naming skill guides agents through these
-checks. This is a documented review policy, not an automated CI naming gate.
+checks. This is a documented review policy, enforced for branches by the trusted naming status after rollout.
 
 ## Fetching and pushing
 

@@ -60,5 +60,8 @@ configured**. Eligible updates can merge through the event-driven
 [delivery workflow](delivery.md) for maintenance handoff expectations.
 
 `python3 scripts/check_branch_name.py` validates PR event metadata and its issue
-using a read-only GitHub token. The required backend lint/test job runs it for
-all PRs, including docs-only changes. See CONTRIBUTING.md for naming/exemptions.
+using a read-only GitHub token. The trusted `branch-naming.yml` workflow checks
+all PRs, including docs-only changes, through `publish_branch_name.py`. It checks
+out main only, never executes PR code, and publishes a status on the PR head.
+After merge, manually dispatch it and verify results before requiring the new
+status alongside existing protections. Until that rollout, the status is not required. See CONTRIBUTING.md for naming/exemptions.

@@ -1,12 +1,10 @@
 name: Backend CI
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, ready_for_review]
   push:
     branches: [main]
 permissions:
   contents: read
-  issues: read
 concurrency:
   group: backend-ci-${{ github.ref }}
   cancel-in-progress: true
@@ -47,12 +45,6 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Validate issue-linked branch name
-        if: github.event_name == 'pull_request'
-        working-directory: .
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/check_branch_name.py
       - name: Set up Python dependency tooling
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
