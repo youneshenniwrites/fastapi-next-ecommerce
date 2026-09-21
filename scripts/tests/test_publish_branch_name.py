@@ -47,6 +47,9 @@ class Publication(unittest.TestCase):
                 result.pop()
             elif changed == "head":
                 result[0]["head"]["sha"] = "b" * 40
+            elif changed == "unrelated":
+                result[0]["user"]["avatar_url"] = "changed"
+                result[0]["head"]["repo"]["pushed_at"] = "changed"
             return result
 
         with (
@@ -101,3 +104,38 @@ class Publication(unittest.TestCase):
         self.assertEqual(publish.call_count, 2)
         publish.assert_any_call("a", prs)
         publish.assert_any_call("b", prs)
+
+    def test_unrelated_metadata_does_not_leave_pending(self):
+        self.assertEqual(self.run_case(changed="unrelated"), ["pending", "success"])
+
+    def test_event_head_invalidated_before_inventory_failure(self):
+        import json
+        import subprocess
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "event.json"
+            path.write_text(json.dumps({"pull_request": {"head": {"sha": "a" * 40}}}))
+            calls = []
+
+            def fail_read():
+                calls.append("read")
+                raise subprocess.CalledProcessError(1, "gh")
+
+            with (
+                patch.dict(
+                    "os.environ",
+                    {
+                        "GITHUB_EVENT_NAME": "pull_request_target",
+                        "GITHUB_EVENT_PATH": str(path),
+                    },
+                ),
+                patch.object(
+                    publisher, "status", side_effect=lambda *args: calls.append(args)
+                ),
+                patch.object(publisher, "open_prs", side_effect=fail_read),
+                self.assertRaises(subprocess.CalledProcessError),
+            ):
+                publisher.main()
+            self.assertEqual(calls[0][:2], ("a" * 40, "pending"))
+            self.assertEqual(calls[1], "read")
