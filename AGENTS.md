@@ -150,3 +150,10 @@ on the first body line. Commits and squash subjects retain Conventional Commits.
 Before repeating reviews solely after syncing main, apply the narrow
 [carry-forward exception](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 All other exact-head review and branch-protection rules still apply.
+
+## Automated dependency exception
+
+The owner-authorized [Dependabot policy](docs/dependabot.md) allows eligible dependency-only
+npm/uv patch and minor PRs to receive automated policy approval and protected
+auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
+Bot PRs retain upstream titles; VIN-172 tracks the policy.

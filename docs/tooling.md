@@ -30,8 +30,9 @@ vulnerabilities and an unavailable advisory service both produce unsuccessful ru
 Do not bypass or globally suppress failures to make CI green.
 
 Dependabot checks Python/uv, GitHub Actions, and backend Docker dependencies weekly.
-Python patch updates are grouped; open PR counts are limited. Changes still need
-review and CI. An agent handling a uv update must regenerate requirements.txt if
+Python patch updates are grouped; open PR counts are limited. Required CI remains mandatory; eligible npm/uv patch/minor changes use the
+[automated dependency-policy approval](dependabot.md), while other changes need
+normal review. An agent handling a uv update must regenerate requirements.txt if
 Dependabot leaves it stale; the requirements check deliberately prevents drift.
 Frontend npm dependency updates are enabled weekly, with at most two open PRs.
 
@@ -54,5 +55,6 @@ are not enabled by this PR and should not be claimed as implemented.
 - PRs #19 and #20 upgraded SHA-pinned CI actions after upstream and CI review.
 
 Dependabot's weekly proposals remain enabled. Scheduled agent review is **not
-configured**, and passing checks do not automatically merge proposals. See
+configured**. Eligible updates can merge through the event-driven
+[dependency policy](dependabot.md) after protected CI; other proposals remain manual. See
 [delivery workflow](delivery.md) for maintenance handoff expectations.
