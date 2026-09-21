@@ -215,3 +215,22 @@ provide compile-time checking; they are not runtime payload validation.
 When changing an endpoint, update its models, summary/description, security and
 error responses, add behavior tests, then regenerate the contract. The exported
 schema includes only implemented routes; planned features belong in the roadmap.
+
+## Order drafts (VIN-118)
+
+Authenticated `POST /api/v1/orders/drafts` accepts `lines` containing distinct
+`product_id` and `quantity` values (1–100 lines, quantity 1–99). The API copies
+current catalog names/prices and calculates exact GBP totals. Extra fields such
+as owner, status or money are rejected. A missing product returns 404 without
+creating a partial draft. Stock and carts are unchanged, including for shortages.
+
+`GET /api/v1/orders/` lists only the caller's orders, ascending by ID, with
+`limit` (1–100, default 20) and `after_id` (default 0). `GET /api/v1/orders/{id}`
+returns an owned snapshot or 404. Successful responses are private/no-store;
+missing/disabled authentication returns 401. Draft creation shares the existing
+per-customer write budget and can return 429 with Retry-After.
+
+Draft creation is not idempotent and never places an order or charges money.
+There is no update/placement endpoint yet. Product changes/deletion do not alter
+saved snapshots. VIN-119 must revalidate prices/stock and provide transactional
+placement/idempotency before any checkout purchase controls are exposed.

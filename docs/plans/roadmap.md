@@ -45,6 +45,13 @@ Tailwind v4 and shadcn Button, Badge and Skeleton establish the VINDOR component
 foundation (#53). Catalog/navigation layouts now compose shared components and Lucide icons (#54);
 account, cart and checkout components are added with their feature tickets.
 
+## Order foundation
+
+VIN-118 implements authenticated draft creation/list/detail, immutable GBP
+snapshots and server-owned totals. Drafts never reserve inventory or place a
+purchase. See [ADR 0002](../decisions/0002-order-transactions.md); VIN-119 adds
+atomic placement and VIN-120 adds the customer checkout/history UI.
+
 ## Current priorities
 
 Use the [single portfolio completion plan and checklist](portfolio-completion.md)
