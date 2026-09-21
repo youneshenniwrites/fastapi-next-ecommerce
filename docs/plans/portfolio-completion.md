@@ -27,10 +27,14 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Maintenance interruption (21 September):** VIN-172 automates eligible Dependabot
-approval/merge (PR #173: verified committers and atomic SHA-bound merge;
-Codex findings addressed, external confirmation pending) before resuming VIN-158 (draft PR #164). VIN-158 remains unfinished;
-its recorded browser failure and hosted proof are not waived.
+**Maintenance interruption (21 September):** VIN-172 dependency automation merged
+in PR #173 as `6131daa`. Required CI and Codex review passed; the minor Rabbit
+command-directory clarification is corrected in this closeout. Live automation is verified: PR #168 received github-actions policy approval and
+merged as `08ea04c` after protected CI. Python lockfile and export repairs are pushed to PRs #169–#171;
+PRs #165/#166 need normal workflow-upgrade review. PR #167 now retains the required image backport with verified Next 16.3.5
+source hashes; local install/tests/build/lint/types pass, CI/review pending.
+VIN-158 (draft PR #164) resumes after this maintenance interruption, with its
+browser failure and hosted proof still open.
 
 **Next action:** verify actual deployment and acceptance after the owner merged
 #160 as `b03d641` on 20 September. The merge is confirmed; hosted proof is pending.
