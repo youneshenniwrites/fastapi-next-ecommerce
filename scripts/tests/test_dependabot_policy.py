@@ -81,6 +81,7 @@ class AtomicMergeTests(unittest.TestCase):
     def test_exact_sha_sent_to_atomic_merge(self):
         _, calls = self.run_merge()
         self.assertEqual(calls[-1][1]['sha'], 'reviewed')
+        self.assertEqual(calls[-1][1]['commit_title'], 'chore(deps): update dependencies (VIN-172) (#1)')
         self.assertEqual(calls[-2][1]['commit_id'], 'reviewed')
 
     def test_late_push_rejection_is_not_retried_on_new_head(self):
@@ -91,3 +92,33 @@ class AtomicMergeTests(unittest.TestCase):
         for states in [['FAILURE'], []]:
             _, calls = self.run_merge(states=states)
             self.assertTrue(all(not fields for _, fields in calls))
+
+    def test_missing_required_context_retries_405_without_duplicate_approval(self):
+        from dependabot_merge import merge_validated, MergeNotReady
+        calls = []
+        def api(path, **fields):
+            calls.append((path, fields))
+            if path.endswith('/merge'):
+                if sum(p.endswith('/merge') for p, _ in calls) == 1:
+                    raise MergeNotReady()
+                return {'merged': True}
+            if path.endswith('/reviews'): return {}
+            return {'state': 'open', 'draft': False, 'head': {'sha': 'reviewed'}}
+        self.assertEqual(merge_validated('owner/repo', 1, 'reviewed', api,
+                         lambda: ['SUCCESS'], sleep=lambda _: None), 'Merged validated head')
+        self.assertEqual(sum(p.endswith('/reviews') for p, _ in calls), 1)
+        self.assertEqual(sum(p.endswith('/merge') for p, _ in calls), 2)
+
+    def test_replacement_head_during_405_wait_stops_retry(self):
+        from dependabot_merge import merge_validated, MergeNotReady
+        merges = []
+        def api(path, **fields):
+            if path.endswith('/merge'):
+                merges.append(fields)
+                raise MergeNotReady()
+            if path.endswith('/reviews'): return {}
+            return {'state': 'open', 'draft': False, 'head': {'sha': 'replacement' if merges else 'reviewed'}}
+        result = merge_validated('owner/repo', 1, 'reviewed', api,
+                                 lambda: ['SUCCESS'], sleep=lambda _: None)
+        self.assertIn('Head changed', result)
+        self.assertEqual(len(merges), 1)

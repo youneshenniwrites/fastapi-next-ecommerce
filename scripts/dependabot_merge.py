@@ -5,9 +5,14 @@ import subprocess
 import time
 
 
+class MergeNotReady(RuntimeError):
+    """GitHub rejected a merge while protection/checks are not ready (405)."""
+
+
 def merge_validated(repo, number, head, api, checks, sleep=time.sleep):
     """A changed head stops work; GitHub enforces protection at the merge call."""
     path = f"repos/{repo}/pulls/{number}"
+    approved = False
     for _ in range(40):
         pr = api(path)
         if pr["state"] != "open" or pr["draft"] or pr["head"]["sha"] != head:
@@ -16,11 +21,20 @@ def merge_validated(repo, number, head, api, checks, sleep=time.sleep):
         if any(state in {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED"} for state in states):
             return "Required CI failed; no merge"
         if states and all(state in {"SUCCESS", "SKIPPED", "NEUTRAL"} for state in states):
-            api(f"{path}/reviews", event="APPROVE", commit_id=head,
-                body="Automated dependency-policy approval (VIN-172), not a Codex review. Required CI and protection still apply.")
+            if not approved:
+                api(f"{path}/reviews", event="APPROVE", commit_id=head,
+                    body="Automated dependency-policy approval (VIN-172), not a Codex review. Required CI and protection still apply.")
+                approved = True
             # SHA is checked atomically by GitHub; a push after the above read
             # cannot inherit permission. No --auto request survives this run.
-            result = api(f"{path}/merge", method="PUT", sha=head, merge_method="squash")
+            try:
+                result = api(f"{path}/merge", method="PUT", sha=head, merge_method="squash",
+                             commit_title=f"chore(deps): update dependencies (VIN-172) (#{number})")
+            except MergeNotReady:
+                # Reported green checks may omit contexts not created yet.
+                # Re-read the exact PR head before every bounded retry.
+                sleep(30)
+                continue
             if not result.get("merged"):
                 raise RuntimeError("GitHub did not merge the validated commit")
             return "Merged validated head"
@@ -38,7 +52,16 @@ if __name__ == "__main__":
             command += ["--method", method]
         for key, value in fields.items():
             command += ["-f", f"{key}={value}"]
-        return json.loads(subprocess.check_output(command, text=True))
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode:
+            try:
+                status = str(json.loads(result.stdout).get("status", ""))
+            except (ValueError, AttributeError):
+                status = ""
+            if path.endswith("/merge") and status == "405":
+                raise MergeNotReady("Protected merge not ready")
+            raise subprocess.CalledProcessError(result.returncode, command, result.stdout, result.stderr)
+        return json.loads(result.stdout)
 
     def checks():
         result = subprocess.run(["gh", "pr", "checks", str(number), "--repo", repo,
