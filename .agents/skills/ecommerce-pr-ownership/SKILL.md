@@ -12,7 +12,7 @@ owner connection or report the mismatch; never falsify authorship or rewrite his
 Existing bot/contributor PRs retain their real authors.
 
 Use .github/pull_request_template.md as the canonical description structure:
-Summary, Issue, optional Before / After, Acceptance criteria, Testing, Review,
+Issue/Problem opening, Summary, optional Before / After, Acceptance criteria, Testing, Review,
 and optional Deployment notes. Lead with the customer or contributor outcome,
 use acceptance criteria from the issue, and report the tested commit and results.
 Keep Review to a brief self-review disclosure and links to current-head external
