@@ -12,7 +12,7 @@ issues. The board owns workflow state. Record scope/sequence changes here and li
 them from #155. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
 
-## Progress at a glance — 20 September 2026
+## Progress at a glance — 21 September 2026
 
 **We are in stage 2 of 6: customer-facing reliability.** The existing catalog,
 accounts and cart are the starting product; checkout and sandbox payments are
@@ -21,24 +21,35 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | 🔵 Active | Verify #160 delivery, then #158 |
+| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 review/hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Maintenance interruption (21 September):** VIN-172 dependency automation merged
-in PR #173 as `6131daa`. Required CI and Codex review passed; the minor Rabbit
-command-directory clarification is corrected in this closeout. Live automation is verified: PR #168 received github-actions policy approval and
-merged as `08ea04c` after protected CI. Python lockfile and export repairs are pushed to PRs #169–#171;
-PRs #165/#166 need normal workflow-upgrade review. PR #167 now retains the required image backport with verified Next 16.3.5
-source hashes; local install/tests/build/lint/types pass, CI/review pending.
-VIN-158 (draft PR #164) resumes after this maintenance interruption, with its
-browser failure and hosted proof still open.
+**Maintenance interruption (21 September):** VIN-172 automation merged in PR #173;
+PR #168 proved one live automatic policy approval and protected merge. PRs #165, #166, #169 and #170 are also merged. PRs #167 and #171 retain normal review after
+workflow/backport or lockfile corrections. No deployment claim follows from merge.
+VIN-158 / PR #164 now passes the unchanged browser suite locally (99 passed,
+2 skipped) after correcting repeated validation focus; review and hosted proof
+remain separate gates. PR #160's hosted acceptance remains outstanding.
 
-**Next action:** verify actual deployment and acceptance after the owner merged
-#160 as `b03d641` on 20 September. The merge is confirmed; hosted proof is pending.
-After that, implement #158. Only one implementation story is active.
+**Next action:** finish the open PR queue, then complete VIN-158 hosted verification.
+No new implementation story starts merely because an external check is pending.
+
+**Issue priorities and targets:** High = core demo or active delivery; medium =
+supporting delivery efficiency/evidence; low = post-demo. All issues carry one
+priority label, a category, milestone and project link. Dependencies and blockers
+still govern this plan's sequence. Milestones express outcomes, not promised dates.
+Existing Customer accounts milestones are retained. Closed-ticket priorities are
+retrospective classification; cancelled VIN-42 stays archived and not planned.
+VIN-147 is medium, targeting CI strategy assessment after the queue and VIN-158.
+
+**PR naming (owner-approved 21 September):** `[VIN-N] [type] Description`.
+PR descriptions open with a linked Issue/title, Closes/Refs, and a separate
+Problem line, without a duplicate Issue section. CONTRIBUTING.md owns types/examples; commits remain Conventional Commits and
+Dependabot retains its documented upstream-title exception. The naming follow-up
+to merged PR #174 persists this rule without creating a second portfolio plan.
 
 ### Blockers and unblock actions
 
@@ -74,7 +85,9 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
-- [ ] Correct limiter identity/trust — #158 **next**. Authenticated write-budget correction is in implementation; anonymous ingress trust, test-threshold separation and live topology evidence remain outstanding.
+- [x] Merge authenticated write-budget isolation — VIN-158 / PR #163 (`b47be4a`).
+- [ ] Merge anonymous identity and test-threshold separation — VIN-158 / PR #164. Local browser suite passes after the focus fix; external review and merge remain required.
+- [ ] Configure paired server-only signing keys and prove hosted topology — VIN-158. Missing configuration retains fallback limiting; visitor isolation is not yet operationally verified.
 
 #### 3 — Security and monitoring
 
