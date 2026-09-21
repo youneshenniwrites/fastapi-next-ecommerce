@@ -109,8 +109,8 @@ Review the exact pushed revision. Address actionable findings and rerun affected
 checks. A self-review must say it is a self-review; it is not independent approval.
 All applicable CI jobs must pass before merge. Follow the
 [Codex review policy](docs/codex-review.md); the status is informational pending #38. A verified clean external review replaces a human approval; ticket
-acceptance must still be checked. No workflow in this repository
-bypasses review to automatically merge dependency updates.
+acceptance must still be checked. Eligible dependency updates follow the explicit
+[automated dependency policy](docs/dependabot.md); all other updates retain normal review.
 
 Merge permission does not authorize cloud provisioning. Cloud deployments need
 an agreed environment, budget, secrets/identity design, and rollback plan.
@@ -132,3 +132,10 @@ The exact-head review instructions above have one exception: the owner-authorize
 [pure-main-sync carry-forward procedure](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. Branch protection remains enforced.
+
+## Automated dependency exception
+
+The owner-authorized [Dependabot policy](docs/dependabot.md) allows eligible dependency-only
+npm/uv patch and minor PRs to receive automated policy approval and protected
+auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
+Bot PRs retain upstream titles; VIN-172 tracks the policy.
