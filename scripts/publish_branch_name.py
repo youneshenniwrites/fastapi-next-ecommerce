@@ -3,7 +3,6 @@
 import json
 import os
 import subprocess
-from pathlib import Path
 
 from check_branch_name import REPOSITORY, validate
 
@@ -23,12 +22,36 @@ def api(path, payload=None):
     return json.loads(result.stdout)
 
 
-def publish(number):
-    """Re-read live metadata and refuse success after a concurrent head/title change."""
-    pr = api(f"pulls/{number}")
-    if pr["state"] != "open":
-        return
-    sha = pr["head"]["sha"]
+def open_prs():
+    """Read every page so another PR cannot hide a failing shared-head policy."""
+    result = []
+    page = 1
+    while True:
+        prs = api(f"pulls?state=open&per_page=100&page={page}")
+        result.extend(prs)
+        if len(prs) < 100:
+            return result
+        page += 1
+
+
+def snapshot(prs, sha):
+    """Capture all policy inputs and membership of a commit's open PR group."""
+    return sorted(
+        (
+            pr["number"],
+            pr["head"]["ref"],
+            pr["title"],
+            json.dumps(pr["user"], sort_keys=True),
+            json.dumps(pr["head"].get("repo"), sort_keys=True),
+        )
+        for pr in prs
+        if pr["head"]["sha"] == sha
+    )
+
+
+def publish(sha, prs):
+    """Publish success only when every open PR sharing the commit passes."""
+    group = [pr for pr in prs if pr["head"]["sha"] == sha]
     target = f"{os.environ['GITHUB_SERVER_URL']}/{REPOSITORY}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
 
     def status(state, description):
@@ -42,39 +65,27 @@ def publish(number):
             },
         )
 
-    status("pending", "Checking trusted issue-linked branch policy")
+    status("pending", "Checking every open PR sharing this commit")
     try:
-        message = validate({"pull_request": pr}, lambda n: api(f"issues/{n}"))
+        for pr in group:
+            message = validate({"pull_request": pr}, lambda n: api(f"issues/{n}"))
+            print(f"PR #{pr['number']}: {message}")
+        current = open_prs()
     except (ValueError, subprocess.CalledProcessError) as error:
-        status("failure", "Invalid branch or issue metadata; see run log")
-        print(f"PR #{number}: {error}")
+        status("failure", "Branch or metadata check failed; see run log")
+        print(f"Commit {sha}: {error}")
         return
-    current = api(f"pulls/{number}")
-    if current["state"] != "open" or (
-        current["head"]["sha"],
-        current["head"]["ref"],
-        current["title"],
-    ) != (sha, pr["head"]["ref"], pr["title"]):
-        status("pending", "PR changed during validation; latest event must recheck")
+    if snapshot(current, sha) != snapshot(prs, sha):
+        status("pending", "PR group changed during validation; rerun required")
         return
-    status("success", message)
-    print(f"PR #{number}: {message}")
+    status("success", "All open PRs sharing this commit pass branch naming")
 
 
 def main():
-    """Check one event PR or all open PRs during manual bootstrap/reconciliation."""
-    event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text())
-    if "pull_request" in event:
-        publish(event["pull_request"]["number"])
-        return
-    page = 1
-    while True:
-        prs = api(f"pulls?state=open&per_page=100&page={page}")
-        for pr in prs:
-            publish(pr["number"])
-        if len(prs) < 100:
-            break
-        page += 1
+    """Reconcile every open commit group, even for a single PR event."""
+    prs = open_prs()
+    for sha in sorted({pr["head"]["sha"] for pr in prs}):
+        publish(sha, prs)
 
 
 if __name__ == "__main__":

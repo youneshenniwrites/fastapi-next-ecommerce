@@ -1,7 +1,7 @@
 name: Branch naming
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened, edited, ready_for_review]
+    types: [opened, synchronize, reopened, edited, ready_for_review, closed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -9,7 +9,7 @@ permissions:
   pull-requests: read
   statuses: write
 concurrency:
-  group: branch-naming-${{ github.event.pull_request.number || 'manual' }}
+  group: branch-naming-repository
   cancel-in-progress: false
 jobs:
   validate:
