@@ -20,7 +20,7 @@ def eligible(pr, files, commits, ecosystem, update_type, repository):
         and files
         and all(f["status"] == "modified" and f["filename"] in ALLOWED_FILES.get(ecosystem, set()) for f in files)
         and commits
-        and all((c.get("author") or {}).get("login") == "dependabot[bot]" and c["commit"]["verification"]["verified"] for c in commits)
+        and all((c.get("author") or {}).get("login") == "dependabot[bot]" and (c.get("committer") or {}).get("login") in {"dependabot[bot]", "web-flow"} and c["commit"]["verification"]["verified"] for c in commits)
     )
 
 
