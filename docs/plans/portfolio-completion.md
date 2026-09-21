@@ -12,7 +12,7 @@ issues. The board owns workflow state. Record scope/sequence changes here and li
 them from #155. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
 
-## Progress at a glance — 20 September 2026
+## Progress at a glance — 21 September 2026
 
 **We are in stage 2 of 6: customer-facing reliability.** The existing catalog,
 accounts and cart are the starting product; checkout and sandbox payments are
@@ -21,16 +21,37 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 anonymous identity and hosted proof |
+| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 review/hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Maintenance interruption (21 September):** VIN-172 automation merged in PR #173; PR #168 automatically merged as `08ea04c`. Remaining dependency repairs/reviews are in progress. VIN-158 is implemented in PR #164, not yet merged or hosted-verified.
+**Maintenance interruption (21 September):** VIN-172 automation merged in PR #173;
+PR #168 proved one live automatic policy approval and protected merge. PRs #165, #166, #169 and #170 are also merged. PRs #167 and #171 retain normal review after
+workflow/backport or lockfile corrections. No deployment claim follows from merge.
+VIN-158 / PR #164 now passes the unchanged browser suite locally (99 passed,
+2 skipped) after correcting repeated validation focus; review and hosted proof
+remain separate gates. PR #160's hosted acceptance remains outstanding.
 
-**Next action (21 September 2026):** complete PR #164 review, then configure the
-paired server-only key and prove hosted VIN-158 behavior. The sign-in focus failure
+**Next action:** finish the open PR queue, then complete VIN-158 hosted verification.
+No new implementation story starts merely because an external check is pending.
+
+**Issue priorities and targets:** High = core demo or active delivery; medium =
+supporting delivery efficiency/evidence; low = post-demo. All issues carry one
+priority label, a category, milestone and project link. Dependencies and blockers
+still govern this plan's sequence. Milestones express outcomes, not promised dates.
+Existing Customer accounts milestones are retained. Closed-ticket priorities are
+retrospective classification; cancelled VIN-42 stays archived and not planned.
+VIN-147 is medium, targeting CI strategy assessment after the queue and VIN-158.
+
+**PR naming (owner-approved 21 September):** `[VIN-N] [type] Description`.
+PR descriptions open with a linked Issue/title, Closes/Refs, and a separate
+Problem line, without a duplicate Issue section. CONTRIBUTING.md owns types/examples; commits remain Conventional Commits and
+Dependabot retains its documented upstream-title exception. The naming follow-up
+to merged PR #174 persists this rule without creating a second portfolio plan.
+
+**VIN-158 verification evidence (21 September 2026):** The sign-in focus failure
 was reproduced twice in the full suite: React Hook Form's delayed second error
 focus could interrupt field editing. PR #164 now focuses the first invalid field
 once. The unchanged browser suite passes locally (99 passed, 2 skipped); frontend

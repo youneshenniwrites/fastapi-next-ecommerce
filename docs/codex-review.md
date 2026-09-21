@@ -114,6 +114,9 @@ following must hold; otherwise request fresh current-head review:
    head, reviews and unresolved threads immediately before merging. A further
    change invalidates this evidence. Never bypass protection to use this exception.
 
+Start the comment with plain English: what changed, which checks passed, and
+what still blocks merge. Put technical evidence inside a collapsed `<details>`
+section with descriptive labels; never lead with unexplained letters or hashes.
 Publish one evidence comment on the same PR with R/B/M/H full SHAs, original
 review links, incorporated-main evidence, merge-tree and exact-diff comparison
 results, interaction assessment, current-head CI links and retained deferrals.
