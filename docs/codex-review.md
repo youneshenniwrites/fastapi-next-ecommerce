@@ -125,3 +125,10 @@ pending. If that status becomes required, this manual exception cannot bypass it
 The ordinary exact-head protocol remains the default. Already-running automatic
 reviews are not cancelled or claimed to be prevented by this policy. This policy
 change itself requires normal current-head review; it cannot approve itself.
+
+## Automated dependency exception
+
+The owner-authorized [Dependabot policy](dependabot.md) allows eligible dependency-only
+npm/uv patch and minor PRs to receive automated policy approval and protected
+auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
+Bot PRs retain upstream titles; VIN-172 tracks the policy.
