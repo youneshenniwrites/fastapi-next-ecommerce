@@ -145,8 +145,8 @@ Keep replies concise: outcome, blocker and next action, usually a few bullets.
 Avoid long paragraphs and repeating the plan unless the owner asks for detail.
 In messages and handoffs, identify issues as `VIN-N` (N is the actual GitHub
 issue number) and pull requests as `PR #N`; never use an unqualified number.
-PR titles start `[VIN-N] [type] Description`; link that issue and state the problem
-on the first body line. Commits and squash subjects retain Conventional Commits.
+PR titles start `[VIN-N] [type] Description`; open with a linked **Issue:** line
+including its title, the Closes/Refs reference, then a separate **Problem:** line. Commits and squash subjects retain Conventional Commits.
 Before repeating reviews solely after syncing main, apply the narrow
 [carry-forward exception](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 All other exact-head review and branch-protection rules still apply.

@@ -72,8 +72,9 @@ or extra colon are required. Examples:
 - `[VIN-118] [feat] Persist order snapshots`
 - `[VIN-172] [docs] Correct export instructions and record dependency progress`
 
-The first body line links `VIN-N` to that issue and
-states the problem. Use the same alias in issue titles and handoffs; no separate
+Open the body with `**Issue:** [VIN-N — Issue title](issue-url)`, followed by
+`Closes #N` (complete) or `Refs #N` (partial), then a separate `**Problem:**`
+line stating what is broken or missing. Do not repeat an Issue section below. Use the same alias in issue titles and handoffs; no separate
 numbering system or duplicate issue is created. Refer to pull requests as `PR #N`.
 For squash merges, explicitly supply a Conventional Commits subject, for example
 `fix(security): isolate customer write limits (VIN-158)`; do not copy the PR title. Preserve breaking-change

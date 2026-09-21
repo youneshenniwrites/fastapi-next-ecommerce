@@ -1,14 +1,14 @@
-[VIN-N](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/N): State the problem this PR solves.
+**Issue:** [VIN-N — Issue title](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/N)
+
+Closes #<!-- actual issue number; use Refs #N for partial work -->
+
+**Problem:** Explain what is broken or missing and who it affects.
 
 <!-- PR title: [VIN-N] [type] Description. N is the actual issue number. Replace prompts and remove irrelevant optional sections. -->
 
 ## Summary
 
 Describe the customer or contributor outcome in 1–3 sentences: what changes and why.
-
-## Issue
-
-Closes #<!-- actual issue number; use Refs #N for partial work -->
 
 ## Before / After
 

@@ -47,7 +47,8 @@ retrospective classification; cancelled VIN-42 stays archived and not planned.
 VIN-147 is medium, targeting CI strategy assessment after the queue and VIN-158.
 
 **PR naming (owner-approved 21 September):** `[VIN-N] [type] Description`.
-CONTRIBUTING.md owns types/examples; commits remain Conventional Commits and
+PR descriptions open with a linked Issue/title, Closes/Refs, and a separate
+Problem line, without a duplicate Issue section. CONTRIBUTING.md owns types/examples; commits remain Conventional Commits and
 Dependabot retains its documented upstream-title exception. The naming follow-up
 to merged PR #174 persists this rule without creating a second portfolio plan.
 

@@ -13,7 +13,8 @@ maintaining Dependabot PRs. Do not rewrite merged history to apply this policy.
 
 Before pushing, inspect git status, the branch name, and the commit subjects.
 Use `[VIN-N] [type] Description` for PR titles and link the actual GitHub issue
-as `VIN-N` in the first body line with the problem statement. N is the issue
+as `**Issue:** [VIN-N — Issue title](issue-url)`. Follow with Closes/Refs and a
+separate **Problem:** line; do not repeat an Issue section. N is the issue
 number; PR identifiers remain `PR #N`.
 Before merge, read back the PR title and explicitly pass a separate Conventional
 Commits subject to `gh pr merge --squash --subject`, including the VIN-N alias.
