@@ -12,7 +12,7 @@ an agent/ branch. Preserve existing bot branch names and real authorship when
 maintaining Dependabot PRs. Do not rewrite merged history to apply this policy.
 
 Before pushing, inspect git status, the branch name, and the commit subjects.
-Use `VIN-N: plain description` for PR titles and link the actual GitHub issue
+Use `[VIN-N] [type] Description` for PR titles and link the actual GitHub issue
 as `VIN-N` in the first body line with the problem statement. N is the issue
 number; PR identifiers remain `PR #N`.
 Before merge, read back the PR title and explicitly pass a separate Conventional

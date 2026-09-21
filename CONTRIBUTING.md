@@ -60,9 +60,19 @@ The specification does not define branch names. Our local adaptation is
 | `ci/checkout-update` | `ci: update checkout action` |
 
 Do not create `agent/` branches. Existing Dependabot-managed branches keep their
-bot names; apply compliant PR titles and squash subjects when merging them.
-PR titles use `VIN-N: plain description`, where N is the linked GitHub issue
-number, not the PR number. The first body line links `VIN-N` to that issue and
+bot names and upstream PR titles under the VIN-172 exception; use Conventional
+Commits squash subjects when merging them.
+PR titles use `[VIN-N] [type] Description`, where N is the linked GitHub issue
+number, not the PR number. Use one lowercase type: `feat`, `fix`, `docs`,
+`test`, `ci`, `chore`, `refactor`, or `perf`. Choose the primary purpose of the
+final diff; describe any secondary changes in the body. No scope parentheses
+or extra colon are required. Examples:
+
+- `[VIN-158] [fix] Preserve anonymous visitor rate limits`
+- `[VIN-118] [feat] Persist order snapshots`
+- `[VIN-172] [docs] Correct export instructions and record dependency progress`
+
+The first body line links `VIN-N` to that issue and
 states the problem. Use the same alias in issue titles and handoffs; no separate
 numbering system or duplicate issue is created. Refer to pull requests as `PR #N`.
 For squash merges, explicitly supply a Conventional Commits subject, for example

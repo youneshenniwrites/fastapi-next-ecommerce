@@ -117,7 +117,7 @@ is not configured. Dependabot proposes updates weekly; eligible updates use the 
 ## Common PR description and reviewers
 
 Use `VIN-N` for issues, where N is the actual GitHub issue number; use `PR #N`
-for pull requests. PR titles start `VIN-N: plain description`. The first body
+for pull requests. PR titles start `[VIN-N] [type] Description`. The first body
 line links that issue and states the problem. Follow CONTRIBUTING.md for separate
 Conventional Commits commit/squash subjects; never copy the PR title into squash.
 

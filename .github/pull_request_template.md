@@ -1,6 +1,6 @@
 [VIN-N](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/N): State the problem this PR solves.
 
-<!-- PR title: VIN-N: plain description. N is the actual issue number. Replace prompts and remove irrelevant optional sections. -->
+<!-- PR title: [VIN-N] [type] Description. N is the actual issue number. Replace prompts and remove irrelevant optional sections. -->
 
 ## Summary
 
