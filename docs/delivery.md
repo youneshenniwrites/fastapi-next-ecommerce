@@ -112,7 +112,7 @@ Report merged/open PRs, remaining blockers, checks and the next ticket.
 Inspect open maintenance PRs and either resolve them within authorized scope or
 record their next action; do not silently leave failures unexplained. This is an
 agent workflow, not a continuously running service. Scheduled dependency review
-is not configured. Dependabot proposes updates weekly; it does not review or merge.
+is not configured. Dependabot proposes updates weekly; eligible updates use the bounded automation policy below.
 
 ## Common PR description and reviewers
 
@@ -180,3 +180,10 @@ is the sole exception to requesting fresh reviews after a conflict-free main syn
 It requires preserved review evidence, reproducible merge/diff checks, interaction
 assessment and passing current-head CI. It does not waive branch protection or
 claim current-head external approval. Otherwise the exact-head rules above apply.
+
+## Automated dependency exception
+
+The owner-authorized [Dependabot policy](dependabot.md) allows eligible dependency-only
+npm/uv patch and minor PRs to receive automated policy approval and protected
+auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
+Bot PRs retain upstream titles; VIN-172 tracks the policy.
