@@ -127,7 +127,7 @@ test("patch is idempotent and rejects unexpected versions or source", () => {
     );
     writeFileSync(
       join(fixture, "package.json"),
-      JSON.stringify({ version: "16.3.5" }),
+      JSON.stringify({ version: "16.3.6" }),
     );
     assert.throws(() => patchNextImage(fixture), /Review\/remove/);
   } finally {
