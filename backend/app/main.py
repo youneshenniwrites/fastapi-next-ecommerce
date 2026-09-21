@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.api.v1 import auth, cart, products
+from app.api.v1 import auth, cart, orders, products
 from app.core.observability import init_observability
 from app.core.settings import settings
 
@@ -81,6 +81,7 @@ async def health_check() -> dict[str, str]:
 # from app.api.v1 import products, users
 app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(orders.router)
 app.include_router(cart.router, prefix="/api/v1/cart", tags=["Cart"])
 # app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 

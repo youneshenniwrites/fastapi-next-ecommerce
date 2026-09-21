@@ -8,7 +8,9 @@ The frontend/ directory provides the Next.js catalog and product-detail storefro
 Tailwind v4 and shadcn/ui supply shared themed primitives; page layouts compose reusable storefront components. See [frontend design system](../frontend/design-system.md).
 Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
 browser receives product data for local filtering. Signed-in cart persistence and the cart storefront are implemented; see [cart API](design/cart-api.md).
-Orders and payment adapters remain planned. Product prices use Decimal /
+Authenticated order drafts preserve GBP snapshots without reserving stock or
+placing purchases; see [ADR 0002](decisions/0002-order-transactions.md). Atomic
+placement, checkout UI and payment adapters remain planned. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
 
