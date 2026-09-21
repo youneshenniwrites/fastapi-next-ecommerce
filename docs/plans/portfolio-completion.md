@@ -29,10 +29,10 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 
 **Maintenance interruption (21 September):** VIN-172 dependency automation merged
 in PR #173 as `6131daa`. Required CI and Codex review passed; the minor Rabbit
-command-directory clarification is corrected in this closeout. Live automation
-is being proved on PR #168. Python export repairs are pushed to PRs #169–#171;
-PRs #165/#166 need normal workflow-upgrade review. PR #167 is blocked by the
-Next 16.3.5 security-backport compatibility guard; do not weaken it to merge.
+command-directory clarification is corrected in this closeout. Live automation is verified: PR #168 received github-actions policy approval and
+merged as `08ea04c` after protected CI. Python lockfile and export repairs are pushed to PRs #169–#171;
+PRs #165/#166 need normal workflow-upgrade review. PR #167 now retains the required image backport with verified Next 16.3.5
+source hashes; local install/tests/build/lint/types pass, CI/review pending.
 VIN-158 (draft PR #164) resumes after this maintenance interruption, with its
 browser failure and hosted proof still open.
 
