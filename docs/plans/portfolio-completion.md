@@ -21,21 +21,31 @@ still ahead. Stage counts are not an estimate of effort or time remaining.
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 review/hosted proof; VIN-89 hosted acceptance remains |
+| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Maintenance interruption (21 September):** VIN-172 automation merged in PR #173;
-PR #168 proved one live automatic policy approval and protected merge. PRs #165, #166, #169 and #170 are also merged. PRs #167 and #171 retain normal review after
-workflow/backport or lockfile corrections. No deployment claim follows from merge.
-VIN-158 / PR #164 now passes the unchanged browser suite locally (99 passed,
-2 skipped) after correcting repeated validation focus; review and hosted proof
-remain separate gates. PR #160's hosted acceptance remains outstanding.
+**Maintenance complete (21 September):** VIN-172 is closed and Done. All initial
+Dependabot PRs #165–#171 are merged; PR #168 proved a live policy approval and
+protected automatic merge. PR #175 merged the readable delivery conventions.
 
-**Next action:** finish the open PR queue, then complete VIN-158 hosted verification.
-No new implementation story starts merely because an external check is pending.
+**Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
+CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,
+test-threshold separation and the form-focus correction are merged. This does not
+prove hosted configuration, deployment synchronization or real visitor isolation.
+
+**Verified checklist progress:** `█████░░░░░░░░░░░░░░░` **7 / 29 outcomes (24%)**.
+This counts checked acceptance outcomes, not engineering effort or a delivery-date
+forecast. Stage 1 is complete; stage 2 has 4/7 outcomes verified. Checkout and
+sandbox payments are still unbuilt. VIN-155 links 10 direct workstreams, with one
+closed; its native 10% bar counts issues rather than individual plan outcomes.
+
+**Next action:** complete VIN-158 hosted signing-key/topology verification and
+remaining stage-2 hosted acceptance. VIN-158 remains open; PR #160's hosted cart
+recovery proof also remains outstanding. External blockers must not prevent
+unrelated work under the existing sequence.
 
 **Issue priorities and targets:** High = core demo or active delivery; medium =
 supporting delivery efficiency/evidence; low = post-demo. All issues carry one
@@ -58,8 +68,8 @@ once. The unchanged browser suite passes locally (99 passed, 2 skipped); fronten
 unit checks/build/lint/types/format pass. Earlier backend evidence remains 141
 passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted proof.
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
-pushed on `fix/anonymous-limiter-identity`, not yet merged/deployed. PR #162 merged review/naming policy as `aceea1d`.
-Only VIN-158 is active implementation. PR #160's hosted acceptance remains separate.
+merged in PR #164 (`4d3bbd9`), with hosted deployment/acceptance still unverified. PR #162 merged review/naming policy as `aceea1d`.
+VIN-158 is the active verification story. PR #160's hosted acceptance remains separate.
 
 
 ### Blockers and unblock actions
@@ -97,7 +107,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
 - [x] Merge authenticated customer write-budget isolation — VIN-158 / PR #163, `b47be4a`; tests and both reviews completed.
-- [ ] Merge anonymous identity and test-threshold separation — VIN-158 **current**. Signed-context implementation is pushed; backend/frontend unit tests and production build pass. The sign-in focus race is corrected locally and the unchanged browser suite passes (99 passed, 2 skipped). Fresh review and CI are required; this is not merged or hosted acceptance.
+- [x] Merge anonymous identity and test-threshold separation — VIN-158 / PR #164, `4d3bbd9`. Required CI and both reviews passed on `308824b`; hosted acceptance remains separate.
 - [ ] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Configuration availability is unverified; missing keys preserve fallback limiting but do not prove visitor isolation.
 
 #### 3 — Security and monitoring
