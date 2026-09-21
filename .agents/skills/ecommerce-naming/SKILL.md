@@ -26,3 +26,8 @@ solely for a minor scope adjustment. Use the ownership skill for assignment/labe
 When creating or refreshing a Dependabot PR, preserve its upstream title under
 the VIN-172 exception. Do not rename it to the manual PR format. Commits and
 squash subjects still use Conventional Commits.
+
+New human branches use `type/vin-N-short-description` with the actual issue
+number, matching the PR title key. See CONTRIBUTING.md for allowed types and
+legacy/Dependabot exceptions. The delivery board contains issue cards only;
+link PRs from issues instead of adding separate PR cards.

@@ -4,7 +4,7 @@ Closes #<!-- actual issue number; use Refs #N for partial work -->
 
 **Problem:** Explain what is broken or missing and who it affects.
 
-<!-- PR title: [VIN-N] [type] Description. N is the actual issue number. Replace prompts and remove irrelevant optional sections. -->
+<!-- Branch: type/vin-N-short-description (actual issue number). PR title: [VIN-N] [type] Description. N is the actual issue number. Replace prompts and remove irrelevant optional sections. -->
 
 ## Summary
 

@@ -35,7 +35,7 @@ prerequisites. Do not claim checks passed if a missing prerequisite prevented th
 ## Delivery
 
 Use the ecommerce-naming skill for branch names, commits, PR titles, and squash
-subjects. Follow CONTRIBUTING.md: type/short-kebab-description branches, never
+subjects. Follow CONTRIBUTING.md: type/vin-N-short-description branches, never
 agent/, [VIN-N] [type] PR titles, and Conventional Commits commit/squash subjects. Use a task branch. Respect an existing agent-managed worktree; otherwise use a
 separate worktree when concurrent changes require isolation. Inspect git status
 and overlapping PRs before editing. Allocate separate ports, Compose project names,
@@ -160,3 +160,8 @@ The owner-authorized [Dependabot policy](docs/dependabot.md) allows eligible dep
 npm/uv patch and minor PRs to receive automated policy approval and protected
 auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
 Bot PRs retain upstream titles; VIN-172 tracks the policy.
+
+New human branches use `type/vin-N-short-description` with the actual issue
+number, matching the PR title key. See CONTRIBUTING.md for allowed types and
+legacy/Dependabot exceptions. The delivery board contains issue cards only;
+link PRs from issues instead of adding separate PR cards.

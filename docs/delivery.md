@@ -9,7 +9,7 @@ current delivery status. Link between them rather than copying live status table
 
 Find or create a repository issue with an outcome, scope, acceptance criteria,
 dependencies and validation expectations. Reuse matching issues; existing bot PRs
-can serve as maintenance work items without creating duplicate tickets. Refine
+can link the existing maintenance issue without creating duplicate tickets or PR cards. Refine
 broad backlog items into focused tickets before implementation. Assign the owner.
 Read the relevant agent guidance and skills, inspect working-tree and PR state,
 and choose a Conventional Commit branch. Prefer gh/API and Git; use browser UI
@@ -70,6 +70,10 @@ point to read AGENTS.md, or explicitly include that instruction when starting.
 Never claim a fresh agent has loaded guidance without checking its discovery path.
 
 ## Board and PR lifecycle
+
+Use issue cards only; link PRs from the issue rather than adding duplicate PR
+cards, including Dependabot PRs. Archive redundant PR cards without deleting PRs.
+New human branches use `type/vin-N-short-description`; see CONTRIBUTING.md.
 
 - Backlog: planned work; start only when scoped and unblocked.
 - In progress: implementation underway; keep one implementation ticket active by default.

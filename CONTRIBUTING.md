@@ -50,14 +50,21 @@ concise descriptions of the resulting change. Mark breaking changes with `!`
 before the colon or a `BREAKING CHANGE:` footer, and explain migration effects.
 
 The specification does not define branch names. Our local adaptation is
-`type/short-kebab-description`, with an optional area in the description:
+`type/vin-N-short-description`, with the actual GitHub issue number in lowercase
+(`vin-118`, not the PR number). Keep the branch stable; track progress on the board.
 
 | Branch | Commit subject |
 | --- | --- |
-| `feat/frontend-catalog` | `feat(frontend): add product catalog` |
-| `fix/auth-token-expiry` | `fix(auth): reject expired tokens` |
-| `docs/naming-conventions` | `docs: define repository naming conventions` |
-| `ci/checkout-update` | `ci: update checkout action` |
+| `feat/vin-118-order-drafts` | `feat(orders): add draft snapshots` |
+| `fix/vin-89-cart-recovery` | `fix(cart): recover timed-out reads` |
+| `docs/vin-178-branch-naming` | `docs: define repository naming conventions` |
+| `ci/vin-178-branch-naming` | `ci: enforce issue-linked branches` |
+
+New human PRs must match their branch issue key to the `[VIN-N]` title key.
+The required backend lint/test job validates the format and confirms N is an
+existing issue, not a PR. It runs for docs-only PRs too; title edits retrigger CI.
+Only existing PR #177 (`feat/order-drafts`) is grandfathered. Verified Dependabot
+authorship is exempt; naming a human branch `dependabot/…` is not an exemption.
 
 Do not create `agent/` branches. Existing Dependabot-managed branches keep their
 bot names and upstream PR titles under the VIN-172 exception; use Conventional

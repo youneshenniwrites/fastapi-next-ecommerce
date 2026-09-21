@@ -58,3 +58,7 @@ Dependabot's weekly proposals remain enabled. Scheduled agent review is **not
 configured**. Eligible updates can merge through the event-driven
 [dependency policy](dependabot.md) after protected CI; other proposals remain manual. See
 [delivery workflow](delivery.md) for maintenance handoff expectations.
+
+`python3 scripts/check_branch_name.py` validates PR event metadata and its issue
+using a read-only GitHub token. The required backend lint/test job runs it for
+all PRs, including docs-only changes. See CONTRIBUTING.md for naming/exemptions.

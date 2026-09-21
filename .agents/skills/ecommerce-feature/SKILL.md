@@ -16,3 +16,8 @@ migrations outside Docker. Separate worktrees still share host ports.
 Choose one acceptance criterion from docs/plans/roadmap.md. Identify required
 migrations and API contract changes before editing. Keep the PR reviewable and
 follow the root AGENTS.md delivery checks. This skill does not authorize deployment.
+
+New human branches use `type/vin-N-short-description` with the actual issue
+number, matching the PR title key. See CONTRIBUTING.md for allowed types and
+legacy/Dependabot exceptions. The delivery board contains issue cards only;
+link PRs from issues instead of adding separate PR cards.
