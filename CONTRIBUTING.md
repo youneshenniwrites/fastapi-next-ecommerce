@@ -132,3 +132,10 @@ The exact-head review instructions above have one exception: the owner-authorize
 [pure-main-sync carry-forward procedure](docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. Branch protection remains enforced.
+
+## Automated dependency exception
+
+The owner-authorized [Dependabot policy](docs/dependabot.md) allows eligible dependency-only
+npm/uv patch and minor PRs to receive automated policy approval and protected
+auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
+Bot PRs retain upstream titles; VIN-172 tracks the policy.
