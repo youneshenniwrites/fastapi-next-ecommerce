@@ -51,6 +51,17 @@ Problem line, without a duplicate Issue section. CONTRIBUTING.md owns types/exam
 Dependabot retains its documented upstream-title exception. The naming follow-up
 to merged PR #174 persists this rule without creating a second portfolio plan.
 
+**VIN-158 verification evidence (21 September 2026):** The sign-in focus failure
+was reproduced twice in the full suite: React Hook Form's delayed second error
+focus could interrupt field editing. PR #164 now focuses the first invalid field
+once. The unchanged browser suite passes locally (99 passed, 2 skipped); frontend
+unit checks/build/lint/types/format pass. Earlier backend evidence remains 141
+passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted proof.
+PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
+pushed on `fix/anonymous-limiter-identity`, not yet merged/deployed. PR #162 merged review/naming policy as `aceea1d`.
+Only VIN-158 is active implementation. PR #160's hosted acceptance remains separate.
+
+
 ### Blockers and unblock actions
 
 Both tickets below remain required for the finish line. Blocked does not mean
@@ -85,9 +96,9 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
-- [x] Merge authenticated write-budget isolation — VIN-158 / PR #163 (`b47be4a`).
-- [ ] Merge anonymous identity and test-threshold separation — VIN-158 / PR #164. Local browser suite passes after the focus fix; external review and merge remain required.
-- [ ] Configure paired server-only signing keys and prove hosted topology — VIN-158. Missing configuration retains fallback limiting; visitor isolation is not yet operationally verified.
+- [x] Merge authenticated customer write-budget isolation — VIN-158 / PR #163, `b47be4a`; tests and both reviews completed.
+- [ ] Merge anonymous identity and test-threshold separation — VIN-158 **current**. Signed-context implementation is pushed; backend/frontend unit tests and production build pass. The sign-in focus race is corrected locally and the unchanged browser suite passes (99 passed, 2 skipped). Fresh review and CI are required; this is not merged or hosted acceptance.
+- [ ] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Configuration availability is unverified; missing keys preserve fallback limiting but do not prove visitor isolation.
 
 #### 3 — Security and monitoring
 

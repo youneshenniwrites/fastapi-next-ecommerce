@@ -88,19 +88,20 @@ def test_periodic_sweep_clears_expired_keys_but_keeps_active_ones(monkeypatch):
     assert "fresh" in limiter._buckets
 
 
-def test_client_key_prefers_first_forwarded_address():
+def test_client_key_ignores_untrusted_forwarded_address(monkeypatch):
+    monkeypatch.delenv("VERCEL", raising=False)
     request = Request(
         {
             "type": "http",
             "headers": [(b"x-forwarded-for", b"203.0.113.7, 70.41.3.18")],
         }
     )
-    assert client_key(request) == "203.0.113.7"
+    assert client_key(request) == "peer:unknown"
 
 
 def test_client_key_falls_back_to_unknown_without_source():
     request = Request({"type": "http", "headers": []})
-    assert client_key(request) == "unknown"
+    assert client_key(request) == "peer:unknown"
 
 
 def test_register_returns_429_after_limit(client):
@@ -140,7 +141,8 @@ def test_login_returns_429_and_recovers_after_window(client, user, monkeypatch):
     assert client.post("/api/v1/auth/login", data=payload).status_code == 200
 
 
-def test_login_buckets_are_per_client_ip(client, user, monkeypatch):
+def test_login_ignores_local_forwarded_spoofing(client, user, monkeypatch):
+    monkeypatch.delenv("VERCEL", raising=False)
     monkeypatch.setattr(rate_limit, "auth_login_limiter", RateLimiter(1))
     wrong = {"username": user.email, "password": "wrongpassword"}
     assert client.post("/api/v1/auth/login", data=wrong).status_code == 401
@@ -148,7 +150,7 @@ def test_login_buckets_are_per_client_ip(client, user, monkeypatch):
     other_origin = {"X-Forwarded-For": "203.0.113.9"}
     assert (
         client.post("/api/v1/auth/login", data=wrong, headers=other_origin).status_code
-        == 401
+        == 429
     )
 
 

@@ -146,8 +146,8 @@ normal use is unaffected. No paid WAF or extra service is involved.
 
 | Scope | Limit (60-second fixed window) |
 | --- | --- |
-| `POST /api/v1/auth/register` | 60 requests per anonymous network bucket |
-| `POST /api/v1/auth/login` | 60 requests per anonymous network bucket |
+| `POST /api/v1/auth/register` | 60 requests per anonymous identity |
+| `POST /api/v1/auth/login` | 60 requests per anonymous identity |
 | Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests per verified active customer |
 
 A 429 body is the standard `{"detail": ...}` error shape with no client data,
@@ -167,12 +167,30 @@ authentication, not protection against the cost of authentication itself.
 
 Counters remain process-local and ephemeral. Restarts, multiple instances and
 bounded-table eviction can reset or split allowances; this is not distributed
-abuse protection. Anonymous login/registration still use the first X-Forwarded-For
-entry or peer address. Direct local callers can forge that header; Vercel's ingress
-rewrites it, and a separate API deployment sees the frontend egress rather than
-the browser. Anonymous trust, shared-egress fairness and test-threshold separation
-remain unfinished work in ISSUE #158; this authenticated slice does not fix them.
-See [Vercel request headers](https://vercel.com/docs/headers/request-headers).
+abuse protection. Anonymous login/registration use a verified short-lived storefront context when
+configured, otherwise the platform-provided IP on Vercel or the peer locally.
+Local caller-supplied forwarded headers are ignored. The default registration and
+login limits remain 60 per minute; validated positive environment settings
+control them independently of disposable browser fixture thresholds (10,000).
+
+The frontend signs only login/register requests, only in Vercel runtime, using a
+dedicated `RATE_LIMIT_PROXY_SECRET` shared with its paired API. The opaque bucket
+is an HMAC of the platform IP; the assertion binds its timestamp, bucket, method
+and exact API path. Backend accepts a maximum age of 60 seconds and up to five
+seconds of forward clock skew. Malformed, expired, wrong-route or forged claims
+receive ordinary direct-ingress limiting, never an exemption. A new timestamp
+does not create a fresh bucket. Requests sharing a real public NAT IP still share
+an anonymous allowance; a captured valid assertion can be replayed during its
+short validity window against that same bucket. Per-instance resets still apply.
+
+Configure the same dedicated random key (at least 32 characters) on each paired
+frontend/API environment. Never reuse JWT or deployment-bypass credentials. The
+key is server-only; the assertion header is scrubbed by the backend's existing
+telemetry filter. VIN-121's wider privacy gates still precede telemetry activation.
+Missing frontend configuration omits the assertion; missing backend configuration
+ignores it. Limiting continues, but shared frontend egress can still group visitors.
+Do not claim hosted visitor isolation until paired configuration and actual
+platform topology have been verified. See [Vercel request headers](https://vercel.com/docs/headers/request-headers).
 
 ## Contract workflow
 

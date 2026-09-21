@@ -20,10 +20,12 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
     register,
     handleSubmit,
     reset,
+    setFocus,
     formState: { errors },
   } = useForm<AccountValues>({
     resolver: zodResolver(accountSchema(mode)),
     defaultValues: { email: "", password: "" },
+    shouldFocusError: false,
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
@@ -140,7 +142,11 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
           method="post"
           noValidate
           onSubmit={(event) => {
-            void handleSubmit(submit)(event);
+            // Focus once after validation. RHF's default delayed second focus
+            // can steal focus from a user already editing the next field.
+            void handleSubmit(submit, (invalid) => {
+              setFocus(invalid.email ? "email" : "password");
+            })(event);
           }}
           aria-label={registering ? "Create account" : "Sign in"}
           aria-busy={!ready || pending}
