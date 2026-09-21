@@ -58,3 +58,16 @@ Dependabot's weekly proposals remain enabled. Scheduled agent review is **not
 configured**. Eligible updates can merge through the event-driven
 [dependency policy](dependabot.md) after protected CI; other proposals remain manual. See
 [delivery workflow](delivery.md) for maintenance handoff expectations.
+
+`python3 scripts/check_branch_name.py` validates PR event metadata and its issue
+using a read-only GitHub token. The trusted `branch-naming.yml` workflow checks
+all PRs, including docs-only changes, through `publish_branch_name.py`. It checks
+out main only, never executes PR code, and publishes a status on the PR head.
+Because GitHub statuses belong to commits, every open PR sharing a commit must
+pass together. Repository-wide serialization prevents competing runs from
+publishing different answers; a second paginated read checks group membership
+and policy metadata before success. Opening, updating, editing or closing a PR
+reconciles all open groups. These are API snapshots, not an atomic merge lock;
+API errors or concurrent changes require a successful fresh run before merge.
+After merge, manually dispatch it and verify results before requiring the new
+status alongside existing protections. Until that rollout, the status is not required. See CONTRIBUTING.md for naming/exemptions.

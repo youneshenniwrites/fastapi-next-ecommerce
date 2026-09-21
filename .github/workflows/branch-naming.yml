@@ -1,0 +1,26 @@
+name: Branch naming
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review, closed]
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  statuses: write
+concurrency:
+  group: branch-naming-repository
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/heads/main
+          persist-credentials: false
+      - name: Publish naming status from trusted policy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish_branch_name.py
