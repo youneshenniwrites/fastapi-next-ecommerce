@@ -143,6 +143,9 @@ Do not create a replacement plan or another checklist for wording/status tweaks.
 
 Keep replies concise: outcome, blocker and next action, usually a few bullets.
 Avoid long paragraphs and repeating the plan unless the owner asks for detail.
+PR comments must lead with plain-English changes, results and blockers. Put
+technical proof in a collapsed details section; explain abbreviations and never
+lead with a wall of commit hashes.
 In messages and handoffs, identify issues as `VIN-N` (N is the actual GitHub
 issue number) and pull requests as `PR #N`; never use an unqualified number.
 PR titles start `[VIN-N] [type] Description`; open with a linked **Issue:** line
