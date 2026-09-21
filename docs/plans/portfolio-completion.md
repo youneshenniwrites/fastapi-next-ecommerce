@@ -14,16 +14,16 @@ at a time; external blockers must not prevent independent work.
 
 ## Progress at a glance — 21 September 2026
 
-**We are in stage 2 of 6: customer-facing reliability.** The existing catalog,
+**Active stage: 4 of 6, checkout; next implementation VIN-119.** The existing catalog,
 accounts and cart are the starting product; checkout and sandbox payments are
-still ahead. Stage counts are not an estimate of effort or time remaining.
+not yet complete. Stage counts are not an estimate of effort or time remaining.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | 🔵 Active | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
+| 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
-| 4. Checkout | ☐ Outstanding | #118 → #119 → #120 |
+| 4. Checkout | 🔵 Active | VIN-118 foundation delivered by PR #177; next VIN-119 placement → VIN-120 journey |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
@@ -36,16 +36,35 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Verified checklist progress:** `█████░░░░░░░░░░░░░░░` **7 / 29 outcomes (24%)**.
-This counts checked acceptance outcomes, not engineering effort or a delivery-date
-forecast. Stage 1 is complete; stage 2 has 4/7 outcomes verified. Checkout and
-sandbox payments are still unbuilt. VIN-155 links 10 direct workstreams, with one
-closed; its native 10% bar counts issues rather than individual plan outcomes.
+**Progress after PR #177 merges:** `██████░░░░░░░░░░░░░░` **9 / 29 outcomes (31%)**.
+PR #177 delivers the reviewed architecture decision and tested order-draft
+foundation. While that PR is open, merged progress remains **7 / 29 (24%)**.
+This counts acceptance outcomes, not effort or a delivery-date forecast.
+Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 gains 2/5.
+Atomic placement, checkout UI and sandbox payments remain unbuilt. VIN-155's
+native bar counts whole workstreams: VIN-29 stays open until VIN-119 and VIN-120
+are also accepted, so delivering VIN-118 alone does not advance that bar.
 
-**Next action:** complete VIN-158 hosted signing-key/topology verification and
-remaining stage-2 hosted acceptance. VIN-158 remains open; PR #160's hosted cart
-recovery proof also remains outstanding. External blockers must not prevent
-unrelated work under the existing sequence.
+**Owner-approved sequence change (21 September):** Resume feature delivery with
+VIN-118 order drafts, then VIN-119 atomic placement and VIN-120 checkout/history.
+VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
+Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
+but do not block independent checkout development. One implementation story is active.
+
+Development deployment and public smoke checks succeeded for `91daad7` in
+[run 35642648695](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/35642648695).
+The earlier revision was superseded before frontend CI completed; the deployment
+gate required a fully tested current main. Signed visitor isolation is still
+unverified; the Vercel connector currently lacks access to the project team.
+
+**Next action:** finish PR #177 review/merge, then implement VIN-119 atomic
+placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
+166 PostgreSQL tests pass, including draft ownership, exact totals, rollback and
+migration round trips; container smoke/schema checks and frontend types pass.
+Placement concurrency and the browser checkout journey remain later acceptance.
+
+**Board convention:** issue cards only; PRs stay linked from their issue rather
+than appearing as duplicate cards. This applies to dependency PRs as well.
 
 **Issue priorities and targets:** High = core demo or active delivery; medium =
 supporting delivery efficiency/evidence; low = post-demo. All issues carry one
@@ -68,8 +87,9 @@ once. The unchanged browser suite passes locally (99 passed, 2 skipped); fronten
 unit checks/build/lint/types/format pass. Earlier backend evidence remains 141
 passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted proof.
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
-merged in PR #164 (`4d3bbd9`), with hosted deployment/acceptance still unverified. PR #162 merged review/naming policy as `aceea1d`.
-VIN-158 is the active verification story. PR #160's hosted acceptance remains separate.
+merged in PR #164 (`4d3bbd9`), deployed through `91daad7`; visitor-isolation
+acceptance is still unverified. PR #162 merged review/naming policy as `aceea1d`.
+VIN-158 awaits hosted verification; VIN-118 is in review in PR #177 and VIN-119 is next. PR #160's hosted acceptance remains separate.
 
 
 ### Blockers and unblock actions
@@ -82,7 +102,8 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 | [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | Privacy coverage is incomplete; free Sentry organization/project configuration and DSN availability are unverified. SDK scaffolding and docs have merged. | Agent extends error/transaction/log/nested-context scrubbing and tests serialized SDK payloads before activation. Owner creates or confirms the free organization/projects and configures the required environment values securely. Then agent verifies live telemetry. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
-**Unblock order:** #121 privacy work follows #158 in stage 3; configuration can be
+**Unblock order:** After the owner-approved checkout sequence, resume #121 privacy
+work and outstanding hosted proof. Configuration can be
 prepared independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
 Recheck each blocker at its story handoff and record evidence on the source issue.
@@ -100,7 +121,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [x] Reconcile disputed audit, skills/review and performance claims; mark unresolved evidence explicitly.
 - [x] Verify baseline dev/prod deployment and smoke checks for `70f5efd`.
 
-#### 2 — Reliability · CURRENT
+#### 2 — Reliability
 
 - [x] Implement and merge readable 429/retry feedback — #156 / #159, `2cfc95f`.
 - [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
@@ -116,10 +137,10 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] **#121 BLOCKED — owner configuration, then agent proof:** confirm free Sentry projects/environment configuration; prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
-#### 4 — Checkout
+#### 4 — Checkout · CURRENT
 
-- [ ] Review architecture once and record transaction/state ADR — #29.
-- [ ] Persist owned order drafts and immutable GBP price snapshots — #118.
+- [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by PR #177 (effective on merge).
+- [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, tested in PR #177 (effective on merge).
 - [ ] Place orders atomically with stock protection, rollback and customer-scoped idempotency — #119.
 - [ ] Deliver checkout, confirmation/detail and order history — #120.
 - [ ] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — #118–#120.
