@@ -136,7 +136,8 @@ return 409. Reductions and removal remain allowed during shortages. Cart totals
 use current backend prices, and adding a line does not reserve stock. Deleted
 products are removed from saved carts. See [the cart contract](design/cart-api.md)
 for persistence and concurrency semantics. The signed-in cart storefront is
-implemented; checkout and payment endpoints remain planned.
+implemented; order placement is implemented as documented below. Payment endpoints
+remain planned.
 
 ## Abuse protection (rate limits)
 
@@ -148,7 +149,7 @@ normal use is unaffected. No paid WAF or extra service is involved.
 | --- | --- |
 | `POST /api/v1/auth/register` | 60 requests per anonymous identity |
 | `POST /api/v1/auth/login` | 60 requests per anonymous identity |
-| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests per verified active customer |
+| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes, order drafts (`POST /api/v1/orders/drafts`) and placement (`POST /api/v1/orders/{order_id}/place`) | 300 requests shared per verified active customer |
 
 A 429 body is the standard `{"detail": ...}` error shape with no client data,
 plus `Retry-After` (seconds until the window resets), `X-RateLimit-Limit`, and
@@ -160,7 +161,7 @@ visitors are never harmed.
 Authenticated write budgets use the active user returned by the existing JWT and
 database authentication dependency. Different customers behind the same frontend
 egress have separate budgets; changing forwarded headers or renewing a token does
-not create a new budget for the same user. Cart and authorized admin product writes
+not create a new budget for the same user. Cart, order draft/placement and authorized admin product writes
 share that user's budget. Missing/invalid/disabled identities return 401 before
 consuming it; non-admin product requests retain 403. This is throttling after
 authentication, not protection against the cost of authentication itself.
@@ -231,6 +232,20 @@ missing/disabled authentication returns 401. Draft creation shares the existing
 per-customer write budget and can return 429 with Retry-After.
 
 Draft creation is not idempotent and never places an order or charges money.
-There is no update/placement endpoint yet. Product changes/deletion do not alter
-saved snapshots. VIN-119 must revalidate prices/stock and provide transactional
-placement/idempotency before any checkout purchase controls are exposed.
+There is no draft update endpoint. Product changes/deletion do not alter saved
+snapshots. Placement is a separate operation described below.
+
+## Order placement (VIN-119)
+
+Authenticated `POST /api/v1/orders/{order_id}/place` requires an `Idempotency-Key`
+header (1–128 ASCII letters, digits, underscores or hyphens). It returns 200 with
+the owned placed order. Retrying the same draft and key returns the original result;
+reusing a key for another draft or a new key for an already placed order returns 409.
+
+The service revalidates current prices, stock and exact purchased cart quantities
+in one transaction. Conflicts return 409 without changing inventory or the cart;
+price/cart changes require a fresh draft and deliberate customer confirmation.
+Successful placement decrements inventory and removes purchased cart lines while
+preserving unrelated items. Missing or foreign orders return 404; missing/disabled
+sessions return 401, malformed headers return 422, and write limits can return 429.
+`placed` means inventory claimed, not paid. Checkout UI and payments are later slices.

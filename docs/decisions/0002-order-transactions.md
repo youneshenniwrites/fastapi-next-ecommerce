@@ -2,7 +2,7 @@
 
 Date: 21 September 2026. Status: accepted for VIN-29 implementation.
 Architecture review: VIN-118 → VIN-119 → VIN-120. This records the intended epic
-architecture; only draft persistence is implemented by VIN-118.
+architecture; draft persistence is delivered by VIN-118; VIN-119 adds placement.
 
 ## Decision
 
@@ -23,16 +23,17 @@ Product IDs on lines are historical identifiers, deliberately not cascading
 foreign keys: deleting or renaming a catalog product must preserve order evidence.
 User deletion is restricted while orders exist. Customer list/detail queries
 always filter ownership, including for admins. Cursor pagination bounds list reads.
-There is no draft update/delete or placement endpoint in this slice. Draft retries
+VIN-118 introduced no draft update/delete or placement endpoint. VIN-119 adds
+the placement endpoint described below. Draft retries
 can create multiple quotations; they cannot charge money, reserve stock or clear a
 cart. Existing per-customer write throttling applies. Retention/expiry of unused
 drafts is a later maintenance concern, not an unbounded list response.
 
-## Placement and payment boundaries (VIN-119 / VIN-30, not yet implemented)
+## Placement (VIN-119) and future payment (VIN-30)
 
 Placement revalidates the draft's product IDs, quantities, current prices and stock.
-It creates final immutable placement snapshots; draft amounts are never a promise
-of final pricing. A changed quotation must return a conflict for customer
+It retains the immutable draft snapshots only after confirming their prices still
+match the catalog; draft amounts are never a promise of final pricing. A changed quotation must return a conflict for customer
 reconfirmation before inventory is claimed. No client-supplied total is trusted.
 
 One service transaction claims the customer-scoped idempotency key, locks products
@@ -55,3 +56,22 @@ No microservice, event bus or payment abstraction is added before a concrete cal
 At higher load, draft retention and paginated query plans need measurement; no
 claim of distributed throttling is made. Next.js will consume the generated API
 contract in VIN-120 without owning transactions or payment state.
+
+## Placement contract
+
+`POST /api/v1/orders/{order_id}/place` accepts an `Idempotency-Key` header
+(1–128 ASCII letters, digits, underscores or hyphens). Keys are scoped to the
+customer and identify one draft ID. Same-key/same-draft retries return the original
+placed order; different draft reuse and alternate keys for a placed order conflict.
+A successful placement returns 200, including retries. Failed transactions do not
+consume the key. Order amounts and lines remain immutable quotation snapshots;
+price changes require a fresh draft and customer confirmation.
+
+Placement locks the customer row first, matching all existing cart writers, then
+locks products in ascending ID order. Every purchased cart line must still exist
+with the quoted quantity; otherwise return 409 without changes. Successful
+placement removes those exact lines and preserves unrelated items. Customer
+serialization also prevents simultaneous same-key inserts; a database unique
+constraint provides a second guard. The service commits once and rolls back every
+mutation on failure. Status `placed` means inventory claimed, not paid or fulfilled.
+No payment collection or inventory expiry is delivered in this slice.

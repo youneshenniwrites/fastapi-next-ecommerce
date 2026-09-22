@@ -256,7 +256,10 @@
             "type": "array"
           },
           "status": {
-            "const": "draft",
+            "enum": [
+              "draft",
+              "placed"
+            ],
             "title": "Status",
             "type": "string"
           },
@@ -1117,7 +1120,7 @@
     },
     "/api/v1/orders/drafts": {
       "post": {
-        "description": "Save a GBP quotation only: no stock reservation, cart change or placement.\n\nRepeating creation produces a new draft; placement idempotency is a later slice.\nPrices are copied from the backend and must be revalidated before purchase.",
+        "description": "Save a GBP quotation only: no stock reservation, cart change or placement.\n\nRepeating creation produces a new draft. The separate placement endpoint\nuses a customer-scoped idempotency key for safe retries.\nPrices are copied from the backend and must be revalidated before purchase.",
         "operationId": "post_draft_api_v1_orders_drafts_post",
         "requestBody": {
           "content": {
@@ -1278,6 +1281,129 @@
           }
         ],
         "summary": "Get Order",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{order_id}/place": {
+      "post": {
+        "description": "Place your quotation once; reuse the same key after response loss.\n\nPrice or cart changes require a fresh draft and deliberate confirmation.\nThis endpoint claims inventory but does not collect payment.",
+        "operationId": "post_placement_api_v1_orders__order_id__place_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Order Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too many requests. Retry after the Retry-After delay (seconds).",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the current window expires.",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "description": "Request limit for the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Post Placement",
         "tags": [
           "Orders"
         ]

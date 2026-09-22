@@ -9,8 +9,11 @@ Tailwind v4 and shadcn/ui supply shared themed primitives; page layouts compose 
 Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
 browser receives product data for local filtering. Signed-in cart persistence and the cart storefront are implemented; see [cart API](design/cart-api.md).
 Authenticated order drafts preserve GBP snapshots without reserving stock or
-placing purchases; see [ADR 0002](decisions/0002-order-transactions.md). Atomic
-placement, checkout UI and payment adapters remain planned. Product prices use Decimal /
+placing purchases. Atomic placement is implemented separately: an owned draft and
+customer-scoped retry key drive one transaction for stock revalidation, inventory
+claim and purchased-cart removal. Changed prices or cart quantities return conflicts.
+See [ADR 0002](decisions/0002-order-transactions.md). Checkout UI and payment adapters
+remain planned; placement does not establish payment. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
 

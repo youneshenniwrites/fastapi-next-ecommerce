@@ -16,16 +16,18 @@ from app.models.base import Base
 
 
 class Order(Base):
-    """Immutable draft quotation; creation never claims inventory."""
+    """Immutable quotation lines; placement claims inventory exactly once."""
 
     __tablename__ = "orders"
     __table_args__ = (
-        CheckConstraint("status = 'draft'", name="ck_orders_status"),
+        UniqueConstraint("user_id", "idempotency_key", name="uq_orders_customer_key"),
+        CheckConstraint("status IN ('draft', 'placed')", name="ck_orders_status"),
         CheckConstraint("currency = 'GBP'", name="ck_orders_currency"),
         CheckConstraint(
             "total >= 0 AND total <= 98999999999901.00", name="ck_orders_total"
         ),
     )
+    idempotency_key: Mapped[str | None] = mapped_column(String(128))
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="RESTRICT"), index=True

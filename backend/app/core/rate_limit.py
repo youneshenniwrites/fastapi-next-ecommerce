@@ -6,7 +6,7 @@ with a Retry-After delay plus X-RateLimit-Limit/X-RateLimit-Remaining headers
 and the standard {"detail": ...} error body.
 
 Defaults: registration 60/minute and login 60/minute per anonymous identity;
-cart/admin writes 300/minute per verified active user. Validated environment
+cart/order/admin writes 300/minute per verified active user. Validated environment
 settings can override them; disposable browser fixtures set their own thresholds.
 
 Signed storefront context preserves anonymous visitor buckets across shared

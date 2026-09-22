@@ -49,8 +49,9 @@ account, cart and checkout components are added with their feature tickets.
 
 VIN-118 implements authenticated draft creation/list/detail, immutable GBP
 snapshots and server-owned totals. Drafts never reserve inventory or place a
-purchase. See [ADR 0002](../decisions/0002-order-transactions.md); VIN-119 adds
-atomic placement and VIN-120 adds the customer checkout/history UI.
+purchase. See [ADR 0002](../decisions/0002-order-transactions.md); VIN-119 implements
+atomic placement with stock/price/cart revalidation and customer-scoped retries;
+PR #181 holds review and merge evidence. VIN-120 is the next customer checkout/history UI slice.
 
 ## Current priorities
 
