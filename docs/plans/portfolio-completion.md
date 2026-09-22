@@ -27,16 +27,14 @@ new services solely for demonstration. No additional plan or infrastructure is a
 
 ## Progress at a glance — 22 September 2026
 
-**Active stage: 4 of 6, checkout; VIN-119 merged in PR #181; PR #187 merged; VIN-120 checkout journey active.** The existing catalog,
-accounts and cart are the starting product; checkout and sandbox payments are
-not yet complete. Stage counts are not an estimate of effort or time remaining.
+**Next stage: 5 of 6, sandbox payments.** Non-payment checkout is merged and verified in CI; hosted acceptance remains separate. Stage counts are not effort estimates.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
 | 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
-| 4. Checkout | 🔵 Active | VIN-118 foundation delivered by PR #177; VIN-119 placement merged in PR #181; VIN-120 journey implemented locally; verification/review in progress |
+| 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted proof remains in stage 6 |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
@@ -49,21 +47,21 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Merged progress:** `███████░░░░░░░░░░░░░` **10 / 29 outcomes (34%)**.
-PR #177 is merged and VIN-118 is Done: the reviewed architecture decision and
-tested order-draft foundation are delivered.
-This counts acceptance outcomes, not effort or a delivery-date forecast.
-Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 has 3/5.
-Atomic placement merged in PR #181 (`0f0b214`); hosted
-verification remains pending. Checkout UI is implemented in draft PR #188, with browser corrections and verification in progress; sandbox payments remain unbuilt. VIN-155’s title displays the canonical **34% · 10/29 verified outcomes** metric. Its
-native 1/10 bar counts whole workstreams, not overall plan completion: VIN-29 stays open until VIN-119 and VIN-120
-are also accepted, so delivering VIN-118 alone does not advance that bar.
+**Merged progress:** `████████░░░░░░░░░░░░` **12 / 29 outcomes (41%)**.
+This counts verified acceptance outcomes, not effort or time remaining.
+Baseline is 3/3, reliability 4/7 and checkout 5/5. Other stages remain outstanding.
+PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
+Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
+Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
+VIN-120 and its checkout parent VIN-29 are complete. VIN-155's native bar now counts
+2/10 closed workstreams; its title shows the more granular 41% outcome metric.
+Sandbox payments, hosted acceptance, security and monitoring are not claimed complete.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
-VIN-119 atomic placement, then VIN-120 checkout/history.
+VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. Next: VIN-30 sandbox payments.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
-but do not block independent checkout development. One implementation story is active.
+but do not block independent checkout development. Keep one implementation story active.
 
 Development deployment and public smoke checks succeeded for `91daad7` in
 [run 35642648695](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/35642648695).
@@ -71,7 +69,7 @@ The earlier revision was superseded before frontend CI completed; the deployment
 gate required a fully tested current main. Signed visitor isolation is still
 unverified; the Vercel connector currently lacks access to the project team.
 
-**Current implementation:** VIN-119 atomic
+**Delivered implementation:** VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
 166 PostgreSQL tests pass, including draft ownership, exact totals, rollback and
 migration round trips; container smoke/schema checks and frontend types pass.
@@ -84,7 +82,7 @@ is Done; the browser checkout journey belongs to VIN-120.
 cart actionability regression corrections; 99 local browser tests passed with
 2 existing device-specific skips, and required CI passed. VIN-89 retains broader
 recovery/hosted acceptance in Backlog. VIN-120 checkout submission, confirmation
-and history is now active. The Codex status-indicator follow-up remains deferred
+and history merged in PR #188; VIN-30 is next. The Codex status-indicator follow-up remains deferred
 under VIN-38; it does not displace feature delivery.
 
 **Board convention:** issue cards only; PRs stay linked from their issue rather
@@ -161,13 +159,13 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] **#121 BLOCKED — owner configuration, then agent proof:** confirm free Sentry projects/environment configuration; prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
-#### 4 — Checkout · CURRENT
+#### 4 — Checkout · Complete
 
 - [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by merged PR #177.
 - [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, delivered by merged PR #177.
 - [x] Place orders atomically with stock protection, rollback and customer-scoped idempotency — VIN-119; merged in PR #181 (`0f0b214`).
-- [ ] Deliver checkout, confirmation/detail and order history — #120.
-- [ ] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — #118–#120.
+- [x] Deliver checkout, confirmation/detail and order history — VIN-120 / PR #188, `765ee9b`.
+- [x] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — VIN-118–VIN-120; PR #181 PostgreSQL evidence and PR #188 CI run 35779631311.
 
 #### 5 — Sandbox payment
 
