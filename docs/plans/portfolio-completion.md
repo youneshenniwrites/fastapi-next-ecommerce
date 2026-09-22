@@ -53,8 +53,9 @@ Baseline is 3/3, reliability 4/7 and checkout 5/5. Other stages remain outstandi
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
-VIN-120 and its checkout parent VIN-29 are complete. VIN-155's native bar now counts
-2/10 closed workstreams; its title shows the more granular 41% outcome metric.
+VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
+41% · 12/29 verified outcomes. Hide Sub-issues progress in the saved board view;
+retain the issue hierarchy for organization, not as a competing completion metric.
 Sandbox payments, hosted acceptance, security and monitoring are not claimed complete.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
