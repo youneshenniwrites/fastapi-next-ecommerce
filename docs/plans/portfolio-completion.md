@@ -12,9 +12,22 @@ issues. The board owns workflow state. Record scope/sequence changes here and li
 them from #155. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
 
-## Progress at a glance — 21 September 2026
+## Recruiter-readiness feedback decision — 22 September 2026
 
-**Active stage: 4 of 6, checkout; VIN-119 implemented in PR #181; next feature VIN-120.** The existing catalog,
+Keep this plan as the single source of truth. After PR #187, prioritize VIN-120's
+checkout submission, confirmation and history, then VIN-30 hosted sandbox Checkout.
+Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
+exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
+VIN-121 still requires privacy tests before telemetry activation. Payment work must
+preserve inventory already claimed at placement and release it exactly once for
+expired/cancelled unpaid orders. Finish security headers and hosted evidence before
+claiming demo completion. A concise scaling discussion belongs to the interview
+package: distinguish measured limits from hypotheses; do not add Redis, replicas or
+new services solely for demonstration. No additional plan or infrastructure is approved.
+
+## Progress at a glance — 22 September 2026
+
+**Active stage: 4 of 6, checkout; VIN-119 merged in PR #181; VIN-89 regression follow-up active; next feature VIN-120.** The existing catalog,
 accounts and cart are the starting product; checkout and sandbox payments are
 not yet complete. Stage counts are not an estimate of effort or time remaining.
 
@@ -23,7 +36,7 @@ not yet complete. Stage counts are not an estimate of effort or time remaining.
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
 | 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
-| 4. Checkout | 🔵 Active | VIN-118 foundation delivered by PR #177; VIN-119 placement implemented in PR #181 (review pending); VIN-120 journey next |
+| 4. Checkout | 🔵 Active | VIN-118 foundation delivered by PR #177; VIN-119 placement merged in PR #181; VIN-120 journey next |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
@@ -36,13 +49,13 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Merged progress:** `██████░░░░░░░░░░░░░░` **9 / 29 outcomes (31%)**.
+**Merged progress:** `███████░░░░░░░░░░░░░` **10 / 29 outcomes (34%)**.
 PR #177 is merged and VIN-118 is Done: the reviewed architecture decision and
 tested order-draft foundation are delivered.
 This counts acceptance outcomes, not effort or a delivery-date forecast.
-Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 gains 2/5.
-Atomic placement is implemented and locally verified in PR #181; merge and hosted
-verification remain pending. Checkout UI and sandbox payments remain unbuilt. VIN-155's
+Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 has 3/5.
+Atomic placement merged in PR #181 (`0f0b214`); hosted
+verification remains pending. Checkout UI and sandbox payments remain unbuilt. VIN-155's
 native bar counts whole workstreams: VIN-29 stays open until VIN-119 and VIN-120
 are also accepted, so delivering VIN-118 alone does not advance that bar.
 
@@ -64,8 +77,14 @@ placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
 migration round trips; container smoke/schema checks and frontend types pass.
 VIN-119 evidence: the full PostgreSQL suite passed 175 tests, and the final
 placement suite passed 10 tests including concurrency, rollback and authorization.
-Migration roundtrip and frontend type checks passed. External review, required CI
-and merge remain gates; the browser checkout journey belongs to VIN-120.
+Migration roundtrip and frontend type checks passed. PR #181 is merged and VIN-119
+is Done; the browser checkout journey belongs to VIN-120.
+
+**22 September owner-requested reliability follow-up:** VIN-89 is active before
+VIN-120. Fix the reproduced account-fixture identity mismatch and investigate the
+intermittent desktop stock-feedback and focus-recovery browser failures without
+weakening assertions or increasing timeouts. Passing reruns alone do not prove a
+cart fix; hosted acceptance remains outstanding.
 
 **Board convention:** issue cards only; PRs stay linked from their issue rather
 than appearing as duplicate cards. This applies to dependency PRs as well.
@@ -93,7 +112,7 @@ passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted 
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
 merged in PR #164 (`4d3bbd9`), deployed through `91daad7`; visitor-isolation
 acceptance is still unverified. PR #162 merged review/naming policy as `aceea1d`.
-VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is implemented in PR #181 (review pending). PR #160's hosted acceptance remains separate.
+VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is Done following merged PR #181. PR #160's hosted acceptance remains separate.
 
 
 ### Blockers and unblock actions
@@ -145,7 +164,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 - [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by merged PR #177.
 - [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, delivered by merged PR #177.
-- [ ] Place orders atomically with stock protection, rollback and customer-scoped idempotency — #119; implemented and locally verified in PR #181, awaiting review/merge.
+- [x] Place orders atomically with stock protection, rollback and customer-scoped idempotency — VIN-119; merged in PR #181 (`0f0b214`).
 - [ ] Deliver checkout, confirmation/detail and order history — #120.
 - [ ] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — #118–#120.
 
