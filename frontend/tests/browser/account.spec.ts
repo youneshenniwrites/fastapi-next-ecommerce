@@ -291,6 +291,25 @@ test("restoring an account page revalidates and discards its previous profile", 
 test("background account pages defer all profile requests until visible", async ({
   page,
 }) => {
+  const email = `background-${crypto.randomUUID()}@example.com`;
+  const password = "background-test-password";
+  // Keep the real cart owner and profile identity consistent. A mocked signed-in
+  // profile with a guest cart legitimately triggers extra session reconciliation.
+  expect(
+    (
+      await page.request.post("http://127.0.0.1:18300/api/v1/auth/register", {
+        data: { email, password },
+      })
+    ).status(),
+  ).toBe(201);
+  expect(
+    (
+      await page.request.post("/api/session/login", {
+        headers: { Origin: "http://127.0.0.1:3300" },
+        data: { email, password },
+      })
+    ).status(),
+  ).toBe(200);
   let requests = 0;
   await page.addInitScript(() =>
     Object.defineProperty(document, "visibilityState", {
@@ -298,16 +317,10 @@ test("background account pages defer all profile requests until visible", async 
       configurable: true,
     }),
   );
-  await page.route("**/api/session/me", (route) => {
+  await page.route("**/api/session/me", async (route) => {
     requests++;
-    return route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        email: "background@example.com",
-        created_at: "2026-09-01T12:00:00Z",
-      }),
-    });
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    return route.continue();
   });
   await page.goto("/account");
   await page.waitForLoadState("networkidle");
@@ -316,9 +329,7 @@ test("background account pages defer all profile requests until visible", async 
     window.dispatchEvent(new PageTransitionEvent("pageshow"));
   });
   expect(requests).toBe(0);
-  await expect(
-    page.getByText("background@example.com", { exact: true }),
-  ).toHaveCount(0);
+  await expect(page.getByText(email, { exact: true })).toHaveCount(0);
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", {
       value: "visible",
@@ -326,9 +337,8 @@ test("background account pages defer all profile requests until visible", async 
     });
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  await expect(
-    page.getByText("background@example.com", { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByText(email, { exact: true })).toBeVisible();
+  await page.waitForLoadState("networkidle");
   expect(requests).toBe(2);
 });
 
