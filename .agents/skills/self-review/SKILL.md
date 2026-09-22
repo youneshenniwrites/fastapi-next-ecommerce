@@ -18,3 +18,24 @@ The exact-head review instructions above have one exception: the owner-authorize
 [pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. This does not waive branch protection.
+
+## Required documentation status check
+
+Before pushing or requesting review for a feature/status change, run from the repo:
+
+```sh
+python3 scripts/doc_references.py ISSUE_NUMBER "feature phrase" "related term"
+```
+
+Use the actual issue number and meaningful terms, not these placeholders. Read
+surrounding context for every relevant result, including API guides, README,
+AGENTS, architecture, roadmap, ADRs and the canonical plan. Inspect the complete
+PR, not only the latest patch. Broaden terms when results omit expected docs.
+The script searches tracked text only; inspect affected Wiki pages and issue
+handoffs separately. Matches are candidates, not proof; no matches is not a pass.
+
+Reconcile statements as implemented, merged, deployed or operationally verified
+using actual evidence. Preserve historical statements with explicit context.
+Keep daily handoffs in the tracking issue. In the PR Review section record the
+terms, documents checked and corrections (or why no updates are needed). This is
+a required agent review step, not an automated correctness guarantee or CI gate.
