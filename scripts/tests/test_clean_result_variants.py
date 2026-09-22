@@ -1,6 +1,7 @@
 """Observed bot wording must work without accepting arbitrary approval prose."""
 
 import unittest
+
 from scripts.codex_review_gate import CLEAN_RESULT_FOOTER, clean_result
 
 
