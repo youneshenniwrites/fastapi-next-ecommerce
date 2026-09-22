@@ -1,11 +1,12 @@
 # Delivery skills
 
 These repository skills package our existing delivery workflow. They use GitHub
-Issues, the four-column project board and the canonical PR template. They do not
+Issues, the project board and the canonical PR template. They do not
 create a background service or replace external Codex review.
 
 | Invoke | Outcome |
 | --- | --- |
+| `$deliver-ticket` | Complete an authorized ticket using the saved Lean/Parallel mode and existing delivery skills. |
 | `$product-discovery` | Product decisions, MVP boundary and exclusions recorded as a decision note before refinement. |
 | `$refine-tickets` | Scoped linked stories, dependencies and a resumable issue handoff before coding. |
 | `$create-pr` | Issue-linked PR with factual description, ownership, labels and review request. |
@@ -54,5 +55,8 @@ changes require current-head review. This does not waive branch protection.
 
 Docs and board updates report what was verified and what remains outstanding.
 
-The proposed `finish-pr` orchestration skill is not included in this first set.
-It can follow once these individual workflows have been exercised.
+`deliver-ticket` coordinates these skills; [delivery-mode.md](delivery-mode.md)
+stores the owner-selected execution mode. It does not install a scheduler.
+For tasks outside this repository, explicitly invoke the repository skill path.
+A personal skill link may point to this directory, but is machine-local, not
+installed by merging a PR, and must not duplicate the mode or policy.
