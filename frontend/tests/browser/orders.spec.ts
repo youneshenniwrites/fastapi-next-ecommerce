@@ -77,12 +77,16 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
     await page.getByRole("button", { name: "Place demo order" }).focus();
     await page.keyboard.press("Enter");
     if (scenario === "lost response") {
-      await expect(page.getByRole("alert")).toContainText("lost the response");
+      await expect(page.getByRole("main").getByRole("alert")).toContainText(
+        "lost the response",
+      );
       await page.unroute("**/orders/*");
       await page.getByRole("button", { name: "Place demo order" }).click();
     }
     if (scenario === "cart conflict") {
-      await expect(page.getByRole("alert")).toContainText("stock changed");
+      await expect(page.getByRole("main").getByRole("alert")).toContainText(
+        "stock changed",
+      );
       expect(
         (
           await request.put(`${API}/api/v1/cart/items/${product.id}`, {

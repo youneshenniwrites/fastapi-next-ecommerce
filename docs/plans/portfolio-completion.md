@@ -55,8 +55,8 @@ tested order-draft foundation are delivered.
 This counts acceptance outcomes, not effort or a delivery-date forecast.
 Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 has 3/5.
 Atomic placement merged in PR #181 (`0f0b214`); hosted
-verification remains pending. Checkout UI and sandbox payments remain unbuilt. VIN-155's
-native bar counts whole workstreams: VIN-29 stays open until VIN-119 and VIN-120
+verification remains pending. Checkout UI is implemented in draft PR #188, with browser corrections and verification in progress; sandbox payments remain unbuilt. VIN-155’s title displays the canonical **34% · 10/29 verified outcomes** metric. Its
+native 1/10 bar counts whole workstreams, not overall plan completion: VIN-29 stays open until VIN-119 and VIN-120
 are also accepted, so delivering VIN-118 alone does not advance that bar.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
