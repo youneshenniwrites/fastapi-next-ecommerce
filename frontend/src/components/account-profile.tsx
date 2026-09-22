@@ -85,6 +85,11 @@ export function AccountProfile() {
               </dd>
             </div>
           </dl>
+          <p className="mt-6">
+            <Link href="/orders" prefetch={false}>
+              Order history
+            </Link>
+          </p>
           <Button onClick={signOut} disabled={pending} className="mt-8">
             <LogOut aria-hidden="true" />
             {pending ? "Signing out…" : "Sign out"}

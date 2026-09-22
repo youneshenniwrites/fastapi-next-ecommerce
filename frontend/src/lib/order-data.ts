@@ -14,7 +14,8 @@ type OrderReadResult<T> =
 // appear in the value passed to a page or client component.
 export const readOrder = cache(
   async (id: number): Promise<OrderReadResult<Order>> => {
-    if (!Number.isSafeInteger(id) || id < 1) return { status: "missing" };
+    if (!Number.isSafeInteger(id) || id < 1 || id > 2147483647)
+      return { status: "missing" };
     try {
       const identity = await cartIdentity();
       if (!identity) return { status: "guest" };

@@ -36,7 +36,7 @@ not yet complete. Stage counts are not an estimate of effort or time remaining.
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
 | 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
-| 4. Checkout | 🔵 Active | VIN-118 foundation delivered by PR #177; VIN-119 placement merged in PR #181; VIN-120 journey next |
+| 4. Checkout | 🔵 Active | VIN-118 foundation delivered by PR #177; VIN-119 placement merged in PR #181; VIN-120 journey implemented locally; verification/review in progress |
 | 5. Sandbox payments | ☐ Outstanding | #30 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 

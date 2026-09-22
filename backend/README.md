@@ -32,7 +32,7 @@ contains tables, back it up and compare its schema before deciding whether to st
 the baseline. Never blindly stamp or drop an existing database to bypass errors.
 
 Signed-in cart persistence is documented in [the cart API guide](../docs/design/cart-api.md).
-The Next.js storefront, accounts and signed-in cart UI are implemented; checkout and payments remain planned.
+The Next.js storefront, accounts and signed-in cart UI are implemented; VIN-120 adds checkout/history UI; payments remain planned. See the canonical completion plan for merge/deployment status.
 
 Registration returns 201. Login accepts form fields `username` (email) and
 `password`; use its bearer token for `/api/v1/auth/me`. Product reads are public;
