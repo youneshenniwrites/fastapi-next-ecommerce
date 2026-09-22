@@ -17,10 +17,15 @@ eligible merge, authorized deployment verification and docs/board closeout.
 Invoke the existing named skills for these operations rather than duplicating
 policy here. PR creation, CI starting or a review comment is not itself completion.
 A create-PR-only or review-only request retains its narrower finish line.
+Example finish line: deliver VIN-30 through reviewed PRs, merge under existing
+policy, verify development and update plan/board until complete or genuinely blocked.
+Keep one feature active; parallelize within its outcome, not unrelated features.
 
 While CI/review is running, use bounded waits and do independent work within the
 same ticket. Batch findings into coherent fixes; independently verify each finding.
-Keep non-blocking deferrals linked under existing policy. Do not request duplicate
+Complete a full internal verification pass before external review; retain Codex
+and CodeRabbit review under repository policy. Keep non-blocking deferrals linked
+under existing policy. Do not request duplicate
 reviews for an unchanged head. New blocking correctness/security findings remain
 blocking even after multiple rounds. Internal verification is not external approval.
 
@@ -48,6 +53,39 @@ that file through the normal PR process; disclose if it is still local/unmerged.
   The verifier challenges acceptance and reproduces failures. The lead integrates,
   runs combined checks, handles external reviews, and serializes merges/closeout.
   Avoid parallel work whose dependency or coordination cost exceeds its benefit.
+
+## Roles in Parallel mode
+
+- Lead: priorities, integration, PRs, merges, deployment evidence and tracking.
+- Implementer: bounded feature implementation and regression tests.
+- Verifier: independently challenge acceptance, reproduce failures and test the
+  customer journey. For payments, prepare webhook-race and inventory-release
+  scenarios while implementation proceeds, after agreeing the state/API contract.
+
+## Bookkeeping tooling and pilot
+
+Reuse existing naming, metadata and documentation-discovery tooling. Proposed
+extensions should validate issue links/labels/milestones, report required checks
+and exact reviewed revisions, reconcile board state after merge, calculate the
+percentage and pink graphic from the canonical checklist, and flag contradictory
+plan/issue summaries. These extensions are recorded requirements, not implemented
+automation in this skill. Scripts handle deterministic checks and arithmetic;
+agent judgment still decides whether acceptance evidence warrants completion.
+Do not turn this tooling into a prerequisite for the next feature.
+
+Pilot the workflow on VIN-30 in the currently selected mode. Record start/end
+revision and timestamps, owner interventions needed to resume routine work,
+external review rounds, and elapsed time to verified delivery in the issue handoff.
+Separate waiting time and product/access decisions from avoidable interventions.
+Do not invent a baseline or promise a speedup; evaluate the pilot before expanding.
+
+## Optional unattended continuation
+
+Only after a separate explicit request, configure a bounded follow-up for the
+specified delivery: stop at completion or the agreed boundary, prevent overlapping
+runs, and notify only for meaningful progress or action required. Local scheduled
+work needs the computer on and app running; closing the laptop does not move the
+checkout to the cloud. No scheduler is enabled by this skill or by Parallel mode.
 
 ## Closeout
 
