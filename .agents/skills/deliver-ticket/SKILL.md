@@ -36,6 +36,32 @@ busy-loop unchanged failures, fabricate approval, bypass checks or silently take
 another backlog ticket. A skill does not keep a finished turn running or create a
 scheduler. No scheduled wakeups without a separate explicit request.
 
+## Durable handoff and completion check
+
+Use the existing issue handoff as the recovery record, not a second task ledger.
+Before an interruption or phase transition, record the branch/PR and exact head,
+completed evidence, unresolved findings, current blocker, next action and any
+external action already requested. On resume reconcile these with GitHub and Git;
+old handoff text is context, not proof that a check or review is still current.
+
+Before ending an implementation turn, check whether the requested finish line is
+met, an explicit pause applies, or a genuine blocker prevents further authorized
+work. If a review or check is pending, continue bounded supervision during the
+active run. If continuation is unavailable, leave an honest resumable handoff;
+never claim monitoring continues after the turn ends. This is an instruction-level
+check, not an installed stop hook or guarantee of unattended execution.
+
+Deduplicate work by PR, head revision and review/comment identifier. Re-read live
+state before repeating a review request, response, merge or board mutation. A
+retry after an interrupted tool call must first establish whether it succeeded.
+Keep investigation-only assignments read-only with findings and a next decision;
+turn them into implementation only within the owner's authorized scope.
+
+These principles are adapted from [Firstmate](https://github.com/kunchenguid/firstmate).
+Its [Codex App boundary](https://github.com/kunchenguid/firstmate/blob/main/docs/codex-app-backend.md)
+does not provide a supported desktop runtime backend. No Firstmate scripts,
+watchers, terminal backends or hooks are installed by this workflow.
+
 ## Execution mode
 
 Read docs/delivery-mode.md at the start of each ticket. Direct user instructions
