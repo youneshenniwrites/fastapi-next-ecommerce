@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deliver a VINDOR ticket"
+  short_description: "Complete authorized delivery in Lean or Parallel mode"
+  default_prompt: "Use $deliver-ticket to carry the assigned VINDOR ticket through its authorized finish line."
