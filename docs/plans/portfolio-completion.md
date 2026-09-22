@@ -12,6 +12,19 @@ issues. The board owns workflow state. Record scope/sequence changes here and li
 them from #155. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
 
+## Recruiter-readiness feedback decision — 22 September 2026
+
+Keep this plan as the single source of truth. After PR #187, prioritize VIN-120's
+checkout submission, confirmation and history, then VIN-30 hosted sandbox Checkout.
+Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
+exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
+VIN-121 still requires privacy tests before telemetry activation. Payment work must
+preserve inventory already claimed at placement and release it exactly once for
+expired/cancelled unpaid orders. Finish security headers and hosted evidence before
+claiming demo completion. A concise scaling discussion belongs to the interview
+package: distinguish measured limits from hypotheses; do not add Redis, replicas or
+new services solely for demonstration. No additional plan or infrastructure is approved.
+
 ## Progress at a glance — 22 September 2026
 
 **Active stage: 4 of 6, checkout; VIN-119 merged in PR #181; VIN-89 regression follow-up active; next feature VIN-120.** The existing catalog,
@@ -99,7 +112,7 @@ passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted 
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
 merged in PR #164 (`4d3bbd9`), deployed through `91daad7`; visitor-isolation
 acceptance is still unverified. PR #162 merged review/naming policy as `aceea1d`.
-VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is implemented in PR #181 (review pending). PR #160's hosted acceptance remains separate.
+VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is Done following merged PR #181. PR #160's hosted acceptance remains separate.
 
 
 ### Blockers and unblock actions
