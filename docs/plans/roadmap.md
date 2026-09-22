@@ -94,9 +94,8 @@ development.
 
 The [board](https://github.com/users/youneshenniwrites/projects/1) owns live status.
 Customer accounts are split into #24 secure sessions, #25 registration/login,
-#26 profile/navigation and #27 journey verification/documentation. Cart implementation #28 is delivered. Checkout/orders #29 and sandbox payments
-#30 remain outstanding; Azure #31 is deferred. Refine those
-broader items into focused PR tickets before implementation. See
+#26 profile/navigation and #27 journey verification/documentation. Cart implementation #28 is delivered. Checkout/orders VIN-29 is complete: PR #188 delivered the final checkout/history slice.
+Sandbox payments VIN-30 is next; Azure #31 is deferred. See
 [session design](../design/customer-sessions.md) and [delivery rules](../delivery.md).
 
 Hosting setup #44 and production workflow acceptance #46 are complete.

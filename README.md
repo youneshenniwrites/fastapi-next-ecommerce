@@ -229,9 +229,10 @@ Azure is an optional future migration (#31). The AWS Terraform in backend/infra
 remains legacy reference. No paid upgrade or new AI API billing is authorized.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
-The next product steps are orders and sandbox payments. The customer
+The next product step is sandbox payments; non-payment checkout and order history
+merged in PR #188. The customer
 account journey and the signed-in cart storefront are implemented and covered by desktop/mobile browser tests. Follow the
-[ordered roadmap](docs/plans/roadmap.md) for the remaining work.
+[completion plan](docs/plans/portfolio-completion.md) for the remaining work.
 
 ## Try customer accounts
 
