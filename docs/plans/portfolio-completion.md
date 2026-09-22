@@ -45,8 +45,8 @@ Atomic placement, checkout UI and sandbox payments remain unbuilt. VIN-155's
 native bar counts whole workstreams: VIN-29 stays open until VIN-119 and VIN-120
 are also accepted, so delivering VIN-118 alone does not advance that bar.
 
-**Owner-approved sequence change (21 September):** Resume feature delivery with
-VIN-118 order drafts, then VIN-119 atomic placement and VIN-120 checkout/history.
+**Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
+VIN-119 atomic placement, then VIN-120 checkout/history.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. One implementation story is active.
@@ -89,7 +89,7 @@ passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted 
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
 merged in PR #164 (`4d3bbd9`), deployed through `91daad7`; visitor-isolation
 acceptance is still unverified. PR #162 merged review/naming policy as `aceea1d`.
-VIN-158 awaits hosted verification; VIN-118 is in review in PR #177 and VIN-119 is next. PR #160's hosted acceptance remains separate.
+VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is next. PR #160's hosted acceptance remains separate.
 
 
 ### Blockers and unblock actions
@@ -139,8 +139,8 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 4 — Checkout · CURRENT
 
-- [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by PR #177 (effective on merge).
-- [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, tested in PR #177 (effective on merge).
+- [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by merged PR #177.
+- [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, delivered by merged PR #177.
 - [ ] Place orders atomically with stock protection, rollback and customer-scoped idempotency — #119.
 - [ ] Deliver checkout, confirmation/detail and order history — #120.
 - [ ] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — #118–#120.
@@ -348,29 +348,3 @@ visible while the next independent story proceeds.
 Finish line: a reproducible sandbox shopping demo with verified money/inventory,
 useful monitoring, documented recovery and honest evidence—not completion of
 every enterprise-readiness ticket.
-
-## Evening handoff — 21 September 2026
-
-PR #179 merged as `4342dd1` after current-head Codex review, CodeRabbit approval,
-117 local script tests and passing required CI. VIN-178 remains open only for
-live naming-status verification and required-check activation; implementation
-is merged, not awaiting review. Confirm authorization before changing protections:
-the issue currently says no branch-protection changes.
-
-Vercel API retention was saved and verified after reloading: the Production
-Deployments setting is 7 days in vindor-api-development and 14 days in
-vindor-api-production. Frontends and other retention categories are unchanged.
-Storage reduction has not yet been measured. VIN-147 retains the unnecessary
-docs-only deployment finding; broader CI optimization remains Backlog.
-
-Tomorrow, in order:
-1. Complete the small VIN-178 activation closeout; do not start another CI redesign.
-2. Implement VIN-119: one transaction for order placement, current price/stock
-   validation, inventory protection, cart disposition and customer-scoped idempotency.
-3. Prove last-item concurrency, same-key concurrency, rollback, ownership and
-   response-loss retry behavior in PostgreSQL; open the focused VIN-119 PR.
-4. After VIN-119 acceptance, move to VIN-120 checkout, confirmation and history.
-   Sandbox Stripe payment VIN-30 follows. Hosted proof and monitoring remain
-   visible finish-line requirements; do not count them as completed.
-
-No scheduled agent monitoring or overnight work is enabled.
