@@ -20,7 +20,7 @@ verify current task state in Git and GitHub rather than assuming a handoff is fr
 
 For authorized implementation/continuation requests, use
 [deliver-ticket](.agents/skills/deliver-ticket/SKILL.md) and read
-[the saved execution mode](docs/delivery-mode.md). Lean is the current default.
+[the saved execution mode](docs/delivery-mode.md). That file is the sole source of the current mode.
 Carry the requested scope through its authorized finish line without waiting for
 repeated “carry on” messages. Questions and review-only requests stay narrow.
 

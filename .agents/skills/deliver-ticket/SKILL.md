@@ -99,7 +99,10 @@ automation in this skill. Scripts handle deterministic checks and arithmetic;
 agent judgment still decides whether acceptance evidence warrants completion.
 Do not turn this tooling into a prerequisite for the next feature.
 
-Pilot the workflow on VIN-30 in the currently selected mode. Record start/end
+Run the one-time pilot only when VIN-30 is the authorized active ticket and its
+issue handoff does not record the pilot as completed. Otherwise skip this block.
+Use the currently selected mode; record pilot completion in VIN-30’s handoff
+when finished so later invocations do not restart it. Record start/end
 revision and timestamps, owner interventions needed to resume routine work,
 external review rounds, and elapsed time to verified delivery in the issue handoff.
 Separate waiting time and product/access decisions from avoidable interventions.
