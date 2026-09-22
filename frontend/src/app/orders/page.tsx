@@ -25,7 +25,7 @@ export default async function OrdersPage({
             <p className="mt-6">No orders on this page yet.</p>
           )}
           <ul className="my-6 divide-y">
-            {result.data.map((order) => (
+            {result.data.slice(0, 20).map((order) => (
               <li key={order.id} className="py-4">
                 <Link href={`/orders/${order.id}`} prefetch={false}>
                   Order #{order.id} —{" "}
@@ -35,11 +35,8 @@ export default async function OrdersPage({
               </li>
             ))}
           </ul>
-          {result.data.length === 20 && (
-            <Link
-              href={`/orders?after=${result.data.at(-1)!.id}`}
-              prefetch={false}
-            >
+          {result.data.length > 20 && (
+            <Link href={`/orders?after=${result.data[19].id}`} prefetch={false}>
               More orders
             </Link>
           )}

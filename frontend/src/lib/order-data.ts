@@ -42,7 +42,7 @@ export const readOrders = cache(
       if (!identity) return { status: "guest" };
       const result = await apiClient().GET("/api/v1/orders/", {
         redirect: "error",
-        params: { query: { limit: 20, after_id: afterId } },
+        params: { query: { limit: 21, after_id: afterId } },
         headers: { Authorization: `Bearer ${identity.token}` },
       });
       if (result.response.status === 401) return { status: "guest" };

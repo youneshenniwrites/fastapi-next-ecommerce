@@ -40,7 +40,9 @@ beforeEach(() => {
     token: "fictional-token",
   });
   get.mockResolvedValue(
-    response(200, { items: [{ product: { id: 3 }, quantity: 2 }] }),
+    response(200, {
+      items: [{ product: { id: 3 }, quantity: 2, available: true }],
+    }),
   );
   post.mockResolvedValue(response(201, { id: 7 }));
 });
@@ -136,5 +138,17 @@ for (const [status, message] of [
     post.mockResolvedValue(response(status));
     expect((await place()).error).toMatch(message);
     expect(post).toHaveBeenCalledTimes(1);
-    expect(refresh).not.toHaveBeenCalled();
+    if (status === 409) expect(refresh).toHaveBeenCalledWith("/cart");
+    else expect(refresh).not.toHaveBeenCalled();
   });
+
+it("does not create another draft from newly unavailable cart lines", async () => {
+  get.mockResolvedValue(
+    response(200, {
+      items: [{ product: { id: 3 }, quantity: 2, available: false }],
+    }),
+  );
+  expect((await prepare()).error).toMatch(/no longer available/);
+  expect(post).not.toHaveBeenCalled();
+  expect(refresh).toHaveBeenCalledWith("/cart");
+});

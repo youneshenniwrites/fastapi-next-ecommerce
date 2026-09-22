@@ -48,6 +48,13 @@ export async function prepareCheckout(
         error:
           "Your cart is empty or unavailable. Refresh it before continuing.",
       };
+    if (cart.data.items.some((item) => !item.available)) {
+      revalidatePath("/cart");
+      return {
+        error:
+          "Some items are no longer available in that quantity. Update your cart before checkout.",
+      };
+    }
     const draft = await client.POST("/api/v1/orders/drafts", {
       headers: auth,
       redirect: "error",
@@ -119,11 +126,13 @@ export async function placeCheckout(
           retryAfterSeconds(result.response.headers.get("Retry-After")),
         ),
       };
-    if (result.response.status === 409)
+    if (result.response.status === 409) {
+      revalidatePath("/cart");
       return {
         error:
           "Your cart, price or stock changed. Return to your cart and prepare a new order to review.",
       };
+    }
     if (result.response.status === 401 || result.response.status === 404)
       return { error: "This order is unavailable for your current session." };
     if (!result.data || result.response.status !== 200)

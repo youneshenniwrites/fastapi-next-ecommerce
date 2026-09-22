@@ -2,7 +2,12 @@ import AxeBuilder from "@axe-core/playwright";
 import { test, expect } from "@playwright/test";
 const API = "http://127.0.0.1:18300";
 
-for (const scenario of ["normal", "lost response", "cart conflict"])
+for (const scenario of [
+  "normal",
+  "lost response",
+  "cart conflict",
+  "stock conflict",
+])
   test(`checkout places one owned order and shows confirmation/history (${scenario})`, async ({
     page,
     request,
@@ -36,11 +41,12 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
       await request.get(`${API}/api/v1/products/`)
     ).json();
     const product = products.find((p: { stock: number }) => p.stock > 0);
+    const requestedQuantity = scenario === "stock conflict" ? product.stock : 1;
     expect(
       (
         await request.put(`${API}/api/v1/cart/items/${product.id}`, {
           headers,
-          data: { quantity: 1 },
+          data: { quantity: requestedQuantity },
         })
       ).status(),
     ).toBe(200);
@@ -55,9 +61,12 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
     await expect(
       page
         .getByRole("main")
-        .getByText(`Total: £${Number(product.price).toFixed(2)} GBP`, {
-          exact: true,
-        }),
+        .getByText(
+          `Total: £${(Number(product.price) * requestedQuantity).toFixed(2)} GBP`,
+          {
+            exact: true,
+          },
+        ),
     ).toBeVisible();
     expect(
       (await new AxeBuilder({ page }).include("main").analyze()).violations,
@@ -78,6 +87,47 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
         ).status(),
       ).toBe(204);
     }
+    if (scenario === "stock conflict") {
+      const buyer = `competing-${crypto.randomUUID()}@example.com`;
+      expect(
+        (
+          await request.post(`${API}/api/v1/auth/register`, {
+            data: { email: buyer, password },
+          })
+        ).status(),
+      ).toBe(201);
+      const login = await request.post(`${API}/api/v1/auth/login`, {
+        form: { username: buyer, password },
+      });
+      expect(login.status()).toBe(200);
+      const competingHeaders = {
+        Authorization: `Bearer ${(await login.json()).access_token}`,
+      };
+      expect(
+        (
+          await request.put(`${API}/api/v1/cart/items/${product.id}`, {
+            headers: competingHeaders,
+            data: { quantity: 1 },
+          })
+        ).status(),
+      ).toBe(200);
+      const draft = await request.post(`${API}/api/v1/orders/drafts`, {
+        headers: competingHeaders,
+        data: { lines: [{ product_id: product.id, quantity: 1 }] },
+      });
+      expect(draft.status()).toBe(201);
+      const competitorId = (await draft.json()).id;
+      expect(
+        (
+          await request.post(`${API}/api/v1/orders/${competitorId}/place`, {
+            headers: {
+              ...competingHeaders,
+              "Idempotency-Key": `competitor-${competitorId}`,
+            },
+          })
+        ).status(),
+      ).toBe(200);
+    }
     const place = page.getByRole("button", { name: "Place demo order" });
     if (scenario === "normal") {
       // The first click can refocus a window and start session verification.
@@ -89,6 +139,27 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
     } else {
       await place.focus();
       await page.keyboard.press("Enter");
+    }
+    if (scenario === "stock conflict") {
+      await expect(page.getByRole("main").getByRole("alert")).toContainText(
+        "stock changed",
+      );
+      await page.getByRole("link", { name: "Your cart", exact: true }).click();
+      await expect(
+        page.getByText("Limited stock", { exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Review checkout", exact: true })
+        .click();
+      await expect(page.getByRole("main").getByRole("alert")).toContainText(
+        "no longer available",
+      );
+      const drafts = await (
+        await request.get(`${API}/api/v1/orders/`, { headers })
+      ).json();
+      expect(drafts).toHaveLength(1);
+      expect(drafts[0].status).toBe("draft");
+      return;
     }
     if (scenario === "lost response") {
       await expect(page.getByRole("main").getByRole("alert")).toContainText(

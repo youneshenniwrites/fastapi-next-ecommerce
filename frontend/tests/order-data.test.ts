@@ -64,3 +64,14 @@ it("reads first history page without a cursor", async () => {
   get.mockResolvedValue({ response: { status: 200 }, data: [] });
   expect((await readOrders()).status).toBe("ready");
 });
+
+it("fetches one lookahead order after the requested cursor", async () => {
+  get.mockResolvedValue({ response: { status: 200 }, data: [] });
+  await readOrders(42);
+  expect(get).toHaveBeenCalledWith(
+    "/api/v1/orders/",
+    expect.objectContaining({
+      params: { query: { limit: 21, after_id: 42 } },
+    }),
+  );
+});

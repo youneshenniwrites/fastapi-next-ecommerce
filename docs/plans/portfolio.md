@@ -31,5 +31,7 @@ journey, and inspect evidence for important failure cases. Explain tradeoffs,
 limits, and how the design would evolve at scale. Avoid infrastructure added just
 for its name. No real payment details or customer data belong in this demo.
 
-See [roadmap](roadmap.md) for implemented status and remaining PRs. Update the canonical plan when priorities change. Dependency proposals are
+See [roadmap](roadmap.md) for the capability index and
+[the canonical portfolio plan](portfolio-completion.md) for status and progress.
+Update the canonical plan when priorities change. Dependency proposals are
 reviewed separately; failing bot PRs are not a prerequisite to unrelated work.
