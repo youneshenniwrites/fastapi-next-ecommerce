@@ -311,6 +311,8 @@ function CartContent() {
         {!cart.readOnly && (
           <CheckoutSubmit
             action={prepareCheckout.bind(null, cart.state.owner)}
+            owner={cart.state.owner}
+            key={cart.state.owner}
             label="Review checkout"
           />
         )}

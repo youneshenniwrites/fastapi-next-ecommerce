@@ -66,6 +66,7 @@ export default async function OrderPage({
           {result.data.status === "draft" && (
             <CheckoutSubmit
               action={placeCheckout.bind(null, result.owner, result.data.id)}
+              owner={result.owner}
               label="Place demo order"
             />
           )}

@@ -8,13 +8,18 @@ const { identity, get, post, refresh, origin } = vi.hoisted(() => ({
 }));
 vi.mock("next/headers", () => ({ headers: async () => ({ get: origin }) }));
 vi.mock("next/cache", () => ({ revalidatePath: refresh }));
-vi.mock("@/lib/cart-data", () => ({ cartIdentity: identity }));
+vi.mock("server-only", () => ({}));
+vi.mock("@/lib/cart-data", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/cart-data")>()),
+  cartIdentity: identity,
+}));
 vi.mock("@/lib/session", () => ({
   sessionPolicy: () => ({ origins: ["https://shop.example"] }),
 }));
 vi.mock("@/lib/api/client", () => ({
   apiClient: () => ({ GET: get, POST: post }),
 }));
+import { CartRateLimitError } from "@/lib/cart-data";
 import { prepareCheckout, placeCheckout } from "../src/app/orders/actions";
 const response = (status: number, data?: unknown, retry?: string) => ({
   response: new Response(null, {
@@ -40,6 +45,19 @@ beforeEach(() => {
   post.mockResolvedValue(response(201, { id: 7 }));
 });
 for (const action of [prepare, place]) {
+  for (const seconds of [12, undefined])
+    it(`${action.name}: identity throttling prevents downstream reads and writes (${seconds})`, async () => {
+      identity.mockRejectedValue(new CartRateLimitError(seconds));
+      expect(await action()).toEqual({
+        error:
+          seconds === undefined
+            ? "Too many requests. Wait briefly, then try again."
+            : "Too many requests. Wait 12 seconds, then try again.",
+      });
+      expect(get).not.toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalled();
+      expect(refresh).not.toHaveBeenCalled();
+    });
   it(`${action.name}: rejects foreign origins before accessing identity`, async () => {
     origin.mockReturnValue("https://evil.example");
     expect((await action()).error).toMatch(/Origin/);

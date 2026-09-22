@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { apiClient } from "@/lib/api/client";
-import { cartIdentity } from "@/lib/cart-data";
+import { cartIdentity, CartRateLimitError } from "@/lib/cart-data";
 import { sessionPolicy } from "@/lib/session";
 import { rateLimitMessage, retryAfterSeconds } from "@/lib/rate-limit";
 
@@ -70,7 +70,9 @@ export async function prepareCheckout(
           "We couldn't prepare your order. Review your cart and try again.",
       };
     id = draft.data.id;
-  } catch {
+  } catch (error) {
+    if (error instanceof CartRateLimitError)
+      return { error: rateLimitMessage(error.retryAfterSeconds) };
     return {
       error:
         "We couldn't confirm your draft. Check order history before trying again. No payment has been taken.",
@@ -129,7 +131,9 @@ export async function placeCheckout(
         error:
           "We couldn't confirm placement. Retry this same order; it will not be placed twice.",
       };
-  } catch {
+  } catch (error) {
+    if (error instanceof CartRateLimitError)
+      return { error: rateLimitMessage(error.retryAfterSeconds) };
     return {
       error:
         "We couldn't confirm placement. Retry this same order; it will not be placed twice.",

@@ -1,22 +1,28 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useSession } from "@/components/session-provider";
 import { Button } from "@/components/ui/button";
 import type { CheckoutResult } from "@/app/orders/actions";
 
 export function CheckoutSubmit({
   action,
   label,
+  owner,
 }: {
   action: (previous: CheckoutResult, form: FormData) => Promise<CheckoutResult>;
   label: string;
+  owner: string;
 }) {
+  const session = useSession();
   const [state, submit, pending] = useActionState(
-    async (previous: CheckoutResult, form: FormData) => {
+    async (
+      previous: CheckoutResult,
+      form: FormData,
+    ): Promise<CheckoutResult & { owner?: string }> => {
       try {
         const result = await action(previous, form);
-        if (result.location) window.location.assign(result.location);
-        return result;
+        return { ...result, owner };
       } catch {
         return {
           error:
@@ -24,8 +30,17 @@ export function CheckoutSubmit({
         };
       }
     },
-    { error: "" },
+    { error: "" } as CheckoutResult & { owner?: string },
   );
+  useEffect(() => {
+    if (
+      state.location &&
+      state.owner === owner &&
+      session.status === "authenticated" &&
+      session.user.email === owner
+    )
+      window.location.assign(state.location);
+  }, [state, owner, session]);
   return (
     <form action={submit} className="mt-6 space-y-4">
       <Button type="submit" disabled={pending}>

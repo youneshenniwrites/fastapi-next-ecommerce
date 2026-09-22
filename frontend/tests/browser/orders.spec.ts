@@ -25,7 +25,9 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
       ).status(),
     ).toBe(200);
     await page.goto("/orders");
-    await expect(page.getByText("No orders on this page yet.")).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText("No orders on this page yet."),
+    ).toBeVisible();
     const token = (await page.context().cookies()).find(
       (c) => c.name === "local-session",
     )!.value;
@@ -51,9 +53,11 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
     ).toBeVisible();
     const url = page.url();
     await expect(
-      page.getByText(`Total: £${Number(product.price).toFixed(2)} GBP`, {
-        exact: true,
-      }),
+      page
+        .getByRole("main")
+        .getByText(`Total: £${Number(product.price).toFixed(2)} GBP`, {
+          exact: true,
+        }),
     ).toBeVisible();
     expect(
       (await new AxeBuilder({ page }).include("main").analyze()).violations,
@@ -74,8 +78,18 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
         ).status(),
       ).toBe(204);
     }
-    await page.getByRole("button", { name: "Place demo order" }).focus();
-    await page.keyboard.press("Enter");
+    const place = page.getByRole("button", { name: "Place demo order" });
+    if (scenario === "normal") {
+      // The first click can refocus a window and start session verification.
+      const box = (await place.boundingBox())!;
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+      await page.mouse.up();
+    } else {
+      await place.focus();
+      await page.keyboard.press("Enter");
+    }
     if (scenario === "lost response") {
       await expect(page.getByRole("main").getByRole("alert")).toContainText(
         "lost the response",
@@ -101,7 +115,7 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
       page.getByRole("heading", { name: "Order confirmed" }),
     ).toBeVisible();
     await expect(
-      page.getByText("Placed — unpaid", { exact: false }),
+      page.getByRole("main").getByText("Placed — unpaid", { exact: false }),
     ).toBeVisible();
     await page.reload();
     await expect(
@@ -126,6 +140,10 @@ for (const scenario of ["normal", "lost response", "cart conflict"])
     ).toBeVisible();
     await page.context().clearCookies();
     await page.goto(url);
-    await expect(page.getByText("Sign in to view your order.")).toBeVisible();
-    await expect(page.getByText(product.name, { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByRole("main").getByText("Sign in to view your order."),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText(product.name, { exact: true }),
+    ).toHaveCount(0);
   });

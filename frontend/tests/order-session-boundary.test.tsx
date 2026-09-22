@@ -38,7 +38,7 @@ it("conceals old order snapshots during account resolution and account switches"
   ]) {
     mocks.session.mockReturnValue(session);
     rerender(view());
-    expect(screen.queryByText("Private order")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Private order" })).toBeNull();
   }
   expect(mocks.refresh).toHaveBeenCalled();
 });
@@ -46,10 +46,10 @@ it("offers account verification recovery without exposing the old order", () => 
   mocks.session.mockReturnValue({ status: "error" });
   render(
     <OrderSessionBoundary owner="a@example.com">
-      Private order
+      <button>Private order</button>
     </OrderSessionBoundary>,
   );
-  expect(screen.queryByText("Private order")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Private order" })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Verify account again" }));
   expect(mocks.verify).toHaveBeenCalledTimes(1);
 });
@@ -57,4 +57,32 @@ it("retry performs a fresh order read instead of navigating to the same cached U
   render(<RetryOrders />);
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(mocks.refresh).toHaveBeenCalledTimes(1);
+});
+it("keeps the same form node through verification so a pending action is not reset", () => {
+  mocks.session.mockReturnValue({
+    status: "authenticated",
+    user: { email: "a@example.com" },
+  });
+  const view = () => (
+    <OrderSessionBoundary owner="a@example.com">
+      <input aria-label="Order note" defaultValue="" />
+    </OrderSessionBoundary>
+  );
+  const { rerender } = render(view());
+  const input = screen.getByRole("textbox", { name: "Order note" });
+  fireEvent.change(input, { target: { value: "in progress" } });
+  mocks.session.mockReturnValue({ status: "loading" });
+  rerender(view());
+  expect(screen.queryByRole("textbox")).toBeNull();
+  expect(input.isConnected).toBe(true);
+  expect(
+    input.closest("[data-order-private]")?.getAttribute("inert"),
+  ).not.toBeNull();
+  mocks.session.mockReturnValue({
+    status: "authenticated",
+    user: { email: "a@example.com" },
+  });
+  rerender(view());
+  expect(screen.getByRole("textbox")).toBe(input);
+  expect((input as HTMLInputElement).value).toBe("in progress");
 });
