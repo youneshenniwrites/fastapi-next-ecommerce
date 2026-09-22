@@ -1120,7 +1120,7 @@
     },
     "/api/v1/orders/drafts": {
       "post": {
-        "description": "Save a GBP quotation only: no stock reservation, cart change or placement.\n\nRepeating creation produces a new draft; placement idempotency is a later slice.\nPrices are copied from the backend and must be revalidated before purchase.",
+        "description": "Save a GBP quotation only: no stock reservation, cart change or placement.\n\nRepeating creation produces a new draft. The separate placement endpoint\nuses a customer-scoped idempotency key for safe retries.\nPrices are copied from the backend and must be revalidated before purchase.",
         "operationId": "post_draft_api_v1_orders_drafts_post",
         "requestBody": {
           "content": {

@@ -38,7 +38,8 @@ Customer = Annotated[User, Depends(get_current_user)]
 def post_draft(payload: DraftCreate, db: Database, user: Customer):
     """Save a GBP quotation only: no stock reservation, cart change or placement.
 
-    Repeating creation produces a new draft; placement idempotency is a later slice.
+    Repeating creation produces a new draft. The separate placement endpoint
+    uses a customer-scoped idempotency key for safe retries.
     Prices are copied from the backend and must be revalidated before purchase.
     """
     return create_draft(db, user.id, payload)

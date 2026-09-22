@@ -149,7 +149,7 @@ normal use is unaffected. No paid WAF or extra service is involved.
 | --- | --- |
 | `POST /api/v1/auth/register` | 60 requests per anonymous identity |
 | `POST /api/v1/auth/login` | 60 requests per anonymous identity |
-| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes | 300 requests per verified active customer |
+| Cart writes (`PUT`/`DELETE /api/v1/cart/items/{id}`) and product writes, order drafts (`POST /api/v1/orders/drafts`) and placement (`POST /api/v1/orders/{order_id}/place`) | 300 requests shared per verified active customer |
 
 A 429 body is the standard `{"detail": ...}` error shape with no client data,
 plus `Retry-After` (seconds until the window resets), `X-RateLimit-Limit`, and
@@ -161,7 +161,7 @@ visitors are never harmed.
 Authenticated write budgets use the active user returned by the existing JWT and
 database authentication dependency. Different customers behind the same frontend
 egress have separate budgets; changing forwarded headers or renewing a token does
-not create a new budget for the same user. Cart and authorized admin product writes
+not create a new budget for the same user. Cart, order draft/placement and authorized admin product writes
 share that user's budget. Missing/invalid/disabled identities return 401 before
 consuming it; non-admin product requests retain 403. This is throttling after
 authentication, not protection against the cost of authentication itself.

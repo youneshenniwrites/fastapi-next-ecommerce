@@ -142,7 +142,8 @@ export interface paths {
          * Post Draft
          * @description Save a GBP quotation only: no stock reservation, cart change or placement.
          *
-         *     Repeating creation produces a new draft; placement idempotency is a later slice.
+         *     Repeating creation produces a new draft. The separate placement endpoint
+         *     uses a customer-scoped idempotency key for safe retries.
          *     Prices are copied from the backend and must be revalidated before purchase.
          */
         post: operations["post_draft_api_v1_orders_drafts_post"];
