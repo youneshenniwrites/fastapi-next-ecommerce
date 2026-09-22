@@ -57,7 +57,7 @@ The earlier revision was superseded before frontend CI completed; the deployment
 gate required a fully tested current main. Signed visitor isolation is still
 unverified; the Vercel connector currently lacks access to the project team.
 
-**Next action:** implement VIN-119 atomic
+**Current implementation:** VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
 166 PostgreSQL tests pass, including draft ownership, exact totals, rollback and
 migration round trips; container smoke/schema checks and frontend types pass.

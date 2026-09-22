@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Path, Query, Response
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -10,7 +10,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.errors import RATE_LIMITED_RESPONSE, ErrorResponse
 from app.schemas.order import DraftCreate, OrderRead
-from app.services.orders import create_draft
+from app.services.orders import create_draft, place_order
 
 
 def private_response(response: Response) -> None:
@@ -66,3 +66,29 @@ def get_order(
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
+
+
+@router.post(
+    "/{order_id}/place",
+    response_model=OrderRead,
+    dependencies=[Depends(enforce_write_limit)],
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        **RATE_LIMITED_RESPONSE,
+    },
+)
+def post_placement(
+    order_id: Annotated[int, Path(ge=1, le=2147483647)],
+    idempotency_key: Annotated[
+        str, Header(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
+    ],
+    db: Database,
+    user: Customer,
+):
+    """Place your quotation once; reuse the same key after response loss.
+
+    Price or cart changes require a fresh draft and deliberate confirmation.
+    This endpoint claims inventory but does not collect payment.
+    """
+    return place_order(db, user.id, order_id, idempotency_key)

@@ -40,7 +40,7 @@ class OrderLineRead(BaseModel):
 class OrderRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    status: Literal["draft"]
+    status: Literal["draft", "placed"]
     currency: Literal["GBP"]
     total: Decimal
     created_at: datetime
