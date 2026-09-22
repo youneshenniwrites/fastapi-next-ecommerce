@@ -12,7 +12,7 @@ Authenticated order drafts preserve GBP snapshots without reserving stock or
 placing purchases. Atomic placement is implemented separately: an owned draft and
 customer-scoped retry key drive one transaction for stock revalidation, inventory
 claim and purchased-cart removal. Changed prices or cart quantities return conflicts.
-See [ADR 0002](decisions/0002-order-transactions.md). Checkout UI and payment adapters
+See [ADR 0002](decisions/0002-order-transactions.md). VIN-120 implements the checkout UI described below; payment adapters
 remain planned; placement does not establish payment. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
@@ -45,7 +45,7 @@ CI performs locked dependency installation, lint, formatting, tests, and a real
 container/PostgreSQL smoke flow. The AWS infrastructure under backend/infra is
 legacy reference; its nested workflow is not an active deployment pipeline.
 
-As checkout is implemented, domain services will own transactions and coordinate
+The placement domain service owns transactions and coordinates
 CRUD helpers. FastAPI remains authoritative for permissions, money, and inventory.
 The Next.js app consumes an OpenAPI-generated contract; CI rejects contract drift.
 
@@ -70,3 +70,24 @@ VINDOR is the public product name (formerly FORME). Vercel and Neon project disp
 Repository slug, project IDs, database names/roles and credentials remain stable.
 Original FORME domains remain available during migration; see the
 [environment rollout](../deploy/environments/README.md#vindor-domain-rollout).
+
+## Checkout and order screens (VIN-120)
+
+The cart's Review checkout action reads the authenticated cart and creates an
+owned draft from its product IDs and quantities. `/orders/[id]` shows immutable
+server-calculated GBP lines and totals. Explicit placement uses
+`storefront-order-{id}` as a customer-scoped idempotency key, preserved across
+reloads and lost responses. `/orders` lists owned drafts and placed orders in
+20-item cursor pages. No browser redirect establishes payment: confirmation says
+**Placed — unpaid**, and the demo takes no payment or fulfils goods.
+
+Server Actions independently check the allowed origin and current owner. Reads
+are server-only/no-store; credentials never enter component props. A session
+boundary conceals order content until the active account matches the snapshot.
+Throttling, stale cart/stock/price conflicts, session changes and uncertain writes
+have distinct recovery guidance. Mutations are never automatically repeated.
+A lost draft response directs customers to history; placement retries reuse the
+same draft/key. Payment, expiry and exactly-once inventory release remain VIN-30.
+
+Local verification uses disposable accounts/data; merge and hosted acceptance
+status remain in the [canonical plan](plans/portfolio-completion.md).

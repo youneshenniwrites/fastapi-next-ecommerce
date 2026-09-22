@@ -1,11 +1,14 @@
-# Senior SWE portfolio plan
+# Portfolio vision
 
 This is an interview showcase, not a real business. Build a polished, reproducible
 fictional desk-accessories shop with decisions and evidence the owner can explain.
 GBP is the currency; Vercel/Neon free plans host the demo. Use a modular monolith and add
 infrastructure only for a demonstrated need. Deliver focused, reviewed PRs.
 
-## Delivery sequence
+The [canonical portfolio completion plan](portfolio-completion.md) owns all current
+priorities, status and acceptance gates. This page describes product direction only.
+
+## Product direction
 
 1. Reproducible demo: fictional catalog and explicit, safe admin bootstrap.
 2. Polished Next.js/TypeScript storefront: responsive catalog/detail pages,
@@ -28,6 +31,7 @@ journey, and inspect evidence for important failure cases. Explain tradeoffs,
 limits, and how the design would evolve at scale. Avoid infrastructure added just
 for its name. No real payment details or customer data belong in this demo.
 
-See [roadmap](roadmap.md) for implemented status and remaining PRs. Keep this plan
-and the roadmap consistent when priorities change. Dependency proposals are
+See [roadmap](roadmap.md) for the capability index and
+[the canonical portfolio plan](portfolio-completion.md) for status and progress.
+Update the canonical plan when priorities change. Dependency proposals are
 reviewed separately; failing bot PRs are not a prerequisite to unrelated work.

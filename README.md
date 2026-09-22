@@ -9,7 +9,7 @@
 A storefront project built around a FastAPI API and PostgreSQL, with a
 Next.js frontend. **The launch currency is GBP. Free demo hosting targets Vercel and Neon.**
 The backend and catalog storefront run locally and in a
-[development demo](https://vindor-ecommerce-development.vercel.app); checkout UI is still planned.
+[development demo](https://vindor-ecommerce-development.vercel.app); VIN-120 implements checkout UI; see the [completion plan](docs/plans/portfolio-completion.md) for merge/deployment status.
 
 [Quick start](#quick-start) · [API](#api-overview) · [Checks](#testing-and-quality) ·
 [Architecture](docs/architecture.md) · [Roadmap](docs/plans/roadmap.md) ·
@@ -27,7 +27,7 @@ The backend and catalog storefront run locally and in a
 | Verification | SQLite/PostgreSQL tests, container smoke tests, coverage gate, dependency audits |
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive catalog/detail and registration/login pages, filters, generated API types and browser checks |
-| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; payments and checkout/history UI remain planned |
+| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is implemented on VIN-120's branch; payments remain planned |
 | Hosting | Development and production demos verified on Vercel/Neon; main releases through GitHub CI/CD |
 
 This repository is a development foundation, not a production-ready shop. Tests
@@ -113,8 +113,8 @@ HTTP client → FastAPI routes/dependencies → CRUD helpers → SQLAlchemy → 
 
 The Next.js App Router frontend consumes generated types from FastAPI's OpenAPI contract.
 FastAPI remains authoritative for permissions, product prices, inventory, and
-future order totals. Domain services will own checkout transactions when that flow
-is implemented; payment/email files currently contain placeholders.
+order totals. A domain service owns the placement transaction; payment/email
+files currently contain placeholders.
 
 The local stack starts PostgreSQL, runs a one-shot Alembic migration container,
 then starts the non-root API container. Database and API host ports bind to loopback.

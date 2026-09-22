@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { CheckoutSubmit } from "@/components/checkout-submit";
+import { prepareCheckout } from "@/app/orders/actions";
 import { CartPrivateRegion } from "@/components/cart-private-region";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -305,6 +307,19 @@ function CartContent() {
         <p className="mt-3 text-xs leading-5 text-muted-foreground">
           Prices are current backend prices and can change. Adding objects does
           not reserve stock; availability is checked again at checkout.
+        </p>
+        {!cart.readOnly && (
+          <CheckoutSubmit
+            action={prepareCheckout.bind(null, cart.state.owner)}
+            owner={cart.state.owner}
+            key={cart.state.owner}
+            label="Review checkout"
+          />
+        )}
+        <p className="mt-4">
+          <Link href="/orders" prefetch={false}>
+            Order history
+          </Link>
         </p>
       </section>
     </div>
