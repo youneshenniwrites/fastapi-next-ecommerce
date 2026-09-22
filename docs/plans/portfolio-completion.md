@@ -27,7 +27,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 
 ## Progress at a glance — 22 September 2026
 
-**Active stage: 4 of 6, checkout; VIN-119 merged in PR #181; VIN-89 regression follow-up active; next feature VIN-120.** The existing catalog,
+**Active stage: 4 of 6, checkout; VIN-119 merged in PR #181; PR #187 merged; VIN-120 checkout journey active.** The existing catalog,
 accounts and cart are the starting product; checkout and sandbox payments are
 not yet complete. Stage counts are not an estimate of effort or time remaining.
 
@@ -80,11 +80,12 @@ placement suite passed 10 tests including concurrency, rollback and authorizatio
 Migration roundtrip and frontend type checks passed. PR #181 is merged and VIN-119
 is Done; the browser checkout journey belongs to VIN-120.
 
-**22 September owner-requested reliability follow-up:** VIN-89 is active before
-VIN-120. Fix the reproduced account-fixture identity mismatch and investigate the
-intermittent desktop stock-feedback and focus-recovery browser failures without
-weakening assertions or increasing timeouts. Passing reruns alone do not prove a
-cart fix; hosted acceptance remains outstanding.
+**22 September handoff:** PR #187 merged (`b5ced34`) with account-fixture and
+cart actionability regression corrections; 99 local browser tests passed with
+2 existing device-specific skips, and required CI passed. VIN-89 retains broader
+recovery/hosted acceptance in Backlog. VIN-120 checkout submission, confirmation
+and history is now active. The Codex status-indicator follow-up remains deferred
+under VIN-38; it does not displace feature delivery.
 
 **Board convention:** issue cards only; PRs stay linked from their issue rather
 than appearing as duplicate cards. This applies to dependency PRs as well.

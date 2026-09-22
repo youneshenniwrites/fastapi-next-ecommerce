@@ -51,7 +51,9 @@ VIN-118 implements authenticated draft creation/list/detail, immutable GBP
 snapshots and server-owned totals. Drafts never reserve inventory or place a
 purchase. See [ADR 0002](../decisions/0002-order-transactions.md); VIN-119 implements
 atomic placement with stock/price/cart revalidation and customer-scoped retries;
-PR #181 holds review and merge evidence. VIN-120 is the next customer checkout/history UI slice.
+PR #181 is merged. VIN-120 is the active customer checkout/history UI slice.
+PR #187 merged account-fixture/cart actionability test corrections; broader VIN-89
+recovery and hosted acceptance remain outstanding.
 
 ## Current priorities
 
