@@ -71,3 +71,12 @@ reconciles all open groups. These are API snapshots, not an atomic merge lock;
 API errors or concurrent changes require a successful fresh run before merge.
 After merge, manually dispatch it and verify results before requiring the new
 status alongside existing protections. Until that rollout, the status is not required. See CONTRIBUTING.md for naming/exemptions.
+
+## Documentation reference discovery
+
+Before feature/status PRs, create-pr and self-review require
+`python3 scripts/doc_references.py 119 "placement" "checkout"` with the actual
+issue and feature terms. This lists tracked documentation references with file/line
+locations for human inspection. It does not validate their truth, inspect remote
+Wiki/issues, or replace current-head review. Record the inspection in the PR Review
+section; no new CI gate or custom command is introduced.
