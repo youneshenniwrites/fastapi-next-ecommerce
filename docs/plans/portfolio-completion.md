@@ -125,9 +125,11 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 | [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | Privacy coverage is incomplete; free Sentry organization/project configuration and DSN availability are unverified. SDK scaffolding and docs have merged. | Agent extends error/transaction/log/nested-context scrubbing and tests serialized SDK payloads before activation. Owner creates or confirms the free organization/projects and configures the required environment values securely. Then agent verifies live telemetry. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
-**Unblock order:** After the owner-approved checkout sequence, resume #121 privacy
-work and outstanding hosted proof. Configuration can be
-prepared independently, but telemetry activation waits for privacy checks. #45
+**Unblock order:** VIN-30 sandbox payments is next now that non-payment checkout
+is complete. Then resume VIN-121 privacy work and outstanding hosted proof. If
+VIN-30 encounters an external blocker, record it and proceed with independent
+privacy/hosted work rather than waiting idle. Configuration can be prepared
+independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
 Recheck each blocker at its story handoff and record evidence on the source issue.
 If either remains unresolved at portfolio acceptance, report the demo as incomplete
