@@ -14,8 +14,8 @@ at a time; external blockers must not prevent independent work.
 
 ## Recruiter-readiness feedback decision — 22 September 2026
 
-Keep this plan as the single source of truth. After PR #187, prioritize VIN-120's
-checkout submission, confirmation and history, then VIN-30 hosted sandbox Checkout.
+Keep this plan as the single source of truth. VIN-120 checkout submission,
+confirmation and history are delivered in PR #188. Prioritize VIN-30 hosted sandbox Checkout.
 Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
 exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
 VIN-121 still requires privacy tests before telemetry activation. Payment work must

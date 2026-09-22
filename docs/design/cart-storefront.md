@@ -94,7 +94,7 @@ and ensure bearer cookies never appear in the document.
 
 ## Manual acceptance walkthrough
 
-Use fictional details on the deployment being verified. VIN-120 adds non-payment checkout; consult the completion plan for its deployment status.
+Use fictional details on the deployment being verified. VIN-120 non-payment checkout is merged in PR #188; consult the completion plan for its deployment status.
 
 1. Signed out, open `/cart`: expect a sign-in prompt and no saved products.
 2. Register and sign in. Open an in-stock product, press Add to cart, and check
