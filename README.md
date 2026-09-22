@@ -27,7 +27,7 @@ The backend and catalog storefront run locally and in a
 | Verification | SQLite/PostgreSQL tests, container smoke tests, coverage gate, dependency audits |
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive catalog/detail and registration/login pages, filters, generated API types and browser checks |
-| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is implemented on VIN-120's branch; payments remain planned |
+| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is merged in PR #188; payments remain planned |
 | Hosting | Development and production demos verified on Vercel/Neon; main releases through GitHub CI/CD |
 
 This repository is a development foundation, not a production-ready shop. Tests
@@ -229,9 +229,10 @@ Azure is an optional future migration (#31). The AWS Terraform in backend/infra
 remains legacy reference. No paid upgrade or new AI API billing is authorized.
 
 This is a [senior SWE portfolio project](docs/plans/portfolio.md).
-The next product steps are orders and sandbox payments. The customer
+The next product step is sandbox payments; non-payment checkout and order history
+merged in PR #188. The customer
 account journey and the signed-in cart storefront are implemented and covered by desktop/mobile browser tests. Follow the
-[ordered roadmap](docs/plans/roadmap.md) for the remaining work.
+[completion plan](docs/plans/portfolio-completion.md) for the remaining work.
 
 ## Try customer accounts
 
