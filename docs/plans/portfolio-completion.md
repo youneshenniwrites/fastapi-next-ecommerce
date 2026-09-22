@@ -36,17 +36,17 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Progress after PR #177 merges:** `██████░░░░░░░░░░░░░░` **9 / 29 outcomes (31%)**.
-PR #177 delivers the reviewed architecture decision and tested order-draft
-foundation. While that PR is open, merged progress remains **7 / 29 (24%)**.
+**Merged progress:** `██████░░░░░░░░░░░░░░` **9 / 29 outcomes (31%)**.
+PR #177 is merged and VIN-118 is Done: the reviewed architecture decision and
+tested order-draft foundation are delivered.
 This counts acceptance outcomes, not effort or a delivery-date forecast.
 Stage 1 is complete, stage 2 has 4/7 verified outcomes, and stage 4 gains 2/5.
 Atomic placement, checkout UI and sandbox payments remain unbuilt. VIN-155's
 native bar counts whole workstreams: VIN-29 stays open until VIN-119 and VIN-120
 are also accepted, so delivering VIN-118 alone does not advance that bar.
 
-**Owner-approved sequence change (21 September):** Resume feature delivery with
-VIN-118 order drafts, then VIN-119 atomic placement and VIN-120 checkout/history.
+**Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
+VIN-119 atomic placement, then VIN-120 checkout/history.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. One implementation story is active.
@@ -57,7 +57,7 @@ The earlier revision was superseded before frontend CI completed; the deployment
 gate required a fully tested current main. Signed visitor isolation is still
 unverified; the Vercel connector currently lacks access to the project team.
 
-**Next action:** finish PR #177 review/merge, then implement VIN-119 atomic
+**Next action:** implement VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
 166 PostgreSQL tests pass, including draft ownership, exact totals, rollback and
 migration round trips; container smoke/schema checks and frontend types pass.
@@ -89,7 +89,7 @@ passed, 2 PostgreSQL tests skipped locally. These are local results, not hosted 
 PR #163 merged authenticated customer budgets as `b47be4a`; anonymous changes are
 merged in PR #164 (`4d3bbd9`), deployed through `91daad7`; visitor-isolation
 acceptance is still unverified. PR #162 merged review/naming policy as `aceea1d`.
-VIN-158 awaits hosted verification; VIN-118 is in review in PR #177 and VIN-119 is next. PR #160's hosted acceptance remains separate.
+VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is next. PR #160's hosted acceptance remains separate.
 
 
 ### Blockers and unblock actions
@@ -139,8 +139,8 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 4 — Checkout · CURRENT
 
-- [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by PR #177 (effective on merge).
-- [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, tested in PR #177 (effective on merge).
+- [x] Review architecture once and record transaction/state ADR — VIN-29, ADR 0002, delivered by merged PR #177.
+- [x] Persist owned order drafts and immutable GBP price snapshots — VIN-118, delivered by merged PR #177.
 - [ ] Place orders atomically with stock protection, rollback and customer-scoped idempotency — #119.
 - [ ] Deliver checkout, confirmation/detail and order history — #120.
 - [ ] Prove PostgreSQL concurrency/ownership/totals and desktop/mobile non-payment journey — #118–#120.
