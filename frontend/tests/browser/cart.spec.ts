@@ -1,6 +1,21 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+// Exercise the two timing regressions under slower rendering without slowing
+// unrelated scenarios or relaxing their original assertions/timeouts.
+test.beforeEach(async ({ page }, info) => {
+  if (
+    info.project.name !== "cart-desktop" ||
+    ![
+      "two-account isolation, rapid clicks, invalid quantities, shortages and failures",
+      "focus refresh conceals private cart until identity is verified",
+    ].includes(info.title)
+  )
+    return;
+  const client = await page.context().newCDPSession(page);
+  await client.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+});
+
 const API = "http://127.0.0.1:18300";
 
 type Product = {
@@ -302,9 +317,24 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ })
     .click();
+  // Finish the setup mutation before exercising quantity validation.
+  await expect(page.getByTestId("cart-count").first()).toHaveText("3");
+  await expect(
+    page.getByRole("main").getByRole("button", {
+      name: /Add to cart|Saved to cart/,
+    }),
+  ).toBeEnabled();
   await openCartLink(page, info.project.name);
   const scarce = page.getByLabel(`Quantity of ${second.name}, 1 to 99`);
+  // Opacity does not affect Playwright visibility; inert prevents focus/fill.
+  // Wait for the existing privacy refresh rather than editing a concealed form.
+  const quantityRegion = page
+    .locator("[data-cart-private]")
+    .filter({ has: scarce });
+  await expect(quantityRegion).toHaveCSS("opacity", "1");
+  await expect(quantityRegion).toHaveJSProperty("inert", false);
   await scarce.fill("99");
+  await expect(scarce).toHaveValue("99");
   await updateButton(page, second.name).click();
   await expect(lineAlert(page, second.name)).toContainText(
     /Not enough stock|exceeds current stock/,
@@ -768,6 +798,13 @@ test("focus refresh conceals private cart until identity is verified", async ({
   await expect(
     page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
   ).toBeVisible();
+  // Playwright considers opacity:0 text visible. Require the privacy boundary
+  // to reopen before testing a separate, deliberate quantity mutation.
+  await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+  await expect(page.getByTestId("cart-count").first()).toHaveCSS(
+    "opacity",
+    "1",
+  );
   await fault(page, request, {});
   await page
     .getByRole("button", {
