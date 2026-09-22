@@ -135,3 +135,18 @@ The owner-authorized [Dependabot policy](dependabot.md) allows eligible dependen
 npm/uv patch and minor PRs to receive automated policy approval and protected
 auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
 Bot PRs retain upstream titles; VIN-172 tracks the policy.
+
+## Consolidated review guidance
+
+Root AGENTS.md's Review guidelines section supplies repository instructions to
+Codex Code Review. This is the supported reviewer customization surface, not a
+new skill the connector must be assumed to invoke. See [OpenAI's custom review
+rules](https://developers.openai.com/blog/custom-code-review-rules-for-codex).
+
+The goal is one complete related-area pass with root-cause grouping, not guaranteed
+single-round approval. These instructions cannot change the hosted service's
+internal budget, enforce exhaustive coverage or convert comments into approval.
+Use the next authorized representative PR to assess grouped findings, a safe
+counterexample and unrelated changes; record observed behavior on VIN-190. Do not
+launch extra paid reviews solely to claim this policy is tested. Until observed,
+reduced review rounds remain an intended benefit, not verified performance.

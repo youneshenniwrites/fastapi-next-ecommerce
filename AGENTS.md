@@ -98,6 +98,23 @@ Closes #N only for a completed ticket. Update board status and verify acceptance
 CI, PR disposition and relevant documentation before reporting completion.
 For customer sessions (#24), read docs/design/customer-sessions.md; it documents implemented account flows and session boundaries.
 
+## Review guidelines
+
+- Review the complete current PR diff and its directly affected callers, contracts,
+  tests and documented entry points before submitting findings. For status or
+  priority changes, compare all statements about that feature across the canonical
+  plan, roadmap, component READMEs, API descriptions and live UI copy; distinguish
+  historical records from current instructions. Do not expand into unrelated audits.
+- Consolidate instances of the same root cause into one actionable finding with
+  the affected locations. Report all substantiated findings discovered in the pass
+  together rather than stopping at the first instance. On follow-up, check the fix
+  and related interactions, and do not repeat addressed findings without new evidence.
+- Prioritize concrete behavior, security, data integrity and misleading instructions
+  with a demonstrated consequence. Avoid preference-only wording/style findings.
+  Explain trigger and impact. Do not suppress genuine new defects to force approval;
+  a completed review is not a guarantee of exhaustiveness. Existing review evidence,
+  CI, deferral and merge rules remain unchanged.
+
 ## External review requirement
 
 The owner accepts a completed clean Codex review of the latest commit, with all

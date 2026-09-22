@@ -32,3 +32,8 @@ claim it is fixed or call a review with deferred findings clean. The owner has
 authorized these deferrals and prompt merge under the linked conditions; do not
 ask again for each qualifying follow-up. Necessary correctness/security fixes
 still block. Avoid indefinite review polling and scheduled wakeups.
+
+Before requesting the consolidated follow-up review, apply AGENTS.md's Review
+guidelines to the affected feature across related entry points, not just the
+reported line. These same repo rules guide the connector; do not claim it loads
+this skill automatically or guarantees an exhaustive review.
