@@ -32,8 +32,8 @@ drafts is a later maintenance concern, not an unbounded list response.
 ## Placement (VIN-119) and future payment (VIN-30)
 
 Placement revalidates the draft's product IDs, quantities, current prices and stock.
-It creates final immutable placement snapshots; draft amounts are never a promise
-of final pricing. A changed quotation must return a conflict for customer
+It retains the immutable draft snapshots only after confirming their prices still
+match the catalog; draft amounts are never a promise of final pricing. A changed quotation must return a conflict for customer
 reconfirmation before inventory is claimed. No client-supplied total is trusted.
 
 One service transaction claims the customer-scoped idempotency key, locks products

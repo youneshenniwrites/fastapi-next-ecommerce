@@ -2,7 +2,7 @@
 
 The product has a FastAPI backend and a runnable Next.js catalog storefront.
 Server-mediated customer sessions, registration/login screens and profile/navigation
-are implemented; checkout is planned. Read
+are implemented; checkout UI is planned. Read
 docs/plans/portfolio.md, docs/architecture.md, and docs/plans/roadmap.md before choosing work; update their
 factual status when a feature lands.
 

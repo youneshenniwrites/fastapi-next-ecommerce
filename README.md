@@ -9,7 +9,7 @@
 A storefront project built around a FastAPI API and PostgreSQL, with a
 Next.js frontend. **The launch currency is GBP. Free demo hosting targets Vercel and Neon.**
 The backend and catalog storefront run locally and in a
-[development demo](https://vindor-ecommerce-development.vercel.app); checkout is still planned.
+[development demo](https://vindor-ecommerce-development.vercel.app); checkout UI is still planned.
 
 [Quick start](#quick-start) · [API](#api-overview) · [Checks](#testing-and-quality) ·
 [Architecture](docs/architecture.md) · [Roadmap](docs/plans/roadmap.md) ·
