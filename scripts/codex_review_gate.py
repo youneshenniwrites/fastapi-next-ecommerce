@@ -65,7 +65,13 @@ Codex can also answer questions or update the PR. Try commenting "@codex address
 def clean_result(body, sha):
     """Match the complete observed result, optionally followed by its known footer."""
     normalized = " ".join(body.split())
-    for signoff in ("Can't wait for the next one!", "Swish!"):
+    for signoff in (
+        "Can't wait for the next one!",
+        "Swish!",
+        "Keep it up!",
+        "Hooray!",
+        "Keep them coming!",
+    ):
         result = (
             f"Codex Review: Didn't find any major issues. {signoff} "
             f"**Reviewed commit:** `{sha[:10]}`"
