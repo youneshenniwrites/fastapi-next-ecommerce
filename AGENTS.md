@@ -2,7 +2,7 @@
 
 The product has a FastAPI backend and a runnable Next.js catalog storefront.
 Server-mediated customer sessions, registration/login screens and profile/navigation
-are implemented; checkout submission and order history are implemented on VIN-120's branch (merge/deployment status lives in the canonical plan). Read
+are implemented; checkout submission and order history are merged in PR #188 (merge/deployment status lives in the canonical plan). Read
 docs/plans/portfolio.md, docs/architecture.md, and docs/plans/roadmap.md before choosing work; update their
 factual status when a feature lands.
 

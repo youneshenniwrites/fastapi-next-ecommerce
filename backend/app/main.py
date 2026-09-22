@@ -25,7 +25,8 @@ app = FastAPI(
         "decimal prices. Product writes require an active admin. Register a customer, "
         "then use Authorize with your email in the username field to obtain a bearer "
         "token. Admin bootstrap is an operator CLI, never a public endpoint. "
-        "Signed-in carts use current prices without reserving stock; checkout is planned."
+        "Signed-in carts use current prices without reserving stock. "
+        "Order placement claims stock; sandbox payments remain planned."
     ),
     openapi_tags=[
         {

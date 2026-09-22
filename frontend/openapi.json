@@ -593,7 +593,7 @@
     }
   },
   "info": {
-    "description": "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP decimal prices. Product writes require an active admin. Register a customer, then use Authorize with your email in the username field to obtain a bearer token. Admin bootstrap is an operator CLI, never a public endpoint. Signed-in carts use current prices without reserving stock; checkout is planned.",
+    "description": "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP decimal prices. Product writes require an active admin. Register a customer, then use Authorize with your email in the username field to obtain a bearer token. Admin bootstrap is an operator CLI, never a public endpoint. Signed-in carts use current prices without reserving stock. Order placement claims stock; sandbox payments remain planned.",
     "title": "E-Commerce API",
     "version": "0.1.0"
   },

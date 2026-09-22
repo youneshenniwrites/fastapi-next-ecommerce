@@ -47,10 +47,10 @@ export function ProductDetails({ product }: { product: Product }) {
             <strong>Saved to your account.</strong>
             <p>
               Signed-in carts persist across visits. Prices are current backend
-              prices and can change; adding objects does not reserve stock.
-              Checkout is coming next; no purchases can be made yet. Photography
-              shows representative workspace objects, not exact products or
-              brand endorsements.
+              prices and can change; adding objects does not reserve stock. Demo
+              orders can be placed at checkout; no payment is collected.
+              Photography shows representative workspace objects, not exact
+              products or brand endorsements.
             </p>
           </div>
           <dl className="mt-8 text-xs [&_div]:flex [&_div]:justify-between [&_div]:gap-4 [&_div]:border-b [&_div]:border-border [&_div]:py-3">

@@ -51,7 +51,7 @@ VIN-118 implements authenticated draft creation/list/detail, immutable GBP
 snapshots and server-owned totals. Drafts never reserve inventory or place a
 purchase. See [ADR 0002](../decisions/0002-order-transactions.md); VIN-119 implements
 atomic placement with stock/price/cart revalidation and customer-scoped retries;
-PR #181 is merged. VIN-120 is the active customer checkout/history UI slice.
+PR #181 is merged. VIN-120 customer checkout/history merged in PR #188. VIN-30 sandbox payments is next.
 PR #187 merged account-fixture/cart actionability test corrections; broader VIN-89
 recovery and hosted acceptance remain outstanding.
 
@@ -94,9 +94,8 @@ development.
 
 The [board](https://github.com/users/youneshenniwrites/projects/1) owns live status.
 Customer accounts are split into #24 secure sessions, #25 registration/login,
-#26 profile/navigation and #27 journey verification/documentation. Cart implementation #28 is delivered. Checkout/orders #29 and sandbox payments
-#30 remain outstanding; Azure #31 is deferred. Refine those
-broader items into focused PR tickets before implementation. See
+#26 profile/navigation and #27 journey verification/documentation. Cart implementation #28 is delivered. Checkout/orders VIN-29 is complete: PR #188 delivered the final checkout/history slice.
+Sandbox payments VIN-30 is next; Azure #31 is deferred. See
 [session design](../design/customer-sessions.md) and [delivery rules](../delivery.md).
 
 Hosting setup #44 and production workflow acceptance #46 are complete.

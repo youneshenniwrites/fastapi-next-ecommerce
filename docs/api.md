@@ -248,4 +248,4 @@ price/cart changes require a fresh draft and deliberate customer confirmation.
 Successful placement decrements inventory and removes purchased cart lines while
 preserving unrelated items. Missing or foreign orders return 404; missing/disabled
 sessions return 401, malformed headers return 422, and write limits can return 429.
-`placed` means inventory claimed, not paid. Checkout UI and payments are later slices.
+`placed` means inventory claimed, not paid. Checkout UI merged in PR #188; sandbox payments remain planned under VIN-30.
