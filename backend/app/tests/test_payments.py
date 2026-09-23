@@ -421,3 +421,165 @@ def test_disabled_and_live_configuration():
     with pytest.raises(HTTPException) as error:
         payments.get_provider()
     assert error.value.status_code == 503
+
+
+def test_operator_recovery_after_idempotency_window(db, managed, provider):
+    oid, pid, uid = managed
+    provider.lose_response = True
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+    order = db.get(Order, oid)
+    order.payment_started_at = payments.now() - timedelta(days=2)
+    db.commit()
+    sid = next(iter(provider.sessions))
+    provider.sessions[sid]["status"] = "expired"
+    assert payments.reconcile_known_session(db, oid, sid).payment_status == "expired"
+    assert db.get(Product, pid).stock == 3
+    assert len(provider.requests) == 1
+
+
+def test_real_sdk_transport_serialization(monkeypatch):
+    """Exercise real SDK method routing, resource conversion and retry-key headers."""
+    from stripe._http_client import HTTPClient
+
+    from app.providers.stripe import StripeProvider
+
+    class Transport(HTTPClient):
+        name = "in-memory"
+
+        def request(self, method, url, headers, post_data=None, *, _usage=None):
+            calls.append((method, url, dict(headers), post_data))
+            return (
+                json.dumps(
+                    {
+                        "id": "cs_test_sdk",
+                        "object": "checkout.session",
+                        "metadata": {"order_id": "1"},
+                    }
+                ).encode(),
+                200,
+                {},
+            )
+
+    calls = []
+    monkeypatch.setattr(
+        settings, "STRIPE_API_KEY", SecretStr("rk_test_fictional_fixture")
+    )
+    provider = StripeProvider()
+    provider.client = stripe.StripeClient(
+        "rk_test_fictional_fixture", http_client=Transport()
+    )
+    params = {
+        "mode": "payment",
+        "line_items": [
+            {
+                "price_data": {
+                    "currency": "gbp",
+                    "unit_amount": 235,
+                    "product_data": {"name": "Fictional tea"},
+                },
+                "quantity": 2,
+            }
+        ],
+        "integration_identifier": "vindor_abcdefgh",
+    }
+    assert provider.create(params, "durable-key")["metadata"] == {"order_id": "1"}
+    assert calls[0][2]["Idempotency-Key"] == "durable-key"
+    from urllib.parse import parse_qs
+
+    assert parse_qs(calls[0][3])["line_items[0][price_data][unit_amount]"] == ["235"]
+    assert provider.retrieve("cs_test_sdk")["id"] == "cs_test_sdk"
+    assert provider.expire("cs_test_sdk")["id"] == "cs_test_sdk"
+    assert calls[-1][1].endswith("/v1/checkout/sessions/cs_test_sdk/expire")
+
+
+def test_reconciliation_cli_is_bounded_and_reports_cursor(
+    db, managed, provider, monkeypatch, capsys
+):
+    from app import reconcile_payments
+
+    oid, _, _ = managed
+    monkeypatch.setattr(reconcile_payments, "SessionLocal", lambda: db)
+    monkeypatch.setattr("sys.argv", ["reconcile", "--limit", "1"])
+    reconcile_payments.main()
+    output = capsys.readouterr().out
+    assert f"Order {oid}: pending" in output
+    assert f"Next cursor: --after-id {oid}" in output
+    monkeypatch.setattr("sys.argv", ["reconcile", "--order-id", str(oid)])
+    with pytest.raises(SystemExit) as error:
+        reconcile_payments.main()
+    assert error.value.code == 2
+
+
+def test_legacy_placed_orders_stay_unmanaged(db, user, provider, monkeypatch):
+    monkeypatch.setattr(settings, "STRIPE_ENABLED", False)
+    product = Product(name="Legacy item", price=Decimal("1.00"), stock=1)
+    db.add(product)
+    db.commit()
+    oid = prepare(db, user.id, product)
+    place_order(db, user.id, oid, "legacy")
+    monkeypatch.setattr(settings, "STRIPE_ENABLED", True)
+    for action in (
+        payments.start_payment,
+        payments.cancel_payment,
+        payments.reconcile_payment,
+    ):
+        with pytest.raises(HTTPException) as error:
+            action(db, user.id, oid)
+        assert error.value.status_code == 409
+    assert db.get(Product, product.id).reserved_stock == 0
+    assert provider.requests == []
+
+
+def test_paid_after_released_inventory_is_never_marked_paid(db, managed, provider):
+    oid, pid, uid = managed
+    payments.start_payment(db, uid, oid)
+    sid = db.get(Order, oid).payment_session_id
+    payments.cancel_payment(db, uid, oid)
+    provider.sessions[sid].update(status="complete", payment_status="paid")
+    with pytest.raises(HTTPException) as error:
+        provider.emit(db, sid)
+    assert error.value.status_code == 409
+    assert db.get(Order, oid).payment_status == "cancelled"
+    assert db.get(Product, pid).stock == 3
+    assert list(db.scalars(select(PaymentEvent))) == []
+
+
+def test_inventory_effect_and_deduplication_roll_back_together(
+    db, managed, provider, monkeypatch
+):
+    oid, pid, uid = managed
+    payments.start_payment(db, uid, oid)
+    sid = db.get(Order, oid).payment_session_id
+    provider.sessions[sid].update(status="complete", payment_status="paid")
+    original_commit = db.commit
+
+    def fail_commit():
+        db.flush()
+        raise RuntimeError("disposable database fault after effects")
+
+    monkeypatch.setattr(db, "commit", fail_commit)
+    with pytest.raises(RuntimeError):
+        provider.emit(db, sid)
+    monkeypatch.setattr(db, "commit", original_commit)
+    assert db.get(Order, oid).payment_status == "pending"
+    assert db.get(Product, pid).reserved_stock == 2
+    assert list(db.scalars(select(PaymentEvent))) == []
+    provider.emit(db, sid)
+    assert db.get(Order, oid).payment_status == "paid"
+
+
+def test_customer_explicit_status_and_cancel_endpoints(client, db, managed, token):
+    oid, pid, _ = managed
+    headers = {"Authorization": f"Bearer {token}"}
+    assert (
+        client.post(f"/api/v1/orders/{oid}/reconcile", headers=headers).json()[
+            "payment_status"
+        ]
+        == "pending"
+    )
+    response = client.post(f"/api/v1/orders/{oid}/cancel", headers=headers)
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "private, no-store"
+    assert response.json()["payment_status"] == "cancelled"
+    assert db.get(Product, pid).stock == 3

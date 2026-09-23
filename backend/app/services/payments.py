@@ -283,6 +283,25 @@ def cancel_payment(db: Session, user_id: int, order_id: int) -> Order:
         raise
 
 
+def reconcile_known_session(db: Session, order_id: int, session_id: str) -> Order:
+    """Operator recovery beyond the idempotency window, never recreating a session.
+
+    The session must match the durable intent, amount and sandbox identity. A paid
+    snapshot still waits for signed webhook replay before marking the order paid.
+    """
+    provider = get_provider()
+    db.commit()
+    session = provider_call(provider.retrieve, session_id)
+    try:
+        order = lock_order(db, order_id)
+        apply_session(db, order, session)
+        db.commit()
+        return order
+    except Exception:
+        db.rollback()
+        raise
+
+
 def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
     provider = get_provider()
     try:
