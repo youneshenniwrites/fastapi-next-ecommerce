@@ -248,4 +248,10 @@ price/cart changes require a fresh draft and deliberate customer confirmation.
 Successful placement decrements inventory and removes purchased cart lines while
 preserving unrelated items. Missing or foreign orders return 404; missing/disabled
 sessions return 401, malformed headers return 422, and write limits can return 429.
-`placed` means inventory claimed, not paid. Checkout UI merged in PR #188; sandbox payments remain planned under VIN-30.
+`placed` means inventory claimed, not paid. The optional VIN-30 sandbox lifecycle adds
+`payment_status` and `payment_expires_at`; historical orders retain null payment state.
+Owned POST operations `/api/v1/orders/{id}/payment`, `/cancel` and `/reconcile`
+create/reuse Checkout, cancel safely and reconcile respectively. Signed provider
+events use `/api/v1/payments/webhook`. Only verified success webhooks establish
+`paid`. See [sandbox configuration and recovery](sandbox-payments.md); hosted
+verification status remains in the canonical plan.

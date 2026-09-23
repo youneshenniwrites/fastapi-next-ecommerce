@@ -25,9 +25,9 @@ claiming demo completion. A concise scaling discussion belongs to the interview
 package: distinguish measured limits from hypotheses; do not add Redis, replicas or
 new services solely for demonstration. No additional plan or infrastructure is approved.
 
-## Progress at a glance — 22 September 2026
+## Progress at a glance — 23 September 2026
 
-**Next stage: 5 of 6, sandbox payments.** Non-payment checkout is merged and verified in CI; hosted acceptance remains separate. Stage counts are not effort estimates.
+**Current stage: 5 of 6, sandbox payments.** Non-payment checkout is merged and verified in CI; hosted acceptance remains separate. Stage counts are not effort estimates.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 | 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted proof remains in stage 6 |
-| 5. Sandbox payments | ☐ Outstanding | #30 |
+| 5. Sandbox payments | 🚧 In progress | VIN-30 lifecycle, hosted Checkout and verification |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
 **Maintenance complete (21 September):** VIN-172 is closed and Done. All initial
@@ -47,14 +47,14 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Merged progress:** `████████░░░░░░░░░░░░` **12 / 29 outcomes (41%)**.
+**Verified progress:** `█████████░░░░░░░░░░░` **13 / 29 outcomes (45%)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 4/7 and checkout 5/5. Other stages remain outstanding.
+Baseline is 3/3, reliability 4/7, checkout 5/5 and payment setup 1/3. Other stages remain outstanding.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-41% · 12/29 verified outcomes. Hide Sub-issues progress in the saved board view;
+45% · 13/29 verified outcomes. Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Sandbox payments, hosted acceptance, security and monitoring are not claimed complete.
 
@@ -172,7 +172,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 5 — Sandbox payment
 
-- [ ] Confirm provider setup satisfies free/no-card constraint — #30.
+- [x] Confirm provider setup satisfies free/no-card constraint — VIN-30; free Stripe sandbox account connected on 23 September, test mode verified through the Stripe connector. No live activation or real card was required.
 - [ ] Deliver test-mode sessions, verified webhooks and payment lifecycle — #30.
 - [ ] Prove deduplication, cancellation/expiry, races and exactly-once inventory release — #30.
 

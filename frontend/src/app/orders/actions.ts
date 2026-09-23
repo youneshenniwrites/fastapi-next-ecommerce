@@ -130,7 +130,7 @@ export async function placeCheckout(
       revalidatePath("/cart");
       return {
         error:
-          "Your cart, price or stock changed. Return to your cart and prepare a new order to review.",
+          "Your cart, price or stock changed, or the total is unsupported. Sandbox orders must total £0.30–£999,999.99. Return to your cart, adjust it if needed, and prepare a new order to review.",
       };
     }
     if (result.response.status === 401 || result.response.status === 404)

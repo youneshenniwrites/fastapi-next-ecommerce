@@ -87,7 +87,10 @@ boundary conceals order content until the active account matches the snapshot.
 Throttling, stale cart/stock/price conflicts, session changes and uncertain writes
 have distinct recovery guidance. Mutations are never automatically repeated.
 A lost draft response directs customers to history; placement retries reuse the
-same draft/key. Payment, expiry and exactly-once inventory release remain VIN-30.
+same draft/key. VIN-30 adds optional sandbox payment state, signed webhooks and exactly-once
+inventory release; [ADR 0003](decisions/0003-sandbox-payments.md) records the
+transaction boundaries. [The runbook](sandbox-payments.md) distinguishes
+configuration, operator recovery and hosted verification.
 
 Local verification uses disposable accounts/data; merge and hosted acceptance
 status remain in the [canonical plan](plans/portfolio-completion.md).
