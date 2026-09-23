@@ -39,12 +39,10 @@ links disabled; a recovered Checkout Session could accept money after stock was
 released. Session line items and amounts come only from persisted order snapshots.
 Do not enable adjustable quantities, promotions, shipping or tax on this integration.
 
-The approved free sandbox setup is verified. The development destination and
-secrets were configured on 23 September 2026. The destination must be switched
-to the frontend relay after deployment because direct development API access
-requires Vercel sign-in. This is configuration evidence,
-**not evidence that a deployed purchase works**. Hosted proof follows reviewed
-implementation deployment. Production-shop activation is outside this rollout.
+The approved free sandbox setup and development activation were verified on
+23 September 2026. The destination uses the public frontend relay because direct
+API access requires Vercel sign-in. The hosted evidence below proves the deployed
+journey. Production sandbox payments and their relay remain disabled.
 
 ## Customer flow
 
@@ -122,3 +120,41 @@ Hosted acceptance must separately record the deployed revision, fictional order,
 sandbox session/event IDs, final payment state and inventory effect for success,
 cancellation and expiry. Never publish API keys, signatures or customer credentials.
 See [ADR 0003](decisions/0003-sandbox-payments.md) for transaction decisions.
+
+## Hosted development evidence — 23 September 2026
+
+Verified at 19:20–19:30 UTC using fictional products/users and Stripe test mode.
+Revision `8685cc1bae6f6edad34e569ffa66e78739b8be8d` was redeployed unchanged after
+development-only configuration: API `HQxhFPtHraGoAYAMaHMWyPmdcs9Y`, frontend
+`5Y9ry8kMnoHvM3a1vBN5smmfUoyC`. The workflow dispatch skipped the already-deployed
+revision, so Vercel's Redeploy operation applied configuration to that same revision.
+
+| Scenario | Observed result |
+| --- | --- |
+| Purchase, order 1 | Stripe `complete` / `paid`, £12.90 GBP; application showed paid and order history was verified. |
+| Cancellation, order 2 | Application cancelled; Stripe session expired/unpaid. Product 5 stock rose 28 → 29 and stayed 29 after refresh. |
+| Expiry, order 3 | Application expired; Stripe session expired/unpaid. Product 5 stock rose 28 → 29. |
+| Duplicate expiry event | Original delivery at 19:27:45 UTC and manual replay at 19:29:40 UTC both returned HTTP 200; stock stayed 29. |
+| Unsigned webhook | Public relay/API path returned HTTP 400. |
+
+Stripe account `acct_1UItNbAsSrcPIxfF` and all observed sessions had `livemode=false`.
+Destination `we_1UItjTAsSrcPIxfFEAhEy1f0` sends to
+`https://vindor-ecommerce-development.vercel.app/api/payments/webhook`.
+No API keys, webhook secrets or payment credentials are included here.
+
+<details>
+<summary>Provider references for reproducing the evidence</summary>
+
+- Paid order 1: `cs_test_a10PAk1kN5DdlDRoh7DvtPwi1mTv2FOPXbagoA5yXkkLRblY90lidv4I4t`.
+- Cancelled order 2: `cs_test_a1ioTmUaWO6sAMww49VflHJjLsH6UWygoLFQ8BGvhfwddPVR1CExQOMql2`.
+- Expired order 3: `cs_test_a1obPdBiuMkcvdl74VKTdl1WvM48ZfqpO6V1RKHGbyrVKRV1Wv0mSTxZ61`.
+- Replayed expiry: `evt_1UIvpUAsSrcPIxfFCkWfEBjY`.
+
+</details>
+
+Inventory observations came from the public product's server-rendered DTO with an
+uncached backend fetch, together with application and Stripe state. Direct Neon
+inspection was unavailable: this does not claim inspection of hosted event rows or
+`reserved_stock`. PR #194's 77 PostgreSQL payment tests supply separate automated
+transaction/race evidence. This hosted run does not complete privacy/monitoring,
+restore, accessibility, preview or limiter acceptance in the canonical plan.

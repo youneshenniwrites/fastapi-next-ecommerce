@@ -15,7 +15,7 @@ at a time; external blockers must not prevent independent work.
 ## Recruiter-readiness feedback decision — 22 September 2026
 
 Keep this plan as the single source of truth. VIN-120 checkout submission,
-confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194; prioritize its development activation and hosted sandbox proof.
+confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194 and its hosted sandbox journey was verified on 23 September. Next: VIN-121 telemetry privacy, then the remaining hosted evidence.
 Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
 exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
 VIN-121 still requires privacy tests before telemetry activation. Payment work must
@@ -27,18 +27,18 @@ new services solely for demonstration. No additional plan or infrastructure is a
 
 ## Progress at a glance — 23 September 2026
 
-**Current stage: 6 of 6, hosted verification and portfolio evidence.** Non-payment checkout is merged and verified in CI; hosted acceptance remains separate. Stage counts are not effort estimates.
+**Current stage: 6 of 6, hosted verification and portfolio evidence.** Checkout and sandbox purchase are verified on development; remaining hosted acceptance stays explicit below. Stage counts are not effort estimates.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
 | 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
-| 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted proof remains in stage 6 |
-| 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted verification belong to stage 6 |
+| 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted purchase verified in stage 6 |
+| 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted proof verified in stage 6 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
-**Payment implementation merged (23 September):** PR #194 merged as `0e89efd` after clean Codex review, CodeRabbit approval and passing CI on `9adfff8`. Sandbox sessions, signed webhooks and inventory recovery are delivered. VIN-30 remains In progress until development configuration and real sandbox success/cancellation/expiry evidence are verified. No live payments are enabled.
+**Payment implementation merged (23 September):** PR #194 merged as `0e89efd` after clean Codex review, CodeRabbit approval and passing CI on `9adfff8`. Sandbox sessions, signed webhooks and inventory recovery are delivered. VIN-30 is complete: development revision `8685cc1` passed the real sandbox purchase, history, cancellation, expiry and duplicate-expiry replay on 23 September, 19:20–19:30 UTC. See [hosted evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026). Production sandbox payments remain disabled; no live payments are enabled.
 
 **Maintenance complete (21 September):** VIN-172 is closed and Done. All initial
 Dependabot PRs #165–#171 are merged; PR #168 proved a live policy approval and
@@ -49,19 +49,19 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Verified progress:** `██████████░░░░░░░░░░` **15 / 29 outcomes (52%)**.
+**Verified progress:** `███████████░░░░░░░░░` **16 / 29 outcomes (55%)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 4/7, checkout 5/5 and payment implementation 3/3. Other stages remain outstanding.
+Baseline is 3/3, reliability 4/7, checkout 5/5, payment implementation 3/3 and hosted finish 1/8. Security/monitoring remains 0/3.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-52% · 15/29 verified outcomes. Hide Sub-issues progress in the saved board view;
+55% · 16/29 verified outcomes. Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
-Payment implementation and automated correctness evidence are complete; hosted payment acceptance, security and monitoring are not claimed complete.
+Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
-VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. Next: VIN-30 development activation and hosted payment verification in stage 6.
+VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. Next: VIN-121 privacy coverage before telemetry activation.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
@@ -85,7 +85,7 @@ is Done; the browser checkout journey belongs to VIN-120.
 cart actionability regression corrections; 99 local browser tests passed with
 2 existing device-specific skips, and required CI passed. VIN-89 retains broader
 recovery/hosted acceptance in Backlog. VIN-120 checkout submission, confirmation
-and history merged in PR #188; VIN-30 implementation merged in PR #194. Its hosted verification is next. The Codex status-indicator follow-up remains deferred
+and history merged in PR #188; VIN-30 implementation merged in PR #194. Its hosted verification was completed on 23 September (see evidence above). The Codex status-indicator follow-up remains deferred
 under VIN-38; it does not displace feature delivery.
 
 **Board convention:** issue cards only; PRs stay linked from their issue rather
@@ -128,10 +128,9 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
 **Unblock order:** Stage 5 payment implementation and automated correctness
-evidence are complete. Start stage 6 with VIN-30 development activation and actual
-hosted sandbox success/cancellation/expiry verification. Then resume VIN-121 privacy work and outstanding hosted proof. If
-VIN-30 encounters an external blocker, record it and proceed with independent
-privacy/hosted work rather than waiting idle. Configuration can be prepared
+evidence and VIN-30 hosted sandbox proof are complete. Resume VIN-121 privacy
+coverage before telemetry activation, followed by outstanding hosted proof. Record
+external blockers and continue independent work rather than waiting idle. Configuration can be prepared
 independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
 Recheck each blocker at its story handoff and record evidence on the source issue.
@@ -176,7 +175,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 #### 5 — Sandbox payment
 
 - [x] Confirm provider setup satisfies free/no-card constraint — VIN-30; free Stripe sandbox account connected on 23 September, test mode verified through the Stripe connector. No live activation or real card was required.
-- [x] Deliver test-mode sessions, verified webhooks and payment lifecycle — VIN-30 / PR #194, merged `0e89efd`; hosted activation remains in stage 6.
+- [x] Deliver test-mode sessions, verified webhooks and payment lifecycle — VIN-30 / PR #194, merged `0e89efd`; development activation and hosted evidence are recorded in stage 6.
 - [x] Prove deduplication, cancellation/expiry, races and exactly-once inventory release — VIN-30 / PR #194; PostgreSQL CI run 35901974932 and desktop/mobile browser CI run 35901974785. These are automated fixture tests, not hosted Stripe proof.
 
 #### 6 — Hosted portfolio finish
@@ -185,7 +184,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Expand cart coverage measurement and validate comparison gates before requiring them.
 - [ ] Resolve exact-head review enforcement — #38; add types around new backend services.
 - [ ] Prove browser-cache speed benefit or record unproven by **1 October** — #146; implementation is already merged, measurement is not proven.
-- [ ] Run complete hosted sandbox purchase with fictional data.
+- [x] Run complete hosted sandbox purchase with fictional data — VIN-30, development `8685cc1`, 23 September; [success/history, cancellation, expiry and duplicate replay evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026).
 - [ ] Perform disposable restore rehearsal and document recovery — scoped #130.
 - [ ] Review full journey for keyboard/mobile/accessibility — scoped #131, not formal full conformance.
 - [ ] Update architecture/setup/limits and deliver five-minute demo script.

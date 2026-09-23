@@ -1,6 +1,7 @@
 # ADR 0003: sandbox payment authority and inventory release
 
-Date: 23 September 2026. Status: accepted in merged PR #194; hosted verification remains pending.
+Date: 23 September 2026. Status: accepted in merged PR #194; development hosted verification completed
+on 23 September. See the [payment runbook](../sandbox-payments.md#hosted-development-evidence--23-september-2026). Production payments remain disabled.
 
 ## Context
 
