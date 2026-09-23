@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from uuid import uuid4
 
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.settings import settings
 from app.crud.cart import lock_customer
 from app.crud.order import read_owned
 from app.models.cart import CartLine
@@ -71,6 +74,12 @@ def place_order(db: Session, user_id: int, order_id: int, key: str) -> Order:
             raise HTTPException(
                 409, "Order already placed; retry with the original key"
             )
+        if settings.STRIPE_ENABLED and not Decimal("0.30") <= order.total <= Decimal(
+            "999999.99"
+        ):
+            raise HTTPException(
+                409, "Sandbox payment total must be between GBP 0.30 and GBP 999999.99"
+            )
         products = {
             p.id: p
             for p in db.scalars(
@@ -95,7 +104,13 @@ def place_order(db: Session, user_id: int, order_id: int, key: str) -> Order:
             if cart is None or cart.quantity != line.quantity:
                 raise HTTPException(409, "Cart changed; create and confirm a new draft")
             product.stock -= line.quantity
+            if settings.STRIPE_ENABLED:
+                product.reserved_stock += line.quantity
             db.delete(cart)
+        if settings.STRIPE_ENABLED:
+            order.payment_status = "pending"
+            order.payment_reference = str(uuid4())
+            order.payment_expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         order.status = "placed"
         order.idempotency_key = key
         db.flush()

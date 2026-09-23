@@ -12,8 +12,8 @@ Authenticated order drafts preserve GBP snapshots without reserving stock or
 placing purchases. Atomic placement is implemented separately: an owned draft and
 customer-scoped retry key drive one transaction for stock revalidation, inventory
 claim and purchased-cart removal. Changed prices or cart quantities return conflicts.
-See [ADR 0002](decisions/0002-order-transactions.md). VIN-120 implements the checkout UI described below; payment adapters
-remain planned; placement does not establish payment. Product prices use Decimal /
+See [ADR 0002](decisions/0002-order-transactions.md). VIN-120 implements the checkout UI described below; VIN-30 implements the sandbox payment adapter and lifecycle; activation and hosted
+proof remain pending in the canonical plan. Placement does not establish payment. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
 
@@ -79,7 +79,8 @@ server-calculated GBP lines and totals. Explicit placement uses
 `storefront-order-{id}` as a customer-scoped idempotency key, preserved across
 reloads and lost responses. `/orders` lists owned drafts and placed orders in
 20-item cursor pages. No browser redirect establishes payment: confirmation says
-**Placed — unpaid**, and the demo takes no payment or fulfils goods.
+**Placed — unpaid** for legacy/unmanaged orders. Managed orders show their
+authoritative sandbox payment state. No real money is collected or goods fulfilled.
 
 Server Actions independently check the allowed origin and current owner. Reads
 are server-only/no-store; credentials never enter component props. A session
@@ -87,7 +88,10 @@ boundary conceals order content until the active account matches the snapshot.
 Throttling, stale cart/stock/price conflicts, session changes and uncertain writes
 have distinct recovery guidance. Mutations are never automatically repeated.
 A lost draft response directs customers to history; placement retries reuse the
-same draft/key. Payment, expiry and exactly-once inventory release remain VIN-30.
+same draft/key. VIN-30 adds optional sandbox payment state, signed webhooks and exactly-once
+inventory release; [ADR 0003](decisions/0003-sandbox-payments.md) records the
+transaction boundaries. [The runbook](sandbox-payments.md) distinguishes
+configuration, operator recovery and hosted verification.
 
 Local verification uses disposable accounts/data; merge and hosted acceptance
 status remain in the [canonical plan](plans/portfolio-completion.md).

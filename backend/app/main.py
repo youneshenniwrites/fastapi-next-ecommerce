@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.api.v1 import auth, cart, orders, products
+from app.api.v1 import auth, cart, orders, payments, products
 from app.core.observability import init_observability
 from app.core.settings import settings
 
@@ -26,7 +26,7 @@ app = FastAPI(
         "then use Authorize with your email in the username field to obtain a bearer "
         "token. Admin bootstrap is an operator CLI, never a public endpoint. "
         "Signed-in carts use current prices without reserving stock. "
-        "Order placement claims stock; sandbox payments remain planned."
+        "Order placement claims stock; configured sandbox orders use hosted Checkout."
     ),
     openapi_tags=[
         {
@@ -83,6 +83,7 @@ async def health_check() -> dict[str, str]:
 app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(orders.router)
+app.include_router(payments.router)
 app.include_router(cart.router, prefix="/api/v1/cart", tags=["Cart"])
 # app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 

@@ -23,6 +23,10 @@ class Product(Base):
         CheckConstraint(
             "stock >= 0 AND stock <= 2147483647", name="ck_products_stock_range"
         ),
+        CheckConstraint(
+            "reserved_stock >= 0 AND stock + reserved_stock <= 2147483647",
+            name="ck_products_reservation_range",
+        ),
         CheckConstraint("currency = 'GBP'", name="ck_products_currency"),
         CheckConstraint(
             "length(trim(name)) >= 1 AND length(name) <= 255",
@@ -41,6 +45,7 @@ class Product(Base):
     currency: Mapped[str] = mapped_column(
         String(3), nullable=False, default="GBP", server_default="GBP"
     )
+    reserved_stock: Mapped[int] = mapped_column(default=0, server_default="0")
     stock: Mapped[int] = mapped_column(nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

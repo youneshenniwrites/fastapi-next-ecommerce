@@ -74,7 +74,7 @@ def create_new_product(product_in: ProductCreate, db: Session = Depends(get_db))
     dependencies=[Depends(require_admin), Depends(enforce_write_limit)],
     summary="Partially update a product",
     description="Active admin only. Omitted fields retain their values; only description may explicitly be null. This PUT intentionally has partial-update semantics.",
-    responses={**WRITE_ERRORS, **NOT_FOUND},
+    responses={**WRITE_ERRORS, **NOT_FOUND, 409: {"model": ErrorResponse}},
 )
 def update_existing_product(
     product_id: int, product_in: ProductUpdate, db: Session = Depends(get_db)
@@ -90,7 +90,7 @@ def update_existing_product(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a product",
     description="Active admin only. Returns no body on success.",
-    responses={**WRITE_ERRORS, **NOT_FOUND},
+    responses={**WRITE_ERRORS, **NOT_FOUND, 409: {"model": ErrorResponse}},
     dependencies=[Depends(require_admin), Depends(enforce_write_limit)],
 )
 def delete_existing_product(product_id: int, db: Session = Depends(get_db)):

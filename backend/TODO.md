@@ -22,7 +22,10 @@
 3. **Services Layer**
 
    * Start with email notifications and caching (Redis).
-   * Implement payment service (Stripe sandbox) for orders.
+   * Original task: implement a Stripe sandbox payment service. Implementation
+     is included in PR #194; activation and hosted verification remain separate.
+     See the [sandbox payment runbook](../docs/sandbox-payments.md) and
+     [canonical completion plan](../docs/plans/portfolio-completion.md) for current status.
 
 4. **Validation & Error Handling**
 

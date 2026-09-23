@@ -3,6 +3,7 @@ import { OrderSessionBoundary } from "@/components/order-session-boundary";
 import Link from "next/link";
 import { readOrders } from "@/lib/order-data";
 import { money } from "@/lib/catalog";
+import { orderStatusLabel } from "@/lib/order-status";
 
 export const metadata = {
   title: "Order history",
@@ -28,8 +29,7 @@ export default async function OrdersPage({
             {result.data.slice(0, 20).map((order) => (
               <li key={order.id} className="py-4">
                 <Link href={`/orders/${order.id}`} prefetch={false}>
-                  Order #{order.id} —{" "}
-                  {order.status === "placed" ? "Placed — unpaid" : "Draft"} —{" "}
+                  Order #{order.id} — {orderStatusLabel(order)} —{" "}
                   {money(order.total)} GBP
                 </Link>
               </li>

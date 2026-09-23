@@ -48,9 +48,10 @@ export function ProductDetails({ product }: { product: Product }) {
             <p>
               Signed-in carts persist across visits. Prices are current backend
               prices and can change; adding objects does not reserve stock. Demo
-              orders can be placed at checkout; no payment is collected.
-              Photography shows representative workspace objects, not exact
-              products or brand endorsements.
+              orders can be placed at checkout. Payments, when enabled, use a
+              sandbox; no real money is charged. Photography shows
+              representative workspace objects, not exact products or brand
+              endorsements.
             </p>
           </div>
           <dl className="mt-8 text-xs [&_div]:flex [&_div]:justify-between [&_div]:gap-4 [&_div]:border-b [&_div]:border-border [&_div]:py-3">

@@ -255,6 +255,36 @@
             "title": "Lines",
             "type": "array"
           },
+          "payment_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Expires At"
+          },
+          "payment_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pending",
+                  "paid",
+                  "failed",
+                  "cancelled",
+                  "expired"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Status"
+          },
           "status": {
             "enum": [
               "draft",
@@ -277,6 +307,30 @@
           "lines"
         ],
         "title": "OrderRead",
+        "type": "object"
+      },
+      "PaymentRead": {
+        "properties": {
+          "checkout_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkout Url"
+          },
+          "order": {
+            "$ref": "#/components/schemas/OrderRead"
+          }
+        },
+        "required": [
+          "order",
+          "checkout_url"
+        ],
+        "title": "PaymentRead",
         "type": "object"
       },
       "ProductCreate": {
@@ -593,7 +647,7 @@
     }
   },
   "info": {
-    "description": "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP decimal prices. Product writes require an active admin. Register a customer, then use Authorize with your email in the username field to obtain a bearer token. Admin bootstrap is an operator CLI, never a public endpoint. Signed-in carts use current prices without reserving stock. Order placement claims stock; sandbox payments remain planned.",
+    "description": "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP decimal prices. Product writes require an active admin. Register a customer, then use Authorize with your email in the username field to obtain a bearer token. Admin bootstrap is an operator CLI, never a public endpoint. Signed-in carts use current prices without reserving stock. Order placement claims stock; configured sandbox orders use hosted Checkout.",
     "title": "E-Commerce API",
     "version": "0.1.0"
   },
@@ -1286,6 +1340,248 @@
         ]
       }
     },
+    "/api/v1/orders/{order_id}/cancel": {
+      "post": {
+        "description": "Release inventory only after unstarted or provider-confirmed cancelled payment.",
+        "operationId": "post_cancel_api_v1_orders__order_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Order Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too many requests. Retry after the Retry-After delay (seconds).",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the current window expires.",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "description": "Request limit for the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Post Cancel",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{order_id}/payment": {
+      "post": {
+        "description": "Start or recover the same sandbox Checkout session; never create a second charge.",
+        "operationId": "post_payment_api_v1_orders__order_id__payment_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Order Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too many requests. Retry after the Retry-After delay (seconds).",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the current window expires.",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "description": "Request limit for the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Post Payment",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/api/v1/orders/{order_id}/place": {
       "post": {
         "description": "Place your quotation once; reuse the same key after response loss.\n\nPrice or cart changes require a fresh draft and deliberate confirmation.\nThis endpoint claims inventory but does not collect payment.",
@@ -1406,6 +1702,216 @@
         "summary": "Post Placement",
         "tags": [
           "Orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{order_id}/reconcile": {
+      "post": {
+        "description": "Read authoritative provider state; browser redirects do not establish payment.",
+        "operationId": "post_reconcile_api_v1_orders__order_id__reconcile_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "title": "Order Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too many requests. Retry after the Retry-After delay (seconds).",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the current window expires.",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit": {
+                "description": "Request limit for the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Post Reconcile",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/api/v1/payments/webhook": {
+      "post": {
+        "description": "Verify the exact raw signed body and commit deduplication with its effects.",
+        "operationId": "webhook_api_v1_payments_webhook_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "stripe-signature",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 2048,
+              "title": "Stripe-Signature",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Webhook Api V1 Payments Webhook Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Webhook",
+        "tags": [
+          "Payments"
         ]
       }
     },
@@ -1616,6 +2122,16 @@
             },
             "description": "Product does not exist."
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -1782,6 +2298,16 @@
               }
             },
             "description": "Product does not exist."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "422": {
             "content": {

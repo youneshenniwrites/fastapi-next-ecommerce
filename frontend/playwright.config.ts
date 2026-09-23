@@ -9,6 +9,16 @@ export default defineConfig({
   use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
   projects: [
     ...["Desktop Chrome", "Pixel 7"].map((device) => ({
+      name: `payments-${device}`,
+      testMatch: "payments.spec.ts",
+      use: {
+        ...devices[device],
+        baseURL: "http://127.0.0.1:3302",
+        trace: "off" as const,
+        screenshot: "off" as const,
+      },
+    })),
+    ...["Desktop Chrome", "Pixel 7"].map((device) => ({
       name: `orders-${device}`,
       testMatch: "orders.spec.ts",
       use: {
@@ -76,6 +86,26 @@ export default defineConfig({
     },
   ],
   webServer: [
+    {
+      command: "../backend/.venv/bin/python scripts/test-api.py --payments",
+      url: "http://127.0.0.1:18302/health",
+      reuseExistingServer: false,
+      timeout: 60000,
+    },
+    {
+      command: "npm run start",
+      url: "http://127.0.0.1:3302",
+      env: {
+        API_BASE_URL: "http://127.0.0.1:18302",
+        PORT: "3302",
+        STRIPE_WEBHOOK_RELAY_ENABLED: "true",
+        APP_ORIGIN: "http://127.0.0.1:3302",
+        ALLOW_LOCAL_HTTP_SESSIONS: "true",
+        HOSTNAME: "127.0.0.1",
+      },
+      reuseExistingServer: false,
+      timeout: 60000,
+    },
     {
       command: "../backend/.venv/bin/python scripts/test-api.py",
       url: "http://127.0.0.1:18300/health",

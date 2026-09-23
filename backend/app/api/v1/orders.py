@@ -9,8 +9,9 @@ from app.crud.order import list_owned, read_owned
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.errors import RATE_LIMITED_RESPONSE, ErrorResponse
-from app.schemas.order import DraftCreate, OrderRead
+from app.schemas.order import DraftCreate, OrderRead, PaymentRead
 from app.services.orders import create_draft, place_order
+from app.services.payments import cancel_payment, reconcile_payment, start_payment
 
 
 def private_response(response: Response) -> None:
@@ -93,3 +94,57 @@ def post_placement(
     This endpoint claims inventory but does not collect payment.
     """
     return place_order(db, user.id, order_id, idempotency_key)
+
+
+@router.post(
+    "/{order_id}/payment",
+    response_model=PaymentRead,
+    dependencies=[Depends(enforce_write_limit)],
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        503: {"model": ErrorResponse},
+        **RATE_LIMITED_RESPONSE,
+    },
+)
+def post_payment(
+    order_id: Annotated[int, Path(ge=1, le=2147483647)], db: Database, user: Customer
+):
+    """Start or recover the same sandbox Checkout session; never create a second charge."""
+    return start_payment(db, user.id, order_id)
+
+
+@router.post(
+    "/{order_id}/cancel",
+    response_model=OrderRead,
+    dependencies=[Depends(enforce_write_limit)],
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        503: {"model": ErrorResponse},
+        **RATE_LIMITED_RESPONSE,
+    },
+)
+def post_cancel(
+    order_id: Annotated[int, Path(ge=1, le=2147483647)], db: Database, user: Customer
+):
+    """Release inventory only after unstarted or provider-confirmed cancelled payment."""
+    return cancel_payment(db, user.id, order_id)
+
+
+@router.post(
+    "/{order_id}/reconcile",
+    response_model=OrderRead,
+    dependencies=[Depends(enforce_write_limit)],
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        503: {"model": ErrorResponse},
+        **RATE_LIMITED_RESPONSE,
+    },
+)
+def post_reconcile(
+    order_id: Annotated[int, Path(ge=1, le=2147483647)], db: Database, user: Customer
+):
+    """Read authoritative provider state; browser redirects do not establish payment."""
+    return reconcile_payment(db, user.id, order_id)
