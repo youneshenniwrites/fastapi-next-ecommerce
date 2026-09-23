@@ -46,7 +46,7 @@ test("browse, filter and view the real FastAPI catalog", async ({
   await expect(page.getByText("In stock", { exact: true })).toBeVisible();
   await expect(
     page.getByText(
-      /Demo orders can be placed at checkout; no payment is collected/,
+      /Demo orders can be placed at checkout\. Payments, when enabled, use a sandbox; no real money is charged\./,
     ),
   ).toBeVisible();
   await page.screenshot({
