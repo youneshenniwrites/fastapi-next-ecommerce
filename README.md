@@ -27,7 +27,7 @@ The backend and catalog storefront run locally and in a
 | Verification | SQLite/PostgreSQL tests, container smoke tests, coverage gate, dependency audits |
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive catalog/detail and registration/login pages, filters, generated API types and browser checks |
-| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is merged in PR #188; VIN-30 sandbox payment code is implemented in PR #194; activation and hosted proof remain pending |
+| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is merged in PR #188; VIN-30 sandbox payment code merged in PR #194; activation and hosted proof remain pending |
 | Hosting | Development and production demos verified on Vercel/Neon; main releases through GitHub CI/CD |
 
 This repository is a development foundation, not a production-ready shop. Tests
