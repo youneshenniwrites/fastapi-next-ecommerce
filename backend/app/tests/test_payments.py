@@ -33,6 +33,9 @@ class FakeProvider:
         self.lose_response = False
         self.expire_error = False
 
+    def account_id(self):
+        return "acct_fictional_fixture"
+
     def create(self, params, key):
         self.requests.append((copy.deepcopy(params), key))
         if key not in self.keys:
@@ -449,6 +452,8 @@ def test_real_sdk_transport_serialization(monkeypatch):
 
         def request(self, method, url, headers, post_data=None, *, _usage=None):
             calls.append((method, url, dict(headers), post_data))
+            if url.endswith("/v1/account"):
+                return b'{"id":"acct_sdk","object":"account"}', 200, {}
             return (
                 json.dumps(
                     {
@@ -483,6 +488,8 @@ def test_real_sdk_transport_serialization(monkeypatch):
         ],
         "integration_identifier": "vindor_abcdefgh",
     }
+    assert provider.account_id() == "acct_sdk"
+    assert calls.pop()[1].endswith("/v1/account")
     assert provider.create(params, "durable-key")["metadata"] == {"order_id": "1"}
     assert calls[0][2]["Idempotency-Key"] == "durable-key"
     from urllib.parse import parse_qs
@@ -583,3 +590,283 @@ def test_customer_explicit_status_and_cancel_endpoints(client, db, managed, toke
     assert response.headers["cache-control"] == "private, no-store"
     assert response.json()["payment_status"] == "cancelled"
     assert db.get(Product, pid).stock == 3
+
+
+@pytest.mark.parametrize(
+    "delay", [timedelta(minutes=31), timedelta(hours=22, minutes=59)]
+)
+def test_never_received_create_remains_valid_through_replay_window(
+    db, managed, provider, monkeypatch, delay
+):
+    """A transport failure before Stripe sees the request must not strand stock."""
+    oid, _, uid = managed
+    clock = [payments.now()]
+    monkeypatch.setattr(payments, "now", lambda: clock[0])
+    create = provider.create
+    calls = []
+
+    def validation_aware_create(params, key):
+        calls.append(copy.deepcopy(params))
+        if len(calls) == 1:
+            raise stripe.APIConnectionError("Request never reached Stripe")
+        if params["expires_at"] < int(clock[0].timestamp()) + 1800:
+            raise stripe.InvalidRequestError(
+                "expires_at must be at least 30 minutes ahead",
+                "expires_at",
+                http_status=400,
+            )
+        return create(params, key)
+
+    monkeypatch.setattr(provider, "create", validation_aware_create)
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+    clock[0] += delay
+    result = payments.start_payment(db, uid, oid)
+    assert result["checkout_url"]
+    assert len(provider.sessions) == 1
+    assert calls[0] == calls[1]
+
+
+def test_generic_create_rejection_never_proves_absence(
+    db, managed, provider, monkeypatch
+):
+    oid, pid, uid = managed
+    provider.lose_response = True
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+
+    def reject(*_):
+        raise stripe.InvalidRequestError(
+            "Pre-idempotency validation failure", "expires_at", http_status=400
+        )
+
+    monkeypatch.setattr(provider, "create", reject)
+    with pytest.raises(HTTPException) as error:
+        payments.cancel_payment(db, uid, oid)
+    assert error.value.status_code == 503
+    assert len(provider.sessions) == 1
+    assert db.get(Product, pid).reserved_stock == 2
+
+
+def prepare_unknown_scan(db, managed, provider, monkeypatch):
+    oid, _, uid = managed
+
+    def reject(*_):
+        raise stripe.InvalidRequestError(
+            "Deterministic rejection without a session", "line_items", http_status=400
+        )
+
+    monkeypatch.setattr(provider, "create", reject)
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+    deadline = payments.aware(db.get(Order, oid).payment_expires_at)
+    monkeypatch.setattr(payments, "now", lambda: deadline + timedelta(minutes=6))
+    return oid
+
+
+def test_complete_absence_scan_releases_rejected_creation_once(
+    db, managed, provider, monkeypatch
+):
+    oid = prepare_unknown_scan(db, managed, provider, monkeypatch)
+    calls = []
+
+    def find(reference, expiry):
+        calls.append((reference, expiry))
+        assert not db.in_transaction()
+        return [], True
+
+    monkeypatch.setattr(provider, "find_sessions", find, raising=False)
+    assert payments.reconcile_unknown_session(db, oid).payment_status == "expired"
+    assert payments.reconcile_unknown_session(db, oid).payment_status == "expired"
+    assert db.get(Product, managed[1]).stock == 3
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize("outcome", ["incomplete", "ambiguous", "unavailable"])
+def test_unproven_absence_keeps_reservation(
+    db, managed, provider, monkeypatch, outcome
+):
+    oid = prepare_unknown_scan(db, managed, provider, monkeypatch)
+
+    def find(*_):
+        if outcome == "unavailable":
+            raise stripe.APIConnectionError("Cannot scan provider")
+        return (
+            [{"id": "one"}, {"id": "two"}] if outcome == "ambiguous" else []
+        ), outcome == "ambiguous"
+
+    monkeypatch.setattr(provider, "find_sessions", find, raising=False)
+    with pytest.raises(HTTPException):
+        payments.reconcile_unknown_session(db, oid)
+    assert db.get(Order, oid).payment_status == "pending"
+    assert db.get(Product, managed[1]).reserved_stock == 2
+
+
+def test_scan_refuses_open_creation_window(db, managed, provider, monkeypatch):
+    oid, pid, uid = managed
+    provider.lose_response = True
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+    with pytest.raises(HTTPException) as error:
+        payments.reconcile_unknown_session(db, oid)
+    assert error.value.status_code == 409
+    assert db.get(Product, pid).reserved_stock == 2
+
+
+@pytest.mark.parametrize("paid", [False, True])
+def test_scan_recovers_matching_session_without_recreating(
+    db, managed, provider, monkeypatch, paid
+):
+    oid, pid, uid = managed
+    provider.lose_response = True
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+    deadline = payments.aware(db.get(Order, oid).payment_expires_at)
+    monkeypatch.setattr(payments, "now", lambda: deadline + timedelta(minutes=6))
+    sid = next(iter(provider.sessions))
+    provider.sessions[sid].update(
+        status="complete" if paid else "expired",
+        payment_status="paid" if paid else "unpaid",
+    )
+    monkeypatch.setattr(
+        provider,
+        "find_sessions",
+        lambda *_: ([provider.retrieve(sid)], True),
+        raising=False,
+    )
+    result = payments.reconcile_unknown_session(db, oid)
+    assert result.payment_status == ("pending" if paid else "expired")
+    assert db.get(Product, pid).stock == (1 if paid else 3)
+    assert len(provider.requests) == 1
+
+
+def test_scan_rechecks_concurrent_webhook_binding(db, managed, provider, monkeypatch):
+    oid, pid, uid = managed
+    provider.lose_response = True
+    with pytest.raises(HTTPException):
+        payments.start_payment(db, uid, oid)
+    deadline = payments.aware(db.get(Order, oid).payment_expires_at)
+    monkeypatch.setattr(payments, "now", lambda: deadline + timedelta(minutes=6))
+    sid = next(iter(provider.sessions))
+    provider.sessions[sid].update(status="complete", payment_status="paid")
+
+    def find(*_):
+        provider.emit(db, sid)
+        return [], True
+
+    monkeypatch.setattr(provider, "find_sessions", find, raising=False)
+    assert payments.reconcile_unknown_session(db, oid).payment_status == "paid"
+    assert db.get(Product, pid).stock == 1
+
+
+@pytest.mark.parametrize("foreign_id", ["999999", "malformed", "existing"])
+def test_foreign_integer_order_id_without_reference_is_acknowledged(
+    db, managed, provider, foreign_id
+):
+    oid, pid, _ = managed
+    event = {
+        "id": "evt_foreign",
+        "type": "checkout.session.completed",
+        "livemode": False,
+        "data": {
+            "object": {
+                "metadata": {
+                    "order_id": str(oid) if foreign_id == "existing" else foreign_id
+                }
+            }
+        },
+    }
+    payments.handle_webhook(db, json.dumps(event).encode(), "fixture")
+    assert db.get(Order, oid).payment_status == "pending"
+    assert db.get(Product, pid).reserved_stock == 2
+    assert list(db.scalars(select(PaymentEvent))) == []
+
+
+def test_provider_scan_paginates_and_caps_without_false_absence(monkeypatch):
+    from types import SimpleNamespace
+
+    from app.providers.stripe import StripeProvider
+
+    monkeypatch.setattr(
+        settings, "STRIPE_API_KEY", SecretStr("rk_test_fictional_fixture")
+    )
+    adapter = StripeProvider()
+    calls = []
+    pages = [
+        {"data": [{"id": "cs_test_foreign", "metadata": {}}], "has_more": True},
+        {
+            "data": [
+                {"id": "cs_test_match", "metadata": {"payment_reference": "wanted"}}
+            ],
+            "has_more": False,
+        },
+    ]
+
+    def list_sessions(params):
+        calls.append(copy.deepcopy(params))
+        page = pages.pop(0)
+        return SimpleNamespace(to_dict=lambda: page)
+
+    adapter.client = SimpleNamespace(
+        v1=SimpleNamespace(
+            checkout=SimpleNamespace(sessions=SimpleNamespace(list=list_sessions))
+        )
+    )
+    result, complete = adapter.find_sessions("wanted", 100000)
+    assert complete and result[0]["id"] == "cs_test_match"
+    assert calls[0]["created"] == {"gte": 13540, "lte": 100000}
+    assert calls[1]["starting_after"] == "cs_test_foreign"
+    pages.extend(
+        {"data": [{"id": f"cs_test_page_{i}", "metadata": {}}], "has_more": True}
+        for i in range(10)
+    )
+    assert adapter.find_sessions("wanted", 100000) == ([], False)
+    assert len(calls) == 12
+
+
+@pytest.mark.parametrize("operation", ["replay", "absence"])
+def test_changed_stripe_account_keeps_inventory_claim(
+    db, managed, provider, monkeypatch, operation
+):
+    oid, pid, uid = managed
+    if operation == "absence":
+        prepare_unknown_scan(db, managed, provider, monkeypatch)
+    else:
+        provider.lose_response = True
+        with pytest.raises(HTTPException):
+            payments.start_payment(db, uid, oid)
+    monkeypatch.setattr(provider, "account_id", lambda: "acct_wrong_account")
+    with pytest.raises(HTTPException) as error:
+        if operation == "absence":
+            payments.reconcile_unknown_session(db, oid)
+        else:
+            payments.start_payment(db, uid, oid)
+    assert error.value.status_code == 409
+    assert db.get(Order, oid).payment_status == "pending"
+    assert db.get(Product, pid).reserved_stock == 2
+
+
+def test_missing_original_account_cannot_prove_absence(
+    db, managed, provider, monkeypatch
+):
+    oid = prepare_unknown_scan(db, managed, provider, monkeypatch)
+    order = db.get(Order, oid)
+    params = json.loads(order.payment_request)
+    params["metadata"].pop("stripe_account_id")
+    order.payment_request = json.dumps(params)
+    db.commit()
+    with pytest.raises(HTTPException) as error:
+        payments.reconcile_unknown_session(db, oid)
+    assert error.value.status_code == 409
+    assert db.get(Product, managed[1]).reserved_stock == 2
+
+
+def test_known_session_skips_account_lookup(db, managed, provider, monkeypatch):
+    oid, _, uid = managed
+    payments.start_payment(db, uid, oid)
+
+    def unexpected():
+        pytest.fail("Known session must not require another account lookup")
+
+    monkeypatch.setattr(provider, "account_id", unexpected)
+    assert payments.reconcile_payment(db, uid, oid).payment_status == "pending"

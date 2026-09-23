@@ -33,6 +33,9 @@ class FixtureProvider:
         self.faults = {}
         self.signer = StripeProvider()
 
+    def account_id(self):
+        return "acct_browser_fixture"
+
     def create(self, params, key):
         with self.lock:
             oid = int(params["client_reference_id"])
