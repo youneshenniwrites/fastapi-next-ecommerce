@@ -41,6 +41,10 @@ class OrderRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     status: Literal["draft", "placed"]
+    payment_status: (
+        Literal["pending", "paid", "failed", "cancelled", "expired"] | None
+    ) = None
+    payment_expires_at: datetime | None = None
     currency: Literal["GBP"]
     total: Decimal
     created_at: datetime
@@ -50,3 +54,8 @@ class OrderRead(BaseModel):
     def money(self, value: Decimal) -> str:
         """Return an exact two-place GBP total."""
         return format(value, ".2f")
+
+
+class PaymentRead(BaseModel):
+    order: OrderRead
+    checkout_url: str | None

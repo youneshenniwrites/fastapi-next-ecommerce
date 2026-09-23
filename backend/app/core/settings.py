@@ -33,6 +33,45 @@ class Settings(BaseSettings):
             )
         return self
 
+    STRIPE_ENABLED: bool = False
+    STRIPE_API_KEY: SecretStr = SecretStr("")
+    STRIPE_WEBHOOK_SECRET: SecretStr = SecretStr("")
+    STRIPE_CHECKOUT_ORIGIN: str = ""
+
+    @model_validator(mode="after")
+    def sandbox_payments(self) -> "Settings":
+        """Fail closed on live keys or incomplete explicitly enabled configuration."""
+        from urllib.parse import urlsplit
+
+        key = self.STRIPE_API_KEY.get_secret_value()
+        if key and not key.startswith(("rk_test_", "sk_test_")):
+            raise ValueError("Only Stripe test-mode keys are allowed")
+        if self.STRIPE_ENABLED:
+            origin = urlsplit(self.STRIPE_CHECKOUT_ORIGIN)
+            if (
+                not key
+                or not self.STRIPE_WEBHOOK_SECRET.get_secret_value().startswith(
+                    "whsec_"
+                )
+                or origin.username
+                or origin.password
+                or origin.query
+                or origin.fragment
+                or origin.path not in ("", "/")
+                or not origin.hostname
+                or (
+                    origin.scheme != "https"
+                    and not (
+                        origin.scheme == "http"
+                        and origin.hostname in ("localhost", "127.0.0.1")
+                    )
+                )
+            ):
+                raise ValueError(
+                    "Sandbox payments require test credentials and an exact trusted storefront origin"
+                )
+        return self
+
     SENTRY_DSN: str = ""
     SENTRY_ENVIRONMENT: str = "local"
     SENTRY_RELEASE: str = ""
