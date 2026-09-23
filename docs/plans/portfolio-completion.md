@@ -15,7 +15,7 @@ at a time; external blockers must not prevent independent work.
 ## Recruiter-readiness feedback decision — 22 September 2026
 
 Keep this plan as the single source of truth. VIN-120 checkout submission,
-confirmation and history are delivered in PR #188. Prioritize VIN-30 hosted sandbox Checkout.
+confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194; prioritize its development activation and hosted sandbox proof.
 Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
 exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
 VIN-121 still requires privacy tests before telemetry activation. Payment work must
@@ -27,7 +27,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 
 ## Progress at a glance — 23 September 2026
 
-**Current stage: 5 of 6, sandbox payment activation.** Non-payment checkout is merged and verified in CI; hosted acceptance remains separate. Stage counts are not effort estimates.
+**Current stage: 6 of 6, hosted verification and portfolio evidence.** Non-payment checkout is merged and verified in CI; hosted acceptance remains separate. Stage counts are not effort estimates.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 | 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 privacy + configuration gates; #126 remains actionable |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted proof remains in stage 6 |
-| 5. Sandbox payments | 🚧 In progress | PR #194 merged; development activation and hosted verification remain |
+| 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted verification belong to stage 6 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
 
 **Payment implementation merged (23 September):** PR #194 merged as `0e89efd` after clean Codex review, CodeRabbit approval and passing CI on `9adfff8`. Sandbox sessions, signed webhooks and inventory recovery are delivered. VIN-30 remains In progress until development configuration and real sandbox success/cancellation/expiry evidence are verified. No live payments are enabled.
@@ -61,7 +61,7 @@ retain the issue hierarchy for organization, not as a competing completion metri
 Payment implementation and automated correctness evidence are complete; hosted payment acceptance, security and monitoring are not claimed complete.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
-VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. Next: VIN-30 sandbox payments.
+VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. Next: VIN-30 development activation and hosted payment verification in stage 6.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
@@ -85,7 +85,7 @@ is Done; the browser checkout journey belongs to VIN-120.
 cart actionability regression corrections; 99 local browser tests passed with
 2 existing device-specific skips, and required CI passed. VIN-89 retains broader
 recovery/hosted acceptance in Backlog. VIN-120 checkout submission, confirmation
-and history merged in PR #188; VIN-30 is next. The Codex status-indicator follow-up remains deferred
+and history merged in PR #188; VIN-30 implementation merged in PR #194. Its hosted verification is next. The Codex status-indicator follow-up remains deferred
 under VIN-38; it does not displace feature delivery.
 
 **Board convention:** issue cards only; PRs stay linked from their issue rather
@@ -127,8 +127,9 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 | [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | Privacy coverage is incomplete; free Sentry organization/project configuration and DSN availability are unverified. SDK scaffolding and docs have merged. | Agent extends error/transaction/log/nested-context scrubbing and tests serialized SDK payloads before activation. Owner creates or confirms the free organization/projects and configures the required environment values securely. Then agent verifies live telemetry. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
-**Unblock order:** VIN-30 sandbox payments is next now that non-payment checkout
-is complete. Then resume VIN-121 privacy work and outstanding hosted proof. If
+**Unblock order:** Stage 5 payment implementation and automated correctness
+evidence are complete. Start stage 6 with VIN-30 development activation and actual
+hosted sandbox success/cancellation/expiry verification. Then resume VIN-121 privacy work and outstanding hosted proof. If
 VIN-30 encounters an external blocker, record it and proceed with independent
 privacy/hosted work rather than waiting idle. Configuration can be prepared
 independently, but telemetry activation waits for privacy checks. #45
