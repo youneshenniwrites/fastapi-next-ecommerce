@@ -9,7 +9,11 @@ All products, customers and payments are fictional. GBP only; no live charges.
 
 On the **development API project only**, store `STRIPE_API_KEY` and
 `STRIPE_WEBHOOK_SECRET` as server-only secrets. Only `sk_test_`/`rk_test_` keys are
-accepted. Set `STRIPE_CHECKOUT_ORIGIN` to the exact development storefront origin,
+accepted. Restricted keys require Accounts read access for `GET /v1/account`,
+plus Checkout Sessions read/write access for creation, retrieval, listing and
+expiry. Before activation, verify those calls with the actual development key;
+configuration alone does not prove its permissions. A denied account lookup keeps
+payment creation unavailable and inventory reserved. Set `STRIPE_CHECKOUT_ORIGIN` to the exact development storefront origin,
 and enable `STRIPE_ENABLED=true` only after migrations and reviewed code deploy.
 Never prefix these secrets with `NEXT_PUBLIC_`, commit them or paste them in issues.
 Without activation, existing non-payment checkout continues working.
