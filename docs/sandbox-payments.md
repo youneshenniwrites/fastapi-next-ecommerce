@@ -123,7 +123,8 @@ See [ADR 0003](decisions/0003-sandbox-payments.md) for transaction decisions.
 
 ## Hosted development evidence — 23 September 2026
 
-Verified at 19:20–19:30 UTC using fictional products/users and Stripe test mode.
+Verified at 19:20–19:30 UTC, with a paid-stock follow-up at 19:42–19:44 UTC,
+using fictional products/users and Stripe test mode.
 Revision `8685cc1bae6f6edad34e569ffa66e78739b8be8d` was redeployed unchanged after
 development-only configuration: API `HQxhFPtHraGoAYAMaHMWyPmdcs9Y`, frontend
 `5Y9ry8kMnoHvM3a1vBN5smmfUoyC`. The workflow dispatch skipped the already-deployed
@@ -132,6 +133,7 @@ revision, so Vercel's Redeploy operation applied configuration to that same revi
 | Scenario | Observed result |
 | --- | --- |
 | Purchase, order 1 | Stripe `complete` / `paid`, £12.90 GBP; application showed paid and order history was verified. |
+| Paid inventory, order 4 | One unit of product 5, £12.90 GBP: stock 29 before placement (19:42:29 UTC), 28 after placement (19:43:14), and still 28 after the server confirmed Paid (19:44:24). Payment did not decrement stock again. |
 | Cancellation, order 2 | Application cancelled; Stripe session expired/unpaid. Product 5 stock rose 28 → 29 and stayed 29 after refresh. |
 | Expiry, order 3 | Application expired; Stripe session expired/unpaid. Product 5 stock rose 28 → 29. |
 | Duplicate expiry event | Original delivery at 19:27:45 UTC and manual replay at 19:29:40 UTC both returned HTTP 200; stock stayed 29. |
@@ -148,6 +150,7 @@ No API keys, webhook secrets or payment credentials are included here.
 - Paid order 1: `cs_test_a10PAk1kN5DdlDRoh7DvtPwi1mTv2FOPXbagoA5yXkkLRblY90lidv4I4t`.
 - Cancelled order 2: `cs_test_a1ioTmUaWO6sAMww49VflHJjLsH6UWygoLFQ8BGvhfwddPVR1CExQOMql2`.
 - Expired order 3: `cs_test_a1obPdBiuMkcvdl74VKTdl1WvM48ZfqpO6V1RKHGbyrVKRV1Wv0mSTxZ61`.
+- Paid inventory order 4: `cs_test_a1Xv3az6r9DlcvBvh5tFDFrKdyw0T7aGXQyXBZlEClyLdFBUkF5p60xqvx`.
 - Replayed expiry: `evt_1UIvpUAsSrcPIxfFCkWfEBjY`.
 
 </details>
