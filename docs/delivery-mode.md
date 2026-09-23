@@ -1,9 +1,10 @@
 # Delivery execution mode
 
-**Current mode: Lean**
+**Current mode: Parallel**
 
-Owner-selected on 22 September 2026. One agent, batched work and no scheduled
-wakeups. Complete authorized tickets without requiring repeated continuation
+Owner-selected on 23 September 2026. Use bounded implementation and independent
+verification agents within one active feature, with isolated writing worktrees and
+test resources. No scheduled wakeups. Complete authorized tickets without requiring repeated continuation
 prompts; normal acceptance, review and merge rules still apply.
 
 The owner may say **enable parallel mode** or **enable lean mode**. Update this
