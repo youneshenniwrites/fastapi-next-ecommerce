@@ -1,7 +1,7 @@
 # Sandbox payments
 
 VIN-30 adds hosted Stripe Checkout to newly placed orders when the API's sandbox
-configuration is enabled. This document describes the implementation; the
+configuration is enabled. PR #194 merged the implementation on 23 September 2026; the
 [canonical plan](plans/portfolio-completion.md) records merge and hosted proof.
 All products, customers and payments are fictional. GBP only; no live charges.
 

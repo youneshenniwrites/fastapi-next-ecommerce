@@ -1,6 +1,6 @@
 # ADR 0003: sandbox payment authority and inventory release
 
-Date: 23 September 2026. Status: proposed for VIN-30; not a claim of deployment.
+Date: 23 September 2026. Status: accepted in merged PR #194; hosted verification remains pending.
 
 ## Context
 
