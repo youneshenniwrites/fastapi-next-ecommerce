@@ -333,6 +333,11 @@ test("two-account isolation, rapid clicks, invalid quantities, shortages and fai
     .filter({ has: scarce });
   await expect(quantityRegion).toHaveCSS("opacity", "1");
   await expect(quantityRegion).toHaveJSProperty("inert", false);
+  // fill() checks editability but does not prove focus when inert changes.
+  // Use a real pointer activation after privacy refresh before sending text.
+  await scarce.click();
+  await expect(scarce).toBeFocused();
+  await expect(quantityRegion).toHaveJSProperty("inert", false);
   await scarce.fill("99");
   await expect(scarce).toHaveValue("99");
   await updateButton(page, second.name).click();
