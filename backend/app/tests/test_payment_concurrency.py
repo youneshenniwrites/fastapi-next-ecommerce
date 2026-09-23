@@ -100,12 +100,16 @@ def test_provider_success_database_failure_preserves_retry_identity(
 ):
     """A failed local bind cannot duplicate the already-created external session."""
     oid, pid, uid = managed
-    original, calls = db.commit, 0
+    original = db.commit
 
     def commit():
-        nonlocal calls
-        calls += 1
-        if calls == 2:
+        # Fail the binding transaction, not an incidental setup/account commit.
+        # The provider has already created this session, while its local binding
+        # is still uncommitted and must roll back after the injected failure.
+        if (
+            provider.sessions
+            and db.get(Order, oid).payment_session_id in provider.sessions
+        ):
             db.flush()
             raise RuntimeError("disposable binding failure")
         original()
