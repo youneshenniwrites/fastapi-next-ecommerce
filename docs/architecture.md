@@ -12,8 +12,8 @@ Authenticated order drafts preserve GBP snapshots without reserving stock or
 placing purchases. Atomic placement is implemented separately: an owned draft and
 customer-scoped retry key drive one transaction for stock revalidation, inventory
 claim and purchased-cart removal. Changed prices or cart quantities return conflicts.
-See [ADR 0002](decisions/0002-order-transactions.md). VIN-120 implements the checkout UI described below; VIN-30 implements the sandbox payment adapter and lifecycle; activation and hosted
-proof remain pending in the canonical plan. Placement does not establish payment. Product prices use Decimal /
+See [ADR 0002](decisions/0002-order-transactions.md). VIN-120 implements the checkout UI described below; VIN-30 implements the sandbox payment adapter and lifecycle; development activation and hosted
+proof are verified in the [payment runbook](sandbox-payments.md#hosted-development-evidence--23-september-2026). Production payments remain disabled. Placement does not establish payment. Product prices use Decimal /
 NUMERIC(12, 2), carry GBP currency, and serialize as two-place decimal strings.
 API validation and database constraints protect catalog values.
 

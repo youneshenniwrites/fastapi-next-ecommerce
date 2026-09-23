@@ -23,7 +23,8 @@
 
    * Start with email notifications and caching (Redis).
    * Original task: implement a Stripe sandbox payment service. Implementation
-     is included in PR #194; activation and hosted verification remain separate.
+     merged in PR #194; development activation and hosted proof were verified
+     on 23 September. Production payments remain disabled.
      See the [sandbox payment runbook](../docs/sandbox-payments.md) and
      [canonical completion plan](../docs/plans/portfolio-completion.md) for current status.
 
