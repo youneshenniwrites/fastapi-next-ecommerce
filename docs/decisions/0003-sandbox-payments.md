@@ -22,6 +22,11 @@ its result in a new transaction, checking the current order state again. Lost
 responses reuse the intent; they must never create another order or use a new key.
 Never retry creation after the provider's idempotency retention window without
 reconciliation proving the original result. Uncertainty retains the stock claim.
+Starting Checkout sets a fixed 23-hour-50-minute expiry, keeping the immutable
+request valid throughout a 23-hour retry window; unstarted reservations retain
+one-hour deadlines. This trades longer claims for safe response-loss recovery.
+Persist the current Stripe account identity with the request before creation so a
+credential change cannot make a different account's empty session list prove absence.
 
 Verified test-mode webhook events establish payment success. Validate session
 association, expected GBP amount and currency. Deduplicate event processing and
@@ -53,6 +58,14 @@ notifications and unfinished session creation. No local background task or Codex
 schedule is an expiry guarantee. Idle claims without provider sessions need
 operator reconciliation; document this limitation in the runbook and hosted demo.
 
+An explicit operator absence check waits until the immutable expiry plus five
+minutes, verifies the original account and completely scans the provider-bounded
+creation window (at most 1,000 sessions). A match uses ordinary reconciliation;
+only complete absence plus a locked recheck permits release. Incomplete scans,
+unknown account identity, provider errors or ambiguous matches retain inventory.
+Do not mutate provider payment-reference metadata. Generic 4xx responses cannot
+prove absence because Stripe can validate requests before idempotency lookup.
+
 Stripe recovery links must remain disabled: they create a new session after stock
 may already have been released. Session amounts/quantities are not adjustable;
 promotions, shipping, tax and adaptive currency changes are outside this release.
@@ -72,3 +85,6 @@ separate from mocked provider tests and CI.
 - [Limited inventory and session expiry](https://docs.stripe.com/payments/checkout/managing-limited-inventory?payment-ui=stripe-hosted)
 - [Recovery links create new sessions](https://docs.stripe.com/payments/checkout/abandoned-carts?payment-ui=stripe-hosted)
 - [Canonical completion plan](../plans/portfolio-completion.md)
+
+- [Stripe idempotency semantics](https://docs.stripe.com/api/idempotent_requests)
+- [Stripe low-level error handling](https://docs.stripe.com/error-low-level)

@@ -58,7 +58,10 @@ activation remain unmanaged, unpaid demo records.
 
 ## Recovery
 
-Normal provider expiry is delivered through the signed webhook. Unstarted claims
+Normal provider expiry is delivered through the signed webhook. Unstarted orders
+have a one-hour deadline. Starting payment persists a fixed 23-hour-50-minute
+Checkout expiry, allowing the same request to remain valid across the 23-hour
+idempotency replay window. Starting Checkout therefore extends the stock claim. Unstarted claims
 also expire, but need a customer status check or an explicit operator reconciliation
 run; no periodic reconciliation scheduler is installed. An idle unstarted claim can
 therefore hold stock past its deadline until reconciliation runs.
@@ -84,6 +87,24 @@ This retrieves and validates the existing session; it does not create a replacem
 Paid snapshots still require replay of the original signed success event from Stripe
 before the order becomes paid. Resolve a conflicting terminal state explicitly;
 never manually decrement or release inventory to silence an error.
+
+If no session ID can be found, after the persisted expiry plus five minutes run:
+
+```sh
+python -m app.reconcile_payments --order-id ORDER_ID --verify-absent-session
+```
+
+This verifies the original Stripe account identity persisted with the creation
+intent, then scans at most 1,000 sessions in the provider-enforced creation window.
+A matching session is reconciled normally. Only a complete scan with no match can
+release the claim, after locking and rechecking for a concurrent webhook binding.
+The expired immutable request cannot create another payable session. Missing account
+identity, changed credentials pointing at another account, incomplete pagination,
+multiple matches or provider errors keep inventory reserved for operator investigation.
+A generic Stripe 400 response never proves that no session exists: validation may
+run before the idempotency lookup. Do not delete or change payment-reference metadata
+at Stripe, because reconciliation depends on it. This bounded recovery is explicit;
+there is no scheduler or guarantee that idle reservations are reclaimed promptly.
 
 ## Verification
 
