@@ -27,17 +27,15 @@ beforeEach(() => {
   vi.stubEnv("ALLOW_LOCAL_HTTP_SESSIONS", "false");
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response("upstream-private-body", {
-          status: 200,
-          headers: {
-            "Set-Cookie": "private-cookie",
-            "x-secret": "never-forward",
-          },
-        }),
-      ),
+    vi.fn().mockResolvedValue(
+      new Response("upstream-private-body", {
+        status: 200,
+        headers: {
+          "Set-Cookie": "private-cookie",
+          "x-secret": "never-forward",
+        },
+      }),
+    ),
   );
 });
 afterEach(() => {
