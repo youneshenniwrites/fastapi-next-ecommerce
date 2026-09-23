@@ -14,7 +14,16 @@ and enable `STRIPE_ENABLED=true` only after migrations and reviewed code deploy.
 Never prefix these secrets with `NEXT_PUBLIC_`, commit them or paste them in issues.
 Without activation, existing non-payment checkout continues working.
 
-Register `/api/v1/payments/webhook` on the API with these snapshot events:
+For protected development hosting, set server-only
+`STRIPE_WEBHOOK_RELAY_ENABLED=true` on the **development frontend only**. Its
+existing `API_BASE_URL` and `VERCEL_PROTECTION_BYPASS` target the development API.
+Register the public frontend URL `/api/payments/webhook`; the bounded relay sends
+unchanged bytes and the Stripe signature to the fixed API path
+`/api/v1/payments/webhook`. It never accepts a caller-selected destination.
+The API remains protected and verifies signatures. Do not put a protection bypass
+token in the Stripe URL. Production relay configuration remains disabled.
+
+Subscribe to these snapshot events:
 
 - `checkout.session.completed`
 - `checkout.session.async_payment_succeeded`
@@ -27,7 +36,9 @@ released. Session line items and amounts come only from persisted order snapshot
 Do not enable adjustable quantities, promotions, shipping or tax on this integration.
 
 The approved free sandbox setup is verified. The development destination and
-secrets were configured on 23 September 2026; this is configuration evidence,
+secrets were configured on 23 September 2026. The destination must be switched
+to the frontend relay after deployment because direct development API access
+requires Vercel sign-in. This is configuration evidence,
 **not evidence that a deployed purchase works**. Hosted proof follows reviewed
 implementation deployment. Production-shop activation is outside this rollout.
 

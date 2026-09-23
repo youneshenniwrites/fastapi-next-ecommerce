@@ -98,6 +98,7 @@ export default defineConfig({
       env: {
         API_BASE_URL: "http://127.0.0.1:18302",
         PORT: "3302",
+        STRIPE_WEBHOOK_RELAY_ENABLED: "true",
         APP_ORIGIN: "http://127.0.0.1:3302",
         ALLOW_LOCAL_HTTP_SESSIONS: "true",
         HOSTNAME: "127.0.0.1",

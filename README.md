@@ -27,7 +27,7 @@ The backend and catalog storefront run locally and in a
 | Verification | SQLite/PostgreSQL tests, container smoke tests, coverage gate, dependency audits |
 | Agent workflows | Root/backend/frontend instructions and scoped repository skills |
 | Frontend | Responsive catalog/detail and registration/login pages, filters, generated API types and browser checks |
-| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is merged in PR #188; payments remain planned |
+| Shopping | [Signed-in cart API](docs/design/cart-api.md) persists quantities and calculates current GBP totals; the signed-in cart storefront (add, count, quantity, removal, subtotal) is implemented; owned order draft snapshots are implemented; atomic checkout placement and safe retries are implemented; checkout/history UI is merged in PR #188; VIN-30 sandbox payment code is implemented in PR #194; activation and hosted proof remain pending |
 | Hosting | Development and production demos verified on Vercel/Neon; main releases through GitHub CI/CD |
 
 This repository is a development foundation, not a production-ready shop. Tests
@@ -113,8 +113,8 @@ HTTP client → FastAPI routes/dependencies → CRUD helpers → SQLAlchemy → 
 
 The Next.js App Router frontend consumes generated types from FastAPI's OpenAPI contract.
 FastAPI remains authoritative for permissions, product prices, inventory, and
-order totals. A domain service owns the placement transaction; payment/email
-files currently contain placeholders.
+order totals. A domain service owns the placement transaction; the payment service and Stripe adapter implement the sandbox lifecycle. Email
+notifications remain a placeholder. See [payment setup and recovery](docs/sandbox-payments.md).
 
 The local stack starts PostgreSQL, runs a one-shot Alembic migration container,
 then starts the non-root API container. Database and API host ports bind to loopback.

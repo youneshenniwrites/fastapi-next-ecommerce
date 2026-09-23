@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { test, expect } from "@playwright/test";
 
@@ -10,6 +11,7 @@ for (const outcome of [
   "expired",
   "failed",
   "lost response",
+  "processing",
 ] as const) {
   test(`sandbox checkout reconciles ${outcome} without another order`, async ({
     page,
@@ -111,6 +113,27 @@ for (const outcome of [
     await expect(
       page.getByRole("heading", { name: "Disposable sandbox provider" }),
     ).toBeVisible();
+    if (outcome === "processing") {
+      expect(
+        (
+          await request.post(`${API}/__test/payment-event`, {
+            data: { order_id: orderId, state: "processing" },
+          })
+        ).status(),
+      ).toBe(200);
+      await page.goto(orderPath);
+      await page
+        .getByRole("button", { name: "Cancel unpaid order", exact: true })
+        .click();
+      await expect(page.getByRole("main").getByRole("alert")).toContainText(
+        "could not be cancelled",
+      );
+      const held = await (
+        await request.get(`${API}/__test/payment/${orderId}`)
+      ).json();
+      expect(held.payment_status).toBe("pending");
+      expect(held.products[0].reserved_stock).toBe(1);
+    }
     if (outcome === "cancelled") {
       await page.goto(`${orderPath}?payment=cancelled`);
       await expect(
@@ -122,7 +145,10 @@ for (const outcome of [
         .getByRole("button", { name: "Cancel unpaid order", exact: true })
         .click();
     } else {
-      const state = outcome === "lost response" ? "paid" : outcome;
+      const state =
+        outcome === "lost response" || outcome === "processing"
+          ? "paid"
+          : outcome;
       const event = {
         order_id: orderId,
         state,
@@ -141,7 +167,9 @@ for (const outcome of [
       await page.goto(`${orderPath}?payment=return`);
     }
     const label =
-      outcome === "paid" || outcome === "lost response"
+      outcome === "paid" ||
+      outcome === "lost response" ||
+      outcome === "processing"
         ? "Paid — sandbox only"
         : outcome === "cancelled"
           ? "Cancelled — stock released"
@@ -185,3 +213,27 @@ for (const outcome of [
     ).toEqual([]);
   });
 }
+
+test("public relay preserves signed bytes and rejects unsigned requests", async ({
+  request,
+}) => {
+  const body = JSON.stringify({
+    id: "evt_relay_fixture",
+    livemode: false,
+    type: "fixture.noop",
+    data: { object: {} },
+  });
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = createHmac("sha256", "whsec_browser_fixture_only")
+    .update(`${timestamp}.${body}`)
+    .digest("hex");
+  expect(
+    (await request.post("/api/payments/webhook", { data: body })).status(),
+  ).toBe(400);
+  const accepted = await request.post("/api/payments/webhook", {
+    data: body,
+    headers: { "Stripe-Signature": `t=${timestamp},v1=${signature}` },
+  });
+  expect(accepted.status()).toBe(200);
+  expect(await accepted.json()).toEqual({ received: true });
+});
