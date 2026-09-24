@@ -165,7 +165,7 @@ def test_assertion_is_redacted_from_error_request_headers():
     from app.core.observability import scrub_event
 
     event = {"request": {"headers": {"X-Vindor-Client-Context": signed()}}}
-    assert (
-        scrub_event(event, {})["request"]["headers"]["X-Vindor-Client-Context"]
-        == "[Filtered]"
-    )
+    # The privacy boundary now removes the entire request, including this header.
+    scrubbed = scrub_event(event, {})
+    assert "request" not in scrubbed
+    assert event["request"]["headers"]["X-Vindor-Client-Context"] not in str(scrubbed)

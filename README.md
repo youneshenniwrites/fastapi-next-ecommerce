@@ -129,7 +129,8 @@ All resource routes use `/api/v1`. Authentication uses an OAuth2-style password
 form and bearer access tokens. Registration never grants admin privileges.
 Abusive auth/write request rates are throttled with `429` responses; see the
 [abuse-protection section](docs/api.md#abuse-protection-rate-limits). Errors,
-traces, logs, and metrics flow to Sentry when a DSN is configured; see the
+traces, logs, and metrics have SDK support. Hosted activation remains gated by
+VIN-121 privacy verification and configuration; see the
 [observability runbook](docs/observability.md).
 
 | Method | Path | Access |

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   SENTRY_TUNNEL_ROUTE,
+  sourceMapUploadEnabled,
   clientSentryOptions,
   serverSentryOptions,
 } from "../src/lib/sentry-options";
@@ -12,7 +13,7 @@ describe("sentry options", () => {
       environment: "production",
       nodeEnv: "production",
     });
-    expect(options).toEqual({
+    expect(options).toMatchObject({
       dsn: "https://key@o0.ingest.sentry.io/0",
       environment: "production",
       tracesSampleRate: 0.1,
@@ -26,7 +27,7 @@ describe("sentry options", () => {
       dsn: "https://key@o0.ingest.sentry.io/0",
       nodeEnv: "development",
     });
-    expect(options).toEqual({
+    expect(options).toMatchObject({
       dsn: "https://key@o0.ingest.sentry.io/0",
       environment: "development",
       tracesSampleRate: 1,
@@ -51,4 +52,21 @@ describe("sentry options", () => {
         .tracesSampleRate,
     ).toBe(0.5);
   });
+});
+
+it("uploads source maps only with complete credentials", () => {
+  expect(sourceMapUploadEnabled({})).toBe(false);
+  expect(sourceMapUploadEnabled({ SENTRY_AUTH_TOKEN: "fictional" })).toBe(
+    false,
+  );
+  expect(
+    sourceMapUploadEnabled({ SENTRY_ORG: "demo", SENTRY_PROJECT: "demo" }),
+  ).toBe(false);
+  expect(
+    sourceMapUploadEnabled({
+      SENTRY_AUTH_TOKEN: "fictional",
+      SENTRY_ORG: "demo",
+      SENTRY_PROJECT: "demo",
+    }),
+  ).toBe(true);
 });

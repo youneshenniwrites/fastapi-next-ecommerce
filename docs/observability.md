@@ -1,9 +1,9 @@
 # Observability runbook (Sentry, issue #121)
 
-Both runtimes report to Sentry on the free Developer plan (no card, no paid
-upgrade): the FastAPI API via `sentry-sdk` (#122) and the Next.js storefront
-via `@sentry/nextjs` (#123). Telemetry stays completely silent until a DSN is
-configured, so local development and secrets-free CI are unaffected.
+Both runtimes have SDK integration, but **hosted activation remains blocked** until
+privacy checks pass and the owner supplies configuration. This privacy prerequisite
+does not establish live trace continuity, alert delivery or a verified dashboard.
+Missing DSNs keep telemetry silent; no telemetry configuration is changed by this PR.
 
 ## Environment variables
 
@@ -37,20 +37,47 @@ by signal-specific controls:
   production). Reduce log verbosity in Sentry project settings if quota is at
   risk.
 
-## Privacy scrubbing
+## Privacy boundary
 
-`send_default_pii` is off everywhere. The backend `before_send` additionally
-filters authorization headers, cookies, nonstandard credential headers
-(`x-api-key`, `x-auth-token`, `x-vercel-protection-bypass`), sensitive body and
-query keys, and all user PII except the id. The browser key is public by design;
-no other credentials belong in client variables.
+Both error and transaction hooks keep a narrow structural allowlist: event and trace
+identifiers, timestamps, severity, release/environment, exception type, line/column
+numbers and simple static code identifiers. Local filenames lose directory roots;
+Next bundle filenames retain only the artifact path. Valid source-map debug UUIDs
+and matching sanitized artifact paths survive for symbolication. They discard complete request/user data,
+URLs, arbitrary extras/contexts/tags, breadcrumbs, stack source/local variables and
+span data. Exception text, messages, transaction names and span descriptions become
+`[Filtered]`. This covers OAuth `username` bodies, credential headers and nested
+arrays by removing their containing data, rather than guessing every sensitive key.
+Backend exception local-variable capture is explicitly disabled.
 
-## Verifying without a DSN
+Backend logs have their own hook: severity, timestamp and trace correlation survive;
+free-text bodies and application attributes do not. Configured release/environment
+attributes survive. Rate-limit metrics use matched server route templates rather
+than raw request paths; their hook permits only the fixed rejection counter and
+its route/release/environment attributes. Frontend logs remain disabled; a defensive
+log hook removes message text and attributes if enabled later. Session replay,
+attachments and profiling are not enabled. Enabling a new channel or adding custom
+structural fields requires its own privacy review. Trusted release/environment and
+code identifiers must never be populated with user data.
 
-Unit suites cover init gating, option builders, scrubbing, and the 429 counter
-without contacting Sentry. The production build compiles the instrumentation
-with no secrets. Live trace/error screenshots from development require the owner
-prerequisite (Sentry org + DSNs) and remain the outstanding verification step.
+This deliberately loses request details, breadcrumb history and exception messages.
+Use exception type, code identifiers/line numbers and trace IDs for diagnosis; do not
+reintroduce raw payloads to recover convenience. These controls are not a claim that
+arbitrary future SDK channels or application-supplied metadata are automatically safe.
+
+## Verification before activation
+
+In-memory transports exercise the pinned Python SDK and both Node/browser clients,
+serialize actual error and transaction envelopes, and assert private fictional values
+are absent while useful diagnostics survive. The Python suite also checks emitted
+log and metric envelopes. No tests contact Sentry. Option tests cover missing DSNs and conditional
+source-map uploads, which require all of `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and
+`SENTRY_PROJECT`. Never expose the upload token through a public environment variable.
+
+Remaining VIN-121 work: sanitized reporting of meaningful handled failures, then
+configured development evidence for errors, cross-service traces, release/environment,
+logs/metrics and an alert. Ordinary validation/authentication failures are not incidents.
+Do not mark the issue complete or activate telemetry from this prerequisite alone.
 
 ## When an alert fires
 
