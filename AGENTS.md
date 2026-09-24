@@ -22,7 +22,9 @@ For authorized implementation/continuation requests, use
 [deliver-ticket](.agents/skills/deliver-ticket/SKILL.md) and read
 [the saved execution mode](docs/delivery-mode.md). That file is the sole source of the current mode.
 Carry the requested scope through its authorized finish line without waiting for
-repeated “carry on” messages. Questions and review-only requests stay narrow.
+repeated “carry on” messages. Questions and review-only requests stay narrow. Use the
+[evidence-backed checkpoint guidance](docs/delivery.md#evidence-backed-checkpoints)
+for resumable verification, then stop at the authorized finish line.
 
 ## Commands
 

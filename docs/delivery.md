@@ -192,3 +192,48 @@ The owner-authorized [Dependabot policy](dependabot.md) allows eligible dependen
 npm/uv patch and minor PRs to receive automated policy approval and protected
 auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
 Bot PRs retain upstream titles; VIN-172 tracks the policy.
+
+## Evidence-backed checkpoints
+
+Within the active issue handoff, split substantial work into a few observable
+outcomes, ordered by dependencies and risk. Each checkpoint names its acceptance,
+verification method and eventual evidence. Agree API/state contracts before
+parallel implementation. The verifier can prepare failure scenarios while code
+is built; prefer behavioral tests before implementation when they clarify a
+contract. Do not add tests that merely repeat copy or implementation wording.
+
+For meaningful UI changes, identify an agreed design or existing reference and
+compare the same viewport, data and interaction state. Check appearance and
+behavior; record screenshots/results where useful. Backend-only and documentation
+changes need no visual gate. Validate docs with relevant link, example and factual
+checks, not a mandatory application end-to-end run.
+
+Batch review findings under the existing bounded-review policy. A repeated failure
+without new evidence calls for diagnosis or a concrete blocker, not an unlimited
+critic/fixer loop. Preserve valid approvals only under the existing review rules.
+After the authorized finish line, stop: identifying a next ticket is not permission
+to start it. An explicit pause takes effect even with incomplete checkpoints.
+
+### Lightweight handoff checker
+
+For multi-step delivery, export the current issue handoff to a temporary JSON
+snapshot and run `python3 scripts/delivery_check.py /path/to/handoff.json` before
+claiming completion. The snapshot is disposable, not a second plan or progress
+metric. Keep its source and any corrected evidence in the issue handoff.
+
+The object requires nonempty `issue`, `revision` and `finish_line` strings;
+`checkpoints` is a nonempty list of objects with `outcome`, `verification`,
+`status: "done"` and nonempty `evidence`. `closeout` contains `review`, `merge`,
+`deployment` and `tracking`; each has either `status: "done"` plus `evidence`, or
+`status: "not-applicable"` plus a `reason` tied to the authorized scope. For a
+PR-only request, merge/deployment may be inapplicable; do not excuse an obligation
+that belongs to the requested finish line. Pending evidence remains incomplete.
+
+Exit 0 means fields are complete, 1 means evidence fields are incomplete, and 2
+means the input cannot be read/parsed. The checker does not query GitHub, validate
+links, prove a revision was tested or judge whether an exemption is legitimate.
+The lead must verify those facts, including current-head CI/reviews and board
+state. It never grants merge permission, changes protection, installs a stop hook
+or schedules work. On pause/blockage, record remaining work and the next action;
+do not fabricate completion to get exit 0. Trivial single-step work can use the
+same completion questions directly without generating JSON.
