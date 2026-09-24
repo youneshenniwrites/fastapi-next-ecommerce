@@ -44,6 +44,9 @@ The approved free sandbox setup and development activation were verified on
 API access requires Vercel sign-in. The hosted evidence below proves the deployed
 journey. Production sandbox payments and their relay remain disabled.
 
+For a guided presentation, use the [customer walkthrough and five-minute script](demo.md#try-the-hosted-sandbox-shop).
+This runbook owns operator configuration, recovery and verification evidence.
+
 ## Customer flow
 
 Place the order once, then choose **Pay with Stripe sandbox**. Placement has
