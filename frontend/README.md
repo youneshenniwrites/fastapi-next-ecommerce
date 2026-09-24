@@ -94,3 +94,9 @@ search/stock/sort controls and mobile navigation. Lucide supplies the UI icons.
 See [the design-system guide](design-system.md) for tokens, adding components,
 server/client boundaries and the reset strategy. Product and hero images use the
 licensed local photography described above.
+
+## Demonstrate the shopping journey
+
+Use the [hosted sandbox walkthrough and five-minute script](../docs/demo.md#try-the-hosted-sandbox-shop)
+for a customer-facing demonstration. The [payment runbook](../docs/sandbox-payments.md)
+owns setup, recovery and dated evidence; production payments remain disabled.

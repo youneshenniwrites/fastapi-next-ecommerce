@@ -1,5 +1,85 @@
 # Reproducible portfolio demo
 
+## Try the hosted sandbox shop
+
+Use the [development storefront](https://vindor-ecommerce-development.vercel.app)
+for payments. Production supports the unpaid demo journey; its Stripe payments
+remain disabled. No purchase charges real money or ships goods. You do not need
+a Stripe account or a real card to try the customer flow.
+
+1. [Create an account](https://vindor-ecommerce-development.vercel.app/register)
+   with a unique fictional address, such as `your-demo-name@example.com`, and a
+   password you do not use elsewhere. Then [sign in](https://vindor-ecommerce-development.vercel.app/login);
+   registration does not sign you in automatically. Development accounts are
+   separate from production accounts.
+2. Choose an in-stock product, select **Add to cart**, and open **Cart**. Use one
+   item for a short demo; stock and prices can change between visits.
+3. Select **Review checkout**. The draft shows server-calculated GBP lines and
+   totals but has not reserved stock. Select **Place demo order** once. Placement
+   claims inventory; it does not establish payment.
+4. Choose **Pay with Stripe sandbox** and confirm Stripe displays **Sandbox**.
+   Select card payment and use `4242 4242 4242 4242`, a future expiry such as
+   `12/34`, and a three-digit CVC such as `123`. Use fictional name/email details
+   and leave payment-detail saving off. These are [Stripe's documented test values](https://docs.stripe.com/testing#testing-interactively),
+   not real payment credentials.
+5. Complete the test payment. On return, look for **Paid — sandbox only** and
+   server confirmation. If still pending, deliberately select **Check payment
+   status**; returning from Stripe alone is not proof of payment. Do not place a
+   second order to retry this payment.
+6. Open **Order history** and revisit the same order to see its persisted status.
+   Sign out through **My account** when finished.
+
+If the payment button is absent, confirm you used development and a newly placed
+order. Orders placed before sandbox activation remain unpaid legacy records.
+If stock or prices changed, return to the cart and review it again. For a 429,
+follow the displayed wait guidance before retrying; repeated clicks do not help.
+Other payment problems belong in the [payment recovery runbook](sandbox-payments.md#recovery).
+
+### Optional cancellation demonstration
+
+On a separate unpaid order, use **Cancel unpaid order** and confirm the cancelled
+status. Returning through Stripe's back/cancel link alone does not cancel the
+order or release stock. Cancellation does not refill the cart. Avoid placing
+unneeded orders: inventory is claimed at placement, and idle unstarted orders
+need a status check or operator reconciliation after their deadline. Provider
+expiry/replay evidence is already recorded in the runbook; do not wait for expiry
+as part of a five-minute presentation.
+
+## Five-minute demonstration script
+
+Prepare a fictional account and an in-stock item first. This is a suggested
+presentation sequence, not a measured completion-time guarantee.
+
+| Time | Show | Explain |
+| --- | --- | --- |
+| 0:00–0:45 | Catalog and signed-in navigation | Fictional GBP shop; Next.js storefront, FastAPI and PostgreSQL; free Vercel/Neon hosting. |
+| 0:45–1:30 | Cart and checkout draft | Prices/totals belong to the server. A draft reserves nothing. |
+| 1:30–2:15 | Place the order | Atomic placement claims inventory; retry identity prevents duplicate placement. |
+| 2:15–3:30 | Stripe sandbox and paid confirmation | Only verified server-side payment evidence establishes paid state; payment does not deduct stock twice. |
+| 3:30–4:00 | Order history | The same customer's order and final status persist across navigation. |
+| 4:00–5:00 | Linked evidence and limitations below | Explain what was tested, what is still unfinished and why the design is bounded. |
+
+### Evidence and honest limits
+
+- [Hosted payment evidence](sandbox-payments.md#hosted-development-evidence--23-september-2026)
+  records purchase/history, stock before/after payment, cancellation, expiry and
+  duplicate webhook delivery. This guide reuses that evidence; writing it is not
+  a new hosted verification run.
+- [Order transaction decisions](decisions/0002-order-transactions.md) and
+  [payment lifecycle decisions](decisions/0003-sandbox-payments.md) explain ownership,
+  idempotency, money and inventory boundaries. [Architecture](architecture.md)
+  describes the components and hosting.
+- No real fulfilment, refunds or production payment activation. Monitoring privacy
+  work, restore rehearsal, hosted reliability checks and the focused accessibility
+  review remain unfinished. Do not claim enterprise readiness or full accessibility
+  conformance; consult the [single completion plan](plans/portfolio-completion.md).
+
+## Prepare a disposable local demo
+
+For a fresh checkout, follow [development setup](development.md) first. The local
+bootstrap below does not configure Stripe; local sandbox integration requires the
+separate [payment configuration](sandbox-payments.md#configuration-and-activation).
+
 Use a disposable local database. This is a fictional desk-accessories shop with
 GBP prices, including an out-of-stock product for frontend empty-stock states.
 
