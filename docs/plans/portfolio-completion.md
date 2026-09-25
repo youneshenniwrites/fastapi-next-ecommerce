@@ -289,6 +289,18 @@ continuity, errors, release/environment tags, logs/metrics and an alert.
 Acceptance: privacy tests precede activation; every live criterion has evidence or
 an explicit blocker. Missing credentials do not block checkout implementation.
 
+### Telemetry acceptance refinement (VIN-121)
+
+PR #203 is merged. Next delivery follows the [refined VIN-121 contract](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121): session-channel privacy assessment, free development configuration, then verified signals and hosted evidence. Proposed additions are not yet implemented.
+
+- Safe structured logs cover checkout technical failures, webhook failures and inventory-release outcomes.
+- RED covers cart writes, placement and payment-session creation: request count/rate, technical error ratio and p95 duration with sample counts. Expected declines/validation failures are separate; sampled trace counts are not total traffic.
+- Payment evidence covers webhook processing failures and confirmation-to-local-paid delay, with explicit timestamp sources and duplicate handling.
+- Trace evidence links storefront/API/dependencies; webhook processing is a separate asynchronous request, not assumed to share Stripe's trace context.
+- New signals must survive the existing privacy allowlists with serialized-envelope positive/negative tests. Keep labels bounded and exclude personal data, raw URLs and order identifiers. Verify free account limits before activation; retain alert and quota acceptance.
+
+[VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) separately owns optional browser RUM (LCP/INP/CLS), after VIN-121. It does not block VIN-121 or add a portfolio completion outcome. No Collector, extra vendor, paid infrastructure or coding is authorized by this planning update. The single progress checklist remains unchanged.
+
 ### Security headers (#126)
 
 Introduce compatible headers and a tested CSP rollout. Verify sessions, Server

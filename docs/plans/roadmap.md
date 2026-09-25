@@ -102,3 +102,7 @@ Sandbox payments VIN-30 is complete on development; production payments remain d
 Hosting setup #44 and production workflow acceptance #46 are complete.
 Development and production are live; #45 tracks the remaining frontend previews.
 Account journey verification (#27) is complete; the persistent cart API (#71) and cart storefront (#72) are delivered (#80). Azure is deferred; no extra API billing is allowed.
+
+### Telemetry refinement
+
+VIN-121 owns privacy-safe logs, checkout RED and payment-health signals plus hosted trace/alert/quota evidence; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). These signal additions are planned, not delivered by PR #203. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.
