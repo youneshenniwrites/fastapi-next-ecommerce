@@ -70,7 +70,9 @@ arbitrary future SDK channels or application-supplied metadata are automatically
 In-memory transports exercise the pinned Python SDK and both Node/browser clients,
 serialize actual error and transaction envelopes, and assert private fictional values
 are absent while useful diagnostics survive. The Python suite also checks emitted
-log and metric envelopes. No tests contact Sentry. Option tests cover missing DSNs and conditional
+log and metric envelopes. No tests contact Sentry. Browser session envelopes emitted by default integrations
+are outside these error/transaction callback tests; assess those channels before
+hosted activation, especially before introducing SDK user identity. Option tests cover missing DSNs and conditional
 source-map uploads, which require all of `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and
 `SENTRY_PROJECT`. Never expose the upload token through a public environment variable.
 
