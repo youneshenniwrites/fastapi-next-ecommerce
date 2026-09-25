@@ -15,10 +15,10 @@ at a time; external blockers must not prevent independent work.
 ## Recruiter-readiness feedback decision — 22 September 2026
 
 Keep this plan as the single source of truth. VIN-120 checkout submission,
-confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194 and its hosted sandbox journey was verified on 23 September. Next: VIN-121 telemetry privacy, then the remaining hosted evidence.
+confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194 and its hosted sandbox journey was verified on 23 September. PR #203 implements VIN-121 error/transaction/log/metric privacy controls and serialized tests. Next: assess browser session envelopes, finish configuration and collect hosted evidence.
 Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
 exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
-VIN-121 still requires privacy tests before telemetry activation. Payment work must
+VIN-121 activation still requires session-channel assessment and confirmed configuration after the PR #203 privacy prerequisite. Payment work must
 preserve inventory already claimed at placement and release it exactly once for
 expired/cancelled unpaid orders. Finish security headers and hosted evidence before
 claiming demo completion. A concise scaling discussion belongs to the interview
@@ -61,7 +61,7 @@ retain the issue hierarchy for organization, not as a competing completion metri
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
-VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. Next: VIN-121 privacy coverage before telemetry activation.
+VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. Next: VIN-121 session-channel assessment and configuration before hosted telemetry verification; PR #203 supplies the error/transaction/log/metric privacy prerequisite.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
@@ -124,12 +124,12 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 
 | Ticket / board status | Verified dependency | Next unblock action | Who acts | Completion evidence |
 | --- | --- | --- | --- | --- |
-| [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | Privacy coverage is incomplete; free Sentry organization/project configuration and DSN availability are unverified. SDK scaffolding and docs have merged. | Agent extends error/transaction/log/nested-context scrubbing and tests serialized SDK payloads before activation. Owner creates or confirms the free organization/projects and configures the required environment values securely. Then agent verifies live telemetry. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
+| [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | PR #203 implements error/transaction/log/metric filtering and serialized tests. The free frontend Sentry project was inspected on 23 September; backend project, runtime configuration and browser session-channel verification remain outstanding. | Verify PR #203 delivery state, assess default browser session envelopes, then complete missing project/environment configuration securely and prove hosted telemetry. Do not reimplement the filtering and serialized tests supplied by PR #203. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
 **Unblock order:** Stage 5 payment implementation and automated correctness
-evidence and VIN-30 hosted sandbox proof are complete. Resume VIN-121 privacy
-coverage before telemetry activation, followed by outstanding hosted proof. Record
+evidence and VIN-30 hosted sandbox proof are complete. Continue VIN-121 with session-channel assessment and configuration after the
+PR #203 privacy prerequisite, followed by outstanding hosted proof. Record
 external blockers and continue independent work rather than waiting idle. Configuration can be prepared
 independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
@@ -160,7 +160,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 3 — Security and monitoring
 
-- [ ] **#121 BLOCKED — agent action:** complete telemetry privacy coverage and pass serialized-payload tests before activation.
+- [ ] **#121 remaining privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; assess default browser session envelopes before activation. This broader gate remains unchecked until that assessment is recorded.
 - [ ] **#121 BLOCKED — owner configuration, then agent proof:** confirm free Sentry projects/environment configuration; prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
@@ -271,6 +271,11 @@ unintentionally grouped, and protection claims match demonstrated behavior.
 ## 3. Essential security and observability
 
 ### Sentry (#121)
+
+PR #203 supplies the error/transaction/log/metric privacy prerequisite below,
+including serialized tests and conditional source-map configuration. Remaining
+work: assess default browser session envelopes, meaningful handled-failure
+reporting and hosted configuration/evidence. Consult the issue for merge state.
 
 Cover enabled errors, transactions, logs and nested context with privacy controls.
 Include OAuth username emails, authorization/cookies, credential headers, URLs,
