@@ -84,9 +84,10 @@ guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
 Still open in separate PRs: static type checking, then code scanning and
 remaining review/coverage required-check rules. Frontend lint/type/build and browser checks are now implemented.
 Sentry SDK scaffolding is merged in the API and storefront (#122/#123).
-#121 remains blocked: privacy handling and serialized-payload tests must pass
-before activation, then configured projects and live telemetry evidence are
-required. DSNs alone do not complete monitoring.
+#121 remains open: PR #203 implements error/transaction/log/metric privacy
+filtering and serialized-payload tests. Next assess default browser session
+envelopes, complete configuration and collect live telemetry evidence; do not
+repeat the implemented prerequisite. DSNs alone do not complete monitoring.
 Operational runbooks and release/restore verification continue alongside hosted
 development.
 

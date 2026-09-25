@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
-import { SENTRY_TUNNEL_ROUTE } from "./src/lib/sentry-options";
+import {
+  SENTRY_TUNNEL_ROUTE,
+  sourceMapUploadEnabled,
+} from "./src/lib/sentry-options";
 const config: NextConfig = {
   poweredByHeader: false,
   // Vercel's adapter packages functions; standalone output is for local containers.
@@ -14,5 +17,5 @@ export default withSentryConfig(config, {
   silent: true,
   widenClientFileUpload: true,
   tunnelRoute: SENTRY_TUNNEL_ROUTE,
-  sourcemaps: { disable: true },
+  sourcemaps: { disable: !sourceMapUploadEnabled(process.env) },
 });

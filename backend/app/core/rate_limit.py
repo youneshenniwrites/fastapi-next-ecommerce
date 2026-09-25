@@ -129,7 +129,9 @@ def _enforce(request: Request, limiter: RateLimiter, key: str | None = None) -> 
     """Reject over-limit requests with 429 and standard throttling headers."""
     allowed, retry_after = limiter.consume(client_key(request) if key is None else key)
     if not allowed:
-        count_rate_limit_rejection(request.url.path)
+        count_rate_limit_rejection(
+            getattr(request.scope.get("route"), "path", "unmatched")
+        )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many requests. Wait briefly, then try again.",
