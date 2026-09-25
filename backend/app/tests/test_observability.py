@@ -192,3 +192,67 @@ def test_rejection_records_route_metric(monkeypatch):
     with pytest.raises(Exception, match="Too many requests"):
         _enforce(request, limiter)
     assert recorded == ["/api/v1/orders/{order_id}/payment"]
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [None, "https://[invalid/path.py", "private@example.invalid", "secrets.txt"],
+)
+def test_untrusted_stack_locations_are_discarded(filename):
+    """Malformed or non-code paths must not disclose request-derived values."""
+    event = {
+        "exception": {
+            "values": [
+                {
+                    "type": "Error",
+                    "stacktrace": {
+                        "frames": [
+                            {
+                                "filename": filename,
+                                "function": "private@example.invalid",
+                            },
+                            None,
+                        ]
+                    },
+                }
+            ]
+        },
+        "contexts": {"trace": None},
+    }
+    clean = scrub_event(event, {})
+    assert clean["exception"]["values"][0]["stacktrace"] == {"frames": [{}, {}]}
+    assert clean["contexts"]["trace"] == {}
+
+
+def test_code_artifact_location_keeps_only_source_map_path():
+    event = {
+        "exception": {
+            "values": [
+                {
+                    "stacktrace": {
+                        "frames": [
+                            {
+                                "filename": "https://shop.invalid/_next/static/chunks/app.js?token=private",
+                                "function": "render_page",
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+    frame = scrub_event(event, {})["exception"]["values"][0]["stacktrace"]["frames"][0]
+    assert frame == {
+        "filename": "/_next/static/chunks/app.js",
+        "function": "render_page",
+    }
+
+
+def test_unknown_metric_is_dropped():
+    assert scrub_metric({"name": "private@example.invalid", "value": 1}, {}) is None
+
+
+def test_malformed_exception_and_span_context_do_not_escape_filter():
+    clean = scrub_event({"exception": {"values": "private"}, "spans": [None]}, {})
+    assert clean["exception"] == {"values": []}
+    assert clean["spans"] == [{"description": "[Filtered]"}]
