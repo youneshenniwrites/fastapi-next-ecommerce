@@ -36,6 +36,15 @@ busy-loop unchanged failures, fabricate approval, bypass checks or silently take
 another backlog ticket. A skill does not keep a finished turn running or create a
 scheduler. No scheduled wakeups without a separate explicit request.
 
+## Checkpoints and verification
+
+Follow [evidence-backed checkpoints](../../../docs/delivery.md#evidence-backed-checkpoints)
+in the existing issue handoff. Define observable outcomes and verification before
+implementation; let an independent verifier prepare failure scenarios in parallel
+when useful. Apply visual acceptance only to relevant UI changes. Use the linked
+lightweight handoff checker for multi-step completion; its output is structural
+validation, never proof of approval or delivery. Do not create another plan.
+
 ## Durable handoff and completion check
 
 Use the existing issue handoff as the recovery record, not a second task ledger.
@@ -122,4 +131,5 @@ Use update-delivery-board and update-docs after merge. Update the one canonical
 checklist only for verified outcomes, then synchronize VIN-155's percentage and
 pink graphic from that count. Preserve implemented/merged/deployed/verified
 distinctions. Report outcome, PR, evidence, blocker and next action concisely.
-Do not spawn another task or enable background automation as an implicit follow-up.
+Stop at the authorized finish line; naming the next ticket does not authorize
+starting it. Do not spawn another task or enable background automation as an implicit follow-up.

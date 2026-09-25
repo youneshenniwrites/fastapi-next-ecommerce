@@ -187,7 +187,10 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [x] Run complete hosted sandbox purchase with fictional data — VIN-30, development `8685cc1`, 23 September; [success/history, cancellation, expiry and duplicate replay evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026).
 - [ ] Perform disposable restore rehearsal and document recovery — scoped #130.
 - [ ] Review full journey for keyboard/mobile/accessibility — scoped #131, not formal full conformance.
-- [ ] Update architecture/setup/limits and deliver five-minute demo script.
+- [ ] Update architecture/setup/limits and deliver five-minute demo script. The
+  [walkthrough and script](../demo.md#five-minute-demonstration-script) are documented
+  under VIN-198; final package reconciliation remains required after the outstanding
+  monitoring, recovery and accessibility work. This documentation alone adds no completion credit.
 
 **Finish line:** reproducible hosted sandbox purchase, correct money/inventory,
 useful monitoring, restore evidence and an understandable demonstration.

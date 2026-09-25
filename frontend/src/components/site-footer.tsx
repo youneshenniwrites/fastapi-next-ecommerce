@@ -17,9 +17,9 @@ export function SiteFooter() {
         </p>
       </div>
       <p>
-        Fictional shop · Portfolio demonstration
+        Fictional shop · GBP prices · Sandbox payments only.
         <br />
-        Browse in GBP. Purchasing is not available yet.
+        No real charges or shipping.
         <br />
         Representative photography ·{" "}
         <a

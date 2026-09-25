@@ -43,6 +43,9 @@ AGENTS.md routes agents to the skills. [Delivery policy](delivery.md),
 ownership skills remain authoritative for their respective rules. Read them on
 resume rather than relying on conversation memory.
 
+For multi-step delivery, use the [checkpoint and handoff checker guidance](delivery.md#evidence-backed-checkpoints).
+It validates evidence fields, not external truth or permission to merge.
+
 ## Completion boundaries
 
 A created PR is In review, not Done. Self-review and resolved comments are not

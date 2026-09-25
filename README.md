@@ -235,6 +235,12 @@ merged in PR #188. The customer
 account journey and the signed-in cart storefront are implemented and covered by desktop/mobile browser tests. Follow the
 [completion plan](docs/plans/portfolio-completion.md) for the remaining work.
 
+## Try the sandbox shopping journey
+
+Follow the [hosted walkthrough and five-minute demo script](docs/demo.md#try-the-hosted-sandbox-shop)
+for development signup, cart, checkout, Stripe test payment and order history.
+Use fictional details and test cards only. Production payments remain disabled.
+
 ## Try customer accounts
 
 Use the hosted [registration page](https://vindor-ecommerce.vercel.app/register)
