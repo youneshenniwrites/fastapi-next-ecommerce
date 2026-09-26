@@ -5,6 +5,54 @@ privacy checks pass and the owner supplies configuration. This privacy prerequis
 does not establish live trace continuity, alert delivery or a verified dashboard.
 Missing DSNs keep telemetry silent; no telemetry configuration is changed by this PR.
 
+## Telemetry terms in VINDOR
+
+These examples explain the planned monitoring model, not verified hosted results.
+[VIN-121](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121)
+owns hosted acceptance; optional browser measurements belong to
+[VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204).
+
+| Term | What it answers | Checkout example |
+| --- | --- | --- |
+| Log | What happened at one moment? | A webhook processing attempt failed, with a safe reason code and trace correlation. |
+| Metric | How often, how much, or how slow over a time window? | Payment-session request count, technical error ratio and duration distribution. |
+| Trace | Where did one operation spend time? | A storefront request calls FastAPI, which calls the database and Stripe. |
+| Span | What happened during one step of a trace? | The duration of the Stripe API call. Spans can overlap; their durations need not add up to the total. |
+| APM (application performance monitoring) | Which application operation or dependency is slow or failing? | Compare checkout latency with its database and Stripe spans. APM is a capability, not another required vendor. |
+| RUM (real user monitoring) | What did visitors experience in their browsers? | Observe page loading, responsiveness and layout stability; controlled demo runs are not representative real-user evidence. |
+| RED (rate, errors, duration) | Is a service healthy? | Requests per minute, unexpected technical failures divided by completed requests, and p95 duration for the same operation/window. |
+
+### Reading latency and browser measurements
+
+- **p95/p99:** the 95th/99th percentile of the measured duration distribution.
+  Roughly 95%/99% of observations are at or below that value. Always report the
+  time window and sample count; a handful of demo requests cannot establish a
+  reliable tail-latency baseline.
+- **LCP (Largest Contentful Paint):** when the largest eligible visible content
+  element renders, such as the main product image; measured in milliseconds.
+- **INP (Interaction to Next Paint):** responsiveness across qualifying browser
+  interactions, such as clicking Add to basket; measured in milliseconds. It is
+  not the full API completion time. No qualifying interaction means no INP
+  observation, not a zero.
+- **CLS (Cumulative Layout Shift):** a unitless score for unexpected layout
+  movement, such as content shifting when an image loads.
+
+### Boundaries that keep the evidence honest
+
+Stripe webhook delivery is a separate asynchronous request. Correlate it safely
+with the payment workflow; do not assume hosted Stripe continues our trace.
+Expected payment declines and validation failures are distinct from technical
+outages. Sampled traces do not supply exact total request counts.
+
+Use bounded operation/outcome labels and safe correlation fields; never put
+customer/order identifiers into metric labels or personal data into logs.
+Examples above do not bypass the privacy allowlists: new signals require
+serialized-payload tests and hosted verification before claiming delivery.
+
+An **OpenTelemetry Collector** receives, processes and exports telemetry. It is
+not required for the current SDK-to-Sentry design; adding one or another vendor
+would need a concrete requirement and separate scope.
+
 ## Environment variables
 
 | Variable | Where | Required |
