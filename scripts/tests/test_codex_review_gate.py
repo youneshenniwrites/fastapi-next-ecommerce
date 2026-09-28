@@ -1,5 +1,5 @@
-from pathlib import Path
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from scripts.codex_review_gate import BOT_ID, details_url, evaluate
@@ -328,12 +328,13 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
             "pending",
         )
 
-
     def test_observed_full_comment(self):
         comment = self.clean_comment()
         comment["body"] = (
-            Path(__file__).with_name("fixtures") / "codex-clean-swish.txt"
-        ).read_text().replace("59fbb6437d", self.sha[:10])
+            (Path(__file__).with_name("fixtures") / "codex-clean-swish.txt")
+            .read_text()
+            .replace("59fbb6437d", self.sha[:10])
+        )
         self.assertEqual(
             evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
             "success",
@@ -342,7 +343,8 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
     def test_inserted_or_trailing_prose_stays_pending(self):
         for body in (
             self.clean_comment()["body"].replace(
-                "**Reviewed commit:**", "But I found a blocking issue\n\n**Reviewed commit:**"
+                "**Reviewed commit:**",
+                "But I found a blocking issue\n\n**Reviewed commit:**",
             ),
             self.clean_comment()["body"] + "But I found a blocking issue",
             (Path(__file__).with_name("fixtures") / "codex-clean-swish.txt")
@@ -358,3 +360,24 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
                     )[0],
                     "pending",
                 )
+
+
+class DelightfulCleanEvidence(ReviewEvidence, EditedReviews):
+    """Replay trust checks for the exact clean signoff observed on PR #207."""
+
+    def clean_comment(self):
+        comment = super().clean_comment()
+        comment["body"] = comment["body"].replace(
+            "Can't wait for the next one!", "Delightful!"
+        )
+        return comment
+
+    def test_new_signoff_does_not_accept_additional_findings(self):
+        comment = self.clean_comment()
+        comment["body"] = comment["body"].replace(
+            "Delightful!", "Delightful! But fix this."
+        )
+        self.assertEqual(
+            evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
+            "pending",
+        )

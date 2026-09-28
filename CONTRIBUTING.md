@@ -154,9 +154,10 @@ The exact-head review instructions above have one exception: the owner-authorize
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. Branch protection remains enforced.
 
-## Automated dependency exception
+## Automated dependency delivery
 
-The owner-authorized [Dependabot policy](docs/dependabot.md) allows eligible dependency-only
-npm/uv patch and minor PRs to receive automated policy approval and protected
-auto-merge without per-PR Codex review. Other PRs retain the normal review rules.
-Bot PRs retain upstream titles; VIN-172 tracks the policy.
+The owner-authorized [Dependabot policy](docs/dependabot.md) requires clean current-head
+Codex review and applicable CI before automated approval and protected merging.
+This supersedes the earlier patch/minor policy-only approval exception. Trusted
+continuation handles branch updates and bounded Python export repairs; genuine
+failures remain open. Bot PRs retain upstream titles; VIN-172 tracks the policy.

@@ -1,7 +1,11 @@
-name: Dependabot approval and auto-merge
+name: Dependabot continuation
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_run:
+    workflows: [Backend CI, Frontend CI, Branch naming, Review gate tests, Codex review gate, Dependabot approval and auto-merge]
+    types: [completed]
+  push:
+    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -9,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   reconcile:
-    if: github.repository == 'youneshenniwrites/fastapi-next-ecommerce' && github.event.pull_request.user.login == 'dependabot[bot]'
+    if: github.repository == 'youneshenniwrites/fastapi-next-ecommerce'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
