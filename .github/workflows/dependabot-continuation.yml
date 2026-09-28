@@ -13,7 +13,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   reconcile:
-    if: github.repository == 'youneshenniwrites/fastapi-next-ecommerce' && (github.event_name != 'workflow_run' || github.event.workflow_run.event != 'schedule')
+    # Gate polling catches reaction-only evidence; transition-only optimization is VIN-147.
+    if: github.repository == 'youneshenniwrites/fastapi-next-ecommerce'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

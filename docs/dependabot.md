@@ -13,7 +13,10 @@ updates and major versions. Bot PRs retain upstream titles and authorship. Human
 repair commits do not pretend to be Dependabot commits and still need review.
 
 The initial workflow and continuation share a serial queue. Completion of CI/review
-workflows, main pushes and manual dispatch recheck live evidence. Each run examines
+workflows, main pushes and manual dispatch recheck live evidence. Gate completions
+include its existing five-minute polling, which catches reaction-only review
+evidence. Reducing unchanged polling runs is deferred to VIN-147; this is GitHub
+Actions continuation, not a scheduled Codex chat or repeated review request. Each run examines
 at most 30 candidates and makes at most one branch update, export repair or merge.
 Pending work keeps its place; explicit failures remain open while other candidates
 can proceed. There is no permanent auto-merge authorization or administrator bypass.
