@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: uv
     directory: /backend
+    exclude-paths: ["requirements.txt"]
     assignees: [youneshenniwrites]
     schedule:
       interval: weekly

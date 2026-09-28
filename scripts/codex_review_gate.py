@@ -71,6 +71,8 @@ def clean_result(body, sha):
         "Keep it up!",
         "Hooray!",
         "Keep them coming!",
+        "Delightful!",
+        "You're on a roll.",
     ):
         result = (
             f"Codex Review: Didn't find any major issues. {signoff} "
