@@ -249,3 +249,158 @@ class CheckStatesTests(unittest.TestCase):
             ),
             [],
         )
+
+
+class ApprovalLifecycleTests(unittest.TestCase):
+    def setUp(self):
+        from dependabot_reconcile import APPROVAL
+
+        self.body = APPROVAL
+        self.sha = "a" * 40
+        self.pr = {
+            "number": 1,
+            "state": "open",
+            "draft": False,
+            "user": {"login": "dependabot[bot]"},
+            "base": {"ref": "main"},
+            "head": {
+                "sha": self.sha,
+                "repo": {"full_name": "owner/repo"},
+                "ref": "dependabot/update",
+            },
+            "mergeable_state": "clean",
+        }
+        self.reviews = {1: [], 2: []}
+        self.calls = []
+        self.inspections = 0
+        self.check_calls = 0
+        self.states = ["SUCCESS"]
+        self.fail_after_approval = False
+        self.error_after_approval = False
+        self.optional_change = None
+
+    def own(self, id=10):
+        return {
+            "id": id,
+            "user": {"login": "github-actions[bot]"},
+            "body": self.body,
+            "state": "APPROVED",
+            "commit_id": self.sha,
+        }
+
+    def api(self, path, **fields):
+        number = int(path.split("/pulls/")[1].split("/")[0])
+        self.calls.append((path, fields))
+        if path.endswith("/dismissals"):
+            id = int(path.split("/reviews/")[1].split("/")[0])
+            for review in self.reviews[number]:
+                if review["id"] == id:
+                    review["state"] = "DISMISSED"
+            return {}
+        if path.endswith("/reviews"):
+            review = self.own()
+            self.reviews[number].append(review)
+            return copy.deepcopy(review)
+        if path.endswith("/merge"):
+            return {"merged": True}
+        return {**copy.deepcopy(self.pr), "number": number}
+
+    def pages(self, path):
+        number = int(path.split("/")[-2])
+        if path.endswith("/reviews"):
+            return copy.deepcopy(self.reviews[number])
+        return [
+            {
+                "author_association": "OWNER",
+                "body": f"@codex review\n<!-- codex-review-head:{self.sha} -->",
+            }
+        ]
+
+    def inspect(self, repo, number):
+        self.inspections += 1
+        if self.error_after_approval and self.reviews[number]:
+            raise RuntimeError("Inspection API failed")
+        return (
+            self.sha,
+            "pending"
+            if self.fail_after_approval and self.reviews[number]
+            else "success",
+            "pending",
+        )
+
+    def checks(self, number):
+        self.check_calls += 1
+        if self.optional_change and self.inspections >= 2:
+            return self.optional_change
+        return self.states
+
+    def run_queue(self, count=1):
+        return reconcile(
+            "owner/repo",
+            [{**self.pr, "number": n} for n in range(1, count + 1)],
+            self.api,
+            self.pages,
+            self.checks,
+            self.inspect,
+            self.api,
+        )
+
+    def test_optional_failure_or_rerun_after_final_inspection_revokes_approval(self):
+        for states in (["SUCCESS", "FAILURE"], ["SUCCESS", "IN_PROGRESS"]):
+            with self.subTest(states=states):
+                self.setUp()
+                self.optional_change = states
+                self.run_queue()
+                self.assertEqual(self.check_calls, 3)
+                self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
+                self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
+
+    def test_new_findings_after_approval_revoke_it(self):
+        self.fail_after_approval = True
+        self.run_queue()
+        self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
+        self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
+
+    def test_inspection_exception_after_approval_revokes_it(self):
+        self.error_after_approval = True
+        with self.assertRaisesRegex(RuntimeError, "Inspection API failed"):
+            self.run_queue()
+        self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
+
+    def test_previous_run_approval_is_revoked_even_behind_pending_queue_candidate(self):
+        self.reviews[2] = [self.own()]
+        self.states = ["PENDING"]
+        self.run_queue(count=2)
+        self.assertEqual(self.reviews[2][0]["state"], "DISMISSED")
+        self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
+
+    def test_unknown_prior_evidence_revokes_approval_and_fails_run(self):
+        self.reviews[1] = [self.own()]
+        self.error_after_approval = True
+        with self.assertRaisesRegex(RuntimeError, "own approvals revoked"):
+            self.run_queue()
+        self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
+
+    def test_cleanup_preserves_human_and_unrelated_actions_reviews(self):
+        human = {**self.own(11), "user": {"login": "maintainer"}}
+        unrelated = {**self.own(12), "body": "Another workflow approval"}
+        self.reviews[1] = [self.own(), human, unrelated]
+        self.states = ["FAILURE"]
+        self.run_queue()
+        self.assertEqual(
+            [r["state"] for r in self.reviews[1]], ["DISMISSED", "APPROVED", "APPROVED"]
+        )
+
+    def test_valid_previous_approval_merges_without_duplicate_or_dismissal(self):
+        self.reviews[1] = [self.own()]
+        self.run_queue()
+        self.assertTrue(any(p.endswith("/merge") for p, _ in self.calls))
+        self.assertFalse(any(p.endswith("/dismissals") for p, _ in self.calls))
+        self.assertEqual(len(self.reviews[1]), 1)
+
+    def test_changed_base_revokes_previous_approval_without_new_mutation(self):
+        self.reviews[1] = [self.own()]
+        self.pr["base"]["ref"] = "other"
+        self.run_queue()
+        self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
+        self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))

@@ -20,8 +20,10 @@ can proceed. There is no permanent auto-merge authorization or administrator byp
 GitHub receives the expected head SHA and enforces branch protection.
 
 The workflow updates an outdated branch before requesting review, waits for CI,
-and posts one review request per revision. It checks current evidence again before
-merging. Missing credentials, unknown review evidence, conflicts and genuine test
+and posts one review request per revision. It checks current evidence and CI again immediately before
+merging, and withdraws its own approvals when their supporting evidence is stale
+or delivery cannot proceed. Existing approvals are checked across the bounded
+queue even when an earlier candidate is still pending. Missing credentials, unknown review evidence, conflicts and genuine test
 failures prevent delivery. It cannot automatically repair arbitrary incompatibilities;
 those require a code change and fresh review. A clean review is not proof that every
 possible defect was found.
