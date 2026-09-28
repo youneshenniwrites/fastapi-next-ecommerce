@@ -8,6 +8,7 @@ import codex_review_gate as gate
 from dependabot_export import ExportNotSafe, repair_export
 from dependabot_merge import MergeNotReady
 
+LEGACY_APPROVAL = "Automated dependency-policy approval (VIN-172), not a Codex review. Required CI and protection still apply."
 APPROVAL = "Automated dependency continuation approval after exact-head Codex review (VIN-172)."
 
 
@@ -28,7 +29,7 @@ def own_approvals(reviews):
         for r in reviews
         if r.get("user", {}).get("login") == "github-actions[bot]"
         and r.get("state") == "APPROVED"
-        and r.get("body") == APPROVAL
+        and r.get("body") in {APPROVAL, LEGACY_APPROVAL}
     ]
 
 
@@ -69,7 +70,11 @@ def reconcile_approvals(repo, candidates, api, pages, checks, inspect):
                 and green(states)
                 and current.get("mergeable_state") == "clean"
             )
-            stale = [r for r in reviews if not valid or r.get("commit_id") != sha]
+            stale = [
+                r
+                for r in reviews
+                if not valid or r.get("commit_id") != sha or r.get("body") != APPROVAL
+            ]
         except Exception:  # noqa: BLE001 - unknown evidence cannot retain approval
             stale = reviews
             failed = True

@@ -402,6 +402,23 @@ class ApprovalLifecycleTests(unittest.TestCase):
             [r["state"] for r in self.reviews[1]], ["DISMISSED", "APPROVED", "APPROVED"]
         )
 
+    def test_legacy_approval_is_replaced_only_after_clean_review(self):
+        from dependabot_reconcile import LEGACY_APPROVAL
+
+        self.reviews[1] = [{**self.own(90), "body": LEGACY_APPROVAL}]
+        self.run_queue()
+        self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
+        self.assertEqual(self.reviews[1][1]["body"], self.body)
+
+    def test_legacy_approval_removed_while_ci_pending(self):
+        from dependabot_reconcile import LEGACY_APPROVAL
+
+        self.reviews[2] = [{**self.own(90), "body": LEGACY_APPROVAL}]
+        self.states = ["PENDING"]
+        self.run_queue(count=2)
+        self.assertEqual(self.reviews[2][0]["state"], "DISMISSED")
+        self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
+
     def test_valid_previous_approval_merges_without_duplicate_or_dismissal(self):
         self.reviews[1] = [self.own()]
         self.run_queue()
