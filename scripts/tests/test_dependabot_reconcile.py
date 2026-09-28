@@ -432,3 +432,20 @@ class ApprovalLifecycleTests(unittest.TestCase):
         self.run_queue()
         self.assertEqual(self.reviews[1][0]["state"], "DISMISSED")
         self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
+
+
+class WorkflowContinuationTests(unittest.TestCase):
+    def test_every_pr_ci_workflow_can_resume_the_queue(self):
+        import re
+
+        directory = Path(__file__).resolve().parents[2] / ".github" / "workflows"
+        continuation = (directory / "dependabot-continuation.yml").read_text()
+        match = re.search(r"workflows: \[([^\]]+)\]", continuation)
+        self.assertIsNotNone(match)
+        triggers = {name.strip() for name in match[1].split(",")}
+        for workflow in directory.glob("*.yml"):
+            content = workflow.read_text()
+            if re.search(r"^  pull_request(?:_target)?:", content, re.MULTILINE):
+                name = re.search(r"^name: (.+)$", content, re.MULTILINE)[1]
+                with self.subTest(workflow=workflow.name):
+                    self.assertIn(name, triggers)
