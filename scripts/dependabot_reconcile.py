@@ -104,24 +104,6 @@ def reconcile(repo, pulls, api, pages, checks, inspect, request_api=None, repair
             if not trusted_pr(pr, repo):
                 continue
             sha = pr["head"]["sha"]
-            if repair is not None:
-                try:
-                    repaired = repair(repo, number, sha, api, request_api)
-                except ExportNotSafe as error:
-                    outcomes.append((number, f"Export repair blocked: {error}"))
-                    continue
-                if repaired:
-                    outcomes.append(
-                        (number, "Repaired Python export; wait for new-head CI")
-                    )
-                    break
-            states = checks(number)
-            if any(
-                s in {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED"}
-                for s in states
-            ):
-                outcomes.append((number, "Required CI failed; repair required"))
-                continue
             if pr.get("mergeable_state") == "behind":
                 if request_api is None:
                     outcomes.append(
@@ -147,6 +129,24 @@ def reconcile(repo, pulls, api, pages, checks, inspect, request_api=None, repair
                     (number, "Mergeability pending; keep this queue candidate")
                 )
                 break
+            if repair is not None:
+                try:
+                    repaired = repair(repo, number, sha, api, request_api)
+                except ExportNotSafe as error:
+                    outcomes.append((number, f"Export repair blocked: {error}"))
+                    continue
+                if repaired:
+                    outcomes.append(
+                        (number, "Repaired Python export; wait for new-head CI")
+                    )
+                    break
+            states = checks(number)
+            if any(
+                s in {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED"}
+                for s in states
+            ):
+                outcomes.append((number, "Required CI failed; repair required"))
+                continue
             if not states or any(
                 s not in {"SUCCESS", "SKIPPED", "NEUTRAL"} for s in states
             ):

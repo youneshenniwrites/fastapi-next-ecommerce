@@ -78,6 +78,17 @@ class ReconcileTests(unittest.TestCase):
             ],
         )
 
+    def test_behind_updates_before_unsafe_export_or_stale_failed_ci(self):
+        self.pr["mergeable_state"] = "behind"
+        self.states = ["FAILURE"]
+
+        def repair(*args):
+            self.fail("Export must wait for the synchronized manifest")
+
+        self.run_reconcile(repair=repair)
+        self.assertEqual(len(self.writes()), 1)
+        self.assertTrue(self.writes()[0][0].endswith("/update-branch"))
+
     def test_missing_token_never_updates_branch(self):
         self.pr["mergeable_state"] = "behind"
         self.run_reconcile(token=False)
