@@ -381,3 +381,22 @@ class DelightfulCleanEvidence(ReviewEvidence, EditedReviews):
             evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
             "pending",
         )
+
+
+class OnARollCleanEvidence(DelightfulCleanEvidence):
+    """Exact clean signoff observed on PR #214; inherit stale/spoofed checks."""
+
+    def clean_comment(self):
+        return ReviewEvidence.clean_comment(self) | {
+            "body": ReviewEvidence.clean_comment(self)["body"].replace(
+                "Can't wait for the next one!", "You're on a roll."
+            )
+        }
+
+    def test_new_signoff_does_not_accept_additional_findings(self):
+        comment = self.clean_comment()
+        comment["body"] += " But fix this."
+        self.assertEqual(
+            evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
+            "pending",
+        )
