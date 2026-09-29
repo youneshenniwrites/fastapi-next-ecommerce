@@ -48,7 +48,7 @@ export function patchNextImage(nextDirectory) {
   const { version } = JSON.parse(
     readFileSync(join(nextDirectory, "package.json")),
   );
-  if (version !== "16.3.5") {
+  if (version !== "16.3.6") {
     throw new Error(
       `Review/remove the Next image backport before using Next ${version}`,
     );

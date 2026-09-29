@@ -77,16 +77,16 @@ changes require current-head review. This does not waive branch protection.
 
 ### Temporary Next.js image backport (#98)
 
-Next.js 16.3.4/16.3.5's standalone image optimizer can permanently hang an uncached
+Next.js 16.3.4–16.3.6's standalone image optimizer can permanently hang an uncached
 variant when the first client disconnects. This caused repeated browser CI
 failures after navigation. See [upstream issue #96538](https://github.com/vercel/next.js/issues/96538)
 and the accepted [fix #98168](https://github.com/vercel/next.js/pull/98168).
-Stable 16.3.5 still lacks that fix as verified on 12 September 2026.
+Stable 16.3.6 still lacks that fix as verified on 28 September 2026.
 
 `frontend/scripts/patch-next-image.mjs` applies the response-socket-only backport
 after `npm ci` and before `npm run build`. It preserves the request socket for
 protocol/address handling and the response-body size limit. Both distributed
-module formats are checked against exact 16.3.5 source hashes before either is
+module formats are checked against exact 16.3.6 source hashes before either is
 written; unexpected versions/content fail the command. It is idempotent and
 changes no application code or image assertions. `npm test` checks disconnected
 and live callers, request metadata, size limits and the patch guards.
@@ -99,3 +99,8 @@ The standalone production build copies the patched dependency. Vercel's hosted
 image optimization is separate from this local/standalone optimizer.
 
 PR #167: inspected the published 16.3.5 CJS/ESM image optimizer; both still share the request socket through createRequestResponseMocks. Retain the backport with verified 16.3.5 hashes and the same disconnected-caller/body-limit/partial-patch regressions; future versions remain rejected.
+
+PR #209: the published 16.3.6 CJS/ESM optimizer hashes are identical to 16.3.5.
+The unpatched disconnected-caller regression still times out; retain the backport
+with those verified hashes and accept only 16.3.6. Patched runtime, body-limit,
+idempotence and partial-patch guards remain covered.
