@@ -40,9 +40,12 @@ new services solely for demonstration. No additional plan or infrastructure is a
 
 **Payment implementation merged (23 September):** PR #194 merged as `0e89efd` after clean Codex review, CodeRabbit approval and passing CI on `9adfff8`. Sandbox sessions, signed webhooks and inventory recovery are delivered. VIN-30 is complete: development revision `8685cc1` passed the real sandbox purchase, history, cancellation, expiry and duplicate-expiry replay on 23 September, 19:20–19:30 UTC, with paid-stock verification at 19:42–19:44 UTC. See [hosted evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026). Production sandbox payments remain disabled; no live payments are enabled.
 
-**Maintenance complete (21 September):** VIN-172 is closed and Done. All initial
+**Initial maintenance delivered (21 September):** All initial
 Dependabot PRs #165–#171 are merged; PR #168 proved a live policy approval and
 protected automatic merge. PR #175 merged the readable delivery conventions.
+VIN-172 reopened on 28 September to repair the new dependency queue and replace
+policy-only approval with Codex-reviewed continuation. This maintenance does not
+change the portfolio acceptance count.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
 CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,

@@ -30,10 +30,10 @@ vulnerabilities and an unavailable advisory service both produce unsuccessful ru
 Do not bypass or globally suppress failures to make CI green.
 
 Dependabot checks Python/uv, GitHub Actions, and backend Docker dependencies weekly.
-Python patch updates are grouped; open PR counts are limited. Required CI remains mandatory; eligible npm/uv patch/minor changes use the
-[automated dependency-policy approval](dependabot.md), while other changes need
-normal review. An agent handling a uv update must regenerate requirements.txt if
-Dependabot leaves it stale; the requirements check deliberately prevents drift.
+Python patch updates are grouped; open PR counts are limited. Applicable CI and
+current-head Codex review remain mandatory. The [dependency continuation](dependabot.md)
+repairs eligible stale requirements exports using trusted, offline tooling. Unsafe
+inputs and genuine test failures remain blocked for investigation.
 Frontend npm dependency updates are enabled weekly, with at most two open PRs.
 
 CI actions are pinned to reviewed commit SHAs, with version comments for readers.
