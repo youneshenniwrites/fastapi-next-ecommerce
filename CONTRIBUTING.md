@@ -122,7 +122,7 @@ for completed tickets and Refs #N for partial work. Never invent a ticket refere
 
 Explain the problem and resulting behavior, then give the commands/results and
 material limitations. Keep the Review section to a brief self-review disclosure
-and links to current-head Codex review and CI evidence, stating their actual
+and links to current-head external review and CI evidence, stating their actual
 status. Assignment and labels belong in the sidebar. Include relevant screenshots for UI changes, or API/test
 output for backend changes. Do not include tokens, passwords, or customer data.
 
@@ -156,8 +156,10 @@ changes require current-head review. Branch protection remains enforced.
 
 ## Automated dependency delivery
 
-The owner-authorized [Dependabot policy](docs/dependabot.md) requires clean current-head
-Codex review and applicable CI before automated approval and protected merging.
-This supersedes the earlier patch/minor policy-only approval exception. Trusted
+The owner-authorized [Dependabot policy](docs/dependabot.md) uses CodeRabbit as the
+sole external reviewer for verified Dependabot PRs. Require its current-head
+`APPROVED` review, no unresolved review findings, and applicable CI before Actions
+approval and a protected merge. Do not request Codex for these PRs or interpret
+praise as approval. Human-authored PRs retain the Codex policy above. Trusted
 continuation handles branch updates and bounded Python export repairs; genuine
-failures remain open. Bot PRs retain upstream titles; VIN-172 tracks the policy.
+failures remain open. VIN-38 implements this policy; VIN-172 tracks live delivery proof.

@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  auto_review:
+    enabled: true
+    ignore_usernames: []
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 0

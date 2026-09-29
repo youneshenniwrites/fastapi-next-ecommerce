@@ -339,10 +339,21 @@ def publish_reviews(repo, target, only_pr=None):
     pulls = pages(f"repos/{repo}/pulls?state=open")
     groups = {}
     for pr in pulls:
+        # Dependabot uses CodeRabbit approval; do not publish a misleading Codex
+        # pending/success status for this explicitly owner-exempt class.
+        if (
+            pr.get("user", {}).get("login") == "dependabot[bot]"
+            and pr.get("base", {}).get("ref") == "main"
+            and (pr.get("head", {}).get("repo") or {}).get("full_name") == repo
+            and pr.get("head", {}).get("ref", "").startswith("dependabot/")
+        ):
+            continue
         groups.setdefault(pr["head"]["sha"], []).append(pr["number"])
     if only_pr is not None:
         groups = {sha: numbers for sha, numbers in groups.items() if only_pr in numbers}
         if not groups:
+            if any(pr["number"] == only_pr for pr in pulls):
+                return
             raise RuntimeError("Requested PR is not open; no status published")
 
     def publish(sha, state, reason):

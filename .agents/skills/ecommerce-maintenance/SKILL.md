@@ -15,8 +15,9 @@ separately from vulnerability findings without bypassing either check.
 
 For action updates, verify the upstream commit corresponding to the intended
 release and retain SHA pins with readable version comments. Dependabot proposes
-updates; the agent still reviews the exact head and follows the owner's merge
-instructions. Do not activate the legacy AWS workflow during maintenance.
+updates; CodeRabbit reviews their exact head and trusted automation follows
+the [dependency policy](../../../docs/dependabot.md). Do not request Codex on
+verified Dependabot PRs. Human-authored maintenance PRs retain Codex review. Do not activate the legacy AWS workflow during maintenance.
 
 When documenting tooling, name the executable command, what it verifies, and its
 limits. Keep the runnable catalog distinct from planned authentication and checkout. Keep
@@ -26,4 +27,5 @@ production readiness from coverage or vulnerability-audit results alone.
 
 Read docs/delivery.md and the maintenance decisions in docs/tooling.md. Resolve or
 record a concrete next action for failing bot PRs during maintenance handoff. Do
-not claim continuous monitoring: scheduled dependency review is not configured.
+not claim live autonomous delivery is proven without a recorded review, approval
+and protected merge. GitHub continuation is separate from scheduled Codex chats.
