@@ -73,6 +73,7 @@ class Settings(BaseSettings):
         return self
 
     SENTRY_DSN: str = ""
+    SENTRY_DIAGNOSTICS_ENABLED: bool = False
     SENTRY_ENVIRONMENT: str = "local"
     SENTRY_RELEASE: str = ""
     SENTRY_TRACES_SAMPLE_RATE: float = Field(default=0.1, ge=0.0, le=1.0)

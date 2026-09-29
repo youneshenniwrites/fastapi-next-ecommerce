@@ -870,3 +870,45 @@ def test_known_session_skips_account_lookup(db, managed, provider, monkeypatch):
 
     monkeypatch.setattr(provider, "account_id", unexpected)
     assert payments.reconcile_payment(db, uid, oid).payment_status == "pending"
+
+
+def test_confirmation_only_first_committed_paid_transition(
+    db, managed, provider, monkeypatch
+):
+    observed = []
+    monkeypatch.setattr(
+        payments, "record_confirmation", lambda *args: observed.append(args)
+    )
+    oid, pid, uid = managed
+    payments.start_payment(db, uid, oid)
+    sid = db.get(Order, oid).payment_session_id
+    provider.sessions[sid].update(status="complete", payment_status="paid")
+    provider.emit(db, sid)
+    provider.emit(db, sid)
+    provider.emit(db, sid, eid="evt_second")
+    assert len(observed) == 1
+    recorded = db.get(PaymentEvent, "evt_1")
+    assert observed[0][1].replace(tzinfo=None) == recorded.created_at.replace(
+        tzinfo=None
+    )
+
+
+def test_release_log_only_after_commit_and_not_duplicate(
+    db, managed, provider, monkeypatch
+):
+    calls = []
+    monkeypatch.setattr(payments, "record_inventory_release", calls.append)
+    oid, pid, uid = managed
+    payments.cancel_payment(db, uid, oid)
+    payments.cancel_payment(db, uid, oid)
+    assert calls == ["released"]
+
+
+def test_release_log_discarded_on_rollback(db, managed, monkeypatch):
+    calls = []
+    monkeypatch.setattr(payments, "record_inventory_release", calls.append)
+    oid, pid, uid = managed
+    payments.finish(db, db.get(Order, oid), "cancelled")
+    db.rollback()
+    db.commit()
+    assert calls == []

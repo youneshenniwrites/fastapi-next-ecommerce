@@ -142,10 +142,26 @@ def test_serialized_sdk_envelopes_are_private():
                 "extra": {"nested": [[{"token": "fictional-secret"}]]},
             }
         )
+        with sentry_sdk.start_transaction(
+            name="/api/v1/orders/{order_id}/payment", op="http.server"
+        ):
+            pass
         with sentry_sdk.start_transaction(name="fictional-secret", op="test"):
             sentry_sdk.set_context("private", {"password": "fictional-secret"})
         sentry_sdk.logger.error(
             "fictional-secret", attributes={"password": "fictional-secret"}
+        )
+        from datetime import datetime, timezone
+
+        from app.core.observability import record_confirmation, record_request
+
+        record_request("cart_write", 200, 12)
+        record_confirmation(
+            1700000000, datetime.fromtimestamp(1700000001, timezone.utc)
+        )
+        sentry_sdk.logger.info(
+            "fictional-secret",
+            attributes={"operation": "fictional-secret", "outcome": "fictional-secret"},
         )
         count_rate_limit_rejection("/api/v1/orders/{order_id}/payment")
         sentry_sdk.flush()
@@ -157,6 +173,10 @@ def test_serialized_sdk_envelopes_are_private():
     assert b"ValueError" in serialized
     assert b"privacy-test" in serialized
     assert b"demo@1" in serialized
+    assert b"payment_session" in serialized
+    assert b"commerce.requests" in serialized
+    assert b"cart_write" in serialized
+    assert b"payment.confirmation_delay" in serialized
     assert b"trace_id" in serialized
     logs = [
         item.payload.json
@@ -256,3 +276,97 @@ def test_malformed_exception_and_span_context_do_not_escape_filter():
     clean = scrub_event({"exception": {"values": "private"}, "spans": [None]}, {})
     assert clean["exception"] == {"values": []}
     assert clean["spans"] == [{"description": "[Filtered]"}]
+
+
+def test_request_outcomes_and_telemetry_failure_do_not_escape(monkeypatch):
+    from app.core.observability import record_request
+
+    calls = []
+    monkeypatch.setattr(sentry_sdk.metrics, "count", lambda *a, **kw: calls.append(kw))
+    for status in (200, 409, 422, 503):
+        record_request("order_placement", status, 10)
+    assert [c["attributes"]["outcome"] for c in calls] == [
+        "success",
+        "expected_error",
+        "expected_error",
+        "technical_error",
+    ]
+    monkeypatch.setattr(
+        sentry_sdk.metrics,
+        "count",
+        lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("offline")),
+    )
+    record_request("order_placement", 200, 10)
+
+
+def test_confirmation_invalid_and_skew_are_not_latency_samples(monkeypatch):
+    from datetime import datetime, timezone
+
+    from app.core.observability import record_confirmation
+
+    counts, samples = [], []
+    monkeypatch.setattr(
+        sentry_sdk.metrics,
+        "count",
+        lambda *a, **kw: counts.append(kw["attributes"]["outcome"]),
+    )
+    monkeypatch.setattr(
+        sentry_sdk.metrics, "distribution", lambda *a, **kw: samples.append(a[1])
+    )
+    for created in (None, True, -1, 10**1000, 1700000002, 1700000000):
+        record_confirmation(created, datetime.fromtimestamp(1700000001, timezone.utc))
+    assert counts == ["invalid", "invalid", "invalid", "invalid", "clock_skew", "valid"]
+    assert samples == [1000]
+
+
+def test_cart_denominator_includes_rejected_requests(client, monkeypatch):
+    from app.core import observability
+
+    observed = []
+    monkeypatch.setattr(
+        observability, "record_request", lambda *args: observed.append(args)
+    )
+    response = client.put("/api/v1/cart/items/1", json={"quantity": 1})
+    assert response.status_code == 401
+    assert len(observed) == 1
+    assert observed[0][:2] == ("cart_write", 401)
+    assert observed[0][2] >= 0
+
+
+def test_diagnostic_default_off_and_admin_only(client, user, token, db, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app.core.settings import settings
+    from app.main import app
+
+    headers = {"Authorization": f"Bearer {token}"}
+    assert client.post("/api/v1/diagnostics/sentry", headers=headers).status_code == 404
+    monkeypatch.setattr(settings, "SENTRY_DIAGNOSTICS_ENABLED", True)
+    monkeypatch.setattr(settings, "SENTRY_ENVIRONMENT", "development")
+    assert client.post("/api/v1/diagnostics/sentry", headers=headers).status_code == 403
+    user.is_superuser = True
+    db.commit()
+    with TestClient(app, raise_server_exceptions=False) as diagnostic_client:
+        assert (
+            diagnostic_client.post(
+                "/api/v1/diagnostics/sentry", headers=headers
+            ).status_code
+            == 500
+        )
+    monkeypatch.setattr(settings, "SENTRY_ENVIRONMENT", "production")
+    assert client.post("/api/v1/diagnostics/sentry", headers=headers).status_code == 404
+
+
+def test_transaction_names_are_bounded():
+    assert (
+        scrub_event({"transaction": "/api/v1/orders/{order_id}/payment"}, {})[
+            "transaction"
+        ]
+        == "payment_session"
+    )
+    assert (
+        scrub_event({"transaction": "/api/v1/orders/secret/payment?token=secret"}, {})[
+            "transaction"
+        ]
+        == "[Filtered]"
+    )

@@ -8,9 +8,11 @@ from typing import Any, Protocol
 
 import stripe
 from fastapi import HTTPException
+from sqlalchemy import event as sqlalchemy_event
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.observability import record_confirmation, record_inventory_release
 from app.core.settings import settings
 from app.models.order import Order, PaymentEvent
 from app.models.product import Product
@@ -80,6 +82,7 @@ def finish(db: Session, order: Order, state: str) -> None:
             product.stock += line.quantity
     if state != "paid":
         order.inventory_released_at = now()
+        db.info.setdefault("inventory_release_observations", []).append("released")
     order.payment_status = state
     order.payment_checkout_url = None
 
@@ -426,6 +429,8 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
         session = provider_call(provider.retrieve, session["id"])
     try:
         order = lock_order(db, order_id)
+        was_paid = order.payment_status == "paid"
+        confirmation = None
         if db.get(PaymentEvent, event["id"]) is None:
             apply_session(
                 db,
@@ -438,12 +443,30 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
                     "checkout.session.async_payment_succeeded",
                 },
             )
-            db.add(
-                PaymentEvent(
-                    id=event["id"], order_id=order.id, event_type=event["type"]
-                )
+            recorded = PaymentEvent(
+                id=event["id"],
+                order_id=order.id,
+                event_type=event["type"],
+                created_at=now(),
             )
+            db.add(recorded)
+            if not was_paid and order.payment_status == "paid":
+                db.flush()
+                confirmation = recorded.created_at
         db.commit()
+        if confirmation is not None:
+            record_confirmation(event.get("created"), confirmation)
     except Exception:
         db.rollback()
         raise
+
+
+@sqlalchemy_event.listens_for(Session, "after_commit")
+def _record_committed_release(session):
+    for outcome in session.info.pop("inventory_release_observations", []):
+        record_inventory_release(outcome)
+
+
+@sqlalchemy_event.listens_for(Session, "after_rollback")
+def _discard_rolled_back_release(session):
+    session.info.pop("inventory_release_observations", None)
