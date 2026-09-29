@@ -4,6 +4,7 @@ import html
 import io
 import json
 import os
+import re
 import subprocess
 import tarfile
 import tempfile
@@ -49,6 +50,8 @@ def read(url, expected=200, retry=False):
 def main():
     """Deploy the release archive and smoke-test the development environment."""
     sha = os.environ["RELEASE_SHA"]
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        raise ValueError("RELEASE_SHA must be a full lowercase commit SHA")
     archive = subprocess.check_output(["git", "archive", sha])
     with tempfile.TemporaryDirectory(prefix="dev-release-") as directory:
         root = Path(directory)
@@ -74,6 +77,10 @@ def main():
                     "deploy",
                     "--prod",
                     "--yes",
+                    "--env",
+                    f"SENTRY_RELEASE={sha}",
+                    "--build-env",
+                    f"SENTRY_RELEASE={sha}",
                     "--cwd",
                     directory,
                     "--token",
