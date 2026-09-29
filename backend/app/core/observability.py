@@ -218,12 +218,26 @@ OUTCOMES = {
 }
 
 
+REASONS = {
+    "completed",
+    "rejected",
+    "server_failure",
+    "reconciliation_required",
+    "duplicate_event",
+    "processed_event",
+}
+
+
 def _signal_attributes(attributes: Any) -> dict[str, str]:
     if not isinstance(attributes, dict):
         return {}
     return {
         key: value
-        for key, allowed in (("operation", OPERATIONS), ("outcome", OUTCOMES))
+        for key, allowed in (
+            ("operation", OPERATIONS),
+            ("outcome", OUTCOMES),
+            ("reason", REASONS),
+        )
         if isinstance(value := attributes.get(key), str) and value in allowed
     }
 
@@ -232,12 +246,22 @@ def record_request(operation: str, status: int, duration_ms: float) -> None:
     """Unsampled completed attempts; expected 4xx are not technical failures."""
     outcome = (
         "technical_error"
-        if status >= 500
+        if status >= 500 or (operation == "webhook" and status == 409)
         else "expected_error"
         if status >= 400
         else "success"
     )
-    attributes = {"operation": operation, "outcome": outcome}
+    attributes = {
+        "operation": operation,
+        "outcome": outcome,
+        "reason": "reconciliation_required"
+        if operation == "webhook" and status == 409
+        else "server_failure"
+        if status >= 500
+        else "rejected"
+        if status >= 400
+        else "completed",
+    }
     try:
         sentry_sdk.metrics.count("commerce.requests", 1, attributes=attributes)
         sentry_sdk.metrics.distribution(
@@ -331,6 +355,20 @@ def record_inventory_release(outcome: str) -> None:
         sentry_sdk.logger.info(
             "Inventory release completed",
             attributes={"operation": "inventory_release", "outcome": outcome},
+        )
+    except Exception:
+        pass
+
+
+def record_webhook_processed(duplicate: bool) -> None:
+    try:
+        sentry_sdk.logger.info(
+            "Webhook delivery processed",
+            attributes={
+                "operation": "webhook",
+                "outcome": "duplicate" if duplicate else "success",
+                "reason": "duplicate_event" if duplicate else "processed_event",
+            },
         )
     except Exception:
         pass

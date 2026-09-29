@@ -12,7 +12,11 @@ from sqlalchemy import event as sqlalchemy_event
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.observability import record_confirmation, record_inventory_release
+from app.core.observability import (
+    record_confirmation,
+    record_inventory_release,
+    record_webhook_processed,
+)
 from app.core.settings import settings
 from app.models.order import Order, PaymentEvent
 from app.models.product import Product
@@ -431,7 +435,8 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
         order = lock_order(db, order_id)
         was_paid = order.payment_status == "paid"
         confirmation = None
-        if db.get(PaymentEvent, event["id"]) is None:
+        duplicate = db.get(PaymentEvent, event["id"]) is not None
+        if not duplicate:
             apply_session(
                 db,
                 order,
@@ -454,6 +459,7 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
                 db.flush()
                 confirmation = recorded.created_at
         db.commit()
+        record_webhook_processed(duplicate)
         if confirmation is not None:
             record_confirmation(event.get("created"), confirmation)
     except Exception:

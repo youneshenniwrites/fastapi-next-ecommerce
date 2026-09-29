@@ -161,7 +161,11 @@ def test_serialized_sdk_envelopes_are_private():
         )
         sentry_sdk.logger.info(
             "fictional-secret",
-            attributes={"operation": "fictional-secret", "outcome": "fictional-secret"},
+            attributes={
+                "operation": "fictional-secret",
+                "outcome": "fictional-secret",
+                "reason": "fictional-secret",
+            },
         )
         count_rate_limit_rejection("/api/v1/orders/{order_id}/payment")
         sentry_sdk.flush()
@@ -176,6 +180,7 @@ def test_serialized_sdk_envelopes_are_private():
     assert b"payment_session" in serialized
     assert b"commerce.requests" in serialized
     assert b"cart_write" in serialized
+    assert b"completed" in serialized
     assert b"payment.confirmation_delay" in serialized
     assert b"trace_id" in serialized
     logs = [
@@ -370,3 +375,27 @@ def test_transaction_names_are_bounded():
         ]
         == "[Filtered]"
     )
+
+
+def test_webhook_reconciliation_is_technical_and_reasons_are_bounded(monkeypatch):
+    from app.core.observability import record_request, scrub_log
+
+    counts = []
+    monkeypatch.setattr(
+        sentry_sdk.metrics, "count", lambda *a, **kw: counts.append(kw["attributes"])
+    )
+    record_request("webhook", 409, 10)
+    assert counts == [
+        {
+            "operation": "webhook",
+            "outcome": "technical_error",
+            "reason": "reconciliation_required",
+        }
+    ]
+    assert (
+        scrub_log({"attributes": {"reason": "fictional-secret"}}, {})["attributes"]
+        == {}
+    )
+    assert scrub_log({"attributes": {"reason": "duplicate_event"}}, {})[
+        "attributes"
+    ] == {"reason": "duplicate_event"}

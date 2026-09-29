@@ -876,6 +876,8 @@ def test_confirmation_only_first_committed_paid_transition(
     db, managed, provider, monkeypatch
 ):
     observed = []
+    deliveries = []
+    monkeypatch.setattr(payments, "record_webhook_processed", deliveries.append)
     monkeypatch.setattr(
         payments, "record_confirmation", lambda *args: observed.append(args)
     )
@@ -887,6 +889,7 @@ def test_confirmation_only_first_committed_paid_transition(
     provider.emit(db, sid)
     provider.emit(db, sid, eid="evt_second")
     assert len(observed) == 1
+    assert deliveries == [False, True, False]
     recorded = db.get(PaymentEvent, "evt_1")
     assert observed[0][1].replace(tzinfo=None) == recorded.created_at.replace(
         tzinfo=None
