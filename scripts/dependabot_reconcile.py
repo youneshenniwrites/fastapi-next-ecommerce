@@ -177,7 +177,12 @@ def reconcile(repo, pulls, api, pages, checks, inspect, request_api=None, repair
             marker = f"<!-- coderabbit-review-head:{sha} -->"
             if (
                 state != "success"
-                and reason != "CodeRabbit has an unfinished review"
+                and reason
+                not in {
+                    "CodeRabbit has an unfinished review",
+                    "Resolve review conversations before automatic merging",
+                    "Obtain CodeRabbit approval after its latest findings",
+                }
                 and not any(
                     review_request(c) and marker in c.get("body", "") for c in comments
                 )

@@ -73,6 +73,19 @@ class ReconcileTests(unittest.TestCase):
         self.assertTrue(any(p.endswith("/merge") for p, f in self.writes()))
         self.assertFalse(any(p.endswith("/comments") for p, f in self.writes()))
 
+    def test_findings_without_marker_do_not_request_review_or_stall_queue(self):
+        for reason in (
+            "Resolve review conversations before automatic merging",
+            "Obtain CodeRabbit approval after its latest findings",
+        ):
+            self.setUp()
+            self.comments = []
+            self.state = "pending"
+            self.reason = reason
+            self.run_reconcile(count=3)
+            self.assertEqual(self.writes(), [])
+            self.assertEqual(self.reads, 3)
+
     def test_running_review_does_not_request_another_review(self):
         self.comments = []
         self.state = "pending"
