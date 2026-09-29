@@ -4,12 +4,22 @@ import json
 import os
 import subprocess
 
+import coderabbit_review_gate as rabbit
 import codex_review_gate as gate
 from dependabot_export import ExportNotSafe, repair_export
 from dependabot_merge import MergeNotReady
 
 LEGACY_APPROVAL = "Automated dependency-policy approval (VIN-172), not a Codex review. Required CI and protection still apply."
-APPROVAL = "Automated dependency continuation approval after exact-head Codex review (VIN-172)."
+CODEX_APPROVAL = "Automated dependency continuation approval after exact-head Codex review (VIN-172)."
+APPROVAL = "Automated dependency continuation approval after exact-head CodeRabbit approval (VIN-38)."
+
+
+def review_request(comment):
+    return comment.get("author_association") in {
+        "OWNER",
+        "MEMBER",
+        "COLLABORATOR",
+    } and comment.get("body", "").splitlines()[0:1] == ["@coderabbitai review"]
 
 
 def trusted_pr(pr, repo):
@@ -29,7 +39,7 @@ def own_approvals(reviews):
         for r in reviews
         if r.get("user", {}).get("login") == "github-actions[bot]"
         and r.get("state") == "APPROVED"
-        and r.get("body") in {APPROVAL, LEGACY_APPROVAL}
+        and r.get("body") in {APPROVAL, CODEX_APPROVAL, LEGACY_APPROVAL}
     ]
 
 
@@ -162,10 +172,15 @@ def reconcile(repo, pulls, api, pages, checks, inspect, request_api=None, repair
                     )
                 )
                 break
+            reviewed, state, reason = inspect(repo, number)
             comments = pages(f"repos/{repo}/issues/{number}/comments")
-            marker = f"<!-- codex-review-head:{sha} -->"
-            if not any(
-                gate.review_request(c) and marker in c.get("body", "") for c in comments
+            marker = f"<!-- coderabbit-review-head:{sha} -->"
+            if (
+                state != "success"
+                and reason != "CodeRabbit has an unfinished review"
+                and not any(
+                    review_request(c) and marker in c.get("body", "") for c in comments
+                )
             ):
                 current = api(path)
                 if (
@@ -175,20 +190,21 @@ def reconcile(repo, pulls, api, pages, checks, inspect, request_api=None, repair
                 ):
                     request_api(
                         f"repos/{repo}/issues/{number}/comments",
-                        body=f"@codex review\n{marker}",
+                        body=f"@coderabbitai review\n{marker}",
                     )
-                    outcomes.append((number, "Requested Codex review for current head"))
+                    outcomes.append(
+                        (number, "Requested CodeRabbit review for current head")
+                    )
                 else:
                     outcomes.append(
                         (number, "Review request token unavailable or head changed")
                     )
                 break
-            reviewed, state, reason = inspect(repo, number)
             if reviewed != sha or state != "success":
                 outcomes.append((number, reason))
                 if reason in {
-                    "Resolve review conversations and obtain a clean re-review",
-                    "Obtain a new clean review after the latest review findings",
+                    "Resolve review conversations before automatic merging",
+                    "Obtain CodeRabbit approval after its latest findings",
                 }:
                     continue
                 break
@@ -351,7 +367,7 @@ def main():
         api,
         gate.pages,
         lambda number: check_states(repo, number),
-        gate.inspect,
+        rabbit.inspect,
         (lambda path, **fields: api(path, token=token, **fields)) if token else None,
         repair=repair_export,
     )

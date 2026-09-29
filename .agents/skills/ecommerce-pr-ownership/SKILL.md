@@ -45,7 +45,7 @@ closure/Done, and record any remaining work instead of implying completion.
 
 ## Reviewer requests
 
-Assign the owner on every PR, but do not request their review. Codex is the sole
+Assign the owner on every PR, but do not request their review. For human-authored PRs, Codex is the
 requested reviewer; ownership and reviewer requests are separate.
 Request Codex Code Review using its configured integration (or @codex review
 comment). Listing Codex in the PR body is not a request. Inspect existing review
@@ -66,3 +66,5 @@ The exact-head review instructions above have one exception: the owner-authorize
 [pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. This does not waive branch protection.
+
+For verified Dependabot PRs, use [dependency policy](../../../docs/dependabot.md) instead of the Codex request/status steps above: CodeRabbit reviews the current head; automation approves and merges only after its APPROVED review, resolved findings and CI.

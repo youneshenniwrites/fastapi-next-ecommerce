@@ -44,7 +44,13 @@ new services solely for demonstration. No additional plan or infrastructure is a
 Dependabot PRs #165–#171 are merged; PR #168 proved a live policy approval and
 protected automatic merge. PR #175 merged the readable delivery conventions.
 VIN-172 reopened on 28 September to repair the new dependency queue and replace
-policy-only approval with Codex-reviewed continuation. This maintenance does not
+policy-only approval with Codex-reviewed continuation (PR #214). VIN-38 is now in
+progress to replace Codex with CodeRabbit for Dependabot only; rollout and live
+unattended review → approval → protected merge proof remain pending. Manual merges
+do not satisfy that proof. The maintenance sequence is VIN-172 delivery proof,
+VIN-38 reviewer policy (needed to finish that proof), VIN-146 frontend CI speed,
+then VIN-147 repeated-run reduction. Keep their handoffs on the existing issues.
+This maintenance does not
 change the portfolio acceptance count.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
@@ -88,8 +94,8 @@ is Done; the browser checkout journey belongs to VIN-120.
 cart actionability regression corrections; 99 local browser tests passed with
 2 existing device-specific skips, and required CI passed. VIN-89 retains broader
 recovery/hosted acceptance in Backlog. VIN-120 checkout submission, confirmation
-and history merged in PR #188; VIN-30 implementation merged in PR #194. Its hosted verification was completed on 23 September (see evidence above). The Codex status-indicator follow-up remains deferred
-under VIN-38; it does not displace feature delivery.
+and history merged in PR #188; VIN-30 implementation merged in PR #194. Its hosted verification was completed on 23 September (see evidence above). VIN-38 now covers the owner-requested Dependabot reviewer-policy change above;
+it does not add portfolio feature completion credit.
 
 **Board convention:** issue cards only; PRs stay linked from their issue rather
 than appearing as duplicate cards. This applies to dependency PRs as well.

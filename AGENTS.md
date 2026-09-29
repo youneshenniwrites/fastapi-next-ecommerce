@@ -80,7 +80,7 @@ Project skills in .agents/skills cover feature isolation, backend changes,
 verification, Azure planning, maintenance, and PR ownership. Frontend-specific
 guidance lives under frontend/.agents/skills and frontend/AGENTS.md. User
 instructions take precedence over skill guidelines. Use only skills relevant to
-the task. Codex external review is required before merge; no public evidence host is required. Attach
+the task. Codex external review is required for human-authored PRs before merge; no public evidence host is required. Attach
 redacted logs/screenshots only within the authorized workflow.
 
 See CONTRIBUTING.md for PR expectations, docs/tooling.md for check scope, and
@@ -119,7 +119,7 @@ For customer sessions (#24), read docs/design/customer-sessions.md; it documents
 
 ## External review requirement
 
-The owner accepts a completed clean Codex review of the latest commit, with all
+For human-authored PRs, the owner accepts a completed clean Codex review of the latest commit, with all
 findings addressed and threads resolved, as external approval. Explicit owner-approved deferrals
 are permitted only when recorded with a linked issue; do not call them clean reviews. Follow
 [the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,
@@ -130,7 +130,7 @@ clean result. Missing, stale or unrecognized evidence keeps the PR open.
 
 The canonical PR format is .github/pull_request_template.md. Use the
 ecommerce-pr-ownership skill to fill it, assign the owner, and request/verify
-Codex review. Keep the owner as assignee, not a requested reviewer. Read these repository files each time
+the external review required for its author type. Keep the owner as assignee, not a requested reviewer. Read these repository files each time
 you resume PR work; conversation memory is not the source of truth.
 
 ## Invokable delivery skills
@@ -183,11 +183,13 @@ All other exact-head review and branch-protection rules still apply.
 
 ## Automated dependency delivery
 
-The owner-authorized [Dependabot policy](docs/dependabot.md) requires clean current-head
-Codex review and applicable CI before automated approval and protected merging.
-This supersedes the earlier patch/minor policy-only approval exception. Trusted
+The owner-authorized [Dependabot policy](docs/dependabot.md) uses CodeRabbit as the
+sole external reviewer for verified Dependabot PRs. Require its current-head
+`APPROVED` review, no unresolved review findings, and applicable CI before Actions
+approval and a protected merge. Do not request Codex for these PRs or interpret
+praise as approval. Human-authored PRs retain the Codex policy above. Trusted
 continuation handles branch updates and bounded Python export repairs; genuine
-failures remain open. Bot PRs retain upstream titles; VIN-172 tracks the policy.
+failures remain open. VIN-38 implements this policy; VIN-172 tracks live delivery proof.
 
 New human branches use `type/vin-N-short-description` with the actual issue
 number, matching the PR title key. See CONTRIBUTING.md for allowed types and

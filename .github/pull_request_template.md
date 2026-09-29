@@ -26,13 +26,15 @@ Give the tested commit, checks and results. Note skipped checks and relevant lim
 ## Review
 
 Briefly disclose self-review and its outcome. Normally link current-head external
-review and CI results, stating pending or failed results honestly. For a qualifying
+review and CI results, stating pending or failed results honestly. For a qualifying human-authored
 pure-main-sync exception, link the original reviews and the evidence comment
 required by docs/codex-review.md: full R/B/M/H revisions, reviewed-main evidence,
 merge-tree/exact-diff checks, interaction assessment and current-head CI. State
 “Owner-authorized review carry-forward; H not externally reviewed” and retain
 any explicit deferrals. Refresh evidence after changes; never imply that original
 reviews approve H.
+
+<!-- Verified Dependabot PRs follow docs/dependabot.md: current-head CodeRabbit APPROVED review, resolved findings and CI; do not request Codex. -->
 
 <!-- Assignment and labels belong in the sidebar. Follow docs/codex-review.md: required current-head CI and external review (or the fully evidenced pure-main-sync exception) gate merge; the Codex review status is informational pending #38. -->
 

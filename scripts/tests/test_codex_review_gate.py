@@ -400,3 +400,27 @@ class OnARollCleanEvidence(DelightfulCleanEvidence):
             evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
             "pending",
         )
+
+
+class DependabotExemption(unittest.TestCase):
+    def test_no_codex_status_for_same_repo_dependency_pr(self):
+        from scripts import codex_review_gate as gate
+
+        pr = {
+            "number": 1,
+            "user": {"login": "dependabot[bot]"},
+            "base": {"ref": "main"},
+            "head": {
+                "sha": "a" * 40,
+                "ref": "dependabot/uv/test",
+                "repo": {"full_name": "owner/repo"},
+            },
+        }
+        with (
+            patch.object(gate, "pages", return_value=[pr]),
+            patch.object(gate, "inspect") as inspect,
+            patch.object(gate, "api") as api,
+        ):
+            gate.publish_reviews("owner/repo", "https://example.com", only_pr=1)
+            inspect.assert_not_called()
+            api.assert_not_called()

@@ -97,7 +97,7 @@ assign youneshenniwrites and apply scope labels. Self-review must be identified.
 Before merge, review the full exact-head diff, resolve findings and require all
 applicable checks and external tool review/approval for the current head.
 Self-review alone does not authorize merging. Never bypass branch protection.
-The informational `Codex review` status reports review evidence; enforcement is
+For human-authored PRs, the informational `Codex review` status reports review evidence; enforcement is
 deferred to #38. Inspect the actual current-head review before merging; follow [its evidence protocol](codex-review.md). A human Approve review is
 not required. Unknown or missing evidence keeps the PR open unless the owner
 explicitly authorizes a documented deferral. The #35/#37 deferral is not a blanket
@@ -130,14 +130,14 @@ The [PR template](../.github/pull_request_template.md) defines the Issue/Problem
 optional Before / After, Acceptance criteria, Testing, Review, and optional
 Deployment notes. Lead with a short customer or contributor outcome; fill
 acceptance criteria from the issue and testing with the tested commit and actual
-results. Use a brief self-review disclosure plus linked current-head Codex review
+results. Use a brief self-review disclosure plus linked current-head external review
 and CI evidence. State pending or failed results honestly and refresh evidence
 after changes. Keep owner assignment and labels in the sidebar, without duplicate
 review checkboxes or owner/reviewer metadata in the body. Remove irrelevant
 optional sections. No Jira placeholder.
 
 Assign youneshenniwrites on every PR; do not request them as reviewer.
-Codex is the sole requested reviewer. Request Codex through the review
+For human-authored PRs, Codex is the requested reviewer. Request Codex through the review
 integration and verify completion on the current commit. A named reviewer in the
 body is not evidence of a request or approval. The ownership skill contains the
 operational steps; AGENTS.md routes future sessions to it. External approval
@@ -188,11 +188,13 @@ claim current-head external approval. Otherwise the exact-head rules above apply
 
 ## Automated dependency delivery
 
-The owner-authorized [Dependabot policy](dependabot.md) requires clean current-head
-Codex review and applicable CI before automated approval and protected merging.
-This supersedes the earlier patch/minor policy-only approval exception. Trusted
+The owner-authorized [Dependabot policy](dependabot.md) uses CodeRabbit as the
+sole external reviewer for verified Dependabot PRs. Require its current-head
+`APPROVED` review, no unresolved review findings, and applicable CI before Actions
+approval and a protected merge. Do not request Codex for these PRs or interpret
+praise as approval. Human-authored PRs retain the Codex policy above. Trusted
 continuation handles branch updates and bounded Python export repairs; genuine
-failures remain open. Bot PRs retain upstream titles; VIN-172 tracks the policy.
+failures remain open. VIN-38 implements this policy; VIN-172 tracks live delivery proof.
 
 ## Evidence-backed checkpoints
 

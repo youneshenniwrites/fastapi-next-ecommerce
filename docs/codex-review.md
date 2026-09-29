@@ -1,5 +1,8 @@
 # Automated Codex review gate
 
+This protocol applies to human-authored PRs. Verified Dependabot PRs use
+[CodeRabbit approval and protected automation](dependabot.md), without Codex review.
+
 ## Delivery decision — 8 September 2026
 
 The owner merged #37 and explicitly requested finishing #35 while deferring
@@ -131,11 +134,13 @@ change itself requires normal current-head review; it cannot approve itself.
 
 ## Automated dependency delivery
 
-The owner-authorized [Dependabot policy](dependabot.md) requires clean current-head
-Codex review and applicable CI before automated approval and protected merging.
-This supersedes the earlier patch/minor policy-only approval exception. Trusted
+The owner-authorized [Dependabot policy](dependabot.md) uses CodeRabbit as the
+sole external reviewer for verified Dependabot PRs. Require its current-head
+`APPROVED` review, no unresolved review findings, and applicable CI before Actions
+approval and a protected merge. Do not request Codex for these PRs or interpret
+praise as approval. Human-authored PRs retain the Codex policy above. Trusted
 continuation handles branch updates and bounded Python export repairs; genuine
-failures remain open. Bot PRs retain upstream titles; VIN-172 tracks the policy.
+failures remain open. VIN-38 implements this policy; VIN-172 tracks live delivery proof.
 
 ## Consolidated review guidance
 

@@ -28,7 +28,9 @@ class ReconcileTests(unittest.TestCase):
         self.comments = [
             {
                 "author_association": "OWNER",
-                "body": "@codex review\n<!-- codex-review-head:" + "a" * 40 + " -->",
+                "body": "@coderabbitai review\n<!-- coderabbit-review-head:"
+                + "a" * 40
+                + " -->",
             }
         ]
         self.state = "success"
@@ -64,6 +66,19 @@ class ReconcileTests(unittest.TestCase):
         self.run_reconcile(count=3)
         self.assertEqual(len(self.writes()), 2)
         self.assertEqual(self.writes()[-1][1]["sha"], "a" * 40)
+
+    def test_existing_approval_does_not_request_another_review(self):
+        self.comments = []
+        self.run_reconcile()
+        self.assertTrue(any(p.endswith("/merge") for p, f in self.writes()))
+        self.assertFalse(any(p.endswith("/comments") for p, f in self.writes()))
+
+    def test_running_review_does_not_request_another_review(self):
+        self.comments = []
+        self.state = "pending"
+        self.reason = "CodeRabbit has an unfinished review"
+        self.run_reconcile()
+        self.assertEqual(self.writes(), [])
 
     def test_behind_updates_only_one_atomically(self):
         self.pr["mergeable_state"] = "behind"
@@ -129,7 +144,7 @@ class ReconcileTests(unittest.TestCase):
         self.run_reconcile()
         self.assertEqual(
             self.writes()[0][1]["body"],
-            "@codex review\n<!-- codex-review-head:" + "a" * 40 + " -->",
+            "@coderabbitai review\n<!-- coderabbit-review-head:" + "a" * 40 + " -->",
         )
 
     def test_new_findings_before_merge_block(self):
@@ -177,7 +192,7 @@ class ReconcileTests(unittest.TestCase):
 
     def test_explicit_findings_skip_to_next_queue_candidate(self):
         self.state = "pending"
-        self.reason = "Resolve review conversations and obtain a clean re-review"
+        self.reason = "Resolve review conversations before automatic merging"
         self.run_reconcile(count=3)
         self.assertEqual(self.reads, 3)
         self.assertEqual(self.writes(), [])
@@ -323,7 +338,7 @@ class ApprovalLifecycleTests(unittest.TestCase):
         return [
             {
                 "author_association": "OWNER",
-                "body": f"@codex review\n<!-- codex-review-head:{self.sha} -->",
+                "body": f"@coderabbitai review\n<!-- coderabbit-review-head:{self.sha} -->",
             }
         ]
 
