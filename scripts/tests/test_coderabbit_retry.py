@@ -72,3 +72,16 @@ class RetryTests(unittest.TestCase):
     def test_bad_timestamp_blocks_retry(self):
         self.request["created_at"] = "invalid"
         self.assertFalse(self.allowed([self.request, self.response]))
+
+    def test_same_second_response_uses_comment_id(self):
+        self.request["id"] = 10
+        self.response["id"] = 11
+        self.response["updated_at"] = self.request["created_at"]
+        self.assertTrue(self.allowed([self.request, self.response]))
+        self.response["id"] = 9
+        self.assertFalse(self.allowed([self.request, self.response]))
+
+    def test_same_second_newer_activity_supersedes_limit(self):
+        self.response["id"] = 11
+        newer = {**self.response, "id": 12, "body": "Review triggered."}
+        self.assertFalse(self.allowed([self.request, newer, self.response]))

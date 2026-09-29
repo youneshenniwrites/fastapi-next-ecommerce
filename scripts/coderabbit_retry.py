@@ -27,6 +27,9 @@ def may_request(comments, sha, is_request, now=None):
     if any(t is None for t in times):
         return False
     last = max(times)
+    last_id = max(
+        c.get("id", 0) for c in requests if timestamp(c.get("created_at")) == last
+    )
     responses = []
     for comment in comments:
         if not trusted(comment):
@@ -34,12 +37,13 @@ def may_request(comments, sha, is_request, now=None):
         time = timestamp(comment.get("updated_at") or comment.get("created_at"))
         if time is None:
             return False
-        if time > last:
-            responses.append((time, comment.get("body", "")))
+        comment_id = comment.get("id", 0)
+        if time > last or (time == last and comment_id > last_id):
+            responses.append((time, comment_id, comment.get("body", "")))
     if not responses:
         return False
     # A later response supersedes an earlier rate-limit notice.
-    time, body = max(responses, key=lambda item: item[0])
+    time, _, body = max(responses, key=lambda item: (item[0], item[1]))
     if "Review rate limited." not in body and "## Review limit reached" not in body:
         return False
     delay = re.search(r"Next included review available in (\d+) minutes", body)
