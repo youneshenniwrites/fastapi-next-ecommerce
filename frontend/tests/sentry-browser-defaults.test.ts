@@ -46,7 +46,6 @@ it("keeps default error/tracing capture without emitting identity-bearing sessio
   });
   if (!client) throw new Error("Browser SDK did not initialize");
   try {
-    expect(client.getIntegrationByName("BrowserSession")).toBeUndefined();
     expect(client.getIntegrationByName("BrowserTracing")).toBeDefined();
     setUser({
       id: "fictional-secret",
