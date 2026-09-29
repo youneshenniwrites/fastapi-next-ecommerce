@@ -915,3 +915,44 @@ def test_release_log_discarded_on_rollback(db, managed, monkeypatch):
     db.rollback()
     db.commit()
     assert calls == []
+
+
+@pytest.mark.parametrize("failure", ["window", "identity", "customer"])
+def test_payment_route_classifies_operational_conflicts(
+    client, db, managed, provider, token, monkeypatch, failure
+):
+    import sentry_sdk
+
+    oid, pid, uid = managed
+    order = db.get(Order, oid)
+    if failure == "customer":
+        order.payment_status = None
+        db.commit()
+    else:
+        provider.lose_response = True
+        with pytest.raises(HTTPException):
+            payments.start_payment(db, uid, oid)
+        if failure == "window":
+            order.payment_started_at = payments.now() - timedelta(hours=23)
+        else:
+            params = json.loads(order.payment_request)
+            params["metadata"].pop("stripe_account_id")
+            order.payment_request = json.dumps(params)
+        db.commit()
+    counts = []
+    monkeypatch.setattr(
+        sentry_sdk.metrics,
+        "count",
+        lambda *a, **kw: counts.append((a[0], kw["attributes"])),
+    )
+    response = client.post(
+        f"/api/v1/orders/{oid}/payment", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 409
+    attrs = [attrs for name, attrs in counts if name == "commerce.requests"][-1]
+    assert attrs["outcome"] == (
+        "expected_error" if failure == "customer" else "technical_error"
+    )
+    assert attrs["reason"] == (
+        "rejected" if failure == "customer" else "reconciliation_required"
+    )

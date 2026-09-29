@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.observability import (
+    ReconciliationRequired,
     record_confirmation,
     record_inventory_release,
     record_webhook_processed,
@@ -78,7 +79,7 @@ def finish(db: Session, order: Order, state: str) -> None:
     for line in order.lines:
         product = products.get(line.product_id)
         if product is None or product.reserved_stock < line.quantity:
-            raise HTTPException(
+            raise ReconciliationRequired(
                 409, "Inventory reservation requires operator reconciliation"
             )
         product.reserved_stock -= line.quantity
@@ -106,7 +107,7 @@ def validate_session(order: Order, session: dict[str, Any]) -> None:
         or (order.payment_session_id and order.payment_session_id != session["id"])
         or order.payment_started_at is None
     ):
-        raise HTTPException(409, "Payment session does not match the order")
+        raise ReconciliationRequired(409, "Payment session does not match the order")
 
 
 def apply_session(
@@ -122,7 +123,7 @@ def apply_session(
     order.payment_session_id = session["id"]
     if session.get("payment_status") == "paid":
         if order.payment_status not in ("pending", "paid"):
-            raise HTTPException(
+            raise ReconciliationRequired(
                 409,
                 "Payment conflicts with released inventory; operator reconciliation required",
             )
@@ -230,12 +231,12 @@ def get_session(
             )
         if not session_id:
             if aware(order.payment_started_at) + timedelta(hours=23) <= now():
-                raise HTTPException(
+                raise ReconciliationRequired(
                     409, "Uncertain payment creation requires operator reconciliation"
                 )
             params = json.loads(order.payment_request)
             if params.get("metadata", {}).get("stripe_account_id") != account_id:
-                raise HTTPException(
+                raise ReconciliationRequired(
                     409,
                     "Payment account identity changed or is missing; operator reconciliation required",
                 )
@@ -360,7 +361,7 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
             .get("stripe_account_id")
         )
         if not account_id:
-            raise HTTPException(
+            raise ReconciliationRequired(
                 409,
                 "Original payment account is unknown; absence cannot be established",
             )
@@ -370,12 +371,12 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
         db.rollback()
         raise
     if provider_call(provider.account_id) != account_id:
-        raise HTTPException(
+        raise ReconciliationRequired(
             409, "Payment account changed; absence cannot be established"
         )
     matches, complete = provider_call(provider.find_sessions, reference, expiry)
     if not complete or len(matches) > 1:
-        raise HTTPException(
+        raise ReconciliationRequired(
             409,
             "Provider session scan is incomplete or ambiguous; inventory remains reserved",
         )

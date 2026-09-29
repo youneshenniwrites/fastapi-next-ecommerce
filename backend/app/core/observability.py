@@ -3,11 +3,13 @@
 import logging
 import re
 import time
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlsplit
 
 import sentry_sdk
+from fastapi import HTTPException
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -183,7 +185,7 @@ def init_observability(settings: Any) -> bool:
         environment=settings.SENTRY_ENVIRONMENT,
         release=settings.SENTRY_RELEASE or None,
         integrations=[
-            FastApiIntegration(),
+            FastApiIntegration(transaction_style="url"),
             LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
         ],
         traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
@@ -242,11 +244,30 @@ def _signal_attributes(attributes: Any) -> dict[str, str]:
     }
 
 
-def record_request(operation: str, status: int, duration_ms: float) -> None:
+_request_failure: ContextVar[dict[str, bool] | None] = ContextVar(
+    "commerce_failure", default=None
+)
+
+
+class ReconciliationRequired(HTTPException):
+    """Operational conflict, distinct from an expected customer conflict."""
+
+    def __init__(self, status_code: int, detail: str):
+        super().__init__(status_code=status_code, detail=detail)
+        marker = _request_failure.get()
+        if marker is not None:
+            marker["reconciliation"] = True
+
+
+def record_request(
+    operation: str, status: int, duration_ms: float, reconciliation: bool = False
+) -> None:
     """Unsampled completed attempts; expected 4xx are not technical failures."""
     outcome = (
         "technical_error"
-        if status >= 500 or (operation == "webhook" and status == 409)
+        if status >= 500
+        or (status >= 400 and reconciliation)
+        or (operation == "webhook" and status == 409)
         else "expected_error"
         if status >= 400
         else "success"
@@ -255,7 +276,8 @@ def record_request(operation: str, status: int, duration_ms: float) -> None:
         "operation": operation,
         "outcome": outcome,
         "reason": "reconciliation_required"
-        if operation == "webhook" and status == 409
+        if (status >= 400 and reconciliation)
+        or (operation == "webhook" and status == 409)
         else "server_failure"
         if status >= 500
         else "rejected"
@@ -282,6 +304,8 @@ class CommerceMetricsMiddleware:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
+        marker = {}
+        token = _request_failure.set(marker)
         started = time.perf_counter()
         status = 500
         try:
@@ -314,8 +338,12 @@ class CommerceMetricsMiddleware:
                 }.get(route)
             if operation:
                 record_request(
-                    operation, status, (time.perf_counter() - started) * 1000
+                    operation,
+                    status,
+                    (time.perf_counter() - started) * 1000,
+                    marker.get("reconciliation", False),
                 )
+            _request_failure.reset(token)
 
 
 def record_confirmation(provider_created: Any, persisted_at: datetime) -> None:

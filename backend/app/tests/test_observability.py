@@ -399,3 +399,33 @@ def test_webhook_reconciliation_is_technical_and_reasons_are_bounded(monkeypatch
     assert scrub_log({"attributes": {"reason": "duplicate_event"}}, {})[
         "attributes"
     ] == {"reason": "duplicate_event"}
+
+
+def test_real_fastapi_transaction_has_safe_operation(client):
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.transport import Transport
+
+    envelopes = []
+
+    class MemoryTransport(Transport):
+        def capture_envelope(self, envelope):
+            envelopes.append(envelope)
+
+    with sentry_sdk.init(
+        dsn="https://key@o0.ingest.sentry.io/0",
+        transport=MemoryTransport,
+        integrations=[FastApiIntegration(transaction_style="url")],
+        traces_sample_rate=1,
+        before_send_transaction=scrub_event,
+    ):
+        client.put("/api/v1/cart/items/1", json={"quantity": 1})
+        sentry_sdk.flush()
+    transactions = [
+        item.payload.json
+        for envelope in envelopes
+        for item in envelope.items
+        if item.headers["type"] == "transaction"
+    ]
+    assert any(item["transaction"] == "cart_write" for item in transactions), (
+        transactions
+    )
