@@ -6,6 +6,7 @@ import subprocess
 
 import coderabbit_review_gate as rabbit
 import codex_review_gate as gate
+from coderabbit_retry import may_request
 from dependabot_export import ExportNotSafe, repair_export
 from dependabot_merge import MergeNotReady
 
@@ -183,9 +184,7 @@ def reconcile(repo, pulls, api, pages, checks, inspect, request_api=None, repair
                     "Resolve review conversations before automatic merging",
                     "Obtain CodeRabbit approval after its latest findings",
                 }
-                and not any(
-                    review_request(c) and marker in c.get("body", "") for c in comments
-                )
+                and may_request(comments, sha, review_request)
             ):
                 current = api(path)
                 if (
