@@ -30,7 +30,12 @@ can proceed. There is no permanent auto-merge authorization or administrator byp
 GitHub receives the expected head SHA and enforces branch protection.
 
 The workflow updates an outdated branch before requesting review, waits for CI,
-and requests CodeRabbit review once per revision when needed. It checks current evidence and CI again immediately before
+and requests CodeRabbit review when needed. A trusted rate-limit response can permit
+at most two retries per revision (three requests total). The retry waits at least
+one hour and respects a longer advertised minute-based reset plus five minutes;
+an unknown reset waits 24 hours. Later bot activity supersedes a limit notice.
+Missing or malformed evidence and exhausted attempts leave the PR blocked.
+Existing workflow events/polling perform recovery; no new timer is added. It checks current evidence and CI again immediately before
 merging, and withdraws its own approvals when their supporting evidence is stale
 or delivery cannot proceed. Existing approvals are checked across the bounded
 queue even when an earlier candidate is still pending. Missing credentials, unknown review evidence, conflicts and genuine test
