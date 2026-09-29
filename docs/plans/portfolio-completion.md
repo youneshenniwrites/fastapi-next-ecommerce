@@ -43,15 +43,20 @@ new services solely for demonstration. No additional plan or infrastructure is a
 **Initial maintenance delivered (21 September):** All initial
 Dependabot PRs #165–#171 are merged; PR #168 proved a live policy approval and
 protected automatic merge. PR #175 merged the readable delivery conventions.
-VIN-172 reopened on 28 September to repair the new dependency queue and replace
-policy-only approval with Codex-reviewed continuation (PR #214). VIN-38 is now in
-progress to replace Codex with CodeRabbit for Dependabot only; rollout and live
-unattended review → approval → protected merge proof remain pending. Manual merges
-do not satisfy that proof. The maintenance sequence is VIN-172 delivery proof,
-VIN-38 reviewer policy (needed to finish that proof), VIN-146 frontend CI speed,
-then VIN-147 repeated-run reduction. Keep their handoffs on the existing issues.
-This maintenance does not
-change the portfolio acceptance count.
+VIN-172 reopened on 28 September for dependency continuation (PR #214).
+PR #217 switched Dependabot review to CodeRabbit; PR #218 added bounded rate-limit
+retries. Both are merged. Live unattended review → approval → protected merge proof
+remains pending on a genuine eligible update; manual merges do not satisfy it.
+VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
+acceptance does not mean active implementation and adds no portfolio completion credit.
+
+**Current execution priority — 29 September:** finish VIN-121 privacy/configuration
+and hosted monitoring, then VIN-158 visitor isolation and VIN-89 recovery proof,
+VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining
+hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run
+reduction follow portfolio delivery unless a concrete delivery blocker requires a
+bounded repair. This supersedes the temporary maintenance-first handoff. Keep one
+implementation story active under VIN-155; paused work stays Backlog.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
 CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,
