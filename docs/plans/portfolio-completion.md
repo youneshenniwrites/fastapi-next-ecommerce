@@ -70,7 +70,7 @@ PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are deliv
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-55% · 16/29 verified outcomes. Hide Sub-issues progress in the saved board view;
+59% · 17/29 verified outcomes. Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
