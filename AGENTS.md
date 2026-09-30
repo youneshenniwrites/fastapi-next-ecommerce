@@ -80,7 +80,7 @@ Project skills in .agents/skills cover feature isolation, backend changes,
 verification, Azure planning, maintenance, and PR ownership. Frontend-specific
 guidance lives under frontend/.agents/skills and frontend/AGENTS.md. User
 instructions take precedence over skill guidelines. Use only skills relevant to
-the task. Codex external review is required for human-authored PRs before merge; no public evidence host is required. Attach
+the task. Codex external review is required for non-exempt human-authored PRs before merge; no public evidence host is required. Attach
 redacted logs/screenshots only within the authorized workflow.
 
 See CONTRIBUTING.md for PR expectations, docs/tooling.md for check scope, and

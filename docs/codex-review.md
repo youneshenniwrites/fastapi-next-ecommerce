@@ -1,6 +1,6 @@
 # Automated Codex review gate
 
-This protocol applies to human-authored PRs. Verified Dependabot PRs use
+This protocol applies to non-exempt human-authored PRs. Verified Dependabot PRs use
 [CodeRabbit approval and protected automation](dependabot.md), without Codex review.
 
 ## Delivery decision — 8 September 2026

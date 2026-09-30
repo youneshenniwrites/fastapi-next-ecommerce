@@ -104,7 +104,7 @@ assign youneshenniwrites and apply scope labels. Self-review must be identified.
 Before merge, review the full exact-head diff, resolve findings and require all
 applicable checks and external tool review/approval for the current head.
 Self-review alone does not authorize merging. Never bypass branch protection.
-For human-authored PRs, the informational `Codex review` status reports review evidence; enforcement is
+For non-exempt human-authored PRs, the informational `Codex review` status reports review evidence; enforcement is
 deferred to #38. Inspect the actual current-head review before merging; follow [its evidence protocol](codex-review.md). A human Approve review is
 not required. Unknown or missing evidence keeps the PR open unless the owner
 explicitly authorizes a documented deferral. The #35/#37 deferral is not a blanket
@@ -144,7 +144,7 @@ review checkboxes or owner/reviewer metadata in the body. Remove irrelevant
 optional sections. No Jira placeholder.
 
 Assign youneshenniwrites on every PR; do not request them as reviewer.
-For human-authored PRs, Codex is the requested reviewer. Request Codex through the review
+For non-exempt human-authored PRs, Codex is the requested reviewer. Request Codex through the review
 integration and verify completion on the current commit. A named reviewer in the
 body is not evidence of a request or approval. The ownership skill contains the
 operational steps; AGENTS.md routes future sessions to it. External approval
