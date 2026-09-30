@@ -1,0 +1,34 @@
+name: Documentation review request
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: docs-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Execute only trusted default-branch scripts, never pull-request code.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Classify with read-only workflow credentials
+        id: classify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python3 scripts/request_docs_review.py --classify
+      - name: Request CodeRabbit for eligible routine documentation
+        if: steps.classify.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDABOT_REVIEW_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          test -n "$GH_TOKEN" || { echo 'Review credential missing; no approval claimed'; exit 1; }
+          python3 scripts/request_docs_review.py

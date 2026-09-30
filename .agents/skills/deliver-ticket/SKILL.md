@@ -23,7 +23,7 @@ Keep one feature active; parallelize within its outcome, not unrelated features.
 
 While CI/review is running, use bounded waits and do independent work within the
 same ticket. Batch findings into coherent fixes; independently verify each finding.
-Complete a full internal verification pass before external review; follow the repository review policy: Codex for human-authored PRs,
+Complete a full internal verification pass before external review; follow the repository review policy: Codex for non-exempt human-authored PRs, CodeRabbit for eligible routine documentation,
 CodeRabbit only for verified Dependabot PRs. Keep non-blocking deferrals linked
 under existing policy. Do not request duplicate
 reviews for an unchanged head. New blocking correctness/security findings remain

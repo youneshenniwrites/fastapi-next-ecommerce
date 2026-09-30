@@ -104,7 +104,7 @@ assign youneshenniwrites and apply scope labels. Self-review must be identified.
 Before merge, review the full exact-head diff, resolve findings and require all
 applicable checks and external tool review/approval for the current head.
 Self-review alone does not authorize merging. Never bypass branch protection.
-For human-authored PRs, the informational `Codex review` status reports review evidence; enforcement is
+For non-exempt human-authored PRs, the informational `Codex review` status reports review evidence; enforcement is
 deferred to #38. Inspect the actual current-head review before merging; follow [its evidence protocol](codex-review.md). A human Approve review is
 not required. Unknown or missing evidence keeps the PR open unless the owner
 explicitly authorizes a documented deferral. The #35/#37 deferral is not a blanket
@@ -144,7 +144,7 @@ review checkboxes or owner/reviewer metadata in the body. Remove irrelevant
 optional sections. No Jira placeholder.
 
 Assign youneshenniwrites on every PR; do not request them as reviewer.
-For human-authored PRs, Codex is the requested reviewer. Request Codex through the review
+For non-exempt human-authored PRs, Codex is the requested reviewer. Request Codex through the review
 integration and verify completion on the current commit. A named reviewer in the
 body is not evidence of a request or approval. The ownership skill contains the
 operational steps; AGENTS.md routes future sessions to it. External approval
@@ -247,3 +247,24 @@ state. It never grants merge permission, changes protection, installs a stop hoo
 or schedules work. On pause/blockage, record remaining work and the next action;
 do not fabricate completion to get exit 0. Trivial single-step work can use the
 same completion questions directly without generating JSON.
+
+## Routine documentation review exception (VIN-225)
+
+Routine prose-only PRs use CodeRabbit instead of Codex. Eligibility is determined
+from the complete changed-file list by `scripts/docs_review_policy.py`: README.md,
+docs/demo.md, docs/observability.md and Markdown under docs/plans/. Renames must
+qualify on both paths. Mixed changes, forks, drafts and incomplete file evidence
+are not exempt. Agent instructions, delivery/review policy, workflows and scripts
+retain Codex review, even if written in Markdown. PR #224 changed agent guidance
+and therefore would not qualify under this narrow rule.
+
+The trusted documentation-review workflow requests CodeRabbit once per head using
+the existing scoped review credential. CodeRabbit reported skipping #224 because
+the repository has fewer than 10 stars despite automatic review being enabled.
+A request is not approval: require current-head CodeRabbit approval, resolved
+findings and applicable CI before merging. No automatic merge is added here.
+The shared Codex evidence workflow may still run, but reports eligible PRs as
+CodeRabbit-only and publishes no Codex status for them. Missing credentials or
+provider failures require investigation; never infer approval from silence.
+Hosted automatic triggering remains unverified until this workflow lands and an
+eligible PR receives a review. No paid plan change or scheduled chat is enabled.

@@ -1,7 +1,7 @@
 name: Dependabot continuation
 on:
   workflow_run:
-    workflows: [Backend CI, Frontend CI, PR coverage comparison, Dependency audit, Branch naming, Review gate tests, Codex review events, Codex review gate, Dependabot approval and auto-merge]
+    workflows: [Backend CI, Frontend CI, PR coverage comparison, Dependency audit, Branch naming, Review gate tests, Codex review events, Codex review gate, Dependabot approval and auto-merge, Documentation review request]
     types: [completed]
   push:
     branches: [main]

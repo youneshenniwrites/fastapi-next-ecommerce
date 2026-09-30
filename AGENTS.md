@@ -80,7 +80,7 @@ Project skills in .agents/skills cover feature isolation, backend changes,
 verification, Azure planning, maintenance, and PR ownership. Frontend-specific
 guidance lives under frontend/.agents/skills and frontend/AGENTS.md. User
 instructions take precedence over skill guidelines. Use only skills relevant to
-the task. Codex external review is required for human-authored PRs before merge; no public evidence host is required. Attach
+the task. Codex external review is required for non-exempt human-authored PRs before merge; no public evidence host is required. Attach
 redacted logs/screenshots only within the authorized workflow.
 
 See CONTRIBUTING.md for PR expectations, docs/tooling.md for check scope, and
@@ -119,7 +119,9 @@ For customer sessions (#24), read docs/design/customer-sessions.md; it documents
 
 ## External review requirement
 
-For human-authored PRs, the owner accepts a completed clean Codex review of the latest commit, with all
+Routine documentation PRs qualifying under [the documentation exception](docs/codex-review.md#routine-documentation-review-exception-vin-225) require current-head CodeRabbit approval and resolved findings, not Codex. Mixed changes and agent-policy changes do not qualify.
+
+For other human-authored PRs, the owner accepts a completed clean Codex review of the latest commit, with all
 findings addressed and threads resolved, as external approval. Explicit owner-approved deferrals
 are permitted only when recorded with a linked issue; do not call them clean reviews. Follow
 [the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,

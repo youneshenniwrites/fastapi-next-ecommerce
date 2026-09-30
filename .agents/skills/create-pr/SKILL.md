@@ -1,7 +1,14 @@
 ---
 name: create-pr
-description: Create or refresh an ecommerce pull request with issue linkage, accurate testing, ownership and Codex review.
+description: Create or refresh an ecommerce pull request with issue linkage, accurate testing, ownership and policy-selected external review.
 ---
+
+Select the reviewer before taking review actions: verified Dependabot PRs follow
+[dependency policy](../../../docs/dependabot.md); eligible routine documentation
+follows the [documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
+Both use CodeRabbit without Codex requests or statuses. All other human-authored
+PRs use Codex. Reclassify the complete diff after changes; mixed and agent-policy
+changes require Codex.
 
 Read [delivery rules](../../../docs/delivery.md), the [PR template](../../../.github/pull_request_template.md), and the existing [naming](../ecommerce-naming/SKILL.md) and [ownership](../ecommerce-pr-ownership/SKILL.md) skills. Resolve paths relative to this file; run repository commands from the repository root.
 
@@ -12,11 +19,11 @@ Check the issue against the canonical ticket boundaries in the delivery rules li
 Use [self-review](../self-review/SKILL.md) before requesting external review. Fill the canonical template from the final implementation: a short customer or contributor outcome, linked issue, factual acceptance criteria, tests actually run and relevant limitations. Tick only observed outcomes. Every unticked box keeps a named proving vehicle — the exact PR or event that will prove it — recorded on both the source issue and the proving issue, with an expiry after which it closes as unproven-with-reasons. Merges list open boxes explicitly; never let an unticked box float without a vehicle. Keep self-review disclosure brief and link current-head external review and CI evidence with their actual state; pending or failed checks must not be described as passed. Keep assignment in the sidebar rather than repeating owner/reviewer metadata or review checkboxes. Use Closes only for a fully completed issue; otherwise Refs. Remove irrelevant optional sections and Jira placeholders.
 
 Before requesting external review, complete [preflight-review](../preflight-review/SKILL.md)
-and record actual evidence; it does not replace independent Codex review.
+and record actual evidence; it does not replace the selected external review.
 
 Commit incrementally as coherent changes are completed and verified: stage only relevant files, keep coupled code, tests and generated files together, review each staged diff, and use focused Conventional Commits subjects (see the naming skill). Small tasks may need only one commit. Incremental commits do not replace full PR testing or current-head external review, and committing never authorizes pushing or merging.
 
-Within existing push/PR authorization, push the intended changes, then create or refresh the PR using gh/API. Pass multiline text through a body file or structured JSON, never shell interpolation of PR content. Apply the ownership helper and read back title, base/head, body, owner assignment and labels. For human-authored PRs, request Codex using the current-head protocol in [review documentation](../../../docs/codex-review.md); avoid duplicate requests for an unchanged head.
+Within existing push/PR authorization, push the intended changes, then create or refresh the PR using gh/API. Pass multiline text through a body file or structured JSON, never shell interpolation of PR content. Apply the ownership helper and read back title, base/head, body, owner assignment and labels. For non-exempt human-authored PRs, request Codex using the current-head protocol in [review documentation](../../../docs/codex-review.md); avoid duplicate requests for an unchanged head.
 
 Use [update-delivery-board](../update-delivery-board/SKILL.md) to move the linked ticket to In review. Report the PR URL, checks and review state. Creating a PR does not itself authorize merging or deployment; continue a separately authorized delivery task under the repository merge policy.
 
@@ -24,7 +31,7 @@ Follow AGENTS.md for small coherent commits and regular verified pushes within
 existing authorization. Keep code and its tests together; do not save all changes
 for one final large commit. A push does not waive fresh current-head review.
 
-The exact-head review instructions above have one exception: the owner-authorized
+For PRs using Codex, the exact-head review instructions have this exception: the owner-authorized
 [pure-main-sync carry-forward procedure](../../../docs/codex-review.md#review-carry-forward-for-a-pure-main-sync).
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. This does not waive branch protection.

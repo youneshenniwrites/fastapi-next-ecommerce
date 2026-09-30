@@ -3,6 +3,13 @@ name: ecommerce-pr-ownership
 description: Set and verify the owner's assignment and appropriate labels when opening or repairing pull requests in this ecommerce repository.
 ---
 
+Select the reviewer before taking review actions: verified Dependabot PRs follow
+[dependency policy](../../../docs/dependabot.md); eligible routine documentation
+follows the [documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
+Both use CodeRabbit without Codex requests or statuses. All other human-authored
+PRs use Codex. Reclassify the complete diff after changes; mixed and agent-policy
+changes require Codex.
+
 Use ecommerce-naming for branch, commit, and PR naming before creation.
 
 The repository owner is youneshenniwrites. Before opening an agent-authored PR,
@@ -45,21 +52,23 @@ closure/Done, and record any remaining work instead of implying completion.
 
 ## Reviewer requests
 
-Assign the owner on every PR, but do not request their review. For human-authored PRs, Codex is the
+Assign the owner on every PR, but do not request their review. For routine documentation PRs, apply [the documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225): require current-head CodeRabbit approval and resolved findings, without requesting Codex. Check actual changed files; agent-policy and mixed changes retain Codex. For other human-authored PRs, Codex is the
 requested reviewer; ownership and reviewer requests are separate.
+### Only for PRs classified as requiring Codex
+
 Request Codex Code Review using its configured integration (or @codex review
 comment). Listing Codex in the PR body is not a request. Inspect existing review
 activity before posting to avoid duplicate requests; request a new review when
 code changes invalidate the reviewed head. Verify the actual bot response and
 reviewed commit. Do not assume the integration bot is a requestable GitHub user.
 
-External review and approval are required before merge. Follow docs/codex-review.md:
+For these Codex-reviewed PRs, external review is required before merge. Follow docs/codex-review.md:
 post a fresh commit-bound request, verify the trusted bot's clean result for the
 current head and all resolved threads, and require CI. The Codex review status
 is informational pending #38; any owner-approved exception must be explicitly
 recorded and linked to deferred work. Verify ticket acceptance separately. No human Approve review is required.
 Self-review and CI alone are insufficient. Missing evidence keeps the PR open.
-Never bypass protection. After pushing, publish a pending Codex review status if
+Never bypass protection. Only for these non-exempt PRs, after pushing publish a pending Codex review status if
 the workflow has not yet run; never publish success without the evidence adapter.
 
 The exact-head review instructions above have one exception: the owner-authorized
