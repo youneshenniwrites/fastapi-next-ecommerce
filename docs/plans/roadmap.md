@@ -1,5 +1,7 @@
 # Delivery roadmap
 
+**30 September scope revision:** VIN-121 is Done for verified development monitoring: privacy controls, browser/server/API errors, logs/metrics, release/environment tags, email delivery and free-tier controls. PR #222 is merged and deployed; diagnostics are disabled and the temporary administrator is inactive. Joined storefront → API → database trace verification remains unproved and is transferred to [VIN-223](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223), In progress. The owner approved this split; it is outside the revised 29-outcome baseline. Progress is **18/29 (62%) under revised scope**, not evidence that trace continuity passed. This dated update supersedes earlier pending configuration/acceptance wording below. [Hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121#issuecomment-5909526011).
+
 Purpose: [senior SWE portfolio plan](portfolio.md).
 
 The owner-approved [portfolio completion plan](portfolio-completion.md) governs

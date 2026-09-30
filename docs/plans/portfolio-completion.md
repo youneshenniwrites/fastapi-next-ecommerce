@@ -1,5 +1,7 @@
 # VINDOR: audit fixes to a complete portfolio demo
 
+**30 September scope revision:** VIN-121 is Done for verified development monitoring: privacy controls, browser/server/API errors, logs/metrics, release/environment tags, email delivery and free-tier controls. PR #222 is merged and deployed; diagnostics are disabled and the temporary administrator is inactive. Joined storefront → API → database trace verification remains unproved and is transferred to [VIN-223](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223), In progress. The owner approved this split; it is outside the revised 29-outcome baseline. Progress is **18/29 (62%) under revised scope**, not evidence that trace continuity passed. This dated update supersedes earlier pending configuration/acceptance wording below. [Hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121#issuecomment-5909526011).
+
 Approved by the owner on 19 September 2026. **This is the one canonical portfolio
 completion plan**, including its progress checklist, priorities and acceptance
 gates. Amend this file for tweaks; do not create replacement plans or copy its
@@ -63,14 +65,14 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Verified progress:** `████████████░░░░░░░░` **17 / 29 outcomes (59%)**.
+**Verified progress:** `████████████░░░░░░░░` **18 / 29 outcomes (62%, revised scope)**.
 This counts verified acceptance outcomes, not effort or time remaining.
 Baseline is 3/3, reliability 4/7, checkout 5/5, payment implementation 3/3 and hosted finish 1/8. Security/monitoring is 1/3: the reviewed privacy gate is complete.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-59% · 17/29 verified outcomes. Hide Sub-issues progress in the saved board view;
+62% · 18/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
@@ -175,7 +177,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 #### 3 — Security and monitoring
 
 - [x] **#121 privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; PR #219 disables browser-session envelopes and tests actual default-integrations output. Merged as `79d7923` on 30 September after clean Codex review of `c454746` and passing application CI; hosted monitoring remains a separate unchecked outcome.
-- [ ] **#121 development configuration and agent proof:** free plan and projects confirmed on 29 September; configure development and prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
+- [x] **#121 development monitoring foundation:** hosted sanitized errors, logs/metrics, release/environment, email alert and quota controls verified. Owner-approved 30 September scope split transfers unproved joined trace continuity to #223, outside this revised baseline.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
 #### 4 — Checkout · Complete
