@@ -1,9 +1,9 @@
 # Observability runbook (Sentry, issue #121)
 
-Both runtimes have SDK integration, but **hosted activation remains blocked** until
-privacy checks pass and the owner supplies configuration. This privacy prerequisite
-does not establish live trace continuity, alert delivery or a verified dashboard.
-Missing DSNs keep telemetry silent; no telemetry configuration is changed by this PR.
+Both runtimes have SDK integration and serialized privacy tests. Missing DSNs keep
+telemetry silent. VIN-121 remains incomplete until development configuration and
+hosted trace, error, log, metric, alert and quota evidence are recorded. Code tests
+do not establish hosted delivery; production activation is outside this rollout.
 
 ## Telemetry terms in VINDOR
 
@@ -64,6 +64,8 @@ would need a concrete requirement and separate scope.
 | `SENTRY_DSN` | Frontend projects (server-only) | Only to activate reporting |
 | `SENTRY_ENVIRONMENT` | Frontend projects | No (defaults to `NODE_ENV`) |
 | `NEXT_PUBLIC_SENTRY_DSN` | Frontend projects (browser key, public by design) | Only to activate reporting |
+| `NEXT_PUBLIC_SENTRY_ENVIRONMENT` | Frontend projects (build-time public label) | Set `development` for the development app |
+| `SENTRY_DIAGNOSTICS_ENABLED` | API development project only | Default false; temporary admin-only synthetic error exercise |
 
 Store DSNs in Vercel project settings and GitHub environment secrets, never in
 tracked files. Source-map upload stays disabled until the owner provides
@@ -71,8 +73,10 @@ tracked files. Source-map upload stays disabled until the owner provides
 
 ## Sampling and quota guardrails
 
-Free quotas (5k errors, 5M spans, 5GB logs, 5GB metrics per month) are protected
-by signal-specific controls:
+The existing Developer account was inspected on 29 September 2026: no payment
+method, 5k errors, 5M spans, 5GB logs and 5GB application metrics included, with
+zero usage at inspection. Recheck limits before future activation; these are dated
+account observations, not permanent vendor guarantees. Use signal-specific controls:
 
 - **Traces and spans** — low `SENTRY_TRACES_SAMPLE_RATE` (0.1 in production, 1.0
   in local dev). If span quota is at risk, reduce this value first; never add
@@ -100,9 +104,9 @@ Backend exception local-variable capture is explicitly disabled.
 
 Backend logs have their own hook: severity, timestamp and trace correlation survive;
 free-text bodies and application attributes do not. Configured release/environment
-attributes survive. Rate-limit metrics use matched server route templates rather
-than raw request paths; their hook permits only the fixed rejection counter and
-its route/release/environment attributes. Frontend logs remain disabled; a defensive
+attributes survive. Rate-limit metrics use server route templates rather than raw request paths.
+Commerce metrics/logs retain only bounded operation, outcome and reason values
+plus release/environment; customer/order IDs and arbitrary labels are dropped. Frontend logs remain disabled; a defensive
 log hook removes message text and attributes if enabled later. Session replay,
 attachments and profiling are not enabled. Enabling a new channel or adding custom
 structural fields requires its own privacy review. Trusted release/environment and
@@ -118,14 +122,15 @@ arbitrary future SDK channels or application-supplied metadata are automatically
 In-memory transports exercise the pinned Python SDK and both Node/browser clients,
 serialize actual error and transaction envelopes, and assert private fictional values
 are absent while useful diagnostics survive. The Python suite also checks emitted
-log and metric envelopes. No tests contact Sentry. Browser session envelopes emitted by default integrations
-are outside these error/transaction callback tests; assess those channels before
-hosted activation, especially before introducing SDK user identity. Option tests cover missing DSNs and conditional
+log and metric envelopes. No tests contact Sentry. The browser-default regression also exercises the installed SDK integrations with
+fictional identity and navigation. `BrowserSession` is explicitly removed because
+session envelopes bypass the event hooks and can contain identity/IP fields.
+Error and trace capture remain enabled and positively asserted; Replay stays off. Option tests cover missing DSNs and conditional
 source-map uploads, which require all of `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and
 `SENTRY_PROJECT`. Never expose the upload token through a public environment variable.
 
-Remaining VIN-121 work: sanitized reporting of meaningful handled failures, then
-configured development evidence for errors, cross-service traces, release/environment,
+PR #219 implements bounded handled-failure logs and commerce metrics. Remaining
+VIN-121 work: reviewed delivery, then configured development evidence for errors, cross-service traces, release/environment,
 logs/metrics and an alert. Ordinary validation/authentication failures are not incidents.
 Do not mark the issue complete or activate telemetry from this prerequisite alone.
 
@@ -135,3 +140,41 @@ New-issue email alerts route to the owner. Read the trace from the storefront
 span through the API span, reproduce locally with fictional data, fix on a task
 branch with regression coverage, and record evidence in the PR. Never paste
 customer data into tickets; this demo carries none.
+
+
+## Development verification procedure
+
+Use the two development Vercel projects only. They deploy with Vercel's
+`production` target inside those separate development projects; the production
+storefront/API projects remain untouched. Set their Sentry environment labels to
+`development`, including the browser build-time label. Redeploy the reviewed
+revision through the existing exact-main CI gate after configuring DSNs.
+
+1. Confirm the account is still free with no payment method, project spike
+   protection enabled, and low trace sampling. Keep Replay/profiling off.
+2. Exercise fictional cart writes, order placement and sandbox payment-session
+   creation. In Sentry inspect `commerce.requests` and `commerce.duration` by
+   operation/outcome and the same release/environment/window. Calculate technical
+   error ratio using completed attempts in that same window. Report p95 and sample
+   count; a small smoke sample does not establish reliable p99 performance.
+3. Follow the storefront/API trace IDs and span parents. Stripe webhook delivery
+   is a separate incoming request, not an automatically connected parent span.
+4. Inspect `payment.confirmation_delay` only for valid first-paid transitions.
+   It measures the signed provider event's creation time to the persisted local
+   payment-event timestamp, in milliseconds. Invalid or future timestamps produce
+   timing-status observations instead of fabricated zero latency. Duplicate
+   deliveries do not create a new paid-transition observation.
+5. To prove a backend error/alert, temporarily set
+   `SENTRY_DIAGNOSTICS_ENABLED=true` on the development API with
+   `SENTRY_ENVIRONMENT=development`. An authenticated active administrator may
+   POST `/api/v1/diagnostics/sentry` to trigger the fixed synthetic exception.
+   It is absent from public OpenAPI, returns 404 while disabled/outside development,
+   and denies non-admin users. Disable the flag after proof and confirm 404 again.
+6. Record sanitized error/log/metric evidence, release/environment, trace linkage,
+   alert receipt and resolution. Never paste credentials into tickets. Hosted
+   acceptance stays incomplete until those results are recorded on VIN-121.
+
+Counters are emitted without trace sampling, but SDK shutdown, transport failure
+or provider quotas can still drop observations. They are not a durable accounting
+ledger or proof of exact total traffic. Payment/release guards prevent duplicate
+state-transition observations; they do not promise exactly-once telemetry delivery.

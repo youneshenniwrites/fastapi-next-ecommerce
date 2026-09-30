@@ -870,3 +870,89 @@ def test_known_session_skips_account_lookup(db, managed, provider, monkeypatch):
 
     monkeypatch.setattr(provider, "account_id", unexpected)
     assert payments.reconcile_payment(db, uid, oid).payment_status == "pending"
+
+
+def test_confirmation_only_first_committed_paid_transition(
+    db, managed, provider, monkeypatch
+):
+    observed = []
+    deliveries = []
+    monkeypatch.setattr(payments, "record_webhook_processed", deliveries.append)
+    monkeypatch.setattr(
+        payments, "record_confirmation", lambda *args: observed.append(args)
+    )
+    oid, pid, uid = managed
+    payments.start_payment(db, uid, oid)
+    sid = db.get(Order, oid).payment_session_id
+    provider.sessions[sid].update(status="complete", payment_status="paid")
+    provider.emit(db, sid)
+    provider.emit(db, sid)
+    provider.emit(db, sid, eid="evt_second")
+    assert len(observed) == 1
+    assert deliveries == [False, True, False]
+    recorded = db.get(PaymentEvent, "evt_1")
+    assert observed[0][1].replace(tzinfo=None) == recorded.created_at.replace(
+        tzinfo=None
+    )
+
+
+def test_release_log_only_after_commit_and_not_duplicate(
+    db, managed, provider, monkeypatch
+):
+    calls = []
+    monkeypatch.setattr(payments, "record_inventory_release", calls.append)
+    oid, pid, uid = managed
+    payments.cancel_payment(db, uid, oid)
+    payments.cancel_payment(db, uid, oid)
+    assert calls == ["released"]
+
+
+def test_release_log_discarded_on_rollback(db, managed, monkeypatch):
+    calls = []
+    monkeypatch.setattr(payments, "record_inventory_release", calls.append)
+    oid, pid, uid = managed
+    payments.finish(db, db.get(Order, oid), "cancelled")
+    db.rollback()
+    db.commit()
+    assert calls == []
+
+
+@pytest.mark.parametrize("failure", ["window", "identity", "customer"])
+def test_payment_route_classifies_operational_conflicts(
+    client, db, managed, provider, token, monkeypatch, failure
+):
+    import sentry_sdk
+
+    oid, pid, uid = managed
+    order = db.get(Order, oid)
+    if failure == "customer":
+        order.payment_status = None
+        db.commit()
+    else:
+        provider.lose_response = True
+        with pytest.raises(HTTPException):
+            payments.start_payment(db, uid, oid)
+        if failure == "window":
+            order.payment_started_at = payments.now() - timedelta(hours=23)
+        else:
+            params = json.loads(order.payment_request)
+            params["metadata"].pop("stripe_account_id")
+            order.payment_request = json.dumps(params)
+        db.commit()
+    counts = []
+    monkeypatch.setattr(
+        sentry_sdk.metrics,
+        "count",
+        lambda *a, **kw: counts.append((a[0], kw["attributes"])),
+    )
+    response = client.post(
+        f"/api/v1/orders/{oid}/payment", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 409
+    attrs = [attrs for name, attrs in counts if name == "commerce.requests"][-1]
+    assert attrs["outcome"] == (
+        "expected_error" if failure == "customer" else "technical_error"
+    )
+    assert attrs["reason"] == (
+        "rejected" if failure == "customer" else "reconciliation_required"
+    )

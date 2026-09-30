@@ -1,4 +1,5 @@
 import { scrubError, scrubTransaction, scrubLog } from "./sentry-privacy";
+import type { Integration } from "@sentry/core";
 export const SENTRY_TUNNEL_ROUTE = "/sentry-tunnel";
 
 export interface SentryRuntimeEnv {
@@ -20,6 +21,7 @@ interface BaseSentryOptions {
 
 export interface ClientSentryOptions extends BaseSentryOptions {
   tunnel: string;
+  integrations: (defaults: Integration[]) => Integration[];
 }
 
 export type ServerSentryOptions = BaseSentryOptions;
@@ -46,7 +48,15 @@ function baseSentryOptions(env: SentryRuntimeEnv): BaseSentryOptions {
 export function clientSentryOptions(
   env: SentryRuntimeEnv,
 ): ClientSentryOptions {
-  return { ...baseSentryOptions(env), tunnel: SENTRY_TUNNEL_ROUTE };
+  return {
+    ...baseSentryOptions(env),
+    tunnel: SENTRY_TUNNEL_ROUTE,
+    // Session envelopes bypass beforeSend and can include SDK user identity.
+    // Release-health sessions are outside our monitoring scope; retain all
+    // other defaults, including Next.js tracing and error integrations.
+    integrations: (defaults) =>
+      defaults.filter((integration) => integration.name !== "BrowserSession"),
+  };
 }
 
 export function serverSentryOptions(

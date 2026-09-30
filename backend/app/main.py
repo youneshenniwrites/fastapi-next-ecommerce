@@ -5,8 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.api.v1 import auth, cart, orders, payments, products
-from app.core.observability import init_observability
+from app.api.v1 import auth, cart, diagnostics, orders, payments, products
+from app.core.observability import CommerceMetricsMiddleware, init_observability
 from app.core.settings import settings
 
 # Logging configuration.
@@ -44,6 +44,8 @@ app = FastAPI(
     ],
     version="0.1.0",
 )
+
+app.add_middleware(CommerceMetricsMiddleware)
 
 # CORS middleware.
 origins = [
@@ -84,6 +86,7 @@ app.include_router(products.router, prefix="/api/v1/products", tags=["Products"]
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(orders.router)
 app.include_router(payments.router)
+app.include_router(diagnostics.router)
 app.include_router(cart.router, prefix="/api/v1/cart", tags=["Cart"])
 # app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 

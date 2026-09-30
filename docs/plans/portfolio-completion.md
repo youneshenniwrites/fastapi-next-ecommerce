@@ -15,10 +15,10 @@ at a time; external blockers must not prevent independent work.
 ## Recruiter-readiness feedback decision — 22 September 2026
 
 Keep this plan as the single source of truth. VIN-120 checkout submission,
-confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194 and its hosted sandbox journey was verified on 23 September. PR #203 implements VIN-121 error/transaction/log/metric privacy controls and serialized tests. Next: assess browser session envelopes, finish configuration and collect hosted evidence.
+confirmation and history are delivered in PR #188. VIN-30 implementation merged in PR #194 and its hosted sandbox journey was verified on 23 September. PR #203 implements VIN-121 error/transaction/log/metric privacy controls and serialized tests. PR #219 implements the browser-session privacy gate and commerce signals. Next: finish reviewed delivery, configuration and hosted evidence.
 Tests, coverage gates, `/api/v1/` contracts and backend admin authorization already
 exist; do not recreate them or make an admin UI/coverage badge a checkout prerequisite.
-VIN-121 activation still requires session-channel assessment and confirmed configuration after the PR #203 privacy prerequisite. Payment work must
+VIN-121 activation requires reviewed delivery of PR #219 and confirmed development configuration after the merged PR #203 prerequisite. Payment work must
 preserve inventory already claimed at placement and release it exactly once for
 expired/cancelled unpaid orders. Finish security headers and hosted evidence before
 claiming demo completion. A concise scaling discussion belongs to the interview
@@ -43,15 +43,20 @@ new services solely for demonstration. No additional plan or infrastructure is a
 **Initial maintenance delivered (21 September):** All initial
 Dependabot PRs #165–#171 are merged; PR #168 proved a live policy approval and
 protected automatic merge. PR #175 merged the readable delivery conventions.
-VIN-172 reopened on 28 September to repair the new dependency queue and replace
-policy-only approval with Codex-reviewed continuation (PR #214). VIN-38 is now in
-progress to replace Codex with CodeRabbit for Dependabot only; rollout and live
-unattended review → approval → protected merge proof remain pending. Manual merges
-do not satisfy that proof. The maintenance sequence is VIN-172 delivery proof,
-VIN-38 reviewer policy (needed to finish that proof), VIN-146 frontend CI speed,
-then VIN-147 repeated-run reduction. Keep their handoffs on the existing issues.
-This maintenance does not
-change the portfolio acceptance count.
+VIN-172 reopened on 28 September for dependency continuation (PR #214).
+PR #217 switched Dependabot review to CodeRabbit; PR #218 added bounded rate-limit
+retries. Both are merged. Live unattended review → approval → protected merge proof
+remains pending on a genuine eligible update; manual merges do not satisfy it.
+VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
+acceptance does not mean active implementation and adds no portfolio completion credit.
+
+**Current execution priority — 29 September:** finish VIN-121 privacy/configuration
+and hosted monitoring, then VIN-158 visitor isolation and VIN-89 recovery proof,
+VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining
+hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run
+reduction follow portfolio delivery unless a concrete delivery blocker requires a
+bounded repair. This supersedes the temporary maintenance-first handoff. Keep one
+implementation story active under VIN-155; paused work stays Backlog.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
 CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,
@@ -70,7 +75,7 @@ retain the issue hierarchy for organization, not as a competing completion metri
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
 **Owner-approved sequence change (21 September):** VIN-118 order drafts are delivered. Continue feature delivery with
-VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. Next: VIN-121 session-channel assessment and configuration before hosted telemetry verification; PR #203 supplies the error/transaction/log/metric privacy prerequisite.
+VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. Next: finish PR #219 review, development configuration and hosted telemetry verification; PR #203 supplies the merged privacy prerequisite.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
@@ -133,12 +138,12 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 
 | Ticket / board status | Verified dependency | Next unblock action | Who acts | Completion evidence |
 | --- | --- | --- | --- | --- |
-| [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Blocked** | PR #203 implements error/transaction/log/metric filtering and serialized tests. The free frontend Sentry project was inspected on 23 September; backend project, runtime configuration and browser session-channel verification remain outstanding. | Verify PR #203 delivery state, assess default browser session envelopes, then complete missing project/environment configuration securely and prove hosted telemetry. Do not reimplement the filtering and serialized tests supplied by PR #203. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
+| [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **In review** | PR #203 is merged; PR #219 implements the session privacy gate and commerce signals. Free plan and both projects verified on 29 September; runtime configuration and hosted proof remain outstanding. | Finish PR #219 review, configure development securely, then prove hosted telemetry. Do not repeat implemented privacy or signal work. | **Agent:** privacy/configuration code and verification. **Owner:** account access and environment configuration. | Passing privacy tests, frontend/API trace, sanitized errors/logs/metrics, release/environment attribution, alert and quota evidence. DSNs alone do not finish it. |
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
 **Unblock order:** Stage 5 payment implementation and automated correctness
-evidence and VIN-30 hosted sandbox proof are complete. Continue VIN-121 with session-channel assessment and configuration after the
-PR #203 privacy prerequisite, followed by outstanding hosted proof. Record
+evidence and VIN-30 hosted sandbox proof are complete. Continue VIN-121 with reviewed PR #219 delivery and development configuration,
+followed by outstanding hosted proof. Record
 external blockers and continue independent work rather than waiting idle. Configuration can be prepared
 independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
@@ -169,8 +174,8 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 3 — Security and monitoring
 
-- [ ] **#121 remaining privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; assess default browser session envelopes before activation. This broader gate remains unchecked until that assessment is recorded.
-- [ ] **#121 BLOCKED — owner configuration, then agent proof:** confirm free Sentry projects/environment configuration; prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
+- [ ] **#121 remaining privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; PR #219 disables browser-session envelopes and tests actual default-integrations output. This gate awaits reviewed delivery before being checked.
+- [ ] **#121 development configuration and agent proof:** free plan and projects confirmed on 29 September; configure development and prove live errors, traces, releases/environments, logs/metrics and an alert. Missing configuration does not block checkout.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
 #### 4 — Checkout · Complete
@@ -282,9 +287,10 @@ unintentionally grouped, and protection claims match demonstrated behavior.
 ### Sentry (#121)
 
 PR #203 supplies the error/transaction/log/metric privacy prerequisite below,
-including serialized tests and conditional source-map configuration. Remaining
-work: assess default browser session envelopes, meaningful handled-failure
-reporting and hosted configuration/evidence. Consult the issue for merge state.
+including serialized tests and conditional source-map configuration. PR #219
+implements session-channel protection and bounded handled-failure/RED/payment
+signals. Remaining work is reviewed delivery and hosted configuration/evidence;
+consult the issue for merge state.
 
 Cover enabled errors, transactions, logs and nested context with privacy controls.
 Include OAuth username emails, authorization/cookies, credential headers, URLs,
@@ -300,7 +306,7 @@ an explicit blocker. Missing credentials do not block checkout implementation.
 
 ### Telemetry acceptance refinement (VIN-121)
 
-PR #203 is merged. Next delivery follows the [refined VIN-121 contract](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121): session-channel privacy assessment, free development configuration, then verified signals and hosted evidence. Proposed additions are not yet implemented.
+PR #203 is merged. PR #219 implements session-channel privacy protection and the bounded signals below under the [refined VIN-121 contract](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121). Review/merge, free development configuration and hosted evidence remain pending; implemented signals are not yet verified hosted results.
 
 - Safe structured logs cover checkout technical failures, webhook failures and inventory-release outcomes.
 - RED covers cart writes, placement and payment-session creation: request count/rate, technical error ratio and p95 duration with sample counts. Expected declines/validation failures are separate; sampled trace counts are not total traffic.

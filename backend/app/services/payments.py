@@ -8,9 +8,16 @@ from typing import Any, Protocol
 
 import stripe
 from fastapi import HTTPException
+from sqlalchemy import event as sqlalchemy_event
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.observability import (
+    ReconciliationRequired,
+    record_confirmation,
+    record_inventory_release,
+    record_webhook_processed,
+)
 from app.core.settings import settings
 from app.models.order import Order, PaymentEvent
 from app.models.product import Product
@@ -72,7 +79,7 @@ def finish(db: Session, order: Order, state: str) -> None:
     for line in order.lines:
         product = products.get(line.product_id)
         if product is None or product.reserved_stock < line.quantity:
-            raise HTTPException(
+            raise ReconciliationRequired(
                 409, "Inventory reservation requires operator reconciliation"
             )
         product.reserved_stock -= line.quantity
@@ -80,6 +87,7 @@ def finish(db: Session, order: Order, state: str) -> None:
             product.stock += line.quantity
     if state != "paid":
         order.inventory_released_at = now()
+        db.info.setdefault("inventory_release_observations", []).append("released")
     order.payment_status = state
     order.payment_checkout_url = None
 
@@ -99,7 +107,7 @@ def validate_session(order: Order, session: dict[str, Any]) -> None:
         or (order.payment_session_id and order.payment_session_id != session["id"])
         or order.payment_started_at is None
     ):
-        raise HTTPException(409, "Payment session does not match the order")
+        raise ReconciliationRequired(409, "Payment session does not match the order")
 
 
 def apply_session(
@@ -115,7 +123,7 @@ def apply_session(
     order.payment_session_id = session["id"]
     if session.get("payment_status") == "paid":
         if order.payment_status not in ("pending", "paid"):
-            raise HTTPException(
+            raise ReconciliationRequired(
                 409,
                 "Payment conflicts with released inventory; operator reconciliation required",
             )
@@ -223,12 +231,12 @@ def get_session(
             )
         if not session_id:
             if aware(order.payment_started_at) + timedelta(hours=23) <= now():
-                raise HTTPException(
+                raise ReconciliationRequired(
                     409, "Uncertain payment creation requires operator reconciliation"
                 )
             params = json.loads(order.payment_request)
             if params.get("metadata", {}).get("stripe_account_id") != account_id:
-                raise HTTPException(
+                raise ReconciliationRequired(
                     409,
                     "Payment account identity changed or is missing; operator reconciliation required",
                 )
@@ -353,7 +361,7 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
             .get("stripe_account_id")
         )
         if not account_id:
-            raise HTTPException(
+            raise ReconciliationRequired(
                 409,
                 "Original payment account is unknown; absence cannot be established",
             )
@@ -363,12 +371,12 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
         db.rollback()
         raise
     if provider_call(provider.account_id) != account_id:
-        raise HTTPException(
+        raise ReconciliationRequired(
             409, "Payment account changed; absence cannot be established"
         )
     matches, complete = provider_call(provider.find_sessions, reference, expiry)
     if not complete or len(matches) > 1:
-        raise HTTPException(
+        raise ReconciliationRequired(
             409,
             "Provider session scan is incomplete or ambiguous; inventory remains reserved",
         )
@@ -426,7 +434,10 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
         session = provider_call(provider.retrieve, session["id"])
     try:
         order = lock_order(db, order_id)
-        if db.get(PaymentEvent, event["id"]) is None:
+        was_paid = order.payment_status == "paid"
+        confirmation = None
+        duplicate = db.get(PaymentEvent, event["id"]) is not None
+        if not duplicate:
             apply_session(
                 db,
                 order,
@@ -438,12 +449,31 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
                     "checkout.session.async_payment_succeeded",
                 },
             )
-            db.add(
-                PaymentEvent(
-                    id=event["id"], order_id=order.id, event_type=event["type"]
-                )
+            recorded = PaymentEvent(
+                id=event["id"],
+                order_id=order.id,
+                event_type=event["type"],
+                created_at=now(),
             )
+            db.add(recorded)
+            if not was_paid and order.payment_status == "paid":
+                db.flush()
+                confirmation = recorded.created_at
         db.commit()
+        record_webhook_processed(duplicate)
+        if confirmation is not None:
+            record_confirmation(event.get("created"), confirmation)
     except Exception:
         db.rollback()
         raise
+
+
+@sqlalchemy_event.listens_for(Session, "after_commit")
+def _record_committed_release(session):
+    for outcome in session.info.pop("inventory_release_observations", []):
+        record_inventory_release(outcome)
+
+
+@sqlalchemy_event.listens_for(Session, "after_rollback")
+def _discard_rolled_back_release(session):
+    session.info.pop("inventory_release_observations", None)
