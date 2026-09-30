@@ -29,3 +29,7 @@ Read docs/delivery.md and the maintenance decisions in docs/tooling.md. Resolve 
 record a concrete next action for failing bot PRs during maintenance handoff. Do
 not claim live autonomous delivery is proven without a recorded review, approval
 and protected merge. GitHub continuation is separate from scheduled Codex chats.
+
+Before requesting Codex, apply the routine documentation exception in
+[review policy](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
+Eligible prose-only PRs require CodeRabbit instead; mixed or agent-policy changes retain Codex.

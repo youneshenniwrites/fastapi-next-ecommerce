@@ -65,3 +65,7 @@ terms, documents checked and corrections (or why no updates are needed). This is
 a required agent review step, not an automated correctness guarantee or CI gate.
 
 For verified Dependabot PRs, follow [dependency policy](../../../docs/dependabot.md): CodeRabbit is the sole external reviewer. Require current-head APPROVED evidence and resolved findings; do not post a Codex request or treat a summary compliment as approval.
+
+Before requesting Codex, apply the routine documentation exception in
+[review policy](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
+Eligible prose-only PRs require CodeRabbit instead; mixed or agent-policy changes retain Codex.

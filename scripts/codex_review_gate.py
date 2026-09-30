@@ -10,6 +10,11 @@ import os
 import re
 import urllib.request
 
+try:
+    from scripts.docs_review_policy import inspect_routine
+except ModuleNotFoundError:
+    from docs_review_policy import inspect_routine
+
 BOT_ID = 199175422
 CONTEXT = "Codex review"
 
@@ -347,6 +352,21 @@ def publish_reviews(repo, target, only_pr=None):
             and (pr.get("head", {}).get("repo") or {}).get("full_name") == repo
             and pr.get("head", {}).get("ref", "").startswith("dependabot/")
         ):
+            continue
+        try:
+            routine, current = inspect_routine(repo, pr["number"], api, pages)
+        except Exception:
+            routine = False  # Unknown file evidence retains normal Codex inspection.
+        if routine and current["head"]["sha"] == pr["head"]["sha"]:
+            print(
+                json.dumps(
+                    {
+                        "pr": pr["number"],
+                        "review_policy": "CodeRabbit only",
+                        "codex": "not applicable",
+                    }
+                )
+            )
             continue
         groups.setdefault(pr["head"]["sha"], []).append(pr["number"])
     if only_pr is not None:

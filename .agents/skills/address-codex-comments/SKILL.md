@@ -39,3 +39,7 @@ Before requesting the consolidated follow-up review, apply AGENTS.md's Review
 guidelines to the affected feature across related entry points, not just the
 reported line. These same repo rules guide the connector; do not claim it loads
 this skill automatically or guarantees an exhaustive review.
+
+Before requesting Codex, apply the routine documentation exception in
+[review policy](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
+Eligible prose-only PRs require CodeRabbit instead; mixed or agent-policy changes retain Codex.

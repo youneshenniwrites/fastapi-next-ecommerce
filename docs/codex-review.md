@@ -156,3 +156,24 @@ Use the next authorized representative PR to assess grouped findings, a safe
 counterexample and unrelated changes; record observed behavior on VIN-190. Do not
 launch extra paid reviews solely to claim this policy is tested. Until observed,
 reduced review rounds remain an intended benefit, not verified performance.
+
+## Routine documentation review exception (VIN-225)
+
+Routine prose-only PRs use CodeRabbit instead of Codex. Eligibility is determined
+from the complete changed-file list by `scripts/docs_review_policy.py`: README.md,
+docs/demo.md, docs/observability.md and Markdown under docs/plans/. Renames must
+qualify on both paths. Mixed changes, forks, drafts and incomplete file evidence
+are not exempt. Agent instructions, delivery/review policy, workflows and scripts
+retain Codex review, even if written in Markdown. PR #224 changed agent guidance
+and therefore would not qualify under this narrow rule.
+
+The trusted documentation-review workflow requests CodeRabbit once per head using
+the existing scoped review credential. CodeRabbit reported skipping #224 because
+the repository has fewer than 10 stars despite automatic review being enabled.
+A request is not approval: require current-head CodeRabbit approval, resolved
+findings and applicable CI before merging. No automatic merge is added here.
+The shared Codex evidence workflow may still run, but reports eligible PRs as
+CodeRabbit-only and publishes no Codex status for them. Missing credentials or
+provider failures require investigation; never infer approval from silence.
+Hosted automatic triggering remains unverified until this workflow lands and an
+eligible PR receives a review. No paid plan change or scheduled chat is enabled.
