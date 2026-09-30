@@ -65,7 +65,7 @@ would need a concrete requirement and separate scope.
 | `SENTRY_ENVIRONMENT` | Frontend projects | No (defaults to `NODE_ENV`) |
 | `NEXT_PUBLIC_SENTRY_DSN` | Frontend projects (browser key, public by design) | Only to activate reporting |
 | `NEXT_PUBLIC_SENTRY_ENVIRONMENT` | Frontend projects (build-time public label) | Set `development` for the development app |
-| `SENTRY_DIAGNOSTICS_ENABLED` | API development project only | Default false; temporary admin-only synthetic error exercise |
+| `SENTRY_DIAGNOSTICS_ENABLED` | API/frontend development projects (server-only) | Default false; temporary admin-only synthetic error exercise |
 
 Store DSNs in Vercel project settings and GitHub environment secrets, never in
 tracked files. Source-map upload stays disabled until the owner provides
@@ -170,7 +170,21 @@ revision through the existing exact-main CI gate after configuring DSNs.
    POST `/api/v1/diagnostics/sentry` to trigger the fixed synthetic exception.
    It is absent from public OpenAPI, returns 404 while disabled/outside development,
    and denies non-admin users. Disable the flag after proof and confirm 404 again.
-6. Record sanitized error/log/metric evidence, release/environment, trace linkage,
+6. To prove Next.js browser and server error delivery, temporarily set the same
+   server-only `SENTRY_DIAGNOSTICS_ENABLED=true` flag on the development storefront
+   with `SENTRY_ENVIRONMENT=development`. Configure both runtime DSNs and the
+   browser build-time environment first. Sign in as an active administrator and
+   visit `/diagnostics/sentry`. Each button rechecks privileges through FastAPI;
+   a disabled account or non-admin cannot trigger either test. The server action
+   also validates the request origin. Both tests explicitly capture fixed errors
+   and wait up to two seconds for delivery; they do not crash a worker or prove
+   automatic unhandled-error capture. Confirm the two events in Sentry with
+   `development` and the deployed release, rather than treating the flush message
+   as evidence of ingestion. Disable the storefront flag, redeploy, confirm the
+   page returns 404 and disable any temporary administrator immediately afterward.
+   The page is unlinked, uncached and noindex; the flag and environment gates,
+   not obscurity, control access. Never introduce a public browser toggle.
+7. Record sanitized error/log/metric evidence, release/environment, trace linkage,
    alert receipt and resolution. Never paste credentials into tickets. Hosted
    acceptance stays incomplete until those results are recorded on VIN-121.
 
