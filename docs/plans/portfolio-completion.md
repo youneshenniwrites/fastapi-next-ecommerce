@@ -144,8 +144,7 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
 **Unblock order:** Stage 5 payment implementation and automated correctness
-evidence and VIN-30 hosted sandbox proof are complete. Continue VIN-121 with development configuration after merged PR #219,
-followed by outstanding hosted proof. Record
+evidence and VIN-30 hosted sandbox proof are complete. Continue VIN-223 joined trace verification after the completed VIN-121 foundation. Record
 external blockers and continue independent work rather than waiting idle. Configuration can be prepared
 independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
@@ -291,8 +290,8 @@ unintentionally grouped, and protection claims match demonstrated behavior.
 PR #203 supplies the error/transaction/log/metric privacy prerequisite below,
 including serialized tests and conditional source-map configuration. PR #219
 implements session-channel protection and bounded handled-failure/RED/payment
-signals. Remaining work is hosted configuration/evidence;
-consult the issue for merge state.
+signals. The monitoring foundation is verified; joined trace proof is transferred
+to #223 under the owner-approved scope revision.
 
 Cover enabled errors, transactions, logs and nested context with privacy controls.
 Include OAuth username emails, authorization/cookies, credential headers, URLs,
@@ -308,7 +307,7 @@ an explicit blocker. Missing credentials do not block checkout implementation.
 
 ### Telemetry acceptance refinement (VIN-121)
 
-PR #203 is merged. PR #219 implements session-channel privacy protection and the bounded signals below under the [refined VIN-121 contract](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121). PR #219 is merged; free development configuration and hosted evidence remain pending; implemented signals are not yet verified hosted results.
+PR #203 is merged. PR #219 implements session-channel privacy protection and the bounded signals below under the [refined VIN-121 contract](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121). PR #219 and #222 are merged; development monitoring foundation evidence is verified. Joined trace continuity remains unproved in #223.
 
 - Safe structured logs cover checkout technical failures, webhook failures and inventory-release outcomes.
 - RED covers cart writes, placement and payment-session creation: request count/rate, technical error ratio and p95 duration with sample counts. Expected declines/validation failures are separate; sampled trace counts are not total traffic.

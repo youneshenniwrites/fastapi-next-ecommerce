@@ -3,15 +3,15 @@
 **30 September scope revision:** VIN-121 is Done for verified development monitoring: privacy controls, browser/server/API errors, logs/metrics, release/environment tags, email delivery and free-tier controls. PR #222 is merged and deployed; diagnostics are disabled and the temporary administrator is inactive. Joined storefront → API → database trace verification remains unproved and is transferred to [VIN-223](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223), In progress. The owner approved this split; it is outside the revised 29-outcome baseline. Progress is **18/29 (62%) under revised scope**, not evidence that trace continuity passed. This dated update supersedes earlier pending configuration/acceptance wording below. [Hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121#issuecomment-5909526011).
 
 Both runtimes have SDK integration and serialized privacy tests. Missing DSNs keep
-telemetry silent. VIN-121 remains incomplete until development configuration and
-hosted trace, error, log, metric, alert and quota evidence are recorded. Code tests
+telemetry silent. VIN-121 development monitoring is verified under the revised scope.
+Joined storefront/API/database trace verification continues in VIN-223. Code tests
 do not establish hosted delivery; production activation is outside this rollout.
 
 ## Telemetry terms in VINDOR
 
-These examples explain the planned monitoring model, not verified hosted results.
+These examples explain the monitoring model; example values are illustrative.
 [VIN-121](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121)
-owns hosted acceptance; optional browser measurements belong to
+records completed foundation evidence; VIN-223 owns joined trace proof. Optional browser measurements belong to
 [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204).
 
 | Term | What it answers | Checkout example |
@@ -131,9 +131,8 @@ Error and trace capture remain enabled and positively asserted; Replay stays off
 source-map uploads, which require all of `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and
 `SENTRY_PROJECT`. Never expose the upload token through a public environment variable.
 
-PR #219 merged on 30 September (`79d7923`) and delivers bounded handled-failure logs and commerce metrics. Remaining
-VIN-121 work: configured development evidence for errors, cross-service traces, release/environment,
-logs/metrics and an alert. Ordinary validation/authentication failures are not incidents.
+PR #219 merged on 30 September (`79d7923`) and delivers bounded handled-failure logs and commerce metrics. Hosted foundation evidence is recorded on VIN-121. Remaining
+VIN-223 work is joined cross-service trace verification. Ordinary validation/authentication failures are not incidents.
 Do not mark the issue complete or activate telemetry from this prerequisite alone.
 
 ## When an alert fires

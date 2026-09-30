@@ -17,6 +17,13 @@ only for capabilities unavailable through those interfaces.
 
 ## Ticket hierarchy and review scope
 
+Owner preference: celebrate each verified delivery with a brief concrete result.
+Default to small, independently testable tickets and focused PRs; split large
+outcomes before coding. Close completed slices and explicitly link remaining
+work, preserving blockers and recording any approved acceptance-scope change.
+Never inflate progress or defer required safety checks just to close a ticket.
+Refresh the canonical checklist, board and relevant docs at each closeout.
+
 Use an **epic** issue for a larger outcome and link its child **story** issues
 with GitHub sub-issues when available, otherwise explicit parent/child links.
 A story delivers one independently testable behavior, normally in one PR.
