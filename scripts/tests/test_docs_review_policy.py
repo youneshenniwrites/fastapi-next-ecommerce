@@ -96,3 +96,28 @@ class CodexSkip(unittest.TestCase):
             gate.publish_reviews("o/r", "https://example.com", only_pr=7)
             inspect.assert_not_called()
             api.assert_not_called()
+
+
+class CredentialBoundary(unittest.TestCase):
+    def test_ineligible_request_never_uses_member_token(self):
+        from unittest.mock import patch
+
+        from scripts import request_docs_review as module
+
+        with (
+            patch.object(module, "inspect_routine", return_value=(False, {})),
+            patch.object(module, "api") as api,
+        ):
+            module.request("o/r", 7)
+            api.assert_not_called()
+
+    def test_workflow_classifies_before_secret_step(self):
+        from pathlib import Path
+
+        workflow = (
+            Path(__file__).resolve().parents[2] / ".github/workflows/docs-review.yml"
+        ).read_text()
+        classify, request = workflow.split("      - name: Request CodeRabbit")
+        self.assertIn("GH_TOKEN: ${{ github.token }}", classify)
+        self.assertNotIn("secrets.DEPENDABOT_REVIEW_TOKEN", classify)
+        self.assertIn("if: steps.classify.outputs.eligible == 'true'", request)

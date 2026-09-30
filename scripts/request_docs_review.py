@@ -1,5 +1,6 @@
 """Request CodeRabbit once per eligible head; this is not approval or merging."""
 
+import argparse
 import os
 
 try:
@@ -33,4 +34,14 @@ def request(repo, number):
 
 
 if __name__ == "__main__":
-    request(os.environ["GITHUB_REPOSITORY"], int(os.environ["PR_NUMBER"]))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--classify", action="store_true")
+    args = parser.parse_args()
+    repo = os.environ["GITHUB_REPOSITORY"]
+    number = int(os.environ["PR_NUMBER"])
+    if args.classify:
+        routine, _ = inspect_routine(repo, number, api, pages)
+        with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+            output.write(f"eligible={str(routine).lower()}\n")
+    else:
+        request(repo, number)
