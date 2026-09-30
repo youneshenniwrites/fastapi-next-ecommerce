@@ -19,3 +19,7 @@ Record the next unblocked story and a compact handoff in the issue. When writing
 [update-delivery-board](../update-delivery-board/SKILL.md) for actual statuses,
 not invented workflow columns. Read back changed issues and links. Refinement
 does not authorize implementation, parallel work, merge or deployment.
+
+Apply the owner’s small-ticket and progress-closeout preference in the delivery
+policy: split before implementation, celebrate verified slices, and preserve
+explicit links and scope-change notes for remaining work.

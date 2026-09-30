@@ -1,5 +1,7 @@
 # Delivery roadmap
 
+**30 September scope revision:** VIN-121 is Done for verified development monitoring: privacy controls, browser/server/API errors, logs/metrics, release/environment tags, email delivery and free-tier controls. PR #222 is merged and deployed; diagnostics are disabled and the temporary administrator is inactive. Joined storefront → API → database trace verification remains unproved and is transferred to [VIN-223](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223), In progress. The owner approved this split; it is outside the revised 29-outcome baseline. Progress is **18/29 (62%) under revised scope**, not evidence that trace continuity passed. This dated update supersedes earlier pending configuration/acceptance wording below. [Hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121#issuecomment-5909526011).
+
 Purpose: [senior SWE portfolio plan](portfolio.md).
 
 The owner-approved [portfolio completion plan](portfolio-completion.md) governs
@@ -105,4 +107,4 @@ Account journey verification (#27) is complete; the persistent cart API (#71) an
 
 ### Telemetry refinement
 
-VIN-121 owns privacy-safe logs, checkout RED and payment-health signals plus hosted trace/alert/quota evidence; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). Merged PR #219 delivers these signal additions; hosted acceptance remains pending. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.
+VIN-121 owns privacy-safe logs, checkout RED and payment-health signals plus hosted trace/alert/quota evidence; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). Merged PR #219 delivers these signal additions; hosted foundation acceptance is complete under the revised scope; joined trace verification continues in VIN-223. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.
