@@ -129,8 +129,8 @@ Error and trace capture remain enabled and positively asserted; Replay stays off
 source-map uploads, which require all of `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and
 `SENTRY_PROJECT`. Never expose the upload token through a public environment variable.
 
-PR #219 implements bounded handled-failure logs and commerce metrics. Remaining
-VIN-121 work: reviewed delivery, then configured development evidence for errors, cross-service traces, release/environment,
+PR #219 merged on 30 September (`79d7923`) and delivers bounded handled-failure logs and commerce metrics. Remaining
+VIN-121 work: configured development evidence for errors, cross-service traces, release/environment,
 logs/metrics and an alert. Ordinary validation/authentication failures are not incidents.
 Do not mark the issue complete or activate telemetry from this prerequisite alone.
 

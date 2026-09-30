@@ -85,8 +85,8 @@ Still open in separate PRs: static type checking, then code scanning and
 remaining review/coverage required-check rules. Frontend lint/type/build and browser checks are now implemented.
 Sentry SDK scaffolding is merged in the API and storefront (#122/#123).
 #121 remains open: PR #203 implements error/transaction/log/metric privacy
-filtering and serialized-payload tests. PR #219 implements browser-session
-protection and commerce signals. Next finish reviewed delivery, configuration and
+filtering and serialized-payload tests. Merged PR #219 delivers browser-session
+protection and commerce signals. Next finish development configuration and
 live telemetry evidence; do not repeat implemented prerequisites. DSNs alone do not complete monitoring.
 Operational runbooks and release/restore verification continue alongside hosted
 development.
@@ -105,4 +105,4 @@ Account journey verification (#27) is complete; the persistent cart API (#71) an
 
 ### Telemetry refinement
 
-VIN-121 owns privacy-safe logs, checkout RED and payment-health signals plus hosted trace/alert/quota evidence; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). PR #219 implements these signal additions; hosted acceptance remains pending. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.
+VIN-121 owns privacy-safe logs, checkout RED and payment-health signals plus hosted trace/alert/quota evidence; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). Merged PR #219 delivers these signal additions; hosted acceptance remains pending. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.
