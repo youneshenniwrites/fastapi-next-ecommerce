@@ -3,6 +3,13 @@ name: ecommerce-maintenance
 description: Handle dependency-update PRs, quality-tooling changes, and maintenance documentation in this ecommerce repository.
 ---
 
+Select the reviewer before taking review actions: verified Dependabot PRs follow
+[dependency policy](../../../docs/dependabot.md); eligible routine documentation
+follows the [documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
+Both use CodeRabbit without Codex requests or statuses. All other human-authored
+PRs use Codex. Reclassify the complete diff after changes; mixed and agent-policy
+changes require Codex.
+
 Read docs/tooling.md and CONTRIBUTING.md. Inspect the actual manifest, lockfile,
 workflow, and open PRs before choosing an update; do not assume a green dependency
 bot PR proves compatibility. Keep maintenance changes focused and reviewable.
@@ -17,7 +24,7 @@ For action updates, verify the upstream commit corresponding to the intended
 release and retain SHA pins with readable version comments. Dependabot proposes
 updates; CodeRabbit reviews their exact head and trusted automation follows
 the [dependency policy](../../../docs/dependabot.md). Do not request Codex on
-verified Dependabot PRs. Human-authored maintenance PRs retain Codex review. Do not activate the legacy AWS workflow during maintenance.
+verified Dependabot PRs. Only non-exempt human-authored maintenance PRs retain Codex review. Do not activate the legacy AWS workflow during maintenance.
 
 When documenting tooling, name the executable command, what it verifies, and its
 limits. Keep the runnable catalog distinct from planned authentication and checkout. Keep
@@ -29,7 +36,3 @@ Read docs/delivery.md and the maintenance decisions in docs/tooling.md. Resolve 
 record a concrete next action for failing bot PRs during maintenance handoff. Do
 not claim live autonomous delivery is proven without a recorded review, approval
 and protected merge. GitHub continuation is separate from scheduled Codex chats.
-
-Before requesting Codex, apply the routine documentation exception in
-[review policy](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
-Eligible prose-only PRs require CodeRabbit instead; mixed or agent-policy changes retain Codex.
