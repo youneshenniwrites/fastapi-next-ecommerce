@@ -121,3 +121,25 @@ class CredentialBoundary(unittest.TestCase):
         self.assertIn("GH_TOKEN: ${{ github.token }}", classify)
         self.assertNotIn("secrets.DEPENDABOT_REVIEW_TOKEN", classify)
         self.assertIn("if: steps.classify.outputs.eligible == 'true'", request)
+
+
+class RetargetEvents(unittest.TestCase):
+    def test_retarget_reclassifies_and_receives_event(self):
+        from pathlib import Path
+
+        pr = {
+            "state": "open",
+            "draft": False,
+            "base": {"ref": "develop"},
+            "head": {"repo": {"full_name": "o/r"}},
+            "changed_files": 1,
+        }
+        files = [{"filename": "README.md"}]
+        self.assertFalse(eligible(pr, files, "o/r"))
+        pr["base"]["ref"] = "main"
+        self.assertTrue(eligible(pr, files, "o/r"))
+        workflow = (
+            Path(__file__).resolve().parents[2] / ".github/workflows/docs-review.yml"
+        ).read_text()
+        events = workflow.split("types: [", 1)[1].split("]", 1)[0]
+        self.assertIn("edited", [event.strip() for event in events.split(",")])

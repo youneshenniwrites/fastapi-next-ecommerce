@@ -45,7 +45,7 @@ closure/Done, and record any remaining work instead of implying completion.
 
 ## Reviewer requests
 
-Assign the owner on every PR, but do not request their review. For human-authored PRs, Codex is the
+Assign the owner on every PR, but do not request their review. For routine documentation PRs, apply [the documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225): require current-head CodeRabbit approval and resolved findings, without requesting Codex. Check actual changed files; agent-policy and mixed changes retain Codex. For other human-authored PRs, Codex is the
 requested reviewer; ownership and reviewer requests are separate.
 Request Codex Code Review using its configured integration (or @codex review
 comment). Listing Codex in the PR body is not a request. Inspect existing review

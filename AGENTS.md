@@ -119,7 +119,9 @@ For customer sessions (#24), read docs/design/customer-sessions.md; it documents
 
 ## External review requirement
 
-For human-authored PRs, the owner accepts a completed clean Codex review of the latest commit, with all
+Routine documentation PRs qualifying under [the documentation exception](docs/codex-review.md#routine-documentation-review-exception-vin-225) require current-head CodeRabbit approval and resolved findings, not Codex. Mixed changes and agent-policy changes do not qualify.
+
+For other human-authored PRs, the owner accepts a completed clean Codex review of the latest commit, with all
 findings addressed and threads resolved, as external approval. Explicit owner-approved deferrals
 are permitted only when recorded with a linked issue; do not call them clean reviews. Follow
 [the review gate protocol](docs/codex-review.md); treat the `Codex review` status as informational until #38 is resolved,
