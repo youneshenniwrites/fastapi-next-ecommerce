@@ -355,7 +355,7 @@ def publish_reviews(repo, target, only_pr=None):
             continue
         try:
             routine, current = inspect_routine(repo, pr["number"], api, pages)
-        except Exception:
+        except Exception:  # noqa: BLE001 - unknown eligibility never grants exemption
             routine = False  # Unknown file evidence retains normal Codex inspection.
         if routine and current["head"]["sha"] == pr["head"]["sha"]:
             print(

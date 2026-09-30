@@ -1,4 +1,5 @@
 import unittest
+
 from scripts.docs_review_policy import eligible
 
 
@@ -60,8 +61,9 @@ class RequestDeduplication(unittest.TestCase):
             self.assertEqual(api.call_count, 1)
 
     def test_changed_head_does_not_post(self):
-        from scripts import request_docs_review as module
         from unittest.mock import patch
+
+        from scripts import request_docs_review as module
 
         with (
             patch.object(
@@ -81,6 +83,7 @@ class RequestDeduplication(unittest.TestCase):
 class CodexSkip(unittest.TestCase):
     def test_eligible_head_is_not_inspected_or_published(self):
         from unittest.mock import patch
+
         from scripts import codex_review_gate as gate
 
         pr = {"number": 7, "head": {"sha": "abc"}}
