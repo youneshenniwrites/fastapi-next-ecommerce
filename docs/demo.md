@@ -69,8 +69,8 @@ presentation sequence, not a measured completion-time guarantee.
   [payment lifecycle decisions](decisions/0003-sandbox-payments.md) explain ownership,
   idempotency, money and inventory boundaries. [Architecture](architecture.md)
   describes the components and hosting.
-- No real fulfilment, refunds or production payment activation. Monitoring privacy
-  work, restore rehearsal, hosted reliability checks and the focused accessibility
+- No real fulfilment, refunds or production payment activation. Hosted monitoring
+  verification, restore rehearsal, hosted reliability checks and the focused accessibility
   review remain unfinished. Do not claim enterprise readiness or full accessibility
   conformance; consult the [single completion plan](plans/portfolio-completion.md).
 
