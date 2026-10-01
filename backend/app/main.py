@@ -7,6 +7,7 @@ from fastapi.responses import RedirectResponse
 
 from app.api.v1 import auth, cart, diagnostics, orders, payments, products
 from app.core.observability import CommerceMetricsMiddleware, init_observability
+from app.core.rate_limit_diagnostics import RateLimitDiagnosticsMiddleware
 from app.core.settings import settings
 
 # Logging configuration.
@@ -46,6 +47,7 @@ app = FastAPI(
 )
 
 app.add_middleware(CommerceMetricsMiddleware)
+app.add_middleware(RateLimitDiagnosticsMiddleware)
 
 # CORS middleware.
 origins = [

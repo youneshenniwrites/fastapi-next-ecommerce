@@ -23,6 +23,7 @@ WAF. Public reads remain unthrottled.
 import ipaddress
 import math
 import os
+import secrets
 import threading
 import time
 from collections.abc import Callable
@@ -34,6 +35,7 @@ from fastapi.exceptions import HTTPException
 from app.api.deps import get_current_user
 from app.core.observability import count_rate_limit_rejection
 from app.core.proxy_identity import verified_proxy_key
+from app.core.rate_limit_diagnostics import diagnostics_enabled
 from app.core.settings import settings
 from app.models.user import User
 
@@ -64,11 +66,34 @@ class RateLimiter:
         self._buckets: dict[str, tuple[float, int]] = {}
         self._lock = threading.Lock()
         self._overflow_count = 0
+        self._witness_pid = os.getpid()
+        self._witness = secrets.token_hex(16)
+        self._sequence = 0
 
-    def consume(self, key: str) -> tuple[bool, int]:
+    @property
+    def witness(self) -> str:
+        """Opaque object/process identity; inherited objects get a new fork witness."""
+        with self._lock:
+            self._refresh_witness()
+            return self._witness
+
+    def _refresh_witness(self) -> None:
+        """Called under the counter lock; never export the process identifier."""
+        if self._witness_pid != os.getpid() or self._sequence >= 2**53 - 1:
+            self._witness_pid = os.getpid()
+            self._witness = secrets.token_hex(16)
+            self._sequence = 0
+
+    def consume(
+        self, key: str, *, evidence: dict[str, str] | None = None
+    ) -> tuple[bool, int]:
         """Record one request. Return (allowed, retry_after_seconds)."""
         now = self.clock()
         with self._lock:
+            if evidence is not None:
+                self._refresh_witness()
+                self._sequence += 1
+                evidence.update(instance=self._witness, sequence=str(self._sequence))
             start, count = self._buckets.get(key, (now, 0))
             if now - start >= self.window_seconds:
                 start, count = now, 0
@@ -111,23 +136,39 @@ write_limiter = RateLimiter(WRITE_LIMIT)
 
 def client_key(request: Request) -> str:
     """Identify a throttling bucket without storing personal data elsewhere."""
+    return _client_identity(request)[0]
+
+
+def _client_identity(request: Request) -> tuple[str, str]:
+    """Select the key and its provenance in one signature verification."""
     signed = verified_proxy_key(request)
     if signed is not None:
-        return signed
+        return signed, "verified"
     # Only trust platform-overwritten forwarding metadata inside Vercel runtime.
     # Local/direct clients cannot opt in by supplying a request header.
     if os.environ.get("VERCEL") == "1":
         try:
             address = ipaddress.ip_address(request.headers.get("x-forwarded-for", ""))
-            return f"ip:{address.compressed}"
+            return f"ip:{address.compressed}", "fallback"
         except ValueError:
             pass
-    return f"peer:{getattr(request.client, 'host', 'unknown')}"
+    return f"peer:{getattr(request.client, 'host', 'unknown')}", "fallback"
 
 
 def _enforce(request: Request, limiter: RateLimiter, key: str | None = None) -> None:
     """Reject over-limit requests with 429 and standard throttling headers."""
-    allowed, retry_after = limiter.consume(client_key(request) if key is None else key)
+    bucket, context = _client_identity(request) if key is None else (key, "fallback")
+    capture = (
+        limiter is auth_login_limiter
+        and request.method == "POST"
+        and request.url.path == "/api/v1/auth/login"
+        and diagnostics_enabled()
+    )
+    evidence: dict[str, str] | None = {} if capture else None
+    allowed, retry_after = limiter.consume(bucket, evidence=evidence)
+    if evidence is not None:
+        evidence.update(context=context, release=settings.SENTRY_RELEASE)
+        request.state.rate_limit_diagnostic = evidence
     if not allowed:
         count_rate_limit_rejection(
             getattr(request.scope.get("route"), "path", "unmatched")
