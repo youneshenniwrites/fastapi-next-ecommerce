@@ -212,10 +212,8 @@ No browser-visible configuration is required. Backend positive limit settings ar
 `RATE_LIMIT_WRITE` (300/minute per verified user). Disposable browser fixtures
 set their own high limits; never raise production thresholds to make CI pass.
 
-Hosted acceptance remains pending until paired configuration is verified on the
-actual deployed revision: demonstrate two fictional visitor identities sharing
-frontend egress, deliberate 429/retry, and independently limited direct API calls.
-Do not publish raw IPs or signed context. Preserve evidence of project/revision and
-redacted outcomes on VIN-158. Missing configuration does not establish visitor
-isolation and does not block independent checkout work. Telemetry activation still
-requires VIN-121's complete privacy checks.
+Hosted VIN-158 acceptance is [recorded on 1 October 2026](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378): paired development secrets and reviewed source are active, a persistent-connection invalid-login probe reached 429, an owner-observed mobile-data login attempt returned the expected incorrect-credentials message inside that window, and the original connection returned 401 after the retry deadline. A separate direct API probe also reached 429 on request 61 and returned 401 after its retry deadline. The mobile status was observed through the UI, not captured as an HTTP response. Existing signed-identity fixtures separately cover visitors behind one shared frontend egress and invalid assertions.
+
+Counters remain process-local: multiple instances, restarts/eviction and shared NAT constrain protection. This evidence is not a global/distributed-budget guarantee. Future unattended two-network verification is scoped in VIN-238. Never publish raw IPs or signing context. Do not weaken production thresholds to obtain a passing probe.
+
+Manual Vercel redeploys can omit `SENTRY_RELEASE` supplied by the normal delivery CLI. The current development fallback matches reviewed source `f4e630721184a8cfbb436cf5dd602971337c8002`; CI overrides it with each new release. Before manually redeploying different source, update that fallback to the verified source SHA and check the rendered frontend release. Prefer normal gated CI delivery.
