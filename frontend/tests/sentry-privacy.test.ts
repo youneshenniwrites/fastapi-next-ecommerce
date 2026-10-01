@@ -6,7 +6,11 @@ import {
   serverSentryOptions,
   clientSentryOptions,
 } from "../src/lib/sentry-options";
-import { scrubError, scrubLog } from "../src/lib/sentry-privacy";
+import {
+  scrubError,
+  scrubLog,
+  scrubTransaction,
+} from "../src/lib/sentry-privacy";
 
 describe("Sentry payload privacy", () => {
   it("filters defensive log output", () => {
@@ -104,8 +108,8 @@ describe("Sentry payload privacy", () => {
           dsn: "https://key@o0.ingest.sentry.io/0",
           environment: "privacy-test",
           tracesSampleRate: 1,
+          release: "demo@1",
         }),
-        release: "demo@1",
         integrations: [],
         stackParser: defaultStackParser,
         transport: () => ({
@@ -141,7 +145,8 @@ describe("Sentry payload privacy", () => {
           trace: {
             trace_id: "a".repeat(32),
             span_id: "b".repeat(16),
-            op: "test",
+            op: "http.server",
+            parent_span_id: "d".repeat(16),
           },
           private: { password: "fictional-secret" },
         },
@@ -152,6 +157,7 @@ describe("Sentry payload privacy", () => {
             start_timestamp: 1,
             timestamp: 2,
             description: "fictional-secret",
+            op: "http.client",
             data: { token: "fictional-secret" },
           },
         ],
@@ -162,9 +168,16 @@ describe("Sentry payload privacy", () => {
         scope.addBreadcrumb({ message: "fictional-secret" });
         client.captureException(new Error("fictional-secret"));
         startSpan(
-          { name: "fictional-secret", op: "test", forceTransaction: true },
+          {
+            name: "fictional-secret",
+            op: "http.server",
+            forceTransaction: true,
+          },
           () => {
-            startSpan({ name: "fictional-secret", op: "child" }, () => {});
+            startSpan(
+              { name: "fictional-secret", op: "fictional-secret" },
+              () => {},
+            );
           },
         );
       });
@@ -179,10 +192,51 @@ describe("Sentry payload privacy", () => {
         "demo@1",
         "a".repeat(32),
         "b".repeat(16),
+        "d".repeat(16),
+        "Storefront request",
+        "API request",
+        "Application operation",
       ]) {
         expect(serialized).toContain(diagnostic);
       }
       await client.close();
     },
   );
+});
+
+it("uses a closed label vocabulary for malformed and malicious spans", () => {
+  const event = {
+    type: "transaction",
+    transaction:
+      "https://shop.invalid/fictional-secret?email=private@example.invalid",
+    contexts: {
+      trace: {
+        op: "http.server",
+        trace_id: "a".repeat(32),
+        parent_span_id: "b".repeat(16),
+      },
+    },
+    spans: [
+      { op: "function.nextjs", description: "fictional-secret" },
+      { op: "fictional-secret", description: "SELECT private@example.invalid" },
+      { op: "__proto__", description: "fictional-secret" },
+      null,
+    ],
+  };
+  const clean = scrubTransaction(event as never);
+  expect(clean.transaction).toBe("Storefront request");
+  expect(clean.spans?.map((s) => s.description)).toEqual([
+    "Next.js function",
+    "Application operation",
+    "Application operation",
+    "Application operation",
+  ]);
+  expect(JSON.stringify(clean)).not.toMatch(
+    /fictional-secret|private@example|SELECT|__proto__/,
+  );
+  expect(clean.contexts?.trace?.parent_span_id).toBe("b".repeat(16));
+  expect(
+    scrubError({ type: undefined, transaction: "private@example.invalid" })
+      .transaction,
+  ).toBe("[Filtered]");
 });

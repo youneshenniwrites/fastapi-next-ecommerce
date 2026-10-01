@@ -4,6 +4,8 @@
 
 Purpose: [senior SWE portfolio plan](portfolio.md).
 
+**Owner-selected next work — 1 October:** [VIN-230](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230) adds trusted frontend release tags and bounded readable trace labels after completed VIN-223. Preserve privacy controls and require hosted evidence. VIN-158 remains next afterward; the canonical checklist and 18/29 baseline are unchanged.
+
 The owner-approved [portfolio completion plan](portfolio-completion.md) governs
 current priorities and acceptance gates; [#155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155) owns live delivery evidence.
 
