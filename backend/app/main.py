@@ -8,6 +8,7 @@ from fastapi.responses import RedirectResponse
 from app.api.v1 import auth, cart, diagnostics, orders, payments, products
 from app.core.observability import CommerceMetricsMiddleware, init_observability
 from app.core.rate_limit_diagnostics import RateLimitDiagnosticsMiddleware
+from app.core.security_headers import SecurityHeadersMiddleware, internal_server_error
 from app.core.settings import settings
 
 # Logging configuration.
@@ -44,6 +45,7 @@ app = FastAPI(
         },
     ],
     version="0.1.0",
+    exception_handlers={Exception: internal_server_error},
 )
 
 app.add_middleware(CommerceMetricsMiddleware)
@@ -63,6 +65,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Outside CORS so preflight responses receive the same baseline headers.
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 @app.get("/", include_in_schema=False)

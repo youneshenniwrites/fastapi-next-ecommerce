@@ -1,6 +1,67 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test("baseline security headers cover pages, errors and assets", async ({
+  page,
+  request,
+}) => {
+  for (const [path, status] of [
+    ["/", 200],
+    ["/login", 200],
+    ["/not-a-route", 404],
+    ["/api/session/me", 401],
+  ] as const) {
+    const response = await request.get(path);
+    expect(response.status()).toBe(status);
+    expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+    expect(response.headers()["referrer-policy"]).toBe(
+      "strict-origin-when-cross-origin",
+    );
+    expect(response.headers()["content-type"]).toContain(
+      path === "/api/session/me" ? "application/json" : "text/html",
+    );
+    if (path === "/api/session/me") {
+      expect(response.headers()["cache-control"]).toBe("private, no-store");
+    }
+  }
+  for (const [path, destination] of [
+    ["/login/?next=%2Fcart", "/login?next=%2Fcart"],
+    ["/products/1/", "/products/1"],
+    ["/api/session/me/", "/api/session/me"],
+  ]) {
+    const redirect = await request.get(path, { maxRedirects: 0 });
+    expect(redirect.status()).toBe(308);
+    expect(redirect.headers()["location"]).toBe(destination);
+    // Next's framework normalization precedes configured headers. Preserve
+    // its canonical URL/query behavior; this empty 308 is an explicit exception.
+  }
+  await page.goto("/");
+  await expect(page.getByRole("status")).toHaveText("12 objects");
+  const script = await page
+    .locator('script[src^="/_next/static/"]')
+    .first()
+    .getAttribute("src");
+  const style = await page
+    .locator('link[rel="stylesheet"]')
+    .first()
+    .getAttribute("href");
+  expect(script).toBeTruthy();
+  expect(style).toBeTruthy();
+  for (const [path, type] of [
+    [script!, "javascript"],
+    [style!, "text/css"],
+  ]) {
+    const response = await request.get(path);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain(type);
+    expect(response.headers()["cache-control"]).toContain("immutable");
+    expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+    expect(response.headers()["referrer-policy"]).toBe(
+      "strict-origin-when-cross-origin",
+    );
+  }
+});
+
 // A tap can land mid-remount and be swallowed, so re-try until the menu is visible
 // instead of failing outright.
 async function openMobileMenu(page: import("@playwright/test").Page) {
