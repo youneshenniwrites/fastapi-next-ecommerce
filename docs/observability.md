@@ -1,17 +1,17 @@
 # Observability runbook (Sentry, issue #121)
 
-**30 September scope revision:** VIN-121 is Done for verified development monitoring: privacy controls, browser/server/API errors, logs/metrics, release/environment tags, email delivery and free-tier controls. PR #222 is merged and deployed; diagnostics are disabled and the temporary administrator is inactive. Joined storefront → API → database trace verification remains unproved and is transferred to [VIN-223](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223), In progress. The owner approved this split; it is outside the revised 29-outcome baseline. Progress is **18/29 (62%) under revised scope**, not evidence that trace continuity passed. This dated update supersedes earlier pending configuration/acceptance wording below. [Hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121#issuecomment-5909526011).
+**1 October trace verification:** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; the frontend sample lacks a release attribute. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline, so portfolio progress remains **18/29 (62%)**. See the [monitoring runbook](#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
 
 Both runtimes have SDK integration and serialized privacy tests. Missing DSNs keep
 telemetry silent. VIN-121 development monitoring is verified under the revised scope.
-Joined storefront/API/database trace verification continues in VIN-223. Code tests
+VIN-223 verifies one joined hosted storefront/API/database trace. Code tests
 do not establish hosted delivery; production activation is outside this rollout.
 
 ## Telemetry terms in VINDOR
 
 These examples explain the monitoring model; example values are illustrative.
 [VIN-121](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121)
-records completed foundation evidence; VIN-223 owns joined trace proof. Optional browser measurements belong to
+records completed foundation evidence; VIN-223 records joined trace proof. Optional browser measurements belong to
 [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204).
 
 | Term | What it answers | Checkout example |
@@ -131,8 +131,7 @@ Error and trace capture remain enabled and positively asserted; Replay stays off
 source-map uploads, which require all of `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and
 `SENTRY_PROJECT`. Never expose the upload token through a public environment variable.
 
-PR #219 merged on 30 September (`79d7923`) and delivers bounded handled-failure logs and commerce metrics. Hosted foundation evidence is recorded on VIN-121. Remaining
-VIN-223 work is joined cross-service trace verification. Ordinary validation/authentication failures are not incidents.
+PR #219 merged on 30 September (`79d7923`) and delivers bounded handled-failure logs and commerce metrics. Hosted foundation evidence is recorded on VIN-121. VIN-223 records verified joined cross-service trace evidence. Ordinary validation/authentication failures are not incidents.
 Do not mark the issue complete or activate telemetry from this prerequisite alone.
 
 ## When an alert fires
@@ -193,3 +192,32 @@ Counters are emitted without trace sampling, but SDK shutdown, transport failure
 or provider quotas can still drop observations. They are not a durable accounting
 ledger or proof of exact total traffic. Payment/release guards prevent duplicate
 state-transition observations; they do not promise exactly-once telemetry delivery.
+
+## Hosted trace continuity — verified 1 October 2026
+
+Reopening the controlled 30 September request in Sentry across both projects
+shows one joined trace: [`515c6e66035041dc8bca1c789e053707`](https://power-h-ltd.sentry.io/explore/traces/trace/515c6e66035041dc8bca1c789e053707/).
+The earlier frontend-only inspection was incomplete; its cause is not established.
+
+| Operation | Span ID | Verified parent |
+| --- | --- | --- |
+| Next.js outgoing HTTP call | `a00f25d4d400d731` | Frontend span `98e7f29cdc229094` |
+| FastAPI request | `b64e3de6e4276b16` | `a00f25d4d400d731` |
+| Database call | `806563315650c8bd` | `b64e3de6e4276b16` |
+
+Both projects show `development`. The backend records release
+`45a9499f732012b1b95c0715b75be951f10fa8a1`; the frontend sample has no displayed
+release attribute, so it does not prove frontend release tagging. The root took
+871 ms, FastAPI 12.86 ms and database 3.59 ms. One sample is not a p95/p99 baseline.
+
+No propagation fix or privacy relaxation was needed. Descriptions remain
+`[Filtered]`; readable names are not a prerequisite for proving parent linkage.
+No diagnostic flag, account, production setting or paid service was changed.
+Fresh catalog probes on 1 October returned HTTP 200 but were not found under their
+supplied trace IDs at inspection; this evidence does not promise every request
+will be captured. Sampling and ingestion must be considered when repeating it.
+
+To inspect continuity, select both projects (or All Projects), open the exact
+trace, and compare parent IDs across the outgoing HTTP, API and database spans.
+Do not infer a propagation defect from a partial waterfall alone. Keep release
+coverage and readable span naming limitations explicit in future improvements.
