@@ -17,13 +17,13 @@ it("keeps default error/tracing capture without emitting identity-bearing sessio
     dsn: "https://key@o0.ingest.sentry.io/0",
     environment: "privacy-test",
     tracesSampleRate: 1,
+    release: "demo@session-test",
   });
   const defaults = getDefaultIntegrations(options);
   // Positive control: the installed SDK really would enable this channel.
   expect(defaults.some((item) => item.name === "BrowserSession")).toBe(true);
   const client = init({
     ...options,
-    release: "demo@session-test",
     defaultIntegrations: [
       ...defaults,
       browserTracingIntegration({

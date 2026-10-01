@@ -6,6 +6,9 @@ import {
 } from "./src/lib/sentry-options";
 const config: NextConfig = {
   poweredByHeader: false,
+  // A public build identifier, not a credential. Both runtimes use the same
+  // build-time value even if server environment variables later change.
+  env: { NEXT_PUBLIC_SENTRY_RELEASE: process.env.SENTRY_RELEASE || "" },
   // Vercel's adapter packages functions; standalone output is for local containers.
   output: process.env.VERCEL === "1" ? undefined : "standalone",
 };

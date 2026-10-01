@@ -54,10 +54,42 @@ const traceFields = [
   "trace_id",
   "span_id",
   "parent_span_id",
-  "op",
   "status",
   "origin",
 ];
+// Descriptions are derived only from a finite SDK operation vocabulary. Never
+// copy names, URLs, route parameters, SQL or request-derived span attributes.
+const operationLabels: Record<string, string> = {
+  "http.server": "Storefront request",
+  "http.client": "API request",
+  "http.server.middleware": "Request middleware",
+  "function.nextjs": "Next.js function",
+  "function.nextjs.server_component": "Server component",
+  "function.nextjs.server_action": "Server action",
+  "ui.nextjs": "Page render",
+  "ui.render": "Component render",
+  pageload: "Page load",
+  navigation: "Page navigation",
+  "resource.script": "Script load",
+  "resource.css": "Stylesheet load",
+  "resource.img": "Image load",
+  browser: "Browser operation",
+};
+function operationLabel(value: unknown): string {
+  return typeof value === "string" && Object.hasOwn(operationLabels, value)
+    ? operationLabels[value]
+    : "Application operation";
+}
+function traceStructure(value: unknown, fields = traceFields): RecordValue {
+  const result = pick(value, fields);
+  const op = record(value).op;
+  if (op !== undefined)
+    result.op =
+      typeof op === "string" && Object.hasOwn(operationLabels, op)
+        ? op
+        : "app.operation";
+  return result;
+}
 function structure(event: RecordValue): RecordValue {
   const result = pick(event, [
     "event_id",
@@ -69,8 +101,12 @@ function structure(event: RecordValue): RecordValue {
     "release",
     "environment",
   ]);
-  for (const key of ["message", "transaction"])
-    if (key in event) result[key] = FILTERED;
+  if ("message" in event) result.message = FILTERED;
+  if ("transaction" in event)
+    result.transaction =
+      event.type === "transaction"
+        ? operationLabel(record(record(event.contexts).trace).op)
+        : FILTERED;
   const values = record(event.exception).values;
   if (Array.isArray(values))
     result.exception = {
@@ -82,12 +118,12 @@ function structure(event: RecordValue): RecordValue {
     };
   if (event.contexts)
     result.contexts = {
-      trace: pick(record(event.contexts).trace, traceFields),
+      trace: traceStructure(record(event.contexts).trace),
     };
   if (Array.isArray(event.spans))
     result.spans = event.spans.map((span) => ({
-      ...pick(span, [...traceFields, "timestamp", "start_timestamp"]),
-      description: FILTERED,
+      ...traceStructure(span, [...traceFields, "timestamp", "start_timestamp"]),
+      description: operationLabel(record(span).op),
     }));
   const images = record(event.debug_meta).images;
   if (Array.isArray(images)) {

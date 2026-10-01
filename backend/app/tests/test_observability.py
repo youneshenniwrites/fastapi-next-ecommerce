@@ -146,8 +146,19 @@ def test_serialized_sdk_envelopes_are_private():
             name="/api/v1/orders/{order_id}/payment", op="http.server"
         ):
             pass
-        with sentry_sdk.start_transaction(name="fictional-secret", op="test"):
+        with sentry_sdk.start_transaction(
+            name="fictional-secret",
+            op="http.server",
+            trace_id="a" * 32,
+            parent_span_id="b" * 16,
+        ):
             sentry_sdk.set_context("private", {"password": "fictional-secret"})
+            with sentry_sdk.start_span(op="db", description="SELECT fictional-secret"):
+                pass
+            with sentry_sdk.start_span(
+                op="fictional-secret", description="fictional-secret"
+            ):
+                pass
         sentry_sdk.logger.error(
             "fictional-secret", attributes={"password": "fictional-secret"}
         )
@@ -177,6 +188,11 @@ def test_serialized_sdk_envelopes_are_private():
     assert b"ValueError" in serialized
     assert b"privacy-test" in serialized
     assert b"demo@1" in serialized
+    assert b"API request" in serialized
+    assert b"Database query" in serialized
+    assert b"Application operation" in serialized
+    assert b"a" * 32 in serialized
+    assert b"b" * 16 in serialized
     assert b"payment_session" in serialized
     assert b"commerce.requests" in serialized
     assert b"cart_write" in serialized
@@ -280,7 +296,7 @@ def test_unknown_metric_is_dropped():
 def test_malformed_exception_and_span_context_do_not_escape_filter():
     clean = scrub_event({"exception": {"values": "private"}, "spans": [None]}, {})
     assert clean["exception"] == {"values": []}
-    assert clean["spans"] == [{"description": "[Filtered]"}]
+    assert clean["spans"] == [{"description": "Application operation"}]
 
 
 def test_request_outcomes_and_telemetry_failure_do_not_escape(monkeypatch):
@@ -428,4 +444,38 @@ def test_real_fastapi_transaction_has_safe_operation(client):
     ]
     assert any(item["transaction"] == "cart_write" for item in transactions), (
         transactions
+    )
+
+
+def test_readable_labels_never_copy_raw_names_or_sql():
+    event = {
+        "type": "transaction",
+        "transaction": "/api/v1/products/private@example.invalid",
+        "contexts": {
+            "trace": {
+                "op": "http.server",
+                "trace_id": "a" * 32,
+                "parent_span_id": "b" * 16,
+            }
+        },
+        "spans": [
+            {"op": "db", "description": "SELECT fictional-secret"},
+            {"op": "fictional-secret", "description": "private@example.invalid"},
+            None,
+        ],
+    }
+    clean = scrub_event(event, {})
+    assert clean["transaction"] == "API request"
+    assert [span["description"] for span in clean["spans"]] == [
+        "Database query",
+        "Application operation",
+        "Application operation",
+    ]
+    assert "fictional-secret" not in str(clean)
+    assert "private@example.invalid" not in str(clean)
+    assert "SELECT" not in str(clean)
+    assert clean["contexts"]["trace"]["parent_span_id"] == "b" * 16
+    assert (
+        scrub_event({"transaction": "private@example.invalid"}, {})["transaction"]
+        == "[Filtered]"
     )

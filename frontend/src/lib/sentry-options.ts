@@ -4,6 +4,7 @@ export const SENTRY_TUNNEL_ROUTE = "/sentry-tunnel";
 
 export interface SentryRuntimeEnv {
   dsn?: string;
+  release?: string;
   environment?: string;
   nodeEnv?: string;
   tracesSampleRate?: number;
@@ -11,6 +12,7 @@ export interface SentryRuntimeEnv {
 
 interface BaseSentryOptions {
   dsn: string | undefined;
+  release: string | undefined;
   environment: string;
   tracesSampleRate: number;
   sendDefaultPii: false;
@@ -36,6 +38,7 @@ function sampleRateFor(env: SentryRuntimeEnv): number {
 function baseSentryOptions(env: SentryRuntimeEnv): BaseSentryOptions {
   return {
     dsn: env.dsn || undefined,
+    release: env.release || undefined,
     environment: env.environment || env.nodeEnv || "production",
     tracesSampleRate: sampleRateFor(env),
     sendDefaultPii: false,

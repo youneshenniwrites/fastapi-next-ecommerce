@@ -70,3 +70,13 @@ it("uploads source maps only with complete credentials", () => {
     }),
   ).toBe(true);
 });
+
+it("uses the explicit deployment release in both runtime options", () => {
+  for (const builder of [clientSentryOptions, serverSentryOptions]) {
+    expect(builder({ release: "vindor@trusted-commit" }).release).toBe(
+      "vindor@trusted-commit",
+    );
+    expect(builder({}).release).toBeUndefined();
+    expect(builder({ release: "" }).release).toBeUndefined();
+  }
+});

@@ -61,7 +61,7 @@ would need a concrete requirement and separate scope.
 | --- | --- | --- |
 | `SENTRY_DSN` | API projects (server-only) | Only to activate reporting |
 | `SENTRY_ENVIRONMENT` | API projects | No (defaults to `local`) |
-| `SENTRY_RELEASE` | API projects | No |
+| `SENTRY_RELEASE` | API/frontend build/deployment revision | No; development deploy passes the commit SHA |
 | `SENTRY_TRACES_SAMPLE_RATE` | API projects | No (defaults to `0.1`, validated 0–1) |
 | `SENTRY_DSN` | Frontend projects (server-only) | Only to activate reporting |
 | `SENTRY_ENVIRONMENT` | Frontend projects | No (defaults to `NODE_ENV`) |
@@ -72,6 +72,14 @@ would need a concrete requirement and separate scope.
 Store DSNs in Vercel project settings and GitHub environment secrets, never in
 tracked files. Source-map upload stays disabled until the owner provides
 `SENTRY_AUTH_TOKEN`; builds succeed without it.
+
+Frontend release metadata is compiled from the trusted `SENTRY_RELEASE` build value
+into `NEXT_PUBLIC_SENTRY_RELEASE` for both browser and server initialization. Only
+that non-secret identifier is published; source-map credentials remain server-only.
+A redeployment/build is required to change it. Local builds without a release or
+Sentry credentials remain supported. VIN-230's normal development deployment and
+controlled catalog trace will prove these labels and release tags before closure;
+the earlier trace below remains historical evidence of the previous limitation.
 
 ## Sampling and quota guardrails
 
@@ -99,8 +107,12 @@ numbers and simple static code identifiers. Local filenames lose directory roots
 Next bundle filenames retain only the artifact path. Valid source-map debug UUIDs
 and matching sanitized artifact paths survive for symbolication. They discard complete request/user data,
 URLs, arbitrary extras/contexts/tags, breadcrumbs, stack source/local variables and
-span data. Exception text, messages, transaction names and span descriptions become
-`[Filtered]`. This covers OAuth `username` bodies, credential headers and nested
+span data. Exception text and messages remain `[Filtered]`. Transaction/span labels
+are derived from a closed operation vocabulary (for example `Storefront request`,
+`API request`, `Next.js function`, `Database query`); unknown operations become
+`Application operation`. Existing backend commerce route-template labels remain.
+Raw names, URLs, SQL and identifiers never become labels. Unknown span operations
+are normalized to `app.operation`. This covers OAuth `username` bodies, credential headers and nested
 arrays by removing their containing data, rather than guessing every sensitive key.
 Backend exception local-variable capture is explicitly disabled.
 

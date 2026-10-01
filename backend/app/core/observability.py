@@ -73,6 +73,37 @@ def _frames(stack: Any) -> dict[str, Any]:
     return {"frames": cleaned}
 
 
+SPAN_LABELS = {
+    "http.server": "API request",
+    "http.client": "Provider request",
+    "middleware.starlette": "Request middleware",
+    "middleware.starlette.receive": "Receive request",
+    "middleware.starlette.send": "Send response",
+    "db": "Database query",
+    "db.sql.query": "Database query",
+    "db.sql.transaction": "Database transaction",
+    "db.sqlalchemy": "Database query",
+}
+
+
+def _operation_label(value: Any) -> str:
+    return (
+        SPAN_LABELS.get(value, "Application operation")
+        if isinstance(value, str)
+        else "Application operation"
+    )
+
+
+def _trace_structure(value: Any, fields: set[str]) -> dict[str, Any]:
+    result = _pick(value, fields)
+    if isinstance(value, dict) and "op" in value:
+        op = value["op"]
+        result["op"] = (
+            op if isinstance(op, str) and op in SPAN_LABELS else "app.operation"
+        )
+    return result
+
+
 def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
     """Allowlist SDK structure by context; discard all application payloads."""
     result = _pick(
@@ -88,13 +119,24 @@ def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
             "environment",
         },
     )
-    for key in ("message", "transaction"):
-        if key in event:
-            result[key] = (
-                SAFE_TRANSACTIONS.get(event[key], FILTERED)
-                if key == "transaction" and isinstance(event[key], str)
-                else FILTERED
+    if "message" in event:
+        result["message"] = FILTERED
+    if "transaction" in event:
+        trace = (
+            (event.get("contexts") or {}).get("trace")
+            if isinstance(event.get("contexts"), dict)
+            else None
+        )
+        result["transaction"] = (
+            SAFE_TRANSACTIONS.get(
+                event["transaction"],
+                _operation_label(trace.get("op") if isinstance(trace, dict) else None)
+                if event.get("type") == "transaction"
+                else FILTERED,
             )
+            if isinstance(event["transaction"], str)
+            else FILTERED
+        )
     exception = event.get("exception")
     if isinstance(exception, dict):
         values = exception.get("values", [])
@@ -114,14 +156,20 @@ def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
             else {"values": []}
         )
     contexts = event.get("contexts")
-    trace_fields = {"trace_id", "span_id", "parent_span_id", "op", "status", "origin"}
+    trace_fields = {"trace_id", "span_id", "parent_span_id", "status", "origin"}
     if isinstance(contexts, dict):
-        result["contexts"] = {"trace": _pick(contexts.get("trace"), trace_fields)}
+        result["contexts"] = {
+            "trace": _trace_structure(contexts.get("trace"), trace_fields)
+        }
     if isinstance(event.get("spans"), list):
         result["spans"] = [
             {
-                **_pick(span, trace_fields | {"start_timestamp", "timestamp"}),
-                "description": FILTERED,
+                **_trace_structure(
+                    span, trace_fields | {"start_timestamp", "timestamp"}
+                ),
+                "description": _operation_label(
+                    span.get("op") if isinstance(span, dict) else None
+                ),
             }
             for span in event["spans"]
         ]
