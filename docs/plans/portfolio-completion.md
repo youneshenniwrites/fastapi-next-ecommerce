@@ -1,6 +1,6 @@
 # VINDOR: audit fixes to a complete portfolio demo
 
-**1 October trace verification:** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; the frontend sample lacks a release attribute. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline, so portfolio progress remains **18/29 (62%)**. See the [monitoring runbook](../observability.md#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
+**Earlier 1 October trace verification (VIN-223):** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; that historical frontend sample lacks a release attribute, superseded by the [VIN-230 hosted proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107) of matching frontend/backend releases and readable labels. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline and adds no checklist credit. The 1 October VIN-146 evidence disposition below brings the canonical count to **19/29 (66%)**. See the [monitoring runbook](../observability.md#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
 
 Approved by the owner on 19 September 2026. **This is the one canonical portfolio
 completion plan**, including its progress checklist, priorities and acceptance
@@ -27,7 +27,7 @@ claiming demo completion. A concise scaling discussion belongs to the interview
 package: distinguish measured limits from hypotheses; do not add Redis, replicas or
 new services solely for demonstration. No additional plan or infrastructure is approved.
 
-## Progress at a glance — 30 September 2026
+## Progress at a glance — 1 October 2026
 
 **Current stage: 6 of 6, hosted verification and portfolio evidence.** Checkout and sandbox purchase are verified on development; remaining hosted acceptance stays explicit below. Stage counts are not effort estimates.
 
@@ -52,21 +52,21 @@ remains pending on a genuine eligible update; manual merges do not satisfy it.
 VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
 acceptance does not mean active implementation and adds no portfolio completion credit.
 
-**Current execution priority — 1 October (owner update):** VIN-223 trace continuity and its documentation closeout are complete in PR #228. Owner-prioritized [VIN-230](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230) frontend release tags and readable bounded trace labels merged in PR #231 and have [hosted development proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107). This follow-up is outside the revised 29-outcome baseline; it adds no automatic completion credit. Resume VIN-158 visitor isolation and VIN-89 recovery proof, VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run reduction follow portfolio delivery unless a concrete delivery blocker requires a bounded repair. VIN-232 safe HTTP method/status enrichment remains Backlog; it does not displace portfolio delivery. Keep one implementation story active; paused work stays Backlog.
+**Current execution priority — 1 October (owner update):** VIN-223 trace continuity and its documentation closeout are complete in PR #228. Owner-prioritized [VIN-230](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230) frontend release tags and readable bounded trace labels merged in PR #231 and have [hosted development proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107). This follow-up is outside the revised 29-outcome baseline; it adds no automatic completion credit. At the owner’s request, VIN-232 safe HTTP method/status enrichment is now In progress, outside the revised baseline. After that, resume VIN-158 visitor isolation and VIN-89 recovery proof, VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run reduction follow portfolio delivery unless a concrete delivery blocker requires a bounded repair. Keep one implementation story active; paused work stays Backlog.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
 CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,
 test-threshold separation and the form-focus correction are merged. This does not
 prove hosted configuration, deployment synchronization or real visitor isolation.
 
-**Verified progress:** `████████████░░░░░░░░` **18 / 29 outcomes (62%, revised scope)**.
+**Verified progress:** `█████████████░░░░░░░` **19 / 29 outcomes (66%, revised scope)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 4/7, checkout 5/5, payment implementation 3/3 and hosted finish 1/8. Security/monitoring is 1/3: the reviewed privacy gate is complete.
+Baseline is 3/3, reliability 4/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 2/3: the reviewed privacy gate and hosted monitoring foundation are complete. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; it does not claim a speed improvement or complete VIN-146.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-62% · 18/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
+66% · 19/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
@@ -192,7 +192,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] **#45 BLOCKED — agent design/implementation:** deliver reviewed previews with isolated data, exact origins, safe credentials and verified login/cart; see unblock actions above.
 - [ ] Expand cart coverage measurement and validate comparison gates before requiring them.
 - [ ] Resolve exact-head review enforcement — #38; add types around new backend services.
-- [ ] Prove browser-cache speed benefit or record unproven by **1 October** — #146; implementation is already merged, measurement is not proven.
+- [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup is claimed; VIN-146’s actual improvement acceptance remains unchecked and the issue remains open/Backlog.
 - [x] Run complete hosted sandbox purchase with fictional data — VIN-30, development `8685cc1`, 23 September; [success/history, cancellation, expiry and duplicate replay evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026).
 - [ ] Perform disposable restore rehearsal and document recovery — scoped #130.
 - [ ] Review full journey for keyboard/mobile/accessibility — scoped #131, not formal full conformance.
