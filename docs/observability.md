@@ -265,8 +265,10 @@ retained method or response-code fields; historical events are not rewritten.
 ## Safe HTTP method and response metadata (VIN-232)
 
 [VIN-232](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232) restores
-bounded HTTP metadata in the privacy filter. Implementation and automated evidence
-are tracked on its PR; hosted development verification remains required before Done.
+bounded HTTP metadata in the privacy filter. Implementation merged in
+[PR #235](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/235);
+[hosted development acceptance](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232#issuecomment-5935362557)
+is verified and VIN-232 is Done.
 The [OpenTelemetry HTTP conventions](https://opentelemetry.io/docs/specs/semconv/http/http-spans/)
 identify the method and received/sent response status as useful diagnostic fields.
 This change maps the installed Sentry SDK attributes rather than installing another
@@ -289,3 +291,27 @@ status aliases `http.response.status_code` and `http.status_code`. The backend S
 uses `http.method` and `http.response.status_code`; incoming ASGI transaction
 methods are obtained only from validated `request.method`, without retaining the
 request object. Sampling, alerts, quotas and production activation are unchanged.
+
+### Hosted development evidence — 1 October 2026
+
+Reviewed PR #235 merged as `f4e630721184a8cfbb436cf5dd602971337c8002`.
+[Main frontend CI](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36886781060)
+passed, then [normal gated development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36887763871)
+deployed that revision and passed public smoke checks.
+
+The [fresh joined trace `07501badbea249b7bf8487bf718187d7`](https://power-h-ltd.sentry.io/explore/traces/trace/07501badbea249b7bf8487bf718187d7/)
+shows `GET · Storefront request` → outgoing `GET · API request` → FastAPI
+`GET · API request` → `Database query`. Frontend outgoing span
+`915bfaa2789ffe3c` has parent `8c9379f68c9326af`; FastAPI span
+`a526f71889b6b30e` has parent `915bfaa2789ffe3c`, matching the frontend outgoing
+span. The outgoing frontend and backend spans both retain GET and HTTP response
+status 200. Both projects show `development` and release
+`f4e630721184a8cfbb436cf5dd602971337c8002`.
+
+Seven bounded read-only catalog probes and one normal browser product-page load
+were used, with unchanged sampling and allowance for Sentry ingestion delay.
+This verifies one connected sample, not a latency baseline or universal capture;
+historical traces are unchanged. The [issue evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232#issuecomment-5935362557)
+records the proof. Wiki closeout was published as `391628a`; VIN-232 is closed and
+Done. No production telemetry activation or paid feature was needed. This
+follow-up adds no credit to the separate 29-outcome portfolio baseline.
