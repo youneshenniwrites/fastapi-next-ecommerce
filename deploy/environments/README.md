@@ -217,3 +217,41 @@ Partial hosted VIN-158 evidence is [recorded on 1 October 2026](https://github.c
 Counters remain process-local: multiple instances, restarts/eviction and shared NAT constrain protection. This evidence is not a global/distributed-budget guarantee. Future unattended two-network verification is scoped in VIN-238. Never publish raw IPs or signing context. Do not weaken production thresholds to obtain a passing probe.
 
 Manual Vercel redeploys can omit `SENTRY_RELEASE` supplied by the normal delivery CLI. The current development fallback matches reviewed source `f4e630721184a8cfbb436cf5dd602971337c8002`; CI overrides it with each new release. Before manually redeploying different source, update that fallback to the verified source SHA and check the rendered frontend release. Prefer normal gated CI delivery.
+
+### VIN-158 same-instance verification
+
+The default-off `RATE_LIMIT_DIAGNOSTICS_ENABLED` flag enables a bounded development
+proof on failed login responses only. Both applications must run on Vercel with
+`SENTRY_ENVIRONMENT=development` and the same exact lowercase 40-character
+`SENTRY_RELEASE`. No production thresholds, secrets or permissions change.
+The API emits an opaque limiter-object/process witness, an atomic decision
+sequence, effective limit, signature-verification disposition and release; the storefront forwards
+only this complete validated set on login 401/429. It never returns a visitor IP,
+bucket, signing assertion, password or token.
+
+After reviewed code is merged and normal development delivery succeeds, enable
+the flag in the two dedicated development projects and redeploy that exact release.
+Dispatch **Development limiter witness** on main. Once its capture step is running,
+run `python3 scripts/limiter_probe.py --role throttle --release MERGED_SHA --output first.json`
+on the workstation. The runner makes at most 24 fictional invalid login attempts;
+the workstation makes at most 61 preparation attempts, eight rejection brackets
+and one deliberate retry. Endpoints are fixed to development; redirects are never
+followed and missing, mismatched or unverified evidence fails inconclusively.
+
+Download that run's `limiter-observer` artifact and compare with
+`python3 scripts/limiter_probe.py --role compare --release MERGED_SHA --first first.json --second observer.json --output proof.json`.
+Accept only same-witness, verified-context, matching-release A429 → B401 → A429
+with strictly increasing server sequences, followed by A401 deliberate retry.
+Every sample must confirm the unchanged 60-request limit; C429 minus B401 must
+span fewer than 60 decisions, excluding a shared-bucket expiry/refill false pass.
+UTC timestamps are descriptive, not the source of cross-machine ordering.
+The proof demonstrates this process-local behavior, not a distributed budget.
+
+Disable the flag in **both** development apps afterward, read back both settings
+and wait for Ready redeploys. Confirm all `X-Vindor-Limiter-*` headers are absent
+on both the direct API `/api/v1/auth/login` and storefront `/api/session/login`
+failed-login responses: storefront suppression alone cannot prove API cleanup.
+Retain the gated hook and regression tests for
+future repeatable checks. Record actual proof and cleanup before VIN-158 Done;
+adding this mechanism alone earns no checklist credit. No schedule, paid service,
+production activation or owner phone coordination is involved.

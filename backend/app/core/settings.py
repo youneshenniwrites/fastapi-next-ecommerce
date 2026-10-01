@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_AUTH_REGISTER: int = Field(default=60, gt=0)
     RATE_LIMIT_AUTH_LOGIN: int = Field(default=60, gt=0)
     RATE_LIMIT_WRITE: int = Field(default=300, gt=0)
+    RATE_LIMIT_DIAGNOSTICS_ENABLED: bool = False
 
     @field_validator("RATE_LIMIT_PROXY_SECRET")
     @classmethod

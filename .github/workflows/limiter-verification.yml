@@ -1,0 +1,28 @@
+name: Development limiter witness
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: development-limiter-witness
+  cancel-in-progress: false
+jobs:
+  observer:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Capture bounded independent visitor evidence
+        env:
+          EXPECTED_RELEASE: ${{ github.sha }}
+        run: python3 scripts/limiter_probe.py --role observer --release "$EXPECTED_RELEASE" --output observer.json
+      - name: Save sanitized witness samples
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: limiter-observer
+          path: observer.json
+          retention-days: 1
