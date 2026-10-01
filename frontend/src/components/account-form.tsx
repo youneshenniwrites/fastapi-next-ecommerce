@@ -7,7 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { accountSchema, type AccountValues } from "@/lib/account-validation";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, CheckCircle2, LoaderCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  LoaderCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -34,6 +40,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
     () => true,
     () => false,
   );
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [registered, setRegistered] = useState(false);
@@ -71,6 +78,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
           : result.authenticated === true)
       ) {
         reset();
+        setPasswordVisible(false);
         if (registering) setRegistered(true);
         else {
           // Discard cached account/navigation state after authentication.
@@ -176,26 +184,45 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
           </Field>
           <Field data-invalid={Boolean(errors.password)}>
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input
-              id="password"
-              {...register("password")}
-              aria-invalid={Boolean(errors.password)}
-              type="password"
-              autoComplete={registering ? "new-password" : "current-password"}
-              required
-              minLength={registering ? 8 : 1}
-              maxLength={registering ? 128 : 1024}
-              aria-describedby={
-                [
-                  registering ? "password-help" : "",
-                  errors.password ? "password-error" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ") || undefined
-              }
-              disabled={!ready || pending}
-              className="h-12"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                id="password"
+                {...register("password")}
+                aria-invalid={Boolean(errors.password)}
+                type={passwordVisible ? "text" : "password"}
+                autoComplete={registering ? "new-password" : "current-password"}
+                required
+                minLength={registering ? 8 : 1}
+                maxLength={registering ? 128 : 1024}
+                aria-describedby={
+                  [
+                    registering ? "password-help" : "",
+                    errors.password ? "password-error" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || undefined
+                }
+                disabled={!ready || pending}
+                className="h-12 min-w-0 flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-12"
+                disabled={!ready || pending}
+                aria-label={passwordVisible ? "Hide password" : "Show password"}
+                aria-pressed={passwordVisible}
+                aria-controls="password"
+                onClick={() => setPasswordVisible((visible) => !visible)}
+              >
+                {passwordVisible ? (
+                  <EyeOff aria-hidden="true" />
+                ) : (
+                  <Eye aria-hidden="true" />
+                )}
+              </Button>
+            </div>
             {registering && (
               <p id="password-help" className="text-xs text-muted-foreground">
                 Use 8–128 characters. Don't reuse a real password.

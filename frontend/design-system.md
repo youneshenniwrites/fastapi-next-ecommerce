@@ -58,7 +58,10 @@ and FieldError. Schemas live in src/lib/account-validation.ts. Validate on submi
 then on change; associate inline messages with inputs and focus the first invalid
 field. Hydrated forms suppress native tooltips with noValidate. Preserve required
 attributes, pre-hydration disabled controls and POST fallback. Login and registration
-use different password limits; never trim or log passwords. API validation remains
+use different password limits; never trim or log passwords. Login and registration provide a 48px show/hide
+password button; passwords start masked and toggling visibility preserves the
+entered value without submitting. The button exposes its state and accessible
+Show password/Hide password label, and is disabled with the form while pending. API validation remains
 authoritative. Test invalid submissions for zero navigation and zero API calls.
 See the [design-system Wiki](https://github.com/youneshenniwrites/fastapi-next-ecommerce/wiki/Design-system).
 
