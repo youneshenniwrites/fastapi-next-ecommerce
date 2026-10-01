@@ -1,6 +1,6 @@
 # VINDOR: audit fixes to a complete portfolio demo
 
-**Earlier 1 October trace verification (VIN-223):** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; that historical frontend sample lacks a release attribute, superseded by the [VIN-230 hosted proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107) of matching frontend/backend releases and readable labels. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline and adds no checklist credit. The 1 October VIN-146 evidence disposition below brings the canonical count to **19/29 (66%)**. See the [monitoring runbook](../observability.md#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
+**Earlier 1 October trace verification (VIN-223):** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; that historical frontend sample lacks a release attribute, superseded by the [VIN-230 hosted proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107) of matching frontend/backend releases and readable labels. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline and adds no checklist credit. The VIN-146 deadline disposition previously brought the count to 19/29 (66%); VIN-158 hosted throttling/retry verification now brings the canonical count to **20/29 (69%)**. See the [monitoring runbook](../observability.md#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
 
 Approved by the owner on 19 September 2026. **This is the one canonical portfolio
 completion plan**, including its progress checklist, priorities and acceptance
@@ -34,7 +34,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | ⏸ Hosted proof pending | Finish VIN-158 hosted proof; VIN-89 hosted acceptance remains |
+| 2. Reliable cart and rate limits | ⏸ Hosted proof pending | VIN-158 same-instance visitor isolation and VIN-89 hosted acceptance remain |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 foundation complete; #126 remains actionable |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted purchase verified in stage 6 |
 | 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted proof verified in stage 6 |
@@ -52,35 +52,38 @@ remains pending on a genuine eligible update; manual merges do not satisfy it.
 VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
 acceptance does not mean active implementation and adds no portfolio completion credit.
 
-**Current execution priority — 1 October (owner update):** VIN-223 trace continuity and its documentation closeout are complete in PR #228. Owner-prioritized [VIN-230](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230) frontend release tags and readable bounded trace labels merged in PR #231 and have [hosted development proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107). This follow-up is outside the revised 29-outcome baseline; it adds no automatic completion credit. Owner-prioritized VIN-232 safe HTTP method/status enrichment merged in [PR #235](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/235) as `f4e6307`, passed [normal gated development delivery and smoke checks](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36887763871), and has [joined hosted GET/HTTP 200 proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232#issuecomment-5935362557) with matching release and parent IDs. Wiki closeout is published as `391628a`; VIN-232 is closed and Done, outside the revised baseline with no completion credit. Resume VIN-158 visitor isolation next, then VIN-89 recovery proof, VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run reduction follow portfolio delivery unless a concrete delivery blocker requires a bounded repair. Keep one implementation story active; paused work stays Backlog.
+**Current execution priority — 1 October (owner update):** VIN-223 trace continuity and its documentation closeout are complete in PR #228. Owner-prioritized [VIN-230](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230) frontend release tags and readable bounded trace labels merged in PR #231 and have [hosted development proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107). This follow-up is outside the revised 29-outcome baseline; it adds no automatic completion credit. Owner-prioritized VIN-232 safe HTTP method/status enrichment merged in [PR #235](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/235) as `f4e6307`, passed [normal gated development delivery and smoke checks](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36887763871), and has [joined hosted GET/HTTP 200 proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232#issuecomment-5935362557) with matching release and parent IDs. Wiki closeout is published as `391628a`; VIN-232 is closed and Done, outside the revised baseline with no completion credit. VIN-158 has [hosted throttling/retry evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378). VIN-237 password visibility is merged in PR #239. Complete VIN-158 same-instance visitor-isolation proof, then resume VIN-89 recovery proof, VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run reduction follow portfolio delivery unless a concrete delivery blocker requires a bounded repair. Keep one implementation story active; paused work stays Backlog.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
 CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,
-test-threshold separation and the form-focus correction are merged. This does not
-prove hosted configuration, deployment synchronization or real visitor isolation.
+test-threshold separation and the form-focus correction are merged. Merge alone did not
+prove hosted configuration or visitor isolation; the 1 October hosted checkpoint below records configuration and throttling/retry evidence, with visitor isolation still pending.
 
-**Verified progress:** `█████████████░░░░░░░` **19 / 29 outcomes (66%, revised scope)**.
+**Verified progress:** `██████████████░░░░░░` **20 / 29 outcomes (69%, revised scope)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 4/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 2/3: the reviewed privacy gate and hosted monitoring foundation are complete. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; it does not claim a speed improvement or complete VIN-146.
+Baseline is 3/3, reliability 5/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 2/3: the reviewed privacy gate and hosted monitoring foundation are complete. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; it does not claim a speed improvement or complete VIN-146.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-66% · 19/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
+69% · 20/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
 **Historical sequence change (21 September; current priority above supersedes this handoff):** VIN-118 order drafts are delivered. Continue feature delivery with
 VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. The subsequent development monitoring foundation and joined-trace proof are now verified in VIN-121 and VIN-223; follow the current execution priority above.
-VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
+VIN-158 throttling/retry is verified, but same-instance visitor isolation remains open; VIN-89 remains open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
 
+**Historical development deployment (superseded by the 1 October VIN-158 checkpoint below):**
 Development deployment and public smoke checks succeeded for `91daad7` in
 [run 35642648695](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/35642648695).
 The earlier revision was superseded before frontend CI completed; the deployment
-gate required a fully tested current main. Signed visitor isolation is still
-unverified; the Vercel connector currently lacks access to the project team.
+gate required a fully tested current main. At that checkpoint, signed visitor
+isolation was unverified and the Vercel connector lacked project-team access.
+The [1 October hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378)
+records the subsequently verified development configuration and throttling/retry outcomes; visitor isolation remains unverified.
 
 **Delivered implementation:** VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
@@ -115,7 +118,7 @@ Problem line, without a duplicate Issue section. CONTRIBUTING.md owns types/exam
 Dependabot retains its documented upstream-title exception. The naming follow-up
 to merged PR #174 persists this rule without creating a second portfolio plan.
 
-**VIN-158 verification evidence (21 September 2026):** The sign-in focus failure
+**Historical VIN-158 fixture evidence (21 September; hosted closeout below updates its configuration/retry evidence; isolation remains pending):** The sign-in focus failure
 was reproduced twice in the full suite: React Hook Form's delayed second error
 focus could interrupt field editing. PR #164 now focuses the first invalid field
 once. The unchanged browser suite passes locally (99 passed, 2 skipped); frontend
@@ -126,6 +129,8 @@ merged in PR #164 (`4d3bbd9`), deployed through `91daad7`; visitor-isolation
 acceptance is still unverified. PR #162 merged review/naming policy as `aceea1d`.
 VIN-158 awaits hosted verification; VIN-118 is Done following merged PR #177 and VIN-119 is Done following merged PR #181. PR #160's hosted acceptance remains separate.
 
+
+**VIN-158 hosted checkpoint — 1 October 2026 (visitor isolation remains unverified):** Paired dedicated development secrets are active, verifier before signer. Final API deployment `27hgMwUV1uU1y1XBcDo4eShainHE` and storefront `4h5WD3mxTcRt6rchzYVXJdCZ5D5r` redeploy reviewed application source `f4e6307`; frontend release metadata matches. [Timestamped evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378) records request 61 returning 429 with a 43-second wait, the owner’s mobile-data incorrect-credentials report inside that window, and the original connection’s deliberate 401 retry after expiry. A separate direct API probe also returned 429 on request 61 and 401 after its retry deadline. Fresh focused fixtures passed (35 backend, 41 frontend). Earlier fresh-connection runs were inconclusive and included one 503; no global/same-instance budget claim is made. Counters remain process-local and shared NAT users share anonymous budgets. The mobile observation does not prove visitor isolation: a different FastAPI instance could explain its independent response. VIN-158 remains open until both identities are proven against the same limiter instance (or equivalent deployment evidence rules out instance separation). VIN-238 remains future automation work and must account for that topology; it adds no completion credit.
 
 ### Blockers and unblock actions
 
@@ -138,7 +143,7 @@ abandoned or complete. Neither blocks unrelated checkout implementation.
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
 **Unblock order:** Stage 5 payment implementation and automated correctness
-evidence and VIN-30 hosted sandbox proof are complete. VIN-223 joined trace proof and documentation closeout are complete. VIN-230 readable labels and frontend release tags are merged and hosted-verified. Continue VIN-158 and VIN-89 hosted proof. Record
+evidence and VIN-30 hosted sandbox proof are complete. VIN-223 joined trace proof and documentation closeout are complete. VIN-230 readable labels and frontend release tags are merged and hosted-verified. VIN-158 hosted throttling/retry is verified; complete same-instance visitor-isolation proof before VIN-89 hosted recovery proof. Record
 external blockers and continue independent work rather than waiting idle. Configuration can be prepared
 independently, but telemetry activation waits for privacy checks. #45
 remains in stage 6; its design work must not be mistaken for an owner-only wait.
@@ -160,12 +165,12 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 #### 2 — Reliability
 
 - [x] Implement and merge readable 429/retry feedback — #156 / #159, `2cfc95f`.
-- [ ] Verify the rate-limit implementation on the actual hosted revision — gated/unverified; do not equate a skipped deployment job with delivery.
+- [x] Verify the rate-limit implementation on the actual hosted revision — VIN-158, [1 October hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378); reviewed application source `f4e6307`, active development deployments, HTTP 429 and deliberate retry.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
 - [ ] Verify merged recovery on hosted development using fictional data.
 - [x] Merge authenticated customer write-budget isolation — VIN-158 / PR #163, `b47be4a`; tests and both reviews completed.
 - [x] Merge anonymous identity and test-threshold separation — VIN-158 / PR #164, `4d3bbd9`. Required CI and both reviews passed on `308824b`; hosted acceptance remains separate.
-- [ ] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Configuration availability is unverified; missing keys preserve fallback limiting but do not prove visitor isolation.
+- [ ] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Paired development configuration and retry are [verified](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378), but the mobile observation cannot establish shared-egress separation within one limiter instance. Retain this outcome unchecked until same-instance proof or equivalent deployment evidence rules out instance separation.
 
 #### 3 — Security and monitoring
 
