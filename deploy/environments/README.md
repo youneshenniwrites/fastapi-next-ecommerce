@@ -216,7 +216,7 @@ Historical partial hosted VIN-158 evidence is [recorded on 1 October 2026](https
 
 Counters remain process-local: multiple instances, restarts/eviction and shared NAT constrain protection. This evidence is not a global/distributed-budget guarantee. VIN-238 remains Backlog for future automation refinement and can reuse the bounded probe delivered in PR #244. Never publish raw IPs or signing context. Do not weaken production thresholds to obtain a passing probe.
 
-Manual Vercel redeploys can omit `SENTRY_RELEASE` supplied by the normal delivery CLI. The current development fallback matches reviewed source `f4e630721184a8cfbb436cf5dd602971337c8002`; CI overrides it with each new release. Before manually redeploying different source, update that fallback to the verified source SHA and check the rendered frontend release. Prefer normal gated CI delivery.
+Manual Vercel redeploys can omit `SENTRY_RELEASE` supplied by the normal delivery CLI. The configured development fallback at the 1 October checkpoint matches reviewed source `f4e630721184a8cfbb436cf5dd602971337c8002`; CI overrides it with each new release. Before manually redeploying different source, update that fallback to the verified source SHA and check the rendered frontend release. Prefer normal gated CI delivery.
 
 **VIN-158 hosted closeout — 1 October 2026:** [PR #244](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/244) and [independent runner run 36909932392](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909932392) prove actual same-instance isolation on deployed release `847092c`: A429 sequence72 → runner B401 sequence74 → A429 sequence75, then deliberate A401 retry sequence88. All responses share one opaque limiter witness, verified signed context and unchanged limit60. Server order and the one-decision B→C gap exclude instance-separation and expiry/refill false positives; this is not a global distributed budget.
 
@@ -235,6 +235,13 @@ bucket, signing assertion, password or token.
 
 After reviewed code is merged and normal development delivery succeeds, enable
 the flag in the two dedicated development projects and redeploy that exact release.
+A successful delivery status for that same SHA makes a new Development delivery
+dispatch skip deployment, even after environment changes. In that case, rerun
+the deployment job of its previously successful, exact-revision gated run, then
+verify fresh deployment IDs and release metadata. VIN-158 cleanup used
+[attempt 2 of run 36909436876](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909436876/attempts/2);
+a successful skipped dispatch is not evidence that new settings took effect.
+
 Dispatch **Development limiter witness** on main. Once its capture step is running,
 run `python3 scripts/limiter_probe.py --role throttle --release MERGED_SHA --output first.json`
 on the workstation. The runner makes at most 24 fictional invalid login attempts;

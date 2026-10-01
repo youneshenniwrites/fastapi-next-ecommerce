@@ -125,6 +125,27 @@ record their next action; do not silently leave failures unexplained. This is an
 agent workflow, not a continuously running service. Scheduled dependency review
 is not configured. Dependabot proposes updates weekly; eligible updates use the bounded automation policy below.
 
+## Required documentation status check
+
+Before pushing or requesting review for a feature/status change, run from the repo:
+
+```sh
+python3 scripts/doc_references.py ISSUE_NUMBER "feature phrase" "related term"
+```
+
+Use the actual issue number and meaningful terms, not these placeholders. Read
+surrounding context for every relevant result, including API guides, README,
+AGENTS, architecture, roadmap, ADRs and the canonical plan. Inspect the complete
+PR, not only the latest patch. Broaden terms when results omit expected docs.
+The script searches tracked text only; inspect affected Wiki pages and issue
+handoffs separately. Matches are candidates, not proof; no matches is not a pass.
+
+Reconcile statements as implemented, merged, deployed or operationally verified
+using actual evidence. Preserve historical statements with explicit context.
+Keep daily handoffs in the tracking issue. In the PR Review section record the
+terms, documents checked and corrections (or why no updates are needed). This is
+a required agent review step, not an automated correctness guarantee or CI gate.
+
 ## Common PR description and reviewers
 
 Use `VIN-N` for issues, where N is the actual GitHub issue number; use `PR #N`

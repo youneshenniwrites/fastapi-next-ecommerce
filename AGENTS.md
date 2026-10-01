@@ -68,7 +68,7 @@ Do not weaken or bypass checks to complete a task.
 
 ## Product rules
 
-FastAPI owns permissions, product prices, stock, and future order totals. Browser
+FastAPI owns permissions, product prices, stock, and order totals. Browser
 inputs cannot establish admin privileges or authoritative payment state. Schema
 changes include reviewed Alembic migrations. Tests must use disposable databases.
 Do not run downgrade, volume deletion, or seed experiments against customer data.
@@ -151,10 +151,8 @@ Before framework changes, read the installed version-matched documentation and
 applicable official skills as described in [framework guidance](docs/framework-agent-guidance.md).
 Keep project architecture and security constraints authoritative.
 
-Make small, coherent Conventional Commits after relevant checks and staged-diff
-review. Keep coupled code, tests and generated outputs together; do not split by
-arbitrary line counts. Within push authorization, push each verified milestone
-regularly rather than accumulating the entire feature locally. Report blockers
+Follow the coherent-commit guidance in Delivery above. Within push authorization,
+push each verified milestone regularly rather than accumulating the entire feature locally. Report blockers
 and failed checks honestly. Each new head requires fresh external review before merge, except for the
 verified pure-main-sync carry-forward procedure linked below.
 

@@ -201,8 +201,10 @@ coverage scope, local hooks, and how to handle dependency-update failures.
 [Coverage reports](docs/coverage.md) explains Actions summaries, downloadable HTML
 and the deliberately limited frontend measurement.
 
-Static type checking, code scanning, and repository-level required-check rules are
-future tooling increments. We do not claim those controls are enabled today.
+Backend static type checking, code scanning and remaining review/coverage
+enforcement are further tooling increments. Application CI and audit contexts are
+required by current branch protection; verify live repository rules before
+claiming that additional workflows are required.
 
 ## Working with coding agents
 

@@ -1,6 +1,6 @@
 ---
 name: ecommerce-azure
-description: Plan Azure hosting or infrastructure changes for this ecommerce repository, including the API, future Next.js frontend, and PostgreSQL.
+description: Plan Azure hosting or infrastructure changes for this ecommerce repository, including the API, Next.js frontend, and PostgreSQL.
 ---
 
 Azure is optional future migration work (#31). Apply this skill only for an
@@ -10,7 +10,7 @@ The AWS Terraform in backend/infra is legacy reference, not a starting deploymen
 
 Keep Docker Compose as the local workflow. For cloud work, verify current Azure
 service support and regional availability against Microsoft documentation. Plan
-container hosting for FastAPI and the future Next.js server, managed PostgreSQL,
+container hosting for FastAPI and the Next.js server, managed PostgreSQL,
 image storage, identities/secrets, and logs as one coherent deployment.
 
 Before provisioning, establish the target subscription, region, environment, and

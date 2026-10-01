@@ -1,7 +1,5 @@
 # VINDOR: audit fixes to a complete portfolio demo
 
-**Earlier 1 October trace verification (VIN-223):** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; that historical frontend sample lacks a release attribute, superseded by the [VIN-230 hosted proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107) of matching frontend/backend releases and readable labels. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline and adds no checklist credit. The later VIN-158 same-instance closeout below adds its verified identity outcome to the canonical checklist; trace follow-ups add no extra credit. See the [monitoring runbook](../observability.md#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
-
 Approved by the owner on 19 September 2026. **This is the one canonical portfolio
 completion plan**, including its progress checklist, priorities and acceptance
 gates. Amend this file for tweaks; do not create replacement plans or copy its
@@ -52,7 +50,14 @@ remains pending on a genuine eligible update; manual merges do not satisfy it.
 VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
 acceptance does not mean active implementation and adds no portfolio completion credit.
 
-**Current execution priority — 1 October (owner update):** VIN-223 trace continuity and its documentation closeout are complete in PR #228. Owner-prioritized [VIN-230](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230) frontend release tags and readable bounded trace labels merged in PR #231 and have [hosted development proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107). This follow-up is outside the revised 29-outcome baseline; it adds no automatic completion credit. Owner-prioritized VIN-232 safe HTTP method/status enrichment merged in [PR #235](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/235) as `f4e6307`, passed [normal gated development delivery and smoke checks](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36887763871), and has [joined hosted GET/HTTP 200 proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232#issuecomment-5935362557) with matching release and parent IDs. Wiki closeout is published as `391628a`; VIN-232 is closed and Done, outside the revised baseline with no completion credit. VIN-158 has [hosted throttling/retry evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378). VIN-237 password visibility is merged in PR #239. VIN-158 same-instance visitor isolation and retry are now verified through the bounded automated probe delivered in PR #244; see the closeout below. Resume VIN-89 recovery proof next, then VIN-126 deployed security headers, and VIN-45 safe previews plus the remaining hosted portfolio evidence. VIN-146 frontend CI speed and VIN-147 repeated-run reduction follow portfolio delivery unless a concrete delivery blocker requires a bounded repair. Keep one implementation story active; paused work stays Backlog.
+**Current execution priority — 1 October:** VIN-158 hosted isolation, retry and
+cleanup are verified. Resume VIN-89 hosted cart recovery, then VIN-126 deployed
+security headers and VIN-45 safe previews. VIN-146/VIN-147 delivery-efficiency
+work follows portfolio delivery unless a concrete blocker needs a bounded repair.
+Keep one implementation story active; paused work stays Backlog. Monitoring
+follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
+adds no separate checklist credit. VIN-237 password visibility is delivered in
+PR #239. Source issues and VIN-155 hold detailed daily handoffs.
 
 **Core reliability code merged:** PR #164 merged as `4d3bbd9` after passing required
 CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity,
@@ -68,7 +73,7 @@ Codex completed a clean review and CodeRabbit approved. All review findings were
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
 72% · 21/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
-Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
+Payment implementation and hosted payment acceptance are complete; outstanding security headers and other hosted outcomes remain unchecked.
 
 **Historical sequence change (21 September; current priority above supersedes this handoff):** VIN-118 order drafts are delivered. Continue feature delivery with
 VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. The subsequent development monitoring foundation and joined-trace proof are now verified in VIN-121 and VIN-223; follow the current execution priority above.
@@ -110,7 +115,7 @@ priority label, a category, milestone and project link. Dependencies and blocker
 still govern this plan's sequence. Milestones express outcomes, not promised dates.
 Existing Customer accounts milestones are retained. Closed-ticket priorities are
 retrospective classification; cancelled VIN-42 stays archived and not planned.
-VIN-147 is medium, targeting CI strategy assessment after the queue and VIN-158.
+VIN-147 is medium; its start follows portfolio delivery unless it resolves a concrete blocker.
 
 **PR naming (owner-approved 21 September):** `[VIN-N] [type] Description`.
 PR descriptions open with a linked Issue/title, Closes/Refs, and a separate
@@ -138,22 +143,18 @@ At that checkpoint, VIN-158 awaited hosted verification; VIN-118 is Done followi
 
 ### Blockers and unblock actions
 
-Both tickets below remain required for the finish line. Blocked does not mean
-abandoned or complete. Neither blocks unrelated checkout implementation.
+VIN-45 remains an unfinished finish-line dependency. Development monitoring
+(VIN-121) and joined-trace proof (VIN-223) are complete. A blocked preview story
+does not prevent independent recovery/security work.
 
 | Ticket / board status | Verified dependency | Next unblock action | Who acts | Completion evidence |
 | --- | --- | --- | --- | --- |
-| [#121 Sentry](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/121) · **Done (revised scope)** | Development monitoring foundation verified; PR #222 merged and deployed. | Joined trace proof is verified separately in #223. | Agent | Sanitized errors, logs/metrics, tags, email and quota evidence; trace continuity explicitly excluded by owner-approved split. |
 | [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Blocked** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
 
-**Unblock order:** Stage 5 payment implementation and automated correctness
-evidence and VIN-30 hosted sandbox proof are complete. VIN-223 joined trace proof and documentation closeout are complete. VIN-230 readable labels and frontend release tags are merged and hosted-verified. VIN-158 hosted throttling/retry and same-instance visitor isolation are verified. Complete VIN-89 hosted recovery proof next, then VIN-126 deployed security headers and VIN-45 safe previews. Record
-external blockers and continue independent work rather than waiting idle. Configuration can be prepared
-independently, but telemetry activation waits for privacy checks. #45
-remains in stage 6; its design work must not be mistaken for an owner-only wait.
-Recheck each blocker at its story handoff and record evidence on the source issue.
-If either remains unresolved at portfolio acceptance, report the demo as incomplete
-for that outcome rather than ticking it off.
+**Unblock order:** Follow the current execution priority above. VIN-45 remains
+in stage 6; its design work is agent work, not an established owner-only wait.
+Recheck blockers at each story handoff and record evidence on the source issue.
+An unresolved outcome stays unchecked at portfolio acceptance.
 
 ### Delivery checklist
 
@@ -178,7 +179,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 3 — Security and monitoring
 
-- [x] **#121 privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; PR #219 disables browser-session envelopes and tests actual default-integrations output. Merged as `79d7923` on 30 September after clean Codex review of `c454746` and passing application CI; hosted monitoring remains a separate unchecked outcome.
+- [x] **#121 privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; PR #219 disables browser-session envelopes and tests actual default-integrations output. Merged as `79d7923` on 30 September after clean Codex review of `c454746` and passing application CI; hosted monitoring is recorded in the separate verified foundation outcome below.
 - [x] **#121 development monitoring foundation:** hosted sanitized errors, logs/metrics, release/environment, email alert and quota controls verified. Owner-approved 30 September scope split transferred joined trace continuity to #223, outside this revised baseline; that trace is now verified separately.
 - [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
 
@@ -208,7 +209,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Update architecture/setup/limits and deliver five-minute demo script. The
   [walkthrough and script](../demo.md#five-minute-demonstration-script) are documented
   under VIN-198; final package reconciliation remains required after the outstanding
-  monitoring, recovery and accessibility work. This documentation alone adds no completion credit.
+  security, recovery and accessibility work. This documentation alone adds no completion credit.
 
 **Finish line:** reproducible hosted sandbox purchase, correct money/inventory,
 useful monitoring, restore evidence and an understandable demonstration.
@@ -225,9 +226,9 @@ payment → confirmation/history, verified deployment/monitoring, and interview
 evidence. Preserve Next.js, FastAPI, PostgreSQL and free Vercel/Neon hosting.
 No real customer/payment data, paid services or card-required setup.
 
-The first code change is [storefront rate-limit handling #156](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/156).
-Brief planning/status reconciliation precedes it; wider documentation cleanup
-does not block it. Follow [delivery policy](../delivery.md) throughout.
+The original rollout began with [storefront rate-limit handling #156](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/156).
+Brief planning/status reconciliation preceded it; wider documentation cleanup
+did not block it. Follow [delivery policy](../delivery.md) throughout.
 The owner's 20 September [bounded review and merge authorization](../delivery.md#bounded-review-cycles-and-standing-authorization) permits linked non-blocking deferrals
 and prompt merges after required checks and completed reviews; it does not waive
 blocking defects or authorize bypasses.

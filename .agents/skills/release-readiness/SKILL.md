@@ -15,7 +15,8 @@ resources. Azure is optional future work, the legacy AWS Terraform is not a
 deployment path, and no paid upgrades are authorized:
 
 - Environments: development and production configs isolated; each env points
-  at its own database URL, secret key, API base URL and Sentry DSN.
+  at its own database URL, secret key and API base URL. Telemetry DSNs follow
+  the authorized rollout scope below.
 - Migrations: Alembic upgrade applied and metadata-checked before the API
   deploys; the API deploys before the frontend.
 - Secrets: server-only values in secret stores, never in code, client
@@ -23,8 +24,12 @@ deployment path, and no paid upgrades are authorized:
 - CI gate: the exact revision passed all applicable checks before release.
 - Smoke: public endpoints verified after deploy (storefront, health, docs,
   contract) plus the auth and catalog journey on fictional data.
-- Observability: per-environment Sentry DSNs active; errors visible before
-  traffic is expected.
+- Observability: verify the authorized target environment and rollout scope
+  against docs/observability.md. Development monitoring is active; production
+  telemetry activation is outside that rollout and needs separate authorization.
+  Within the enabled scope, verify errors are visible before expected traffic.
+  Record disabled telemetry outside that scope; do not infer permission to
+  configure or activate another environment.
 - Rollback and recovery: known previous good revision, database restore
   path with written RTO/RPO where applicable, and a production checklist
   recording who approved, what was verified and the next unblocked step.
