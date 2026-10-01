@@ -83,7 +83,7 @@ The earlier revision was superseded before frontend CI completed; the deployment
 gate required a fully tested current main. At that checkpoint, signed visitor
 isolation was unverified and the Vercel connector lacked project-team access.
 The [1 October hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378)
-records the subsequently verified development configuration and bounded isolation/retry outcomes.
+records the subsequently verified development configuration and throttling/retry outcomes; visitor isolation remains unverified.
 
 **Delivered implementation:** VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
