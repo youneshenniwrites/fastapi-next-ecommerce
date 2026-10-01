@@ -29,7 +29,11 @@ can create multiple quotations; they cannot charge money, reserve stock or clear
 cart. Existing per-customer write throttling applies. Retention/expiry of unused
 drafts is a later maintenance concern, not an unbounded list response.
 
-## Placement (VIN-119) and future payment (VIN-30)
+## Placement (VIN-119) and payment (VIN-30)
+
+This decision predates payment delivery. VIN-30 is now implemented and hosted-verified
+in development; see [the sandbox payment runbook](../sandbox-payments.md) for the
+current lifecycle and evidence.
 
 Placement revalidates the draft's product IDs, quantities, current prices and stock.
 It retains the immutable draft snapshots only after confirming their prices still

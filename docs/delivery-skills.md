@@ -2,7 +2,7 @@
 
 These repository skills package our existing delivery workflow. They use GitHub
 Issues, the project board and the canonical PR template. They do not
-create a background service or replace external Codex review.
+create a background service or replace policy-selected external review.
 
 | Invoke | Outcome |
 | --- | --- |
@@ -24,7 +24,9 @@ skills. For new product ideas, run `$product-discovery` before `$refine-tickets`
 so stories decompose from recorded decisions, not open questions.
 
 Codex CLI/IDE provides `/skills` selection and `$skill-name` mentions;
-these files do not register arbitrary `/create-pr` or `/preflight-review` commands. Desktop picker
+these files do not register arbitrary `/create-pr` or `/preflight-review` commands.
+Machine-local command wrappers may delegate to these skills separately; keep them
+as routing shortcuts, not copies of policy or the saved execution mode. Desktop picker
 availability depends on the installed host. See the
 [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
 

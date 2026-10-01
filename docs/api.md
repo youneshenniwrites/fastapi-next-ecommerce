@@ -136,8 +136,8 @@ return 409. Reductions and removal remain allowed during shortages. Cart totals
 use current backend prices, and adding a line does not reserve stock. Deleted
 products are removed from saved carts. See [the cart contract](design/cart-api.md)
 for persistence and concurrency semantics. The signed-in cart storefront is
-implemented; order placement is implemented as documented below. Payment endpoints
-remain planned.
+implemented; order placement is implemented as documented below. Sandbox payment endpoints are implemented; see the
+[payment lifecycle and contract](sandbox-payments.md). Production payments remain disabled.
 
 ## Abuse protection (rate limits)
 

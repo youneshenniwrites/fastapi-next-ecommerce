@@ -9,7 +9,7 @@ regression test or request before a fix when feasible. After the change, run
 
 For API work, show status codes and state changes from isolated tests or probes.
 Container CI runs backend/scripts/smoke.py against disposable PostgreSQL. For UI
-work once a frontend exists, capture the affected flow at appropriate viewport
+work, capture the affected flow at appropriate viewport
 sizes and record loading/error states alongside the happy path. Screenshots
 complement tests; they do not replace them.
 

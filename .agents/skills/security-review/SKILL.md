@@ -25,7 +25,7 @@ implemented controls, not against framework defaults:
   SameSite, origin-check, and any token controls.
 - Privilege: product writes behind require_admin, signup cannot grant admin,
   no public route creates an admin.
-- Money and inventory: server-owned prices, stock and future order totals;
+- Money and inventory: server-owned prices, stock and order totals;
   Decimal two-place GBP strings; Pydantic validation plus database enforcement.
 - Injection: trace attacker-controlled strings to SQL, shell, template, HTML,
   and outbound-request sinks; verify parameterization and encoding beyond

@@ -1,13 +1,9 @@
 # Delivery roadmap
 
-**Earlier 1 October trace verification (VIN-223):** VIN-223 now has [joined hosted trace evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/223#issuecomment-5931310439): Next.js → FastAPI → database, with matching parent IDs and development environment tags. The backend release is recorded; that historical frontend sample lacks a release attribute, superseded by VIN-230 evidence below. No propagation code change or privacy relaxation was needed. VIN-121 remains Done under the owner-approved 30 September scope split. VIN-223 is outside the revised 29-outcome baseline and adds no checklist credit. The canonical plan now records **21/29 (72%)** after the VIN-146 deadline disposition and VIN-158 same-instance proof with verified diagnostics cleanup. See the [monitoring runbook](../observability.md#hosted-trace-continuity--verified-1-october-2026) for evidence and limitations.
-
 Purpose: [senior SWE portfolio plan](portfolio.md).
-
-**1 October monitoring and reliability closeout:** Frontend release tags and bounded readable trace labels merged in PR #231, deployed and have [connected hosted proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107). Privacy and sampling controls remain intact. VIN-232 safe HTTP method/status metadata merged in [PR #235](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/235) and has [joined hosted GET/HTTP 200 proof](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232#issuecomment-5935362557) after normal gated development delivery; VIN-232 is Done. VIN-158 has [hosted throttling/retry evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378). VIN-237 password visibility merged in PR #239. VIN-158 same-instance visitor isolation and retry are now verified by the [bounded automated probe](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909932392) delivered in [merged PR #244](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/244), on deployed release `847092c`: A429 sequence 72 → runner B401 sequence 74 → A429 sequence 75, then A401 retry sequence 88, with one limiter witness and verified signed context. Resume VIN-89 hosted recovery proof next, then VIN-126 security headers and VIN-45 safe previews under the canonical plan. VIN-223, VIN-230 and VIN-232 add no checklist credit. The existing VIN-146 “prove or record unproven” deadline outcome is complete with [unproven-with-reasons evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461), previously giving 19/29 (66%); actual speed-improvement acceptance remains open/Backlog. VIN-158 now verifies its second existing reliability outcome, bringing progress to 21/29 (72%) with the denominator unchanged. Both development diagnostic flags are false; [gated cleanup redeployment](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909436876/attempts/2) succeeded, and direct API/storefront login probes returned 401 with no diagnostic headers at 19:00:05 UTC. [Closeout evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5938473213) links the proof and records cleanup. VIN-238 remains Backlog for future automation refinement; reuse PR #244’s bounded probe without separate checklist credit. Counters remain process-local; this proof does not establish a global distributed budget.
-
-The owner-approved [portfolio completion plan](portfolio-completion.md) governs
-current priorities and acceptance gates; [#155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155) owns live delivery evidence.
+The [canonical portfolio completion plan](portfolio-completion.md) owns progress,
+priorities and acceptance gates; [VIN-155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
+owns current handoffs and evidence. This roadmap indexes capabilities.
 
 ## Landed foundation
 
@@ -85,8 +81,9 @@ published with typed-model and revalidation changes merged (#132/#133). The
 19 September correction distinguishes maintainability work from the invalid
 refresh-import finding; the remaining #84
 guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
-Still open in separate PRs: static type checking, then code scanning and
-remaining review/coverage required-check rules. Frontend lint/type/build and browser checks are now implemented.
+Static type checking, code scanning and remaining review/coverage required-check
+rules are further controls, not claims of open PRs. Consult their source issues
+and the live queue before starting work. Frontend lint/type/build and browser checks are implemented.
 Sentry SDK scaffolding is merged in the API and storefront (#122/#123).
 #121’s revised-scope monitoring foundation is complete: PR #203 implements
 error/transaction/log/metric privacy filtering and serialized-payload tests.
@@ -111,4 +108,4 @@ Account journey verification (#27) is complete; the persistent cart API (#71) an
 
 ### Telemetry refinement
 
-VIN-121 owns privacy-safe logs, checkout RED and payment-health signals plus hosted trace/alert/quota evidence; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). Merged PR #219 delivers these signal additions; hosted foundation acceptance is complete under the revised scope; one joined trace is verified in VIN-223. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.
+VIN-121 delivered privacy-safe logs, checkout RED, payment-health signals and hosted alert/quota evidence; VIN-223 owns joined-trace proof; see the [canonical acceptance refinement](portfolio-completion.md#telemetry-acceptance-refinement-vin-121). Merged PR #219 delivers these signal additions; hosted foundation acceptance is complete under the revised scope; one joined trace is verified in VIN-223. Optional browser RUM is deferred to [VIN-204](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/204) and does not block VIN-121. No additional monitoring vendor or Collector is planned.

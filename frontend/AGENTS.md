@@ -12,7 +12,7 @@ backend/.venv (make setup), a production build, and Playwright Chromium installe
 They launch disposable real FastAPI and fault-fixture servers; never reuse live data.
 
 Use src/app for composition, src/components for UI, src/lib/api for the client.
-FastAPI owns permissions, prices, stock and future order state. API_BASE_URL is
+FastAPI owns permissions, prices, stock and order state. API_BASE_URL is
 server-side only. No credentials belong in browser environment variables.
 
 To update generated types: from backend/ run uv run python -m scripts.export_openapi,

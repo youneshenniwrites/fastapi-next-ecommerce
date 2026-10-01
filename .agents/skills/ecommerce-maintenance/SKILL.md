@@ -27,7 +27,7 @@ the [dependency policy](../../../docs/dependabot.md). Do not request Codex on
 verified Dependabot PRs. Only non-exempt human-authored maintenance PRs retain Codex review. Do not activate the legacy AWS workflow during maintenance.
 
 When documenting tooling, name the executable command, what it verifies, and its
-limits. Keep the runnable catalog distinct from planned authentication and checkout. Keep
+limits. Distinguish implemented behavior from proposed work using the canonical plan. Keep
 README, development/tooling docs, and relevant agent guidance consistent. Validate
 new skill metadata and local links. Report self-review honestly and avoid claiming
 production readiness from coverage or vulnerability-audit results alone.
