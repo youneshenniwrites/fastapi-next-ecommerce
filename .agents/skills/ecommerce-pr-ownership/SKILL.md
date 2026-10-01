@@ -21,7 +21,14 @@ Existing bot/contributor PRs retain their real authors.
 Use .github/pull_request_template.md as the canonical description structure:
 Issue/Problem opening, Summary, optional Before / After, Acceptance criteria, Testing, Review,
 and optional Deployment notes. Lead with the customer or contributor outcome,
-use acceptance criteria from the issue, and report the tested commit and results.
+derive acceptance criteria from the issue, but include only observed, verified
+deliverables in the PR checklist. Never tick unverified outcomes or add unchecked
+future work. Put pending CI/review in Review and genuine post-merge verification
+in Deployment notes. Keep every unfulfilled ticket criterion open on its source
+issue with its proving PR/event and next action. Use Refs for partial delivery;
+use Closes only when the ticket is fully completed. Do not hide unfinished scope
+or relabel an unverified implementation outcome as post-merge work to make the
+checklist appear complete. Report the tested commit and actual results.
 Keep Review to a brief self-review disclosure and links to current-head external
 review and CI evidence, explicitly noting pending or failed results. Remove
 unused optional sections. Keep owner assignment and labels in the sidebar; do
