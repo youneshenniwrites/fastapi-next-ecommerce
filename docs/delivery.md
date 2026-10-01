@@ -137,7 +137,7 @@ The [PR template](../.github/pull_request_template.md) defines the Issue/Problem
 optional Before / After, Acceptance criteria, Testing, Review, and optional
 Deployment notes. Lead with a short customer or contributor outcome; fill
 acceptance criteria from the issue and testing with the tested commit and actual
-results. Use a brief self-review disclosure plus linked current-head external review
+results. PR acceptance checklists contain only observed, verified deliverables. Pending CI/review belongs in Review; genuine post-merge verification belongs in Deployment notes and remains open on the source issue. Never tick unverified work or omit unfinished implementation scope to imply completion. Use Refs for partial ticket delivery. Use a brief self-review disclosure plus linked current-head external review
 and CI evidence. State pending or failed results honestly and refresh evidence
 after changes. Keep owner assignment and labels in the sidebar, without duplicate
 review checkboxes or owner/reviewer metadata in the body. Remove irrelevant

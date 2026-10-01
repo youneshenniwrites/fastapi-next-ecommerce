@@ -16,8 +16,8 @@ Describe the customer or contributor outcome in 1–3 sentences: what changes an
 
 ## Acceptance criteria
 
-<!-- Use the linked issue's criteria; check only verified outcomes. -->
-- [ ] Required outcome
+<!-- List only this PR's observed, verified deliverables as checked items. Never tick unverified work. Disclose pending CI/review below and genuine post-merge verification in Deployment notes; keep unmet ticket criteria open on the linked issue and use Refs for partial delivery. Do not omit unfinished scope to imply completion. -->
+<!-- Add checked items with their evidence after verification; do not leave a checked placeholder. -->
 
 ## Testing
 
