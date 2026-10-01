@@ -33,14 +33,25 @@ def read(url, expected=200, retry=False):
                 urllib.request.Request(url, headers=headers), timeout=30
             ) as response:
                 status, body = response.status, response.read()
+                response_headers = response.headers
         except urllib.error.HTTPError as error:
             status, body = error.code, error.read()
+            response_headers = error.headers
         except (urllib.error.URLError, TimeoutError):
             if attempt + 1 == attempts:
                 raise
             time.sleep(5)
             continue
         if status == expected:
+            for name, value in (
+                ("X-Content-Type-Options", "nosniff"),
+                ("Referrer-Policy", "strict-origin-when-cross-origin"),
+            ):
+                if response_headers.get(name) != value:
+                    raise RuntimeError(
+                        f"Header check failed: {url} missing {name}={value}"
+                    )
+            print(f"Verified HTTP {status} and baseline headers: {url}", flush=True)
             return body
         if attempt + 1 < attempts:
             time.sleep(5)
@@ -123,6 +134,7 @@ def main():
             f"## Development released\n\nCommit: `{sha}`\n\n"
             f"- [Storefront]({WEB})\n- [Swagger]({API}/docs)\n"
             "- Database-backed catalog, API docs, anonymous session and origin checks passed.\n"
+            "- Baseline MIME/referrer headers verified on API and storefront smoke responses.\n"
             "- No database downgrade or mutation replay is performed on failure.\n"
         )
 

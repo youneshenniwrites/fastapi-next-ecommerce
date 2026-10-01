@@ -18,6 +18,8 @@ cross-origin HTTPS requests disclose the referring origin rather than its path
 or query string. These headers cover API docs, redirects, handled errors and the
 API's default unexpected-error response, plus storefront pages and static assets.
 Unexpected API exceptions still propagate to the server and error monitoring.
+Normal development delivery verifies these values on the API and storefront
+smoke responses, including deliberate 401s, using its existing protection bypass.
 Next.js's automatic trailing-slash normalization runs before configured headers;
 its empty same-origin 308 responses are excluded. Tests retain their canonical
 URL and query behavior. Hosting-provider responses outside either application
