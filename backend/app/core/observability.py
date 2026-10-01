@@ -86,11 +86,56 @@ SPAN_LABELS = {
 }
 
 
-def _operation_label(value: Any) -> str:
-    return (
+HTTP_METHODS = {
+    "GET",
+    "HEAD",
+    "POST",
+    "PUT",
+    "DELETE",
+    "CONNECT",
+    "OPTIONS",
+    "TRACE",
+    "PATCH",
+}
+
+
+def _http_method(value: Any) -> str | None:
+    if not isinstance(value, str) or not re.fullmatch(
+        r"[!#$%&'*+.^_`|~0-9A-Za-z-]+", value
+    ):
+        return None
+    return value if value in HTTP_METHODS else "_OTHER"
+
+
+def _http_data(value: Any) -> dict[str, Any]:
+    data = value.get("data") if isinstance(value, dict) else None
+    if not isinstance(data, dict):
+        return {}
+    result = {}
+    method = _http_method(data.get("http.method"))
+    if method is not None:
+        result["http.method"] = method
+    status = data.get("http.response.status_code")
+    if (
+        isinstance(status, int)
+        and not isinstance(status, bool)
+        and 100 <= status <= 599
+    ):
+        result["http.response.status_code"] = status
+    return result
+
+
+def _operation_label(value: Any, data: dict[str, Any] | None = None) -> str:
+    label = (
         SPAN_LABELS.get(value, "Application operation")
         if isinstance(value, str)
         else "Application operation"
+    )
+    method = (data or {}).get("http.method")
+    return (
+        f"{method} · {label}"
+        if value in ("http.server", "http.client") and method
+        else label
     )
 
 
@@ -101,6 +146,9 @@ def _trace_structure(value: Any, fields: set[str]) -> dict[str, Any]:
         result["op"] = (
             op if isinstance(op, str) and op in SPAN_LABELS else "app.operation"
         )
+    data = _http_data(value)
+    if data:
+        result["data"] = data
     return result
 
 
@@ -121,16 +169,31 @@ def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
     )
     if "message" in event:
         result["message"] = FILTERED
+    trace = (
+        (event.get("contexts") or {}).get("trace")
+        if isinstance(event.get("contexts"), dict)
+        else None
+    )
+    trace_data = _http_data(trace)
+    # ASGI stores the root method in request metadata rather than span data.
+    # Copy only the validated method; the request itself remains discarded.
+    request = event.get("request")
+    if (
+        isinstance(trace, dict)
+        and trace.get("op") == "http.server"
+        and "http.method" not in trace_data
+        and isinstance(request, dict)
+    ):
+        method = _http_method(request.get("method"))
+        if method is not None:
+            trace_data["http.method"] = method
     if "transaction" in event:
-        trace = (
-            (event.get("contexts") or {}).get("trace")
-            if isinstance(event.get("contexts"), dict)
-            else None
-        )
         result["transaction"] = (
             SAFE_TRANSACTIONS.get(
                 event["transaction"],
-                _operation_label(trace.get("op") if isinstance(trace, dict) else None)
+                _operation_label(
+                    trace.get("op") if isinstance(trace, dict) else None, trace_data
+                )
                 if event.get("type") == "transaction"
                 else FILTERED,
             )
@@ -161,6 +224,8 @@ def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
         result["contexts"] = {
             "trace": _trace_structure(contexts.get("trace"), trace_fields)
         }
+        if trace_data:
+            result["contexts"]["trace"]["data"] = trace_data
     if isinstance(event.get("spans"), list):
         result["spans"] = [
             {
@@ -168,7 +233,7 @@ def scrub_event(event: dict[str, Any], hint: Any) -> dict[str, Any]:
                     span, trace_fields | {"start_timestamp", "timestamp"}
                 ),
                 "description": _operation_label(
-                    span.get("op") if isinstance(span, dict) else None
+                    span.get("op") if isinstance(span, dict) else None, _http_data(span)
                 ),
             }
             for span in event["spans"]

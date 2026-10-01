@@ -75,10 +75,53 @@ const operationLabels: Record<string, string> = {
   "resource.img": "Image load",
   browser: "Browser operation",
 };
-function operationLabel(value: unknown): string {
-  return typeof value === "string" && Object.hasOwn(operationLabels, value)
-    ? operationLabels[value]
-    : "Application operation";
+const httpMethods = new Set([
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "DELETE",
+  "CONNECT",
+  "OPTIONS",
+  "TRACE",
+  "PATCH",
+]);
+function httpMethod(value: unknown): string | undefined {
+  if (
+    typeof value !== "string" ||
+    !/^[!#$%&'*+.^_`|~0-9A-Za-z-]+(?![\s\S])/.test(value)
+  )
+    return;
+  return httpMethods.has(value) ? value : "_OTHER";
+}
+function httpData(value: unknown): RecordValue {
+  const data = record(record(value).data);
+  const result: RecordValue = {};
+  for (const key of ["http.method", "http.request.method"]) {
+    const method = httpMethod(data[key]);
+    if (method !== undefined) result[key] = method;
+  }
+  for (const key of ["http.response.status_code", "http.status_code"]) {
+    const status = data[key];
+    if (
+      typeof status === "number" &&
+      Number.isInteger(status) &&
+      status >= 100 &&
+      status <= 599
+    )
+      result[key] = status;
+  }
+  return result;
+}
+function operationLabel(value: unknown, data: RecordValue = {}): string {
+  const label =
+    typeof value === "string" && Object.hasOwn(operationLabels, value)
+      ? operationLabels[value]
+      : "Application operation";
+  const method = data["http.request.method"] ?? data["http.method"];
+  return (value === "http.server" || value === "http.client") && method
+    ? `${method} · ${label}`
+    : label;
 }
 function traceStructure(value: unknown, fields = traceFields): RecordValue {
   const result = pick(value, fields);
@@ -88,6 +131,8 @@ function traceStructure(value: unknown, fields = traceFields): RecordValue {
       typeof op === "string" && Object.hasOwn(operationLabels, op)
         ? op
         : "app.operation";
+  const data = httpData(value);
+  if (Object.keys(data).length) result.data = data;
   return result;
 }
 function structure(event: RecordValue): RecordValue {
@@ -105,7 +150,10 @@ function structure(event: RecordValue): RecordValue {
   if ("transaction" in event)
     result.transaction =
       event.type === "transaction"
-        ? operationLabel(record(record(event.contexts).trace).op)
+        ? operationLabel(
+            record(record(event.contexts).trace).op,
+            httpData(record(event.contexts).trace),
+          )
         : FILTERED;
   const values = record(event.exception).values;
   if (Array.isArray(values))
@@ -123,7 +171,7 @@ function structure(event: RecordValue): RecordValue {
   if (Array.isArray(event.spans))
     result.spans = event.spans.map((span) => ({
       ...traceStructure(span, [...traceFields, "timestamp", "start_timestamp"]),
-      description: operationLabel(record(span).op),
+      description: operationLabel(record(span).op, httpData(span)),
     }));
   const images = record(event.debug_meta).images;
   if (Array.isArray(images)) {

@@ -259,8 +259,33 @@ No temporary diagnostic/admin account, paid feature or production telemetry acti
 was needed. Historical traces and filtered exception messages are unchanged.
 This proves a connected sample, not a p95/p99 baseline or capture of every request.
 
-HTTP methods and response codes are still removed by the span-data allowlist.
-[VIN-232](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232) tracks a
-small Backlog follow-up to retain validated method/status metadata; raw URLs, query
-strings, IDs and payloads stay excluded. Removing method data is our conservative
-allowlist choice, not an industry requirement.
+That VIN-230 sample predates HTTP method/status enrichment. It therefore has no
+retained method or response-code fields; historical events are not rewritten.
+
+## Safe HTTP method and response metadata (VIN-232)
+
+[VIN-232](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232) restores
+bounded HTTP metadata in the privacy filter. Implementation and automated evidence
+are tracked on its PR; hosted development verification remains required before Done.
+The [OpenTelemetry HTTP conventions](https://opentelemetry.io/docs/specs/semconv/http/http-spans/)
+identify the method and received/sent response status as useful diagnostic fields.
+This change maps the installed Sentry SDK attributes rather than installing another
+telemetry SDK or Collector.
+
+- Retain exact standard methods: GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS,
+  TRACE and PATCH. Syntactically valid unsupported method tokens become `_OTHER`;
+  malformed or non-string values are discarded. No original unknown token is sent.
+- Retain only integer HTTP response codes from 100 through 599. Missing status is
+  left absent; it is not converted to success. A status code is separate from the
+  SDK span status, such as `ok` or `internal_error`.
+- Show the validated method alongside the bounded HTTP operation label, such as
+  `GET · API request`. Preserve release, environment, duration and parent linkage.
+- Continue removing raw URLs, query strings, headers, cookies, request/response
+  bodies, identifiers, SQL and arbitrary span attributes. Route-template enrichment
+  is outside this small change; do not substitute an actual path for a safe template.
+
+The frontend SDK uses method aliases `http.request.method` and `http.method`, and
+status aliases `http.response.status_code` and `http.status_code`. The backend SDK
+uses `http.method` and `http.response.status_code`; incoming ASGI transaction
+methods are obtained only from validated `request.method`, without retaining the
+request object. Sampling, alerts, quotas and production activation are unchanged.

@@ -172,12 +172,47 @@ describe("Sentry payload privacy", () => {
             name: "fictional-secret",
             op: "http.server",
             forceTransaction: true,
+            attributes: {
+              "http.request.method": "GET",
+              "http.response.status_code": 200,
+              "url.full":
+                "https://user:fictional-secret@shop.invalid/private?token=fictional-secret",
+            },
           },
           () => {
             startSpan(
               { name: "fictional-secret", op: "fictional-secret" },
               () => {},
             );
+            startSpan(
+              {
+                name: "https://shop.invalid/fictional-secret",
+                op: "http.client",
+                attributes: {
+                  "http.method": "POST",
+                  "http.status_code": 401,
+                  "http.response.status_code": 401,
+                  "http.url":
+                    "https://user:fictional-secret@shop.invalid/?token=fictional-secret",
+                },
+              },
+              () => {},
+            );
+            for (const [method, status] of [
+              ["PROPFIND", "401"],
+              ["GET\nfictional-secret", true],
+            ])
+              startSpan(
+                {
+                  name: "fictional-secret",
+                  op: "http.client",
+                  attributes: {
+                    "http.method": method,
+                    "http.response.status_code": status,
+                  },
+                },
+                () => {},
+              );
           },
         );
       });
@@ -196,12 +231,140 @@ describe("Sentry payload privacy", () => {
         "Storefront request",
         "API request",
         "Application operation",
+        "GET · Storefront request",
+        "POST · API request",
+        '"http.request.method":"GET"',
+        '"http.method":"POST"',
+        '"http.response.status_code":401',
+        '"http.status_code":401',
       ]) {
         expect(serialized).toContain(diagnostic);
       }
+      const transactions = payloads
+        .map((payload) => JSON.parse(payload.split("\n")[2]))
+        .filter((event) => event.type === "transaction");
+      const generated = transactions.find(
+        (event) => event.transaction === "GET · Storefront request",
+      );
+      expect(generated.contexts.trace.data).toEqual({
+        "http.request.method": "GET",
+        "http.response.status_code": 200,
+      });
+      expect(
+        generated.spans
+          .filter((span: { op: string }) => span.op === "http.client")
+          .map((span: { data?: unknown }) => span.data),
+      ).toEqual([
+        {
+          "http.method": "POST",
+          "http.status_code": 401,
+          "http.response.status_code": 401,
+        },
+        { "http.method": "_OTHER" },
+        undefined,
+      ]);
       await client.close();
     },
   );
+});
+
+it.each(["http.method", "http.request.method"])(
+  "validates the finite method vocabulary in %s",
+  (key) => {
+    for (const method of [
+      "GET",
+      "HEAD",
+      "POST",
+      "PUT",
+      "DELETE",
+      "CONNECT",
+      "OPTIONS",
+      "TRACE",
+      "PATCH",
+      "get",
+      "PROPFIND",
+      "fictional-secret",
+    ])
+      expect(
+        scrubTransaction({
+          contexts: { trace: { op: "http.server", data: { [key]: method } } },
+        } as never).contexts?.trace?.data,
+      ).toEqual({
+        [key]:
+          /^[A-Z]+$/.test(method) && method !== "PROPFIND" ? method : "_OTHER",
+      });
+    for (const method of [
+      undefined,
+      null,
+      true,
+      42,
+      [],
+      {},
+      "",
+      "GET POST",
+      "GET\n",
+      "GET\r\n",
+      "https://shop.invalid/private?token=fictional-secret",
+    ])
+      expect(
+        scrubTransaction({
+          contexts: { trace: { op: "http.server", data: { [key]: method } } },
+        } as never).contexts?.trace?.data,
+      ).toBeUndefined();
+  },
+);
+
+it.each(["http.response.status_code", "http.status_code"])(
+  "keeps only integer HTTP response status in %s",
+  (key) => {
+    for (const status of [100, 200, 401, 599])
+      expect(
+        scrubTransaction({
+          spans: [{ op: "http.client", data: { [key]: status } }],
+        } as never).spans?.[0].data,
+      ).toEqual({ [key]: status });
+    for (const status of [
+      undefined,
+      null,
+      true,
+      "200",
+      99,
+      600,
+      200.5,
+      NaN,
+      Infinity,
+      {},
+      [],
+    ])
+      expect(
+        scrubTransaction({
+          spans: [{ op: "http.client", data: { [key]: status } }],
+        } as never).spans?.[0].data,
+      ).toBeUndefined();
+  },
+);
+
+it("does not invent HTTP fields or prefix non-HTTP span labels", () => {
+  const clean = scrubTransaction({
+    type: "transaction",
+    transaction: "fictional-secret",
+    contexts: { trace: { op: "http.server" } },
+    request: { method: "GET", url: "fictional-secret" },
+    spans: [
+      {
+        op: "ui.render",
+        data: { "http.method": "GET", arbitrary: "fictional-secret" },
+      },
+      { op: "http.client", data: { "http.method": "PROPFIND" } },
+    ],
+  } as never);
+  expect(clean.transaction).toBe("Storefront request");
+  expect(clean.contexts?.trace?.data).toBeUndefined();
+  expect(clean.spans?.map((s) => s.description)).toEqual([
+    "Component render",
+    "_OTHER · API request",
+  ]);
+  expect(JSON.stringify(clean)).not.toContain("fictional-secret");
 });
 
 it("uses a closed label vocabulary for malformed and malicious spans", () => {

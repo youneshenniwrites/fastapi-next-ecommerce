@@ -151,7 +151,9 @@ def test_serialized_sdk_envelopes_are_private():
             op="http.server",
             trace_id="a" * 32,
             parent_span_id="b" * 16,
-        ):
+        ) as transaction:
+            transaction.set_data("http.method", "GET")
+            transaction.set_http_status(200)
             sentry_sdk.set_context("private", {"password": "fictional-secret"})
             with sentry_sdk.start_span(op="db", description="SELECT fictional-secret"):
                 pass
@@ -159,6 +161,24 @@ def test_serialized_sdk_envelopes_are_private():
                 op="fictional-secret", description="fictional-secret"
             ):
                 pass
+            with sentry_sdk.start_span(
+                op="http.client",
+                description="https://user:fictional-secret@shop.invalid/private?token=fictional-secret",
+            ) as span:
+                span.set_data("http.method", "POST")
+                span.set_http_status(401)
+                span.set_data("http.url", "https://shop.invalid/fictional-secret")
+                span.set_data("arbitrary", {"password": "fictional-secret"})
+            with sentry_sdk.start_span(
+                op="http.client", description="fictional-secret"
+            ) as span:
+                span.set_data("http.method", "PROPFIND")
+                span.set_data("http.response.status_code", "401")
+            with sentry_sdk.start_span(
+                op="http.client", description="fictional-secret"
+            ) as span:
+                span.set_data("http.method", "GET\nfictional-secret")
+                span.set_data("http.response.status_code", True)
         sentry_sdk.logger.error(
             "fictional-secret", attributes={"password": "fictional-secret"}
         )
@@ -189,6 +209,33 @@ def test_serialized_sdk_envelopes_are_private():
     assert b"privacy-test" in serialized
     assert b"demo@1" in serialized
     assert b"API request" in serialized
+    assert rb"GET \u00b7 API request" in serialized
+    assert rb"POST \u00b7 Provider request" in serialized
+    assert rb"_OTHER \u00b7 Provider request" in serialized
+    transactions = [
+        item.payload.json
+        for envelope in envelopes
+        for item in envelope.items
+        if item.headers["type"] == "transaction"
+    ]
+    transaction = next(
+        item
+        for item in transactions
+        if item["contexts"]["trace"]["trace_id"] == "a" * 32
+    )
+    assert transaction["contexts"]["trace"]["data"] == {
+        "http.method": "GET",
+        "http.response.status_code": 200,
+    }
+    assert [
+        span.get("data")
+        for span in transaction["spans"]
+        if span.get("op") == "http.client"
+    ] == [
+        {"http.method": "POST", "http.response.status_code": 401},
+        {"http.method": "_OTHER"},
+        None,
+    ]
     assert b"Database query" in serialized
     assert b"Application operation" in serialized
     assert b"a" * 32 in serialized
@@ -434,7 +481,13 @@ def test_real_fastapi_transaction_has_safe_operation(client):
         traces_sample_rate=1,
         before_send_transaction=scrub_event,
     ):
-        client.put("/api/v1/cart/items/1", json={"quantity": 1})
+        response = client.put(
+            "/api/v1/cart/items/1?token=fictional-secret",
+            json={"quantity": 1},
+            headers={"X-Private": "fictional-secret"},
+        )
+        assert response.status_code == 401
+        assert client.get("/api/v1/products/?token=fictional-secret").status_code == 200
         sentry_sdk.flush()
     transactions = [
         item.payload.json
@@ -445,6 +498,23 @@ def test_real_fastapi_transaction_has_safe_operation(client):
     assert any(item["transaction"] == "cart_write" for item in transactions), (
         transactions
     )
+    cart = next(item for item in transactions if item["transaction"] == "cart_write")
+    assert cart["contexts"]["trace"]["data"] == {
+        "http.method": "PUT",
+        "http.response.status_code": 401,
+    }
+    catalog = next(
+        item for item in transactions if item["transaction"] == "GET · API request"
+    )
+    assert catalog["contexts"]["trace"]["data"] == {
+        "http.method": "GET",
+        "http.response.status_code": 200,
+    }
+    assert (
+        "fictional-secret"
+        not in b"\n".join(envelope.serialize() for envelope in envelopes).decode()
+    )
+    assert all("request" not in item for item in transactions)
 
 
 def test_readable_labels_never_copy_raw_names_or_sql():
@@ -479,3 +549,154 @@ def test_readable_labels_never_copy_raw_names_or_sql():
         scrub_event({"transaction": "private@example.invalid"}, {})["transaction"]
         == "[Filtered]"
     )
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "DELETE",
+        "CONNECT",
+        "OPTIONS",
+        "TRACE",
+        "PATCH",
+        "get",
+        "PROPFIND",
+        "fictional-secret",
+    ],
+)
+def test_http_methods_use_closed_vocabulary(method):
+    expected = (
+        method
+        if method
+        in {
+            "GET",
+            "HEAD",
+            "POST",
+            "PUT",
+            "DELETE",
+            "CONNECT",
+            "OPTIONS",
+            "TRACE",
+            "PATCH",
+        }
+        else "_OTHER"
+    )
+    clean = scrub_event(
+        {
+            "type": "transaction",
+            "transaction": "fictional-secret",
+            "contexts": {
+                "trace": {"op": "http.server", "data": {"http.method": method}}
+            },
+        },
+        {},
+    )
+    assert clean["contexts"]["trace"]["data"] == {"http.method": expected}
+    assert clean["transaction"] == f"{expected} · API request"
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        None,
+        True,
+        42,
+        [],
+        {},
+        "",
+        "GET POST",
+        "GET\n",
+        "https://shop.invalid/private?token=fictional-secret",
+    ],
+)
+def test_malformed_http_methods_are_dropped(method):
+    clean = scrub_event(
+        {
+            "contexts": {
+                "trace": {"op": "http.server", "data": {"http.method": method}}
+            },
+            "request": {"method": method},
+        },
+        {},
+    )
+    assert "data" not in clean["contexts"]["trace"]
+    assert "request" not in clean
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        100,
+        200,
+        401,
+        599,
+        None,
+        True,
+        False,
+        "200",
+        99,
+        600,
+        200.5,
+        float("nan"),
+        float("inf"),
+        {},
+        [],
+    ],
+)
+def test_http_status_requires_integer_in_range(status):
+    span = scrub_event(
+        {
+            "spans": [
+                {"op": "http.client", "data": {"http.response.status_code": status}}
+            ]
+        },
+        {},
+    )["spans"][0]
+    if (
+        isinstance(status, int)
+        and not isinstance(status, bool)
+        and 100 <= status <= 599
+    ):
+        assert span["data"] == {"http.response.status_code": status}
+    else:
+        assert "data" not in span
+
+
+def test_http_fallback_never_preserves_raw_request_or_invents_status():
+    event = {
+        "type": "transaction",
+        "transaction": "fictional-secret",
+        "contexts": {"trace": {"op": "http.server"}},
+        "request": {
+            "method": "PATCH",
+            "url": "https://user:fictional-secret@shop.invalid/private?token=fictional-secret",
+            "headers": {"Authorization": "fictional-secret"},
+        },
+    }
+    clean = scrub_event(event, {})
+    assert clean["contexts"]["trace"]["data"] == {"http.method": "PATCH"}
+    assert clean["transaction"] == "PATCH · API request"
+    assert "fictional-secret" not in str(clean)
+    assert "request" not in clean
+    event["contexts"]["trace"]["data"] = {"http.method": "PUT"}
+    assert scrub_event(event, {})["contexts"]["trace"]["data"] == {"http.method": "PUT"}
+    del event["request"]
+    del event["contexts"]["trace"]["data"]
+    assert "data" not in scrub_event(event, {})["contexts"]["trace"]
+    clean = scrub_event(
+        {
+            "spans": [
+                {
+                    "op": "db",
+                    "data": {"http.method": "GET"},
+                    "description": "SELECT fictional-secret",
+                }
+            ]
+        },
+        {},
+    )
+    assert clean["spans"][0]["description"] == "Database query"
