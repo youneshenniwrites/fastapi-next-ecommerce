@@ -409,14 +409,29 @@ for (const mode of ["login", "register"] as const) {
       await page.goto(`/${mode}`, { waitUntil: "commit" });
       const email = page.getByLabel("Email address");
       const password = page.getByLabel("Password", { exact: true });
-      const submit = page.getByRole("main").getByRole("button");
+      const submit = page
+        .getByRole("form", {
+          name: mode === "login" ? "Sign in" : "Create account",
+        })
+        .getByRole("button", {
+          name:
+            mode === "login"
+              ? /^(Preparing sign-in…|Sign in|Signing in…)$/
+              : /^(Preparing registration…|Create account|Creating account…)$/,
+        });
+      const toggle = page.getByRole("button", {
+        name: "Show password",
+        exact: true,
+      });
       await expect(email).toBeDisabled();
       await expect(password).toBeDisabled();
       await expect(submit).toBeDisabled();
+      await expect(toggle).toBeDisabled();
       await expect(submit).toContainText("Preparing");
       expect(submissions).toBe(0);
       release();
       await expect(submit).toBeEnabled();
+      await expect(toggle).toBeEnabled();
       await email.fill("first-click@example.com");
       await password.fill("fictional-first-click-password");
       let documentRequests = 0;
@@ -448,7 +463,16 @@ test.describe("without JavaScript", () => {
       await page.goto(`/${mode}`);
       await expect(page.getByLabel("Email address")).toBeDisabled();
       await expect(page.getByLabel("Password", { exact: true })).toBeDisabled();
-      await expect(page.getByRole("main").getByRole("button")).toBeDisabled();
+      await expect(
+        page.getByRole("button", {
+          name:
+            mode === "login" ? "Preparing sign-in…" : "Preparing registration…",
+          exact: true,
+        }),
+      ).toBeDisabled();
+      await expect(
+        page.getByRole("button", { name: "Show password", exact: true }),
+      ).toBeDisabled();
       await expect(
         page.getByText(
           "Loading the form. If this message remains, enable JavaScript and reload the page.",
