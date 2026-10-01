@@ -76,11 +76,14 @@ VIN-158 hosted proof is complete; VIN-89 remains open for hosted proof; VIN-147 
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
 
+**Historical development deployment (superseded by the 1 October VIN-158 closeout below):**
 Development deployment and public smoke checks succeeded for `91daad7` in
 [run 35642648695](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/35642648695).
 The earlier revision was superseded before frontend CI completed; the deployment
-gate required a fully tested current main. Signed visitor isolation is still
-unverified; the Vercel connector currently lacks access to the project team.
+gate required a fully tested current main. At that checkpoint, signed visitor
+isolation was unverified and the Vercel connector lacked project-team access.
+The [1 October hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378)
+records the subsequently verified development configuration and bounded isolation/retry outcomes.
 
 **Delivered implementation:** VIN-119 atomic
 placement, stock protection and customer-scoped idempotency. VIN-118 evidence:
