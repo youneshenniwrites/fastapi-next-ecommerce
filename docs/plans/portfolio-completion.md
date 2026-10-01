@@ -76,7 +76,7 @@ retain the issue hierarchy for organization, not as a competing completion metri
 Payment implementation and hosted payment acceptance are complete; outstanding security, monitoring and other hosted outcomes remain unchecked.
 
 **Historical sequence change (21 September; current priority above supersedes this handoff):** VIN-118 order drafts are delivered. Continue feature delivery with
-VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. Next: finish development configuration and hosted telemetry verification; PR #203 supplies the merged privacy prerequisite.
+VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. The subsequent development monitoring foundation and joined-trace proof are now verified in VIN-121 and VIN-223; follow the current execution priority above.
 VIN-158 and VIN-89 remain open for hosted proof; VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.

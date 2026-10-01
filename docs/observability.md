@@ -186,7 +186,8 @@ revision through the existing exact-main CI gate after configuring DSNs.
    not obscurity, control access. Never introduce a public browser toggle.
 7. Record sanitized error/log/metric evidence, release/environment, trace linkage,
    alert receipt and resolution. Never paste credentials into tickets. Hosted
-   acceptance stays incomplete until those results are recorded on VIN-121.
+   acceptance stays incomplete until results are recorded on their owning issue:
+   VIN-121 for the revised-scope foundation, VIN-223 for joined-trace evidence.
 
 Counters are emitted without trace sampling, but SDK shutdown, transport failure
 or provider quotas can still drop observations. They are not a durable accounting

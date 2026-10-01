@@ -86,10 +86,12 @@ guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
 Still open in separate PRs: static type checking, then code scanning and
 remaining review/coverage required-check rules. Frontend lint/type/build and browser checks are now implemented.
 Sentry SDK scaffolding is merged in the API and storefront (#122/#123).
-#121 remains open: PR #203 implements error/transaction/log/metric privacy
-filtering and serialized-payload tests. Merged PR #219 delivers browser-session
-protection and commerce signals. Next finish development configuration and
-live telemetry evidence; do not repeat implemented prerequisites. DSNs alone do not complete monitoring.
+#121’s revised-scope monitoring foundation is complete: PR #203 implements
+error/transaction/log/metric privacy filtering and serialized-payload tests.
+Merged PR #219 delivers browser-session protection and commerce signals.
+VIN-223 records one joined hosted trace; release-coverage and sampling limitations
+remain explicit in the observability runbook. Do not repeat completed configuration
+or verification. DSNs alone do not complete monitoring.
 Operational runbooks and release/restore verification continue alongside hosted
 development.
 
