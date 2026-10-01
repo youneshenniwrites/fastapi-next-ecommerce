@@ -173,3 +173,47 @@ it.each(["login", "register"] as const)(
     ).toBe(false);
   },
 );
+
+it.each(["login", "register"] as const)(
+  "toggles %s password visibility without changing credentials or submitting",
+  async (mode) => {
+    const request = vi
+      .fn()
+      .mockResolvedValue(new Response("{}", { status: 401 }));
+    vi.stubGlobal("fetch", request);
+    render(<AccountForm mode={mode} />);
+    const password = screen.getByLabelText("Password") as HTMLInputElement;
+    expect(password.type).toBe("password");
+    expect(password.autocomplete).toBe(
+      mode === "login" ? "current-password" : "new-password",
+    );
+    fireEvent.change(password, { target: { value: "  fictional-password  " } });
+    const toggle = screen.getByRole("button", { name: "Show password" });
+    expect(toggle.getAttribute("type")).toBe("button");
+    expect(toggle.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(toggle);
+    expect(password.type).toBe("text");
+    expect(password.value).toBe("  fictional-password  ");
+    expect(
+      screen
+        .getByRole("button", { name: "Hide password" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(password.type).toBe("password");
+    expect(password.value).toBe("  fictional-password  ");
+    expect(request).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("Email address"), {
+      target: { value: "fiction@example.test" },
+    });
+    fireEvent.submit(
+      screen.getByRole("form", {
+        name: mode === "login" ? "Sign in" : "Create account",
+      }),
+    );
+    await waitFor(() => expect(request).toHaveBeenCalledOnce());
+    expect(JSON.parse(request.mock.calls[0][1].body).password).toBe(
+      "  fictional-password  ",
+    );
+  },
+);

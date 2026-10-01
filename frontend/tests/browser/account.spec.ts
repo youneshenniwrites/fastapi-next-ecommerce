@@ -2,6 +2,48 @@ import { test, expect } from "@playwright/test";
 import { createHmac } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 
+for (const route of ["login", "register"]) {
+  test(`${route} password visibility supports keyboard and pointer without submission`, async ({
+    page,
+  }) => {
+    let submissions = 0;
+    page.on("request", (request) => {
+      if (
+        request.method() === "POST" &&
+        request.url().includes("/api/session/")
+      )
+        submissions++;
+    });
+    await page.goto(`/${route}`);
+    const password = page.getByLabel("Password", { exact: true });
+    const value = "fictional-visibility-password";
+    await expect(password).toBeEnabled();
+    await password.fill(value);
+    await expect(password).toHaveAttribute("type", "password");
+    await password.focus();
+    await page.keyboard.press("Tab");
+    const show = page.getByRole("button", {
+      name: "Show password",
+      exact: true,
+    });
+    await expect(show).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(password).toHaveAttribute("type", "text");
+    await expect(password).toHaveValue(value);
+    const hide = page.getByRole("button", {
+      name: "Hide password",
+      exact: true,
+    });
+    await expect(hide).toHaveAttribute("aria-pressed", "true");
+    if (test.info().project.name.includes("Pixel")) await hide.tap();
+    else await hide.click();
+    await expect(password).toHaveAttribute("type", "password");
+    await expect(password).toHaveValue(value);
+    expect(submissions).toBe(0);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  });
+}
+
 // A tap can land mid-remount and be swallowed, so re-tap until the menu is
 // visible instead of failing outright.
 async function openMobileMenu(page: import("@playwright/test").Page) {
