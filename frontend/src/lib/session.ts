@@ -57,6 +57,35 @@ function rateLimited(response: Response) {
   return result;
 }
 
+// Temporary, explicitly enabled development proof; never relay arbitrary headers.
+function limiterEvidence(result: NextResponse, upstream: Response) {
+  const release = process.env.SENTRY_RELEASE ?? "";
+  const instance = upstream.headers.get("X-Vindor-Limiter-Instance") ?? "";
+  const sequence = upstream.headers.get("X-Vindor-Limiter-Sequence") ?? "";
+  const limit = upstream.headers.get("X-Vindor-Limiter-Limit") ?? "";
+  const context = upstream.headers.get("X-Vindor-Limiter-Context");
+  if (
+    process.env.VERCEL === "1" &&
+    process.env.SENTRY_ENVIRONMENT === "development" &&
+    process.env.RATE_LIMIT_DIAGNOSTICS_ENABLED === "true" &&
+    /^[a-f0-9]{40}$/.test(release) &&
+    upstream.headers.get("X-Vindor-Limiter-Release") === release &&
+    /^[a-f0-9]{32}$/.test(instance) &&
+    /^[1-9][0-9]{0,15}$/.test(sequence) &&
+    Number.isSafeInteger(Number(sequence)) &&
+    /^[1-9][0-9]{0,15}$/.test(limit) &&
+    Number.isSafeInteger(Number(limit)) &&
+    (context === "verified" || context === "fallback")
+  ) {
+    result.headers.set("X-Vindor-Limiter-Instance", instance);
+    result.headers.set("X-Vindor-Limiter-Sequence", sequence);
+    result.headers.set("X-Vindor-Limiter-Limit", limit);
+    result.headers.set("X-Vindor-Limiter-Context", context);
+    result.headers.set("X-Vindor-Limiter-Release", release);
+  }
+  return result;
+}
+
 function clear(
   response: NextResponse,
   config: ReturnType<typeof sessionPolicy>,
@@ -108,9 +137,13 @@ export async function login(request: NextRequest) {
         ...rateLimitContextHeaders(request, "/api/v1/auth/login"),
       },
     });
-    if (result.response.status === 429) return rateLimited(result.response);
+    if (result.response.status === 429)
+      return limiterEvidence(rateLimited(result.response), result.response);
     if (result.response.status === 401)
-      return clear(reply({ error: "Invalid credentials" }, 401), config);
+      return limiterEvidence(
+        clear(reply({ error: "Invalid credentials" }, 401), config),
+        result.response,
+      );
     if (!result.data || result.response.status !== 200)
       return reply({ error: "Authentication service unavailable" }, 503);
     const { access_token, expires_in, token_type } = result.data;

@@ -167,7 +167,9 @@ def _enforce(request: Request, limiter: RateLimiter, key: str | None = None) -> 
     evidence: dict[str, str] | None = {} if capture else None
     allowed, retry_after = limiter.consume(bucket, evidence=evidence)
     if evidence is not None:
-        evidence.update(context=context, release=settings.SENTRY_RELEASE)
+        evidence.update(
+            context=context, release=settings.SENTRY_RELEASE, limit=str(limiter.limit)
+        )
         request.state.rate_limit_diagnostic = evidence
     if not allowed:
         count_rate_limit_rejection(

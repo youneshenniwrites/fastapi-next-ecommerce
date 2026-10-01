@@ -63,10 +63,12 @@ def test_same_instance_orders_isolated_signed_decisions(client, enabled):
     assert [int(proof[PREFIX + "sequence"]) for proof in proofs] == [1, 2, 3, 4]
     for response, proof in zip(responses, proofs, strict=True):
         assert set(proof) == {
-            PREFIX + name for name in ("instance", "context", "release", "sequence")
+            PREFIX + name
+            for name in ("instance", "context", "release", "sequence", "limit")
         }
         assert proof[PREFIX + "context"] == "verified"
         assert proof[PREFIX + "release"] == RELEASE
+        assert proof[PREFIX + "limit"] == "1"
         assert response.headers["cache-control"] == "no-store"
         for forbidden in (
             KEY,
