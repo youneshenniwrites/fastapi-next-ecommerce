@@ -10,6 +10,26 @@ FastAPI publishes an OpenAPI 3.1 contract for every implemented endpoint:
 - ReDoc: http://localhost:8000/redoc
 - Machine-readable schema: http://localhost:8000/openapi.json
 
+## Baseline response headers
+
+The API and storefront explicitly send `X-Content-Type-Options: nosniff` and
+`Referrer-Policy: strict-origin-when-cross-origin`. MIME types remain unchanged;
+cross-origin HTTPS requests disclose the referring origin rather than its path
+or query string. These headers cover API docs, redirects, handled errors and the
+API's default unexpected-error response, plus storefront pages and static assets.
+Unexpected API exceptions still propagate to the server and error monitoring.
+Normal development delivery verifies these values on the API and storefront
+smoke responses, including deliberate 401s, using its existing protection bypass.
+Next.js's automatic trailing-slash normalization runs before configured headers;
+its empty same-origin 308 responses are excluded. Tests retain their canonical
+URL and query behavior. Hosting-provider responses outside either application
+(for example deployment-protection errors) are also outside this header policy.
+
+[VIN-248](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/248)
+records testing and hosted verification. This is a baseline slice of
+[VIN-126](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/126);
+CSP rollout, framing and transport policies remain unfinished.
+
 ## Start and verify the local API
 
 These URLs refer to **your computer**. GitHub displays the source and contract;

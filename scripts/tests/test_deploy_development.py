@@ -7,11 +7,55 @@ import tarfile
 import tempfile
 import unittest
 import urllib.error
+from email.message import Message
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import deploy_development as deploy
+
+
+class DeploymentHeaderTests(unittest.TestCase):
+    def test_expected_success_and_auth_error_require_real_response_headers(self):
+        for status in (200, 401):
+            for missing in (None, "X-Content-Type-Options", "Referrer-Policy"):
+                with self.subTest(status=status, missing=missing):
+                    headers = Message()
+                    headers["X-Content-Type-Options"] = "nosniff"
+                    headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+                    if missing:
+                        del headers[missing]
+                    if status == 401:
+                        response = urllib.error.HTTPError(
+                            "https://fixture.test/me",
+                            401,
+                            "denied",
+                            headers,
+                            io.BytesIO(b"unauthorized"),
+                        )
+                        call = patch.object(
+                            deploy.urllib.request, "urlopen", side_effect=response
+                        )
+                    else:
+                        response = MagicMock()
+                        response.__enter__.return_value = response
+                        response.status = status
+                        response.headers = headers
+                        response.read.return_value = b"ok"
+                        call = patch.object(
+                            deploy.urllib.request, "urlopen", return_value=response
+                        )
+                    with call:
+                        if missing:
+                            with self.assertRaisesRegex(
+                                RuntimeError, "Header check failed"
+                            ):
+                                deploy.read("https://fixture.test/me", expected=status)
+                        else:
+                            self.assertEqual(
+                                deploy.read("https://fixture.test/me", expected=status),
+                                b"ok" if status == 200 else b"unauthorized",
+                            )
 
 
 class DeploymentReleaseTests(unittest.TestCase):

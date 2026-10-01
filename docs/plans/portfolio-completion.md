@@ -327,6 +327,13 @@ Introduce compatible headers and a tested CSP rollout. Verify sessions, Server
 Actions, images and Sentry. Inspect deployed responses rather than assuming
 repository settings equal hosted behavior.
 
+[VIN-248](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/248)
+delivers the small baseline slice: `nosniff` and explicit referrer policy on the
+API and storefront. Its issue retains CI/review and hosted verification evidence.
+The full VIN-126 outcome above stays unchecked until its remaining CSP, framing,
+transport and deployed acceptance criteria are verified; this slice adds no
+separate portfolio outcome.
+
 ## 4. Correct checkout (#29: #118 → #119 → #120)
 
 Run architecture-review once for the epic and record transaction/state decisions

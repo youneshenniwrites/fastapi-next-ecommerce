@@ -6,6 +6,20 @@ import {
 } from "./src/lib/sentry-options";
 const config: NextConfig = {
   poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
+    ];
+  },
   // A public build identifier, not a credential. Both runtimes use the same
   // build-time value even if server environment variables later change.
   env: { NEXT_PUBLIC_SENTRY_RELEASE: process.env.SENTRY_RELEASE || "" },
