@@ -78,8 +78,8 @@ into `NEXT_PUBLIC_SENTRY_RELEASE` for both browser and server initialization. On
 that non-secret identifier is published; source-map credentials remain server-only.
 A redeployment/build is required to change it. Local builds without a release or
 Sentry credentials remain supported. VIN-230's normal development deployment and
-controlled catalog trace will prove these labels and release tags before closure;
-the earlier trace below remains historical evidence of the previous limitation.
+controlled catalog trace verified these labels and release tags on 1 October;
+the earlier VIN-223 trace below remains historical evidence of the previous limitation.
 
 ## Sampling and quota guardrails
 
@@ -223,8 +223,8 @@ Both projects show `development`. The backend records release
 release attribute, so it does not prove frontend release tagging. The root took
 871 ms, FastAPI 12.86 ms and database 3.59 ms. One sample is not a p95/p99 baseline.
 
-No propagation fix or privacy relaxation was needed. Descriptions remain
-`[Filtered]`; readable names are not a prerequisite for proving parent linkage.
+No propagation fix or privacy relaxation was needed for this historical VIN-223 sample. Its descriptions remain
+`[Filtered]`; the later VIN-230 verification below proves readable labels for new traces.
 No diagnostic flag, account, production setting or paid service was changed.
 Fresh catalog probes on 1 October returned HTTP 200 but were not found under their
 supplied trace IDs at inspection; this evidence does not promise every request
@@ -233,4 +233,34 @@ will be captured. Sampling and ingestion must be considered when repeating it.
 To inspect continuity, select both projects (or All Projects), open the exact
 trace, and compare parent IDs across the outgoing HTTP, API and database spans.
 Do not infer a propagation defect from a partial waterfall alone. Keep release
-coverage and readable span naming limitations explicit in future improvements.
+coverage and sampling limitations explicit when assessing a particular sample.
+
+## Readable labels and frontend release — verified 1 October 2026
+
+[PR #231](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/231) merged as
+`6109cf439e34d2fb0b9432f614f02937c15d7ac5`; required PR/main CI and
+[development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36879202076) passed.
+[VIN-230 hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/230#issuecomment-5934081107) verifies
+trace `ce620be45d964b57a947b44aea0d0b2f` with **Storefront request → API request → Database query**,
+Next.js function labels and Application operation for unknown operations.
+
+| Operation | Span ID | Verified parent |
+| --- | --- | --- |
+| Frontend outgoing API request | `a71e7f4b9da471b2` | Frontend span `b54e1f39def54fb5` |
+| FastAPI request | `9e2020e9cb8d006f` | `a71e7f4b9da471b2` |
+| Database query | `9f43e5a874902673` | `9e2020e9cb8d006f` |
+
+Both projects show `development` and release `6109cf439e34d2fb0b9432f614f02937c15d7ac5`.
+The deployed public browser bundle and page trace metadata also contain that revision.
+The initial read and eight bounded read-only catalog probes used sampled incoming
+trace context; configured sampling was unchanged. A normal browser product-page
+load also succeeded. Allow for ingestion delay before judging a missing trace.
+No temporary diagnostic/admin account, paid feature or production telemetry activation
+was needed. Historical traces and filtered exception messages are unchanged.
+This proves a connected sample, not a p95/p99 baseline or capture of every request.
+
+HTTP methods and response codes are still removed by the span-data allowlist.
+[VIN-232](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/232) tracks a
+small Backlog follow-up to retain validated method/status metadata; raw URLs, query
+strings, IDs and payloads stay excluded. Removing method data is our conservative
+allowlist choice, not an industry requirement.
