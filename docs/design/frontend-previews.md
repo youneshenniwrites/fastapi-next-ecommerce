@@ -74,8 +74,18 @@ gh workflow run preview.yml --ref main \
 
 Read the Actions summary for the exact preview URL, source SHA and deployment ID.
 Use the deployment's unique URL, not a stable alias. Keep Vercel Authentication;
-team members sign in normally. CLI automation may use the official protected
-request mechanism, without publishing bypass links/tokens.
+team members sign in normally. Do not invoke protected-request tooling blindly:
+`vercel curl` may create persistent project-wide automation bypass access when no
+secret exists. This preview proof does not authorize that extra access.
+
+For an HTTP probe that must reach the application behind Vercel Authentication,
+use the supported [deployment-specific share grant](https://vercel.com/docs/rest-api/aliases/update-the-protection-bypass-for-a-url)
+only within explicit access authorization. Target the recorded managed deployment
+ID, set a finite short expiry, preserve unrelated grants, keep its token/cookie
+private and revoke only the grant created for the proof immediately afterward.
+Verify revocation; if cleanup fails, record it and retire the managed preview.
+Wrong-origin logout must return the application's JSON `Origin rejected` response;
+a Vercel authentication failure alone does not verify the application policy.
 
 Verify the exact release, HTTPS/security headers, real fictional login/cart,
 anonymous sessions on other hosts, distinct-account ownership, wrong-origin writes
