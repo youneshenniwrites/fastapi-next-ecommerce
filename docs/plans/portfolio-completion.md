@@ -58,7 +58,10 @@ VIN-126 is verified through the staged policy, guarded nonce correction and
 enforcement in PRs #254–#256. Its hosted release and evidence are recorded below.
 VIN-45 is active: [PR #264](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/264)
 merged guarded preview orchestration and exact-origin sessions as `064bfae`.
-Hosted preview verification and retirement remain open; no outcome is credited.
+PR #265 merged the operator guidance. Its protected preview passed fictional
+login, account/host isolation and exact-deployment retirement; [the checkpoint](../design/frontend-previews.md#hosted-checkpoint--2-october-2026)
+records that proof and its limits. Application headers/release identity and
+wrong-origin HTTP rejection remain unverified; no complete outcome is credited.
 VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
@@ -206,7 +209,7 @@ independent restore/accessibility work.
 
 | Ticket / board status | Verified dependency | Next unblock action | Who acts | Completion evidence |
 | --- | --- | --- | --- | --- |
-| [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Active** | [Design and implementation](../design/frontend-previews.md) merged in PR #264. Preview source shares only fictional development API data and uses host-only cookies; it is not a database clone. Hosted acceptance remains unverified. | Review and check a small source PR containing current main, then request its exact-head preview from trusted main; verify login/cart/ownership, wrong-origin rejection and exact deployment retirement. | **Agent:** hosted verification, cleanup and evidence. **Owner:** only a demonstrated access dependency. | Reviewed preview revision/URL, exact allowed origin, development-only configuration, working fictional login/cart, creation and retirement proof. |
+| [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Active** | [Design and implementation](../design/frontend-previews.md) merged in PR #264; PR #265 merged guidance. One reviewed preview passed fictional login, account/host isolation and retirement. Shared fictional development data is intentional, not a database clone. | Use a fresh reviewed open source containing current main to prove protected application headers/release and wrong-origin rejection, then retire it. Retain the quantity observation for VIN-260 investigation. | **Agent:** remaining hosted verification, cleanup and evidence. **Owner:** only a demonstrated access dependency. | Exact reviewed revision/URL, safe configuration, positive login/cart ownership, application-response origin/header proof and retirement evidence. |
 
 **Unblock order:** Follow the current execution priority above. VIN-45 remains
 in stage 6; its remaining hosted verification is agent work, not an established owner-only wait.

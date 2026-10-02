@@ -107,6 +107,42 @@ A failed/uncertain creation may leave a deployment: inspect Vercel before retryi
 and retire the identified managed preview rather than blindly creating duplicates.
 Free quota/provider refusal is an explicit unfinished acceptance blocker.
 
+## Hosted checkpoint — 2 October 2026
+
+[Creation run 37068729348](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37068729348)
+created protected deployment `dpl_EMjSUs1KW1avWvYPQuTdcQSGbohn` from reviewed
+PR #265 revision `2112afbd9220351d9edead970576a32a30544a90`.
+Its unique hostname was
+`vindor-ecommerce-development-oim57jtjd-younes-hennis-projects.vercel.app`;
+it is retired, not a current demo link. The workflow validated the source and
+credential boundary; Vercel reported a ready Preview deployment. Unauthenticated
+HTTP navigation redirected to Vercel login, while the authenticated in-app browser
+could use the storefront. A login-page HTTP 200 is not application-response proof.
+
+Two fictional development customers registered and signed in. The second account
+had an empty cart; signing back into the first account restored its own cart.
+The stable development host remained signed out while the preview was signed in.
+Both sessions were signed out and the first cart was emptied before retirement.
+These observations prove account/host isolation and persistence, not exact
+single-click quantity semantics: a quantity change from one to three was observed
+without captured request counts. Its cause remains unproven; VIN-260's cart
+coverage must investigate rather than claim a regression fix.
+
+[Retirement run 37069674886](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37069674886)
+removed that exact managed deployment and verified provider 404. The unique URL
+then returned HTTP 404 / `DEPLOYMENT_NOT_FOUND`; the documented stable development
+and production aliases still responded normally. No protection grant was created.
+
+VIN-45 remains incomplete: protected application headers/release identity and
+actual wrong-origin HTTP rejection still need hosted evidence. The foreign-origin
+browser form produced no observable application response, so it is not a pass.
+The later creation request in
+[run 37069992201](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37069992201)
+was rejected before credentials/upload because PR #265 had already merged. Use a
+fresh reviewed open PR for the remaining proof; do not weaken the open-source guard
+or reuse the retired URL. Record the final result and cleanup on VIN-45 before
+claiming its portfolio outcome.
+
 ## Sources
 
 Platform behavior follows [CLI deployment](https://vercel.com/docs/cli/deploy),
