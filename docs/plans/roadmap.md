@@ -69,6 +69,9 @@ Beyond the shopping journey, the [enterprise readiness epic](https://github.com/
 sequences security hardening, reliability, and scale/compliance work, with scoped
 tickets for security headers (#126), password reset (#127), refunds (#128), SLOs
 (#129), restore drills (#130), and the WCAG audit (#131).
+VIN-126’s portfolio header outcome is now verified on development and production;
+see the canonical plan for its enforced-release evidence. Other enterprise scope
+remains deferred.
 
 Each PR includes acceptance evidence, self-review findings, and passing CI before
 merge under the user's authorization. Production/cloud deployment and paid external
