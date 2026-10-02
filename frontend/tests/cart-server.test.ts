@@ -1,3 +1,4 @@
+import { fetchRequest } from "./fetch-request";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 const runtime = vi.hoisted(() => ({
@@ -32,7 +33,8 @@ function upstream({
 } = {}) {
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (request: Request) => {
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
       if (fail) throw new Error("private infrastructure failure");
       const path = new URL(request.url).pathname;
       const status = path.endsWith("/auth/me")
@@ -154,7 +156,7 @@ describe("cart Server Action", () => {
     expect(await changeCart(owner, { kind: "add", productId: 1 })).toEqual({
       ok: true,
     });
-    const request = vi.mocked(fetch).mock.calls.at(-1)![0] as Request;
+    const request = fetchRequest(vi.mocked(fetch).mock.calls.at(-1)!);
     expect(await request.json()).toEqual({ quantity: 3 });
     expect(runtime.revalidatePath).toHaveBeenCalledOnce();
   });
@@ -170,7 +172,7 @@ describe("cart Server Action", () => {
         await changeCart(owner, { kind: "step", productId: 1, delta }),
       ).toEqual({ ok: true });
       expect(
-        await (vi.mocked(fetch).mock.calls.at(-1)![0] as Request).json(),
+        await fetchRequest(vi.mocked(fetch).mock.calls.at(-1)!).json(),
       ).toEqual({ quantity: expected });
       expect(runtime.revalidatePath).toHaveBeenCalledOnce();
     },
@@ -187,7 +189,7 @@ describe("cart Server Action", () => {
       ok: true,
     });
     expect(
-      await (vi.mocked(fetch).mock.calls.at(-1)![0] as Request).json(),
+      await fetchRequest(vi.mocked(fetch).mock.calls.at(-1)!).json(),
     ).toEqual({ quantity: 1 });
   });
   it("refreshes the displayed cart when an add reaches the quantity limit", async () => {
@@ -211,7 +213,7 @@ describe("cart Server Action", () => {
     expect(await changeCart(owner, { kind: "remove", productId: 1 })).toEqual({
       ok: true,
     });
-    expect((vi.mocked(fetch).mock.calls.at(-1)![0] as Request).method).toBe(
+    expect(fetchRequest(vi.mocked(fetch).mock.calls.at(-1)!).method).toBe(
       "DELETE",
     );
   });

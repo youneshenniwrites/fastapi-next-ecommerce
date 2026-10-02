@@ -18,7 +18,11 @@ npm run dev
 Open http://127.0.0.1:3000. The server defaults to http://127.0.0.1:8000 for FastAPI.
 To change it, set API_BASE_URL in an ignored .env.local; see .env.example. No CORS
 configuration is necessary: only the Next.js server calls FastAPI. Fetches are
-uncached and have a five-second timeout. Failed requests show a retryable state.
+uncached. Reads have a five-second complete-response deadline; writes use a
+five-second transport cancellation signal and are never automatically replayed.
+An uncertain cart write stays read-only until a fresh authoritative snapshot.
+Known offline route refreshes are deferred so the recovery control remains
+available. See [recovery and its limitations](../docs/design/cart-storefront.md#request-deadlines-and-timeout-recovery).
 
 ## Verification
 

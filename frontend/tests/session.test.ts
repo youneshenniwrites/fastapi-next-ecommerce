@@ -1,3 +1,4 @@
+import { fetchRequest } from "./fetch-request";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 import { NextRequest } from "next/server";
@@ -52,7 +53,7 @@ describe("browser session boundary", () => {
     expect(cookie.domain).toBeUndefined();
     expect(cookie.maxAge).toBeLessThan(1800);
     expect(res.headers.get("cache-control")).toContain("no-store");
-    const call = vi.mocked(fetch).mock.calls[0][0] as Request;
+    const call = fetchRequest(vi.mocked(fetch).mock.calls[0]);
     expect(call.redirect).toBe("error");
     expect(call.headers.get("content-type")).toContain(
       "application/x-www-form-urlencoded",
@@ -101,9 +102,7 @@ describe("browser session boundary", () => {
     expect(res.status).toBe(200);
     expect(JSON.stringify(await res.json())).not.toContain(token);
     expect(
-      (vi.mocked(fetch).mock.calls[0][0] as Request).headers.get(
-        "authorization",
-      ),
+      fetchRequest(vi.mocked(fetch).mock.calls[0]).headers.get("authorization"),
     ).toBe(`Bearer ${token}`);
     expect(res.headers.get("cache-control")).toContain("no-store");
   });
@@ -287,7 +286,7 @@ describe("registration boundary", () => {
     expect(await res.json()).toEqual({ registered: true });
     expect(res.headers.get("cache-control")).toBe("private, no-store");
     expect(res.headers.get("set-cookie")).toBeNull();
-    const sent = vi.mocked(fetch).mock.calls[0][0] as Request;
+    const sent = fetchRequest(vi.mocked(fetch).mock.calls[0]);
     expect(await sent.json()).toEqual({
       email: "demo@example.test",
       password: "test-password",

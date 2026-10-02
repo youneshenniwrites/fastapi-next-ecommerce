@@ -604,7 +604,12 @@ test("uncertain writes stay read-only until the cart can be read again", async (
   const add = page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ });
+  const dispatched = page.waitForRequest(
+    (r) => Boolean(r.headers()["next-action"]),
+    { timeout: 5000 },
+  );
   await add.click();
+  await dispatched;
   await expect(
     page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toBeVisible({ timeout: 15000 });
@@ -617,6 +622,43 @@ test("uncertain writes stay read-only until the cart can be read again", async (
   await expect(add).toBeEnabled();
   await expect(
     page.getByRole("alert").filter({ hasText: "couldn't confirm" }),
+  ).toHaveCount(0);
+});
+
+test("a disconnected write keeps recovery available until deliberate reconnect", async ({
+  page,
+  request,
+}) => {
+  await savedCart(page, request);
+  const add = page
+    .getByRole("main")
+    .getByRole("button", { name: /Add to cart|Saved to cart/ });
+  await expect(add).toBeEnabled();
+  await expect(add.locator("xpath=..")).toHaveCSS("opacity", "1");
+  try {
+    await page.context().setOffline(true);
+    await add.click();
+    await expect(
+      page.getByRole("button", { name: "Refresh cart", exact: true }),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(add).toBeDisabled();
+    await page
+      .getByRole("button", { name: "Refresh cart", exact: true })
+      .click();
+    // A failed identity check conceals private controls. Recovery must remain
+    // available, and no mutation may become actionable while offline.
+    await expect(
+      page.getByRole("button", { name: "Refresh cart", exact: true }),
+    ).toBeVisible();
+    await expect(add.and(page.locator("button:enabled"))).toHaveCount(0);
+  } finally {
+    await page.context().setOffline(false);
+  }
+  await page.getByRole("button", { name: "Refresh cart", exact: true }).click();
+  await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  await expect(add).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: "Refresh cart", exact: true }),
   ).toHaveCount(0);
 });
 

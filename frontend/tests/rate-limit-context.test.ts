@@ -1,3 +1,4 @@
+import { fetchRequest } from "./fetch-request";
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
@@ -97,7 +98,7 @@ it.each([
   async (handler, route, status) => {
     vi.stubEnv("APP_ORIGIN", "https://shop.test");
     vi.stubEnv("APP_ORIGIN_ALIASES", "");
-    const fetchMock = vi.fn().mockResolvedValue(
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(
         JSON.stringify({
           access_token: "fictional-token",
@@ -111,7 +112,7 @@ it.each([
     const input = request("192.0.2.1");
     const response = await handler(input);
     expect(response.status).toBe(status);
-    const upstream = fetchMock.mock.calls[0][0] as Request;
+    const upstream = fetchRequest(fetchMock.mock.calls[0]);
     expect(upstream.headers.get("x-vindor-client-context")).toBe(
       rateLimitContextHeaders(input, route)["x-vindor-client-context"],
     );

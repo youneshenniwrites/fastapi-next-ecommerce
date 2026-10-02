@@ -56,7 +56,8 @@ Visible controls remain mounted during a background refresh, so a focus event
 between pointer-down and pointer-up cannot swallow the first click. Editing is
 disabled until hydration attaches its handlers.
 
-Explicit retry and focus/page restoration use `router.refresh()`. Explicit retry
+Explicit retry and focus/page restoration use `router.refresh()` when the browser
+does not report an offline connection. Explicit retry
 also refreshes the existing session observer so an identity failure can recover. There is no
 periodic cart poll. Focus and page restoration conceal private cart content until refreshed, using
 opacity and accessibility hiding while keeping activation targets mounted.
@@ -133,15 +134,26 @@ within that deadline, preserves the original response metadata for openapi-fetch
 and cancels both body branches on expiry. These API endpoints are JSON endpoints;
 this client is not a streaming-download adapter.
 
-The explicit promise deadline applies only to GET/HEAD. Mutations retain the
-existing transport timeout; an abort-ignoring write is not detached by a promise
-race. A fresh read alone cannot order a write still running upstream. Durable
-operation-status/idempotency support is outside this read-deadline fix, so this
-does not establish a general guarantee for delayed commits after connection loss.
+The explicit promise deadline applies only to GET/HEAD. Mutations use a URL and
+explicit fetch options so the installed Next.js fetch wrapper does not introduce
+intermediate Request copies that can lose timeout propagation during garbage
+collection. They retain the five-second transport cancellation signal; an
+abort-ignoring write is not detached by a promise race. A fresh read alone cannot
+order a write still running upstream. Durable operation-status/idempotency support
+is outside this correction, so it does not establish a general guarantee for
+delayed commits after connection loss.
 
 A timed-out mutation still has an uncertain outcome and is never automatically
 replayed. Existing revalidation and read-only recovery require a fresh server
 snapshot; the deadline correction does not change cart ownership or last-writer-
-wins quantity semantics. Unit tests cover ignored aborts, delayed bodies and late
-responses; a real-fetch regression forces GC across Request copies. The unchanged
-browser cases cover committed writes, recovery controls and account isolation.
+wins quantity semantics. When the browser reports that it is offline, the provider
+does not refresh the route: a failed Next.js refresh can navigate away to a browser
+error page. The recovery control remains available for a deliberate retry after
+reconnecting. A failed session check still conceals private controls, and online
+status alone never clears an uncertain write. This hint does not detect every
+upstream outage or stop a refresh already in flight.
+
+Unit tests cover ignored aborts, delayed bodies and late responses; real-fetch
+regressions force GC through the installed Next.js wrapper. Browser cases cover
+committed writes, offline recovery controls and account isolation. Hosted proof
+and ticket completion are recorded separately on VIN-89.
