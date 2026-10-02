@@ -77,8 +77,8 @@ It is optional for the current stable development alias, never `NEXT_PUBLIC_`,
 and is not supplied to this minimal preview. If API protection changes, establish
 an approved access path rather than copying a production or deployment-write key.
 Only fictional data belongs in development; application authentication and account
-ownership remain mandatory for private API data. No hosting protection was changed
-by VIN-45.
+ownership remain mandatory for private API data. No persistent project-wide protection change was made by VIN-45; its separately
+authorized temporary proof link was revoked before exact preview retirement.
 
 ## Provisioning and verification
 
@@ -105,8 +105,8 @@ by VIN-45.
 7. Verify /health, catalog DB reads, /docs, /redoc, /openapi.json and session behavior
    over HTTPS before advertising URLs. /health alone is liveness, not DB readiness.
 
-GitHub environments currently restrict deployment workflow refs to main. A future
-preview workflow must run trusted orchestration from main and validate the source
+GitHub environments currently restrict deployment workflow refs to main. The reviewed
+preview workflow runs trusted orchestration from main and validates the source
 PR before using development credentials. Do not inject secrets into arbitrary PR
 code, or add a write-enabled pull_request_target workflow that executes PR code.
 
@@ -114,7 +114,8 @@ code, or add a write-enabled pull_request_target workflow that executes PR code.
 
 PR: backend integration checks, frontend quality checks and production build/browser
 tests run on isolated runners → all applicable checks and Codex review pass →
-development preview when its separate policy is delivered. Frontend quality and
+a manually requested protected development preview under the
+[reviewed preview policy](../../docs/design/frontend-previews.md). Frontend quality and
 browser jobs run concurrently; the entire workflow must succeed before delivery.
 Backend changes use disposable CI databases; promotion
 to the shared development API is explicit and serialized. A frontend preview does
@@ -159,7 +160,8 @@ References: [Vercel FastAPI](https://vercel.com/docs/frameworks/backend/fastapi)
 GitHub's production environment contains `DATABASE_URL` and `VERCEL_TOKEN` secrets,
 and `VERCEL_ORG_ID`, `VERCEL_API_PROJECT_ID`, `VERCEL_FRONTEND_PROJECT_ID` variables.
 Runtime signing keys remain in Vercel. The same credential names are prepared in
-development for #45, but frontend PR previews are not implemented by this workflow.
+development for the separate VIN-45 preview workflow; production delivery itself
+does not create frontend PR previews.
 The team-scoped CI token expires **7 December 2026**; replace it in both GitHub
 environments before expiry. Never store it in the repository or command examples.
 
@@ -283,9 +285,10 @@ The [bounded preview design and usage](../../docs/design/frontend-previews.md) u
 manual trusted-main orchestration, exact reviewed PR revisions and the development
 frontend Preview target. Host-only sessions share fictional development data; no
 production credentials or database clone are provided. The
-[2 October hosted checkpoint](../../docs/design/frontend-previews.md#hosted-checkpoint--2-october-2026)
-records protected preview creation, fictional login/cart ownership, host isolation
-and exact retirement. Application headers/release identity and wrong-origin HTTP
-rejection remain unverified on VIN-45; the ticket is not Done. Repeat the full
-fictional login/cart/ownership/host journey alongside those checks on the completing
-reviewed preview, then retire it; the first checkpoint alone is partial evidence.
+[2 October verified closeout](../../docs/design/frontend-previews.md#verified-closeout--2-october-2026)
+records one reviewed preview's full fictional login/cart ownership, host isolation,
+source identity, enforced headers, actual application wrong-origin rejection and
+exact retirement. The owner-authorized temporary dashboard share link had no
+automatic expiry and replaced the existing Hobby link only after separate approval;
+it was revoked immediately after testing. Both test previews are retired, not
+current demo URLs. Creation remains manual; automatic PR previews are later scope.

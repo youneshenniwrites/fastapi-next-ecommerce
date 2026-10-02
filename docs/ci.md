@@ -36,7 +36,7 @@ same commit, skips stale or already deployed revisions, and serializes releases.
 Its named steps run migrations → Vercel API deploy and database reads → storefront
 deploy → public smoke checks. The production environment and job summary link to
 the release. API/browser sessions are checked without exposing secrets. Frontend
-PR previews remain #45. Failed deployment does not automatically roll back schema.
+[Reviewed manual PR previews](design/frontend-previews.md#verified-closeout--2-october-2026) are verified under VIN-45. Failed deployment does not automatically roll back schema.
 See [the environment plan](../deploy/environments/README.md).
 
 ## Reading a failure

@@ -19,7 +19,8 @@ limiter signing key is configured; this is not a new visitor-isolation guarantee
 Before upload, health and deliberate invalid-login probes require the actual
 FastAPI responses without a bypass. Protection responses stop creation; if API
 access later changes, investigate instead of copying secrets. No hosting protection
-is weakened by this feature.
+is persistently weakened by this feature. Temporary test access requires the
+separate authorization and cleanup below.
 
 ## Trust and credentials
 
@@ -80,9 +81,12 @@ secret exists. This preview proof does not authorize that extra access.
 
 For an HTTP probe that must reach the application behind Vercel Authentication,
 use the supported [deployment-specific share grant](https://vercel.com/docs/rest-api/aliases/update-the-protection-bypass-for-a-url)
-only within explicit access authorization. Target the recorded managed deployment
-ID, set a finite short expiry, preserve unrelated grants, keep its token/cookie
-private and revoke only the grant created for the proof immediately afterward.
+only within explicit access authorization. Prefer a finite short expiry and
+preserve unrelated grants. The dashboard share-link flow has no automatic expiry;
+using it requires explicit authorization for manually bounded access and immediate
+revocation. Hobby permits only one share link: replacing an existing link requires
+separate approval because it revokes access outside this preview. Keep tokens and
+cookies private and revoke the test grant immediately afterward.
 Verify revocation; if cleanup fails, record it and retire the managed preview.
 Wrong-origin logout must return the application's JSON `Origin rejected` response;
 a Vercel authentication failure alone does not verify the application policy.
@@ -133,7 +137,7 @@ removed that exact managed deployment and verified provider 404. The unique URL
 then returned HTTP 404 / `DEPLOYMENT_NOT_FOUND`; the documented stable development
 and production aliases still responded normally. No protection grant was created.
 
-VIN-45 remains incomplete: protected application headers/release identity and
+At this first checkpoint VIN-45 was incomplete: protected application headers/release identity and
 actual wrong-origin HTTP rejection still need hosted evidence. The foreign-origin
 browser form produced no observable application response, so it is not a pass.
 The later creation request in
@@ -145,6 +149,48 @@ wrong-origin proof, then retire it. The earlier checkpoint is partial evidence,
 not a substitute for the complete single-preview proving event. Do not weaken
 the open-source guard or reuse the retired URL. Record the final result and cleanup
 on VIN-45 before claiming its portfolio outcome.
+
+## Verified closeout — 2 October 2026
+
+The completing preview came from PR #266's reviewed source
+`6d46eff21d3afd536dfc300682608135aa4ab68b` through
+[creation run 37071893631](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37071893631).
+The trusted guard accepted applicable CI, clean exact-head review and resolved
+findings. Provider metadata identified that source on Ready protected deployment
+`dpl_3oZXgibnV8qNudNsbDKA7VYc8jjP`. Its unique hostname was
+`vindor-ecommerce-development-my46x8j0t-younes-hennis-projects.vercel.app`;
+it is now retired. Release identity is deployment metadata, not a diagnostic HTTP
+header or a claim of preview Sentry activation.
+
+On this same preview, fictional A signed in and one Add produced one Felt Desk Mat
+(£29.50); stable development remained signed out. B signed in with its own profile
+and empty cart; A signed back in and retained quantity one. The cart was emptied
+and both sessions signed out. The earlier quantity observation remains unproven.
+
+At 22:42:09 UTC, actual login HTML passed HTTPS, HSTS max-age 31536000, nosniff,
+DENY, strict-origin-when-cross-origin, private/no-store and enforced nonce CSP with
+strict-dynamic. There is no inline/eval script exception; the documented inline-style
+exception remains. Anonymous logout POSTs with the stable development Origin,
+a different preview Origin, literal null or no Origin each returned application
+HTTP 403 JSON `Origin rejected`. The exact preview Origin returned HTTP 200
+`authenticated: false` and cleared an empty `__Host-session` with Max-Age=0,
+Secure, HttpOnly, SameSite=Lax, Path=/ and no Domain. No redirect or provider-login
+response counted as application proof.
+
+The owner approved the dashboard's manually bounded share link and separately
+approved replacing the existing unidentified Hobby link. No automatic expiry is
+claimed. The temporary link was revoked immediately after the probe: the UI returned
+to Only people with access. Its private local file/clipboard were cleared and the
+receiver stopped. No persistent project-wide automation bypass was created.
+[Retirement run 37073917725](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37073917725)
+then verified provider 404 for this exact managed preview; its public URL returned
+404 / DEPLOYMENT_NOT_FOUND. Stable development storefront/API health and both
+documented production storefront aliases remained available with HTTP 200.
+
+[VIN-45's complete evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45#issuecomment-5962642115)
+records the same-deployment proof and cleanup. This completes the bounded manual
+preview outcome, not autonomous previews or a database clone per PR. No paid plan,
+production activation or new schedule was added.
 
 ## Sources
 

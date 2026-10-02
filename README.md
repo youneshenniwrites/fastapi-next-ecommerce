@@ -224,7 +224,7 @@ separate Neon Free development/production databases. Provider subdomains supply
 free HTTPS addresses. Environment setup (#44) and GitHub-triggered production
 delivery (#46) are complete. [Production storefront](https://vindor-ecommerce.vercel.app) and
 [Swagger API docs](https://vindor-api-production.vercel.app/docs) are live.
-Production delivery follows successful main CI; PR previews remain #45. Read the
+Production delivery follows successful main CI; [reviewed manual PR previews](docs/design/frontend-previews.md#verified-closeout--2-october-2026) are verified under VIN-45. Read the
 [environment plan](deploy/environments/README.md) for isolation, secrets, cold
 starts, quotas and the intended test → review → deploy sequence.
 
