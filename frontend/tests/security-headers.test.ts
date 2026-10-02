@@ -15,14 +15,12 @@ describe("storefront CSP rollout", () => {
     });
     const first = proxy(request);
     const second = proxy(request);
-    const policy = first.headers.get("content-security-policy-report-only")!;
+    const policy = first.headers.get("content-security-policy")!;
     const nonce = policy.match(/'nonce-([^']+)'/)![1];
     expect(Buffer.from(nonce, "base64")).toHaveLength(16);
     expect(policy).not.toContain("attacker");
     expect(policy).not.toContain("script-src 'unsafe-inline'");
-    expect(second.headers.get("content-security-policy-report-only")).not.toBe(
-      policy,
-    );
+    expect(second.headers.get("content-security-policy")).not.toBe(policy);
     expect(
       first.headers.get("x-middleware-request-content-security-policy"),
     ).toBe(policy);
@@ -35,6 +33,7 @@ describe("storefront CSP rollout", () => {
         "x-middleware-request-content-security-policy-report-only",
       ),
     ).toBeNull();
+    expect(first.headers.get("content-security-policy-report-only")).toBeNull();
     expect(first.headers.get("cache-control")).toBe("private, no-store");
   });
   it("strips caller policy even on excluded resources without changing cache", () => {

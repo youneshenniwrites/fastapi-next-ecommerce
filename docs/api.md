@@ -28,8 +28,9 @@ URL and query behavior. Hosting-provider responses outside either application
 [VIN-248](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/248)
 records testing and hosted verification. This is a baseline slice of
 [VIN-126](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/126).
-The [report-only CSP/framing/transport stage](security-headers.md) adds a
-nonce-backed candidate policy; hosted acceptance and enforcement remain unfinished.
+The [CSP/framing/transport runbook](security-headers.md) records nonce-backed
+policy enforcement, documentation exceptions and rollback. VIN-126 records
+actual merge, hosted verification and acceptance evidence.
 
 ## Start and verify the local API
 

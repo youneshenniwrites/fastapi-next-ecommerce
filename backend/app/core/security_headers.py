@@ -1,4 +1,4 @@
-"""Enforced framing/transport headers and candidate CSP for the first rollout."""
+"""Enforced framing, transport and nonce-backed content security policies."""
 
 import secrets
 
@@ -30,7 +30,7 @@ REDOC_EARLY_STYLE_HASHES = (
 )
 
 
-def candidate_content_policy(document: str | None = None, nonce: str = "") -> str:
+def content_policy(document: str | None = None, nonce: str = "") -> str:
     """Allow only the sources needed by the generated documentation page."""
     if document not in {"swagger", "redoc", "oauth-redirect"}:
         return DENY_CONTENT_POLICY
@@ -76,9 +76,7 @@ def response_security_headers(
 ) -> dict[str, str]:
     headers = {
         **SECURITY_HEADERS,
-        "Content-Security-Policy-Report-Only": candidate_content_policy(
-            document, nonce
-        ),
+        "Content-Security-Policy": content_policy(document, nonce),
     }
     # ASGI's scheme is authoritative; never trust arbitrary forwarded headers here.
     # Browsers ignore HSTS on HTTP. Subdomains/preload are deliberately excluded.

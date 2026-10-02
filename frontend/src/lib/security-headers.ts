@@ -1,4 +1,4 @@
-/** Candidate policy: nonce-bearing scripts; styles retain the documented UI exception. */
+/** Enforced policy: nonce-bearing scripts; styles retain the documented UI exception. */
 export function storefrontPolicy(nonce: string, development: boolean): string {
   return [
     "default-src 'self'",
