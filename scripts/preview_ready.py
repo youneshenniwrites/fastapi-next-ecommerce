@@ -43,6 +43,15 @@ def passed(runs, sha, number):
     )
 
 
+def main_revision(repo):
+    """Read the current trusted base, rather than relying on a PR's base snapshot."""
+    obj = codex.api(f"repos/{repo}/git/ref/heads/main").get("object") or {}
+    sha = obj.get("sha", "")
+    if obj.get("type") != "commit" or not re.fullmatch(r"[0-9a-f]{40}", sha):
+        raise ValueError("Current main commit evidence is required")
+    return sha
+
+
 def verify(repo, number, sha):
     """Use trusted gate implementations and complete evidence, never PR status prose."""
     if os.environ.get("GITHUB_REF") != "refs/heads/main":
@@ -53,6 +62,16 @@ def verify(repo, number, sha):
         raise ValueError(
             "Preview source must be an open ready same-repository exact-head PR"
         )
+    base = main_revision(repo)
+    comparison = codex.api(f"repos/{repo}/compare/{base}...{sha}")
+    # pull_request CI checks a synthetic merge, but the preview uploads raw head.
+    # Requiring ancestry makes that merge's tree equal to the uploaded source tree.
+    if (
+        comparison.get("status") not in {"ahead", "identical"}
+        or (comparison.get("base_commit") or {}).get("sha") != base
+        or (comparison.get("merge_base_commit") or {}).get("sha") != base
+    ):
+        raise ValueError("Preview head must include current main before using PR CI")
     files = codex.pages(path + "/files")
     reviewer = rabbit if routine_docs(pr, files, repo) else codex
     reviewed, state, _ = reviewer.inspect(repo, number)
@@ -68,6 +87,8 @@ def verify(repo, number, sha):
             raise ValueError(f"Current-head PR CI is not successful: {workflow}")
     if not source_allowed(codex.api(path), repo, sha):
         raise ValueError("PR changed during preview verification")
+    if main_revision(repo) != base:
+        raise ValueError("Current main changed during preview verification")
     return sha
 
 
