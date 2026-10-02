@@ -287,5 +287,7 @@ findings and applicable CI before merging. No automatic merge is added here.
 The shared Codex evidence workflow may still run, but reports eligible PRs as
 CodeRabbit-only and publishes no Codex status for them. Missing credentials or
 provider failures require investigation; never infer approval from silence.
-Hosted automatic triggering remains unverified until this workflow lands and an
-eligible PR receives a review. No paid plan change or scheduled chat is enabled.
+Hosted automatic triggering and actual current-head approval were verified on
+PR #257; VIN-225 records the workflow/request/review evidence and provider limits.
+This proves that execution, not unlimited provider availability or automatic merging.
+No paid plan change or scheduled chat is enabled.

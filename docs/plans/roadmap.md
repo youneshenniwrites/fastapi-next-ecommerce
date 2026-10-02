@@ -83,8 +83,8 @@ until the working shopping journey has a measured need.
 Typed SQLAlchemy 2.0 models are delivered (#132) and the framework audit is
 published with typed-model and revalidation changes merged (#132/#133). The
 19 September correction distinguishes maintainability work from the invalid
-refresh-import finding; the remaining #84
-guidance slice (AGENTS.md/skills/docs boundaries) is tracked on the ticket.
+refresh-import finding; #84’s remaining guidance slice is now verified in
+AGENTS.md, scoped skills and framework documentation, with closeout on the ticket.
 Static type checking, code scanning and remaining review/coverage required-check
 rules are further controls, not claims of open PRs. Consult their source issues
 and the live queue before starting work. Frontend lint/type/build and browser checks are implemented.
