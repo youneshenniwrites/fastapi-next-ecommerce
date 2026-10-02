@@ -15,7 +15,24 @@ export function apiClient() {
       // Do not detach unfinished mutations: a recovery read could precede commit.
       // Preserve write transport behavior until operation-status ordering exists.
       if (request.method !== "GET" && request.method !== "HEAD") {
-        return fetch(request, { signal: AbortSignal.timeout(5000) });
+        // A URL + explicit init avoids Next's intermediate Request copies,
+        // whose signal chain can be collected before transport cancellation.
+        // Keep awaiting the transport: never race an unfinished write.
+        return fetch(request.url, {
+          method: request.method,
+          headers: request.headers,
+          body: request.body,
+          cache: request.cache,
+          credentials: request.credentials,
+          mode: request.mode,
+          redirect: request.redirect,
+          referrer: request.referrer,
+          referrerPolicy: request.referrerPolicy,
+          integrity: request.integrity,
+          keepalive: request.keepalive,
+          ...(request.body ? { duplex: "half" as const } : {}),
+          signal: AbortSignal.timeout(5000),
+        });
       }
       const controller = new AbortController();
       let timer: ReturnType<typeof setTimeout> | undefined;

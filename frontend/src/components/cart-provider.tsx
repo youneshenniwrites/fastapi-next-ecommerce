@@ -34,6 +34,13 @@ type CartContextValue = {
   clearError: (productId: number) => void;
 };
 const subscribe = () => () => {};
+// A failed refresh while the browser is offline can fall back to a full
+// navigation, replacing the recovery UI with a browser error page. This is
+// only an offline hint: successful authoritative reads still govern recovery.
+function refreshConnectedRoute(router: ReturnType<typeof useRouter>) {
+  if (navigator.onLine) router.refresh();
+}
+
 const SnapshotContext = createContext<
   ((snapshot: CartSnapshot) => void) | null
 >(null);
@@ -101,7 +108,7 @@ export function CartProvider({
   useEffect(() => {
     if (sessionChanged) {
       refreshSession();
-      startRefresh(() => router.refresh());
+      startRefresh(() => refreshConnectedRoute(router));
     }
   }, [sessionChanged, router, refreshSession]);
 
@@ -163,7 +170,7 @@ export function CartProvider({
     // Conceal private data until the server verifies the returning identity.
     function refresh() {
       hide();
-      startRefresh(() => router.refresh());
+      startRefresh(() => refreshConnectedRoute(router));
     }
     function hide() {
       const active = document.activeElement;
@@ -217,7 +224,8 @@ export function CartProvider({
               ...current,
               [change.productId]: { ...result, beforeRefresh },
             }));
-            if (result.uncertain) startRefresh(() => router.refresh());
+            if (result.uncertain)
+              startRefresh(() => refreshConnectedRoute(router));
           }
           resolve(result.ok);
         } catch {
@@ -237,7 +245,7 @@ export function CartProvider({
           }));
           // Transport failures can happen after a committed write. Never retry
           // an add automatically: ask Next for the authoritative server view.
-          startRefresh(() => router.refresh());
+          startRefresh(() => refreshConnectedRoute(router));
           resolve(false);
         } finally {
           if (busy.current.finish(change.productId, operation)) {
@@ -288,7 +296,7 @@ export function CartProvider({
             : "",
         refresh: () => {
           refreshSession();
-          startRefresh(() => router.refresh());
+          startRefresh(() => refreshConnectedRoute(router));
         },
         setQuantity: (productId, quantity) =>
           mutate({ kind: "set", productId, quantity }),
