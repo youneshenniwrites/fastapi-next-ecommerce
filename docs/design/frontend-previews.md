@@ -63,7 +63,9 @@ production origin policy is unchanged.
 
 ## Usage and retirement
 
-After this orchestration is reviewed and merged, request it from `main`:
+After this orchestration is reviewed and merged, synchronize the source branch
+with current main and obtain its fresh current-head review and CI. A behind or
+diverged branch is ineligible. Then request the workflow from `main`:
 
 ```sh
 gh workflow run preview.yml --ref main \
