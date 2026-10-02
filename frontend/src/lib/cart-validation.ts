@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/validation";
 
 export const cartQuantitySchema = z.object({
   quantity: z.number().int().min(1).max(99),

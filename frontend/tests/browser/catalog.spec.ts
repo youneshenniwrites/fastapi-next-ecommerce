@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./security-fixture";
 import AxeBuilder from "@axe-core/playwright";
 
 test("baseline security headers cover pages, errors and assets", async ({
@@ -60,6 +60,57 @@ test("baseline security headers cover pages, errors and assets", async ({
       "strict-origin-when-cross-origin",
     );
   }
+});
+
+test("candidate CSP uses fresh nonces on real pages and preserves hydration", async ({
+  page,
+  request,
+}) => {
+  let previous = "";
+  for (const path of [
+    "/",
+    "/login",
+    "/register",
+    "/not-a-route",
+    "/sentry-tunnel-extra",
+    "/_next/image-extra",
+    "/favicon.ico-extra",
+    "/api/not-a-route",
+    "/photos/not-a-photo",
+  ]) {
+    const response = await page.goto(path);
+    const headers = response!.headers();
+    const candidate = headers["content-security-policy-report-only"];
+    expect(headers["content-security-policy"]).toBe("frame-ancestors 'none'");
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["cache-control"]).toContain("private");
+    expect(headers["cache-control"]).toContain("no-store");
+    const nonce = candidate.match(/'nonce-([^']+)'/)![1];
+    expect(nonce).not.toBe(previous);
+    previous = nonce;
+    const scripts = await page
+      .locator("script:not([src])")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => (node as HTMLScriptElement).nonce),
+      );
+    expect(scripts.length).toBeGreaterThan(0);
+    expect(scripts.every((value) => value === nonce)).toBe(true);
+  }
+  const photo = await request.get("/photos/mat.webp");
+  expect(photo.status()).toBe(200);
+  expect(photo.headers()["content-type"]).toContain("image/webp");
+  expect(photo.headers()["cache-control"]).not.toContain("private");
+  expect(photo.headers()["cache-control"]).not.toContain("no-store");
+  const forged = await request.get("/login", {
+    headers: {
+      "x-nonce": "attacker",
+      "content-security-policy": "script-src 'nonce-attacker'",
+      "content-security-policy-report-only": "script-src 'unsafe-inline'",
+    },
+  });
+  const policy = forged.headers()["content-security-policy-report-only"];
+  expect(policy).not.toContain("attacker");
+  expect(policy).toContain("'strict-dynamic'");
 });
 
 // A tap can land mid-remount and be swallowed, so re-try until the menu is visible
@@ -298,4 +349,93 @@ test("new products have distinct photographs and working detail pages", async ({
       )
       .toBeGreaterThan(0);
   }
+});
+
+test.describe("CSP negative probes", () => {
+  test.use({ allowCspViolations: true });
+  test("report-only observes untrusted inline scripts without enforcing yet", async ({
+    page,
+    cspViolations,
+  }) => {
+    await page.route("**/login", async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        "</body>",
+        "<script>window.fictionalInlineProbe = true</script></body>",
+      );
+      await route.fulfill({ response, body });
+    });
+    await page.goto("/login");
+    expect(
+      await page.evaluate(() => Reflect.get(window, "fictionalInlineProbe")),
+    ).toBe(true);
+    await expect
+      .poll(() =>
+        cspViolations.some(
+          (v) =>
+            v.disposition === "report" && v.directive.startsWith("script-src"),
+        ),
+      )
+      .toBe(true);
+  });
+
+  test("a neutral cross-origin parent cannot frame the storefront", async ({
+    page,
+  }) => {
+    const denied: string[] = [];
+    const browserLog = await page.context().newCDPSession(page);
+    await browserLog.send("Log.enable");
+    browserLog.on("Log.entryAdded", ({ entry }) => {
+      if (
+        /frame-ancestors|X-Frame-Options/i.test(entry.text) &&
+        !/report-only/i.test(entry.text)
+      )
+        denied.push("framing denied");
+    });
+    await page.goto("http://127.0.0.1:18301/frame-probe");
+    await expect.poll(() => denied.includes("framing denied")).toBe(true);
+    await expect
+      .poll(() =>
+        page.frames().some((frame) => frame.url().startsWith("chrome-error:")),
+      )
+      .toBe(true);
+  });
+});
+
+test("API documentation renders under its candidate policies", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("http://127.0.0.1:18300/docs");
+  await expect(page.locator(".swagger-ui .info .title")).toContainText(
+    "E-Commerce API",
+  );
+  await page.locator("#operations-Health-health_check_health_get").click();
+  await page.getByRole("button", { name: "Try it out" }).click();
+  const healthResponse = page.waitForResponse(
+    (response) =>
+      response.url() === "http://127.0.0.1:18300/health" &&
+      response.request().method() === "GET",
+  );
+  await page.getByRole("button", { name: "Execute", exact: true }).click();
+  const health = await healthResponse;
+  expect(health.status()).toBe(200);
+  expect(await health.json()).toEqual({ status: "ok" });
+  await page.goto("http://127.0.0.1:18300/redoc");
+  await expect(
+    page.getByRole("heading", { name: "E-Commerce API" }),
+  ).toBeVisible();
+  // ReDoc's pinned mobile navigation toggle is the sidebar's adjacent sibling.
+  if (isMobile) await page.locator(".menu-content + div").click();
+  const results = page.locator('[data-role="search:results"]');
+  await expect(results).toHaveCount(0);
+  await page
+    .getByRole("textbox", { name: "Search", exact: true })
+    .fill("health");
+  await expect(
+    results.getByRole("menuitem", {
+      name: "Check API process liveness",
+      exact: true,
+    }),
+  ).toBeVisible();
 });

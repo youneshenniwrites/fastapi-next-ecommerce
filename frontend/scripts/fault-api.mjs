@@ -3,6 +3,15 @@ import { createServer } from "node:http";
 let mode = "empty";
 createServer((req, res) => {
   const path = new URL(req.url, "http://127.0.0.1").pathname;
+  // Real loopback document: route.fulfill() has an unknown address space and
+  // Chromium's local-network check would block the frame before CSP can run.
+  if (path === "/frame-probe") {
+    res.setHeader("Content-Type", "text/html");
+    res.end(
+      '<!doctype html><iframe src="http://127.0.0.1:3300/login"></iframe>',
+    );
+    return;
+  }
   if (req.method === "POST" && path.startsWith("/scenario/")) {
     mode = path.split("/").at(-1);
     res.end("ok");

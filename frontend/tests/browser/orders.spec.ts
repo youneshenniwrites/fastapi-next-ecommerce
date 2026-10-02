@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./security-fixture";
 const API = "http://127.0.0.1:18300";
 
 for (const scenario of [

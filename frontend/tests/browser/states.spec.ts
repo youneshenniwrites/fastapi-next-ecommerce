@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./security-fixture";
 test("empty catalog and upstream failure are distinct and recoverable", async ({
   page,
   request,

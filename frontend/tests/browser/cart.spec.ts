@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./security-fixture";
 import AxeBuilder from "@axe-core/playwright";
 
 // Exercise the two timing regressions under slower rendering without slowing
