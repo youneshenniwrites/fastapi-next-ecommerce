@@ -108,7 +108,12 @@ async def redoc_documentation(request: Request) -> HTMLResponse:
     root_path = request.scope.get("root_path", "").rstrip("/")
     # Initialize explicitly so ReDoc passes the nonce to its runtime style elements.
     response = get_redoc_html(
-        openapi_url="", title=f"{app.title} - ReDoc", with_google_fonts=False
+        openapi_url="",
+        title=f"{app.title} - ReDoc",
+        with_google_fonts=False,
+        # The candidate CSP hashes the early perfect-scrollbar stylesheet in this
+        # bundle. Reverify those hashes and browser reports before changing versions.
+        redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.5.4/bundles/redoc.standalone.js",
     )
     html = response.body.decode("utf-8").replace(
         '<redoc spec-url=""></redoc>', '<div id="redoc"></div>'

@@ -139,11 +139,33 @@ def test_documentation_nonces_are_fresh_and_match_candidate_policy(client, path)
         if path != "/docs/oauth2-redirect":
             assert "style-src-attr 'unsafe-inline'" in candidate
             assert f"style-src 'self' 'nonce-{nonce}'" in candidate
+            style_elements = next(
+                directive
+                for directive in candidate.split("; ")
+                if directive.startswith("style-src ")
+            )
+            assert "'unsafe-inline'" not in style_elements
         if path == "/redoc":
             assert '"nonce": "' + nonce + '"' in response.text
             assert "Redoc.init(" in response.text
             assert "fonts.googleapis.com" not in response.text + candidate
             assert "fonts.gstatic.com" not in response.text + candidate
+            assert (
+                "https://cdn.jsdelivr.net/npm/redoc@2.5.4/bundles/redoc.standalone.js"
+                in response.text
+            )
+            assert "https://cdn.redoc.ly" in candidate
+            assert (
+                "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
+                in style_elements
+            )
+            assert (
+                "'sha256-QMIg+bpjm3JdElJ388KYke01izlUW0UoNOeKjpMxdgc='"
+                in style_elements
+            )
+        else:
+            assert "https://cdn.redoc.ly" not in candidate
+            assert "sha256-" not in candidate
         if path == "/docs":
             assert "SwaggerUIBundle.presets.apis" in response.text
             assert (

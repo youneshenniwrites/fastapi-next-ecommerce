@@ -19,6 +19,16 @@ DENY_CONTENT_POLICY = (
     "form-action 'none'; frame-ancestors 'none'"
 )
 
+# ReDoc 2.5.4's perfect-scrollbar style-loader inserts an empty <style>, then
+# fills it before Redoc.init can supply the nonce. These exact browser-verified
+# hashes allow that stylesheet and its empty insertion, without allowing other
+# inline style elements. Reverify both against the CDN bundle when upgrading
+# the pinned redoc_js_url in app.main; runtime styled-components use the nonce.
+REDOC_EARLY_STYLE_HASHES = (
+    "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' "
+    "'sha256-QMIg+bpjm3JdElJ388KYke01izlUW0UoNOeKjpMxdgc='"
+)
+
 
 def candidate_content_policy(document: str | None = None, nonce: str = "") -> str:
     """Allow only the sources needed by the generated documentation page."""
@@ -36,9 +46,12 @@ def candidate_content_policy(document: str | None = None, nonce: str = "") -> st
     script_sources = f"'nonce-{nonce}'"
     if document in {"swagger", "redoc"}:
         script_sources += " https://cdn.jsdelivr.net"
+        image_sources = "'self' data: https://fastapi.tiangolo.com"
+        if document == "redoc":
+            image_sources += " https://cdn.redoc.ly"
         directives.extend(
             [
-                "img-src 'self' data: https://fastapi.tiangolo.com",
+                f"img-src {image_sources}",
                 # Both documentation UIs set layout styles directly on elements.
                 # This exception does not allow inline scripts or style elements.
                 "style-src-attr 'unsafe-inline'",
@@ -49,6 +62,7 @@ def candidate_content_policy(document: str | None = None, nonce: str = "") -> st
             style_sources += " https://cdn.jsdelivr.net"
             directives.append("font-src 'self' data:")
         else:
+            style_sources += f" {REDOC_EARLY_STYLE_HASHES}"
             directives.append("font-src 'self'")
             # ReDoc's search index is built in an embedded blob worker.
             directives.append("worker-src blob:")
