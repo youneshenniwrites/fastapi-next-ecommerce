@@ -62,16 +62,23 @@ Retain TLS parameters. Migrations use direct connections. Verify runtime connect
 recovery and bounded connection use before public deployment; suspended Neon compute
 or serverless process reuse must not result in permanently stale connections.
 
-## Development protection bypass
+## Development API access and preview protection
 
-The development API keeps Vercel Deployment Protection enabled so its demo
-database does not take public traffic; the production demo stays openly
-accessible. Automation passes Protection Bypass for Automation instead of
-weakening that wall: the server-only frontend API client sends
-`x-vercel-protection-bypass` from `VERCEL_PROTECTION_BYPASS` (set on the
-development frontend project, never a `NEXT_PUBLIC_` variable), and the
-development delivery smoke checks send the same header from the GitHub
-development secret. Production leaves the variable unset and is unaffected.
+Vercel protection is deployment-specific; it is not database isolation. On
+2 October, the stable fictional development API alias returned health/catalog
+HTTP 200 and FastAPI's invalid-login HTTP 401 without a protection bypass.
+The preview workflow verifies the health and invalid-login contracts before
+upload; protection responses or unavailable API access stop preview creation.
+Frontend previews still require Vercel Authentication and team membership.
+
+The server-only API client can send `x-vercel-protection-bypass` from
+`VERCEL_PROTECTION_BYPASS` when a protected API deployment is deliberately used.
+It is optional for the current stable development alias, never `NEXT_PUBLIC_`,
+and is not supplied to this minimal preview. If API protection changes, establish
+an approved access path rather than copying a production or deployment-write key.
+Only fictional data belongs in development; application authentication and account
+ownership remain mandatory for private API data. No hosting protection was changed
+by VIN-45.
 
 ## Provisioning and verification
 

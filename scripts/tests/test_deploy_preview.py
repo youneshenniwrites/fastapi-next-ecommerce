@@ -1,10 +1,12 @@
 """Prove provider targeting, source extraction and credential boundary failures."""
 
 import io
+import json
 import os
 import tarfile
 import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
@@ -18,7 +20,9 @@ class PreviewBoundaryTests(unittest.TestCase):
             "accountId": deploy.TEAM,
             "rootDirectory": "frontend",
             "autoExposeSystemEnvs": True,
-            "ssoProtection": {"deploymentType": "prod_deployment_urls"},
+            "ssoProtection": {
+                "deploymentType": "prod_deployment_urls_and_all_previews"
+            },
         }
 
     def test_empty_preview_scope_and_correct_protected_project(self):
@@ -27,6 +31,7 @@ class PreviewBoundaryTests(unittest.TestCase):
             {"id": "production"},
             {"accountId": "other"},
             {"ssoProtection": None},
+            {"ssoProtection": {"deploymentType": "prod_deployment_urls"}},
             {"autoExposeSystemEnvs": False},
             {"rootDirectory": "backend"},
         ]:
@@ -49,6 +54,55 @@ class PreviewBoundaryTests(unittest.TestCase):
             self.project(),
             {"envs": [{"key": "DATABASE_URL", "target": ["production"]}]},
         )
+
+    @patch.object(deploy.urllib.request, "urlopen")
+    def test_public_api_contract_not_protection_response(self, urlopen):
+        def response(code, value):
+            from unittest.mock import MagicMock
+
+            result = MagicMock()
+            result.status = code
+            result.read.return_value = json.dumps(value).encode()
+            result.__enter__.return_value = result
+            return result
+
+        invalid = urllib.error.HTTPError(
+            deploy.API,
+            401,
+            "unauthorized",
+            {},
+            io.BytesIO(b'{"detail":"Incorrect email or password"}'),
+        )
+        urlopen.side_effect = [response(200, {"status": "ok"}), invalid]
+        deploy.require_development_api()
+        self.assertTrue(urlopen.call_args.args[0].full_url.startswith(deploy.API))
+        for blocked in [
+            urllib.error.HTTPError(
+                deploy.API,
+                401,
+                "protection",
+                {},
+                io.BytesIO(b'{"error":"authentication_required"}'),
+            ),
+            response(200, {"page": "sign in to Vercel"}),
+            response(200, {"status": "not-ready"}),
+        ]:
+            urlopen.side_effect = [blocked]
+            with self.assertRaises((ValueError, urllib.error.HTTPError)):
+                deploy.require_development_api()
+        for login_response in [
+            response(200, {"access_token": "unexpected"}),
+            urllib.error.HTTPError(
+                deploy.API,
+                401,
+                "protection",
+                {},
+                io.BytesIO(b'{"error":"authentication_required"}'),
+            ),
+        ]:
+            urlopen.side_effect = [response(200, {"status": "ok"}), login_response]
+            with self.assertRaises(ValueError):
+                deploy.require_development_api()
 
     def test_missing_or_unknown_scope_is_not_empty_preview_evidence(self):
         for variables in [

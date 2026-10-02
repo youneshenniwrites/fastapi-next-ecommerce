@@ -16,8 +16,10 @@ backend ownership checks. No production API/database/JWT key, database password,
 limiter signing key, Sentry upload token or deployment write token is supplied to
 preview code. Authentication uses the existing ordinary ingress limit when no
 limiter signing key is configured; this is not a new visitor-isolation guarantee.
-The development API must remain reachable without a bypass for this minimal
-configuration; if protection later changes, investigate instead of copying secrets.
+Before upload, health and deliberate invalid-login probes require the actual
+FastAPI responses without a bypass. Protection responses stop creation; if API
+access later changes, investigate instead of copying secrets. No hosting protection
+is weakened by this feature.
 
 ## Trust and credentials
 
@@ -27,7 +29,9 @@ Python code validates an open non-draft same-repository PR and the operator's fu
 expected SHA, using complete current-head selected review evidence and the latest
 matching successful PR runs for Backend CI, Frontend CI, Dependency audit and
 Review gate tests. Unresolved findings, forks, stale review, missing/pending/failed
-CI and a changed head fail closed. CodeRabbit is selected only for the existing
+CI and a changed head fail closed. The requested head must contain current main,
+so PR CI’s synthetic merge has the same tree as the uploaded head; a main advance
+during verification stops creation. CodeRabbit is selected only for the existing
 routine-documentation exception; other source uses the existing Codex gate.
 
 Validation runs before the step receives the Vercel token and is repeated before
@@ -41,8 +45,10 @@ A trusted fixed JSON CLI configuration selects the existing Next.js build.
 
 Before upload, the API audit requires the exact approved development project/team,
 frontend root, provider system variables, deployment protection and an empty
-Preview environment scope. Existing Production-target variables on this
-**development project** are not inherited by a Preview deployment. Only explicit
+Preview environment scope. Accepted SSO modes are `all`, `preview`,
+`prod_deployment_urls_and_all_previews` and `all_except_custom_domains`; the
+unsupported abbreviated `prod_deployment_urls` value is rejected. Existing
+Production-target variables on this **development project** are not inherited by a Preview deployment. Only explicit
 non-secret development configuration is injected for this preview; diagnostics
 and webhook relay stay off. Unexpected variables or incomplete metadata stop it.
 

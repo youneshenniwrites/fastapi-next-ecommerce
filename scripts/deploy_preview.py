@@ -8,7 +8,9 @@ import subprocess
 import tarfile
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
+import uuid
 from pathlib import Path
 
 try:
@@ -43,7 +45,7 @@ def audit_project(project, variables):
     if protection.get("deploymentType") not in {
         "all",
         "preview",
-        "prod_deployment_urls",
+        "prod_deployment_urls_and_all_previews",
         "all_except_custom_domains",
     }:
         raise ValueError("Preview deployment protection must remain enabled")
@@ -63,6 +65,46 @@ def audit_project(project, variables):
         raise ValueError(
             "Preview scope must be empty; deploy only explicit development configuration"
         )
+
+
+def require_development_api():
+    """Prove the fixed fictional API is reachable without adding preview credentials."""
+    checks = [
+        ("/health", None, 200, {"status": "ok"}),
+        (
+            "/api/v1/auth/login",
+            urllib.parse.urlencode(
+                {
+                    "username": f"vin45-probe-{uuid.uuid4().hex}@example.test",
+                    "password": "InvalidPreviewProbe123!",
+                }
+            ).encode(),
+            401,
+            {"detail": "Incorrect email or password"},
+        ),
+    ]
+    for path, data, status, expected in checks:
+        request = urllib.request.Request(
+            API + path,
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+            if data
+            else {},
+        )
+        try:
+            response = urllib.request.urlopen(request, timeout=20)
+        except urllib.error.HTTPError as error:
+            if error.code != status:
+                raise
+            response = error
+        with response:
+            if (
+                response.status != status
+                or json.loads(response.read(131073)) != expected
+            ):
+                raise ValueError(
+                    "Development API is unavailable or protected; no preview credential is supplied"
+                )
 
 
 def cli_env():
@@ -218,6 +260,7 @@ def main():
             verify(
                 repo, number, sha
             )  # Re-read review/CI/head immediately before upload.
+            require_development_api()
             command = [
                 "vercel",
                 "deploy",
