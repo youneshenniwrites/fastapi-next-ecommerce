@@ -112,5 +112,7 @@ The root waits for request-time rendering; nonce-bearing HTML is private/no-stor
 Production script policy excludes inline/eval exceptions; Zod uses its supported
 CSP-compatible interpreter. The normal browser suite captures unexpected policy
 violations, while controlled probes verify reporting and framing behavior.
+The guarded Next 16.3.6 render-policy transport patch addresses a hosted nonce
+mismatch; it fails closed on unknown framework sources/versions.
 See [policy exceptions, staging and rollback](../docs/security-headers.md). Hosted
 rollout and enforcement remain pending; this stage alone does not finish VIN-126.

@@ -104,6 +104,7 @@ test("candidate CSP uses fresh nonces on real pages and preserves hydration", as
   const forged = await request.get("/login", {
     headers: {
       "x-nonce": "attacker",
+      "x-vindor-render-csp": "script-src 'nonce-attacker'",
       "content-security-policy": "script-src 'nonce-attacker'",
       "content-security-policy-report-only": "script-src 'unsafe-inline'",
     },

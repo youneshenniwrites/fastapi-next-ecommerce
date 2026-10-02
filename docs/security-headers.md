@@ -8,9 +8,21 @@ stays open until the tested candidate is enforced and hosted in both environment
 ## Policy boundaries
 
 Storefront application pages use a fresh 128-bit nonce per HTML request. Proxy replaces
-caller-supplied CSP and nonce headers before Next.js renders, and the root layout
+caller-supplied CSP, private render-policy and nonce headers before Next.js renders, and the root layout
 waits for a request. Pages are private/no-store; immutable static assets retain
-normal caching. The renderer receives the candidate CSP so framework scripts
+normal caching. Vercel’s hosted stage-one HTML omitted framework nonces even
+though the response policy carried them; standalone output did not. A guarded
+Next.js 16.3.6 compatibility patch lets the renderer read the same policy from
+`x-vindor-render-csp`, using Next’s existing validated nonce parser. Proxy
+overwrites this private transport on application routes and strips all caller
+policy/nonce headers on framework/tunnel exceptions. It is not an additional
+browser permission. The patch validates exact original or completely patched
+CommonJS/ESM and stable webpack/Turbopack development/production bundles before
+writing any file and rejects upgrades/unknown
+sources until explicitly reviewed. Remove it when an upstream supported nonce
+transport is available, then reverify hosted nonces and spoofing defenses.
+
+The renderer receives the candidate CSP so framework scripts
 receive matching nonces. Browsers receive the candidate in
 `Content-Security-Policy-Report-Only` and enforced `frame-ancestors 'none'` plus
 `X-Frame-Options: DENY` during this first stage.
@@ -50,7 +62,8 @@ usable. Vercel already advertised a stronger edge HSTS header before this work;
 inspect the actual hosted value rather than assuming an application override.
 
 Framework static/optimized-image resources and the exact Sentry tunnel route
-do not need a renderer nonce. API and photo paths still pass through Proxy so
+do not need a renderer nonce, but still cross Proxy to strip caller render-policy
+headers without changing their caching. API and photo paths pass through Proxy so
 unknown paths returning HTML errors receive the candidate; valid public photos
 retain their normal cache policy.
 Next's automatic trailing-slash redirects and provider-generated responses remain
@@ -81,3 +94,25 @@ production scripts to `unsafe-eval` to silence a compatibility finding.
 Sources: installed Next.js 16.3.6 CSP guide and [official nonce guidance](https://nextjs.org/docs/app/guides/content-security-policy),
 [HSTS behavior](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security),
 and installed FastAPI documentation generators.
+
+## Hosted rollout checkpoint — 2 October 2026
+
+PR #254 deployed as `ec29964c41a0793e753a2406ddda96f053bd2d1a` through
+[development](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37049058759)
+and [production](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37049058661).
+Development’s public catalog response had a fresh policy nonce and private/no-store
+caching, but its actual bootstrap scripts had no nonce attribute. This prevents
+promotion: enforcing that policy would break hydration. The compatibility change
+remains report-only until actual hosted nonce equality and zero unexpected reports
+are verified. Local enforcement tests passed 137 with two existing skips; that
+local proof does not replace this failed hosted check. The compatibility regression
+uses a disposable browser-server preload that removes both standard CSP request
+headers, including internal forwarding: it fails the same nonce equality/report
+assertions with the stock production renderer. The preload is activated only by
+Playwright fixtures, never by deployment scripts or app startup. Hosted API docs
+passed nonce equality, Swagger health execution and ReDoc search with zero policy
+reports in both environments; storefront/Sentry observation remains unfinished.
+
+The [upstream discussion](https://github.com/vercel/next.js/discussions/95259)
+reports production request-CSP stripping. It is corroborating reporter evidence,
+not proof of our edge’s internal cause; the raw HTML mismatch above is observed.

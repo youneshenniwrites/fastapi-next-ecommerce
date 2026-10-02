@@ -10,6 +10,7 @@ describe("storefront CSP rollout", () => {
         "content-security-policy": "script-src 'unsafe-inline'",
         "content-security-policy-report-only": "script-src 'nonce-attacker'",
         "x-nonce": "attacker",
+        "x-vindor-render-csp": "script-src 'nonce-attacker'",
       },
     });
     const first = proxy(request);
@@ -26,12 +27,45 @@ describe("storefront CSP rollout", () => {
       first.headers.get("x-middleware-request-content-security-policy"),
     ).toBe(policy);
     expect(first.headers.get("x-middleware-request-x-nonce")).toBe(nonce);
+    expect(first.headers.get("x-middleware-request-x-vindor-render-csp")).toBe(
+      policy,
+    );
     expect(
       first.headers.get(
         "x-middleware-request-content-security-policy-report-only",
       ),
     ).toBeNull();
     expect(first.headers.get("cache-control")).toBe("private, no-store");
+  });
+  it("strips caller policy even on excluded resources without changing cache", () => {
+    for (const path of [
+      "/_next/static/not-a-file",
+      "/_next/image",
+      "/sentry-tunnel",
+    ]) {
+      const response = proxy(
+        new NextRequest("https://shop.example" + path, {
+          headers: {
+            "x-vindor-render-csp": "script-src 'nonce-attacker'",
+            "x-nonce": "attacker",
+            "content-security-policy": "script-src 'nonce-attacker'",
+            "content-security-policy-report-only":
+              "script-src 'nonce-attacker'",
+          },
+        }),
+      );
+      for (const name of [
+        "x-vindor-render-csp",
+        "x-nonce",
+        "content-security-policy",
+        "content-security-policy-report-only",
+      ])
+        expect(response.headers.get("x-middleware-request-" + name)).toBeNull();
+      expect(response.headers.get("cache-control")).toBeNull();
+      expect(
+        response.headers.get("content-security-policy-report-only"),
+      ).toBeNull();
+    }
   });
   it("keeps production scripts strict and development eval explicitly limited", () => {
     const production = storefrontPolicy("fixture", false);

@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { fileURLToPath } from "node:url";
+const nonceTransportFixture = fileURLToPath(
+  new URL("./scripts/test-strip-csp-request-headers.cjs", import.meta.url),
+);
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: false,
@@ -102,6 +106,7 @@ export default defineConfig({
         APP_ORIGIN: "http://127.0.0.1:3302",
         ALLOW_LOCAL_HTTP_SESSIONS: "true",
         HOSTNAME: "127.0.0.1",
+        NODE_OPTIONS: `--require=${JSON.stringify(nonceTransportFixture)}`,
       },
       reuseExistingServer: false,
       timeout: 60000,
@@ -126,6 +131,7 @@ export default defineConfig({
         APP_ORIGIN: "http://127.0.0.1:3300",
         ALLOW_LOCAL_HTTP_SESSIONS: "true",
         HOSTNAME: "127.0.0.1",
+        NODE_OPTIONS: `--require=${JSON.stringify(nonceTransportFixture)}`,
       },
       reuseExistingServer: false,
       timeout: 60000,
@@ -137,6 +143,7 @@ export default defineConfig({
         API_BASE_URL: "http://127.0.0.1:18301",
         PORT: "3301",
         HOSTNAME: "127.0.0.1",
+        NODE_OPTIONS: `--require=${JSON.stringify(nonceTransportFixture)}`,
       },
       reuseExistingServer: false,
       timeout: 60000,
