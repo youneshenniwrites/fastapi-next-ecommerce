@@ -20,12 +20,14 @@ Without activation, existing non-payment checkout continues working.
 
 For protected development hosting, set server-only
 `STRIPE_WEBHOOK_RELAY_ENABLED=true` on the **development frontend only**. Its
-existing `API_BASE_URL` and `VERCEL_PROTECTION_BYPASS` target the development API.
+existing `API_BASE_URL` targets the development API; configure a server-only
+`VERCEL_PROTECTION_BYPASS` only if that API deployment requires it.
 Register the public frontend URL `/api/payments/webhook`; the bounded relay sends
 unchanged bytes and the Stripe signature to the fixed API path
 `/api/v1/payments/webhook`. It never accepts a caller-selected destination.
-The API remains protected and verifies signatures. Do not put a protection bypass
-token in the Stripe URL. Production relay configuration remains disabled.
+The API independently verifies Stripe signatures; Vercel access protection depends
+on the selected deployment, as recorded in the environment runbook. Do not put a
+protection bypass token in the Stripe URL. Production relay configuration remains disabled.
 
 Subscribe to these snapshot events:
 

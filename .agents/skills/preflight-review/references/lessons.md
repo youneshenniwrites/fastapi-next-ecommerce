@@ -111,3 +111,13 @@ idempotency protocol that orders recovery after their outcome. A fresh snapshot
 can precede a late commit; response-after-commit fixtures alone do not test this.
 Exercise a write that commits after the deadline, and do not claim that preserving
 existing transport timeouts solves general connection-loss ordering.
+
+## Preview deployment evidence — PR 264
+
+Check protection enums against current provider documentation, not plausible
+abbreviations; a mocked positive fixture does not prove actual protection. Verify
+the selected API alias’s live application response before assuming that a historical
+bypass requirement still applies. Stop creation if that access contract changes.
+For pull-request CI, distinguish the raw head tree from GitHub’s synthetic merge
+tree: upload only a tree the checks exercised, and recheck base movement as well
+as the head before creation. [Source findings and verified disposition](history.md#focused-addendum--2-october-2026-pr-264).

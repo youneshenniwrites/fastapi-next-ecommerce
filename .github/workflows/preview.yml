@@ -1,0 +1,62 @@
+name: Reviewed frontend preview
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Create a reviewed preview or retire a specific preview
+        required: true
+        type: choice
+        options: [create, retire]
+      pr_number:
+        description: Open same-repository PR number (create only)
+        type: string
+      head_sha:
+        description: Full reviewed head SHA (create only)
+        type: string
+      deployment_id:
+        description: Exact VIN-45 preview deployment ID (retire only)
+        type: string
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+concurrency:
+  group: reviewed-frontend-preview
+  cancel-in-progress: false
+jobs:
+  preview:
+    name: Guard, create or retire a development frontend preview
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: development
+    steps:
+      - name: Check out trusted orchestration only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Validate the requested source without deployment credentials
+        if: inputs.operation == 'create'
+        run: python3 scripts/preview_ready.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PREVIEW_SHA: ${{ inputs.head_sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: frontend/.nvmrc
+      - name: Install pinned official deployment CLI (no PR code)
+        run: npm install --global vercel@59.11.7
+      - name: Recheck, then deploy or retire the bounded preview
+        run: python3 scripts/deploy_preview.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_OPERATION: ${{ inputs.operation }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PREVIEW_SHA: ${{ inputs.head_sha }}
+          PREVIEW_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_FRONTEND_PROJECT_ID: ${{ vars.VERCEL_FRONTEND_PROJECT_ID }}

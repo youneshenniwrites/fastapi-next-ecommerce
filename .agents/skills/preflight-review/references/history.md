@@ -151,3 +151,13 @@ Refresh using paginated `pulls?state=all`, `pulls/comments`, `issues/comments` a
 
 - [PR 88: cover comment follow-up](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997140827). Apply review prerequisites to both initial and follow-up requests.
 - [PR 88: picker metadata](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/88#discussion_r3997140833). Keep advertised discovery metadata consistent with the skill package.
+
+## Focused addendum — 2 October 2026, PR 264
+
+This is a scoped follow-up, not a refresh of the complete 12 September snapshot.
+The three PR #264 inline findings were read with their current revision and
+independently evaluated:
+
+- [API reachability](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/264#discussion_r4169847380): the fixed development alias actually returns FastAPI health/catalog/invalid-login responses without a bypass. Add a pre-upload access contract probe and reconcile stale instructions; do not weaken protection or copy credentials.
+- [Preview protection enum](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/264#discussion_r4169847385): unsupported `prod_deployment_urls` was accepted while the documented `prod_deployment_urls_and_all_previews` was rejected. Correct and test the provider enum; do not assert that the unsupported value provides preview protection.
+- [Tested deployment tree](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/264#discussion_r4169847388): current-head PR status alone cannot prove that its raw tree equals the synthetic merge tested by CI. Require current-main ancestry and base/head stability before upload.

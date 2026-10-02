@@ -4,8 +4,8 @@ import type { paths, components } from "./schema";
 export type Product = components["schemas"]["ProductRead"];
 /** Create the server-only client with bounded JSON reads and transport-managed writes. */
 export function apiClient() {
-  // Server-only bypass for the Vercel-gated development API (never browser-exposed);
-  // production leaves it unset and is unaffected.
+  // Optional server-only access for a protected API deployment (never browser-exposed).
+  // Stable public aliases and minimal previews leave this unset.
   const bypass = process.env.VERCEL_PROTECTION_BYPASS;
   return createClient<paths>({
     baseUrl: process.env.API_BASE_URL ?? "http://127.0.0.1:8000",

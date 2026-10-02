@@ -5,6 +5,27 @@ import { retryAfterSeconds, rateLimitMessage } from "./rate-limit";
 import { rateLimitContextHeaders } from "./rate-limit-context";
 
 export function sessionPolicy() {
+  const mode = process.env.APP_ORIGIN_MODE;
+  if (mode === "vercel-preview") {
+    const hostname = process.env.VERCEL_URL ?? "";
+    if (
+      process.env.VERCEL !== "1" ||
+      process.env.VERCEL_ENV !== "preview" ||
+      hostname !== hostname.trim() ||
+      !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.vercel\.app$/.test(hostname)
+    )
+      throw new Error(
+        "Preview sessions require a valid Vercel deployment host",
+      );
+    // Provider configuration, never request Host. Stable deployment origins and
+    // aliases must not authorize writes to this separate preview deployment.
+    return {
+      origins: [`https://${hostname}`],
+      secure: true,
+      name: "__Host-session",
+    };
+  }
+  if (mode) throw new Error("Unsupported APP_ORIGIN_MODE");
   const raw = process.env.APP_ORIGIN;
   if (!raw) throw new Error("APP_ORIGIN is required for sessions");
   const origin = new URL(raw);
