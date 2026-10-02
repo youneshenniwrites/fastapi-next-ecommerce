@@ -14,7 +14,9 @@ pinned action SHAs, timeouts and cancellation of superseded runs.
 | Frontend / Production build and browser tests | Production build → disposable real API → desktop/mobile/axe and fault tests → package | Browser report, traces, screenshots, standalone build |
 | Dependency audit / Python and frontend | Audit locked dependencies on PR/push, weekly, or manually | JSON reports |
 
-The frontend browser job depends on its quality job. Backend jobs run independently
+The frontend quality job starts independently; the browser job starts after its
+docs-only filter. Both unchanged named checks must pass; delivery requires the
+whole exact-main frontend workflow to succeed. Backend jobs also run independently
 so failures do not hide other evidence. Frontend unit coverage measures maintained library TypeScript plus AccountForm and RetryCatalog;
 route rendering, API integration and failure screens are covered by browser tests.
 FastAPI's generated OpenAPI snapshot is checked in CI so API drift fails the PR.
@@ -25,7 +27,8 @@ links and local reproduction. Missing reports are labelled unavailable, never 0%
 ## Build versus deployment
 
 A successful build is not a deployment. The frontend workflow produces a standalone
-build artifact only after browser tests pass. The workflow summary explicitly marks
+build artifact only after browser tests pass. Artifact presence alone is not
+approval: quality may still be running or have failed. The workflow summary explicitly marks
 that CI itself does not deploy. Production delivery is a separate workflow.
 
 Production delivery (#46) waits for all four main verification workflows on the
@@ -43,3 +46,25 @@ artifact. Fix the root cause and rerun checks for the new head; do not skip test
 or suppress an audit to merge. Reports expire after 14 days. Fork PRs receive no
 cloud secrets. Branch-protection required-check settings remain a separate admin
 control; workflow definitions alone do not enforce repository rules.
+
+## Frontend browser runtime (VIN-146)
+
+The browser job uses the official Playwright Noble image, pinned by version and
+immutable digest. It already contains Chromium and its operating-system dependencies;
+there is no per-run browser download, browser-cache restore or apt installation.
+The job still installs the locked npm packages, pinned Node/npm and Python tooling,
+builds the production storefront once and runs the complete serial browser suite.
+A launch check rejects an SDK/image version mismatch before tests; update the image
+tag, digest and expected SDK version together when upgrading Playwright. The cache
+for npm and uv remains. Job names, test projects, workers, retries, thresholds and
+privacy settings are unchanged.
+
+Quality and browser jobs use separate runners; browser API fixtures use disposable
+databases. Parallel jobs do not share mutable test fixtures. Browser tests themselves remain single-worker
+because payment stock, catalog and fault scenarios share state. Container pull time
+and runner queue delay are included when comparing total workflow time. See
+[VIN-146](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146) for
+measured evidence; the older cache-only observation did not prove a speedup.
+
+References: [Playwright CI](https://playwright.dev/docs/ci#via-containers),
+[container/version guidance](https://playwright.dev/docs/docker).

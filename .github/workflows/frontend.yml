@@ -97,12 +97,17 @@ jobs:
           >> "$GITHUB_STEP_SUMMARY"
   browser:
     name: Frontend · Production build and browser tests
-    needs: [quality, changes]
+    needs: [changes]
     if: needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    container:
+      # Match the locked Playwright SDK; keep tag and immutable digest together.
+      image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+      options: --init --ipc=host
     defaults:
       run:
+        shell: bash
         working-directory: frontend
     steps:
       - name: Check out source
@@ -127,13 +132,19 @@ jobs:
           version: "0.8.22"
       - name: Install locked API dependencies
         run: uv sync --locked --python 3.12 --project ../backend
-      - name: Cache Playwright browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
-      - name: Install Chromium and browser system dependencies
-        run: npx playwright install --with-deps chromium
+      - name: Verify the locked SDK can launch preinstalled Chromium
+        run: |
+          node --input-type=module <<'JS'
+          import { createRequire } from 'node:module';
+          import { chromium } from 'playwright';
+          const { version } = createRequire(import.meta.url)('playwright/package.json');
+          if (version !== '1.63.0') {
+            throw new Error('Update the pinned Playwright image together with the SDK');
+          }
+          const browser = await chromium.launch();
+          console.log(`Preinstalled Chromium ready: ${browser.version()}`);
+          await browser.close();
+          JS
       - name: Test desktop, mobile, accessibility and failure states
         run: npm run test:e2e
       - name: Upload browser report, screenshots and failure traces
