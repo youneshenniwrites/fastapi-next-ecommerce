@@ -1,9 +1,15 @@
+import json
 import logging
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.openapi.docs import (
+    get_redoc_html,
+    get_swagger_ui_html,
+    get_swagger_ui_oauth2_redirect_html,
+)
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.api.v1 import auth, cart, diagnostics, orders, payments, products
 from app.core.observability import CommerceMetricsMiddleware, init_observability
@@ -21,6 +27,8 @@ logger.info("Observability initialized", enabled=observability_enabled)
 
 # App initialization.
 app = FastAPI(
+    docs_url=None,
+    redoc_url=None,
     title="E-Commerce API",
     description=(
         "Portfolio ecommerce API backed by PostgreSQL. Public catalog reads use GBP "
@@ -67,6 +75,78 @@ app.add_middleware(
 )
 # Outside CORS so preflight responses receive the same baseline headers.
 app.add_middleware(SecurityHeadersMiddleware)
+
+
+def nonce_document(
+    response: HTMLResponse, request: Request, document: str
+) -> HTMLResponse:
+    """Keep FastAPI's docs generator and nonce its inline scripts and styles."""
+    nonce = request.state.csp_nonce
+    html = response.body.decode("utf-8")
+    html = html.replace("<script", f'<script nonce="{nonce}"')
+    html = html.replace("<style>", f'<style nonce="{nonce}">')
+    request.state.csp_document = document
+    return HTMLResponse(html, headers={"Cache-Control": "private, no-store"})
+
+
+async def swagger_documentation(request: Request) -> HTMLResponse:
+    root_path = request.scope.get("root_path", "").rstrip("/")
+    return nonce_document(
+        get_swagger_ui_html(
+            openapi_url=root_path + app.openapi_url,
+            title=f"{app.title} - Swagger UI",
+            oauth2_redirect_url=root_path + app.swagger_ui_oauth2_redirect_url,
+            init_oauth=app.swagger_ui_init_oauth,
+            swagger_ui_parameters=app.swagger_ui_parameters,
+        ),
+        request,
+        "swagger",
+    )
+
+
+async def redoc_documentation(request: Request) -> HTMLResponse:
+    root_path = request.scope.get("root_path", "").rstrip("/")
+    # Initialize explicitly so ReDoc passes the nonce to its runtime style elements.
+    response = get_redoc_html(
+        openapi_url="", title=f"{app.title} - ReDoc", with_google_fonts=False
+    )
+    html = response.body.decode("utf-8").replace(
+        '<redoc spec-url=""></redoc>', '<div id="redoc"></div>'
+    )
+    options = json.dumps(
+        {
+            "nonce": request.state.csp_nonce,
+            "theme": {
+                "typography": {
+                    "fontFamily": "Arial, sans-serif",
+                    "headings": {"fontFamily": "Arial, sans-serif"},
+                }
+            },
+        }
+    )
+    schema_url = json.dumps(root_path + app.openapi_url).replace("<", "\\u003c")
+    html = html.replace(
+        "</body>",
+        f"<script>Redoc.init({schema_url}, {options}, "
+        'document.getElementById("redoc"));</script></body>',
+    )
+    return nonce_document(HTMLResponse(html), request, "redoc")
+
+
+async def swagger_oauth_redirect(request: Request) -> HTMLResponse:
+    return nonce_document(
+        get_swagger_ui_oauth2_redirect_html(), request, "oauth-redirect"
+    )
+
+
+# Starlette routes preserve the default docs' GET/HEAD behavior and OpenAPI exclusion.
+app.add_route("/docs", swagger_documentation, include_in_schema=False)
+app.add_route("/redoc", redoc_documentation, include_in_schema=False)
+app.add_route(
+    app.swagger_ui_oauth2_redirect_url,
+    swagger_oauth_redirect,
+    include_in_schema=False,
+)
 
 
 @app.get("/", include_in_schema=False)
