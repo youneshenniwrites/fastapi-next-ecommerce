@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./security-fixture";
 
 const API = "http://127.0.0.1:18302";
 const ORIGIN = "http://127.0.0.1:3302";

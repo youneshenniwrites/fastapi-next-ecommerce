@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./security-fixture";
 test("real API login, private profile and logout without JS token exposure", async ({
   page,
   request,

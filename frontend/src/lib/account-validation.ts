@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/validation";
 
 export function accountSchema(mode: "login" | "register") {
   return z.object({

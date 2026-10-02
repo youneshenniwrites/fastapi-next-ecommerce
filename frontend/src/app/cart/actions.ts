@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { z } from "zod";
+import { z } from "@/lib/validation";
 import { apiClient } from "@/lib/api/client";
 import { cartIdentity, CartRateLimitError } from "@/lib/cart-data";
 import { sessionPolicy } from "@/lib/session";
