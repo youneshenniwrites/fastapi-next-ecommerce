@@ -33,7 +33,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
 | 2. Reliable cart and rate limits | ✅ Complete | VIN-158 same-instance visitor isolation and VIN-89 hosted recovery are verified |
-| 3. Security and monitoring | ⛔ Partly blocked | #121 foundation complete; #126 remains actionable |
+| 3. Security and monitoring | ✅ Complete | #121 monitoring foundation and #126 hosted header enforcement are verified |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted purchase verified in stage 6 |
 | 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted proof verified in stage 6 |
 | 6. Hosted demo and evidence | ⛔ Partly blocked | #45 preview design gate; other evidence work remains actionable |
@@ -54,9 +54,9 @@ acceptance does not mean active implementation and adds no portfolio completion 
 cleanup and VIN-248’s baseline MIME/referrer header slice are verified. VIN-146
 frontend CI speed is verified and Done through PR #251. VIN-89 cart recovery is
 merged in PR #252 and verified on hosted development; its evidence is linked below.
-VIN-126’s report-only stage and guarded hosted nonce correction are merged in
-PRs #254 and #255. The final enforcement promotion is being verified; hosted
-acceptance remains required. VIN-45 safe previews follow its verified closeout.
+VIN-126 is verified through the staged policy, guarded nonce correction and
+enforcement in PRs #254–#256. Its hosted release and evidence are recorded below.
+VIN-45 safe previews are next; no next implementation starts automatically.
 VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
@@ -68,16 +68,16 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. Merge alone did not
 prove hosted configuration or visitor isolation. The earlier 1 October checkpoint records configuration and throttling/retry; the later PR #244 probe now establishes same-instance visitor isolation and retry.
 
-**Verified progress:** `███████████████░░░░░` **22 / 29 outcomes (76%, revised scope)**.
+**Verified progress:** `████████████████░░░░` **23 / 29 outcomes (79%, revised scope)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 7/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 2/3: the reviewed privacy gate and hosted monitoring foundation are complete. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; that historical item does not claim a speed improvement. VIN-146’s later implementation and delivery are verified separately without extra credit.
+Baseline is 3/3, reliability 7/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 3/3: privacy, hosted monitoring and deployed security headers are verified. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; that historical item does not claim a speed improvement. VIN-146’s later implementation and delivery are verified separately without extra credit.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-76% · 22/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
+79% · 23/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
-Payment implementation and hosted payment acceptance are complete; outstanding security headers and other hosted outcomes remain unchecked.
+Payment implementation and hosted payment acceptance are complete; the remaining hosted-finish outcomes stay unchecked.
 
 **Historical sequence change (21 September; current priority above supersedes this handoff):** VIN-118 order drafts are delivered. Continue feature delivery with
 VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. The subsequent development monitoring foundation and joined-trace proof are now verified in VIN-121 and VIN-223; follow the current execution priority above.
@@ -181,11 +181,11 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [x] Merge anonymous identity and test-threshold separation — VIN-158 / PR #164, `4d3bbd9`. Required CI and both reviews passed on `308824b`; hosted acceptance remains separate.
 - [x] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Paired configuration and initial retry are [verified](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378); the [PR #244 automated probe](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909932392) proves A429 → B401 → A429 and A's later 401 retry with one limiter witness, ordered sequences and matching release `847092c`. Both development diagnostic flags were disabled, redeployed and verified absent from login responses; [closeout and cleanup evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5938473213) is recorded.
 
-#### 3 — Security and monitoring
+#### 3 — Security and monitoring · Complete
 
 - [x] **#121 privacy gate:** PR #203 implements error/transaction/log/metric filtering with passing serialized-payload tests; PR #219 disables browser-session envelopes and tests actual default-integrations output. Merged as `79d7923` on 30 September after clean Codex review of `c454746` and passing application CI; hosted monitoring is recorded in the separate verified foundation outcome below.
 - [x] **#121 development monitoring foundation:** hosted sanitized errors, logs/metrics, release/environment, email alert and quota controls verified. Owner-approved 30 September scope split transferred joined trace continuity to #223, outside this revised baseline; that trace is now verified separately.
-- [ ] Implement compatible security headers/CSP and verify deployed behavior — #126.
+- [x] Implement compatible security headers/CSP and verify deployed behavior — #126. PRs #254–#256 deliver the staged policy, guarded framework nonce transport and enforcement; exact release and hosted development/production evidence are recorded in the security-header closeout below.
 
 #### 4 — Checkout · Complete
 
@@ -339,16 +339,16 @@ PR #203 is merged. PR #219 implements session-channel privacy protection and the
 
 ### Security headers (#126)
 
-Introduce compatible headers and a tested CSP rollout. Verify sessions, Server
-Actions, images and Sentry. Inspect deployed responses rather than assuming
-repository settings equal hosted behavior.
+Compatible framing, transport and nonce CSP enforcement is delivered through
+PRs #254–#256, with sessions, Server Actions, images and Sentry verified. Actual
+deployed responses and the controlled rejection probe are recorded below.
 
 [VIN-248](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/248)
 delivers the small baseline slice: `nosniff` and explicit referrer policy on the
 API and storefront. Its issue retains CI/review and hosted verification evidence.
-The full VIN-126 outcome above stays unchecked until its remaining CSP, framing,
-transport and deployed acceptance criteria are verified; this slice adds no
-separate portfolio outcome.
+The full VIN-126 outcome is now checked after its CSP, framing, transport and
+deployed acceptance; VIN-248 remains a baseline slice and adds no separate
+portfolio outcome.
 
 ## 4. Correct checkout (#29: #118 → #119 → #120)
 
@@ -438,3 +438,42 @@ visible while the next independent story proceeds.
 Finish line: a reproducible sandbox shopping demo with verified money/inventory,
 useful monitoring, documented recovery and honest evidence—not completion of
 every enterprise-readiness ticket.
+
+### Security-header closeout — 2 October 2026
+
+PRs [#254](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/254),
+[#255](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/255) and
+[#256](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/256)
+deliver staging, the guarded hosted nonce correction and enforcement. The owner
+merged PR #256's reviewed head after green applicable CI; Codex's trusted unedited
+clean result identifies `59a17db2ae`. Its new closing phrase was not recognized by
+the informational adapter; the bounded format follow-up remains deferred in
+[VIN-38](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/38#issuecomment-5960004944).
+No success was fabricated or extra review requested.
+
+Enforced release `cc115e093ad355882e7ce983bf35703f718a9609` passed main CI and
+actual gated [development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37056504486)
+and [production delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37056504484).
+Public hosted catalog/login (repeated)/registration/404 HTML passes framework-script
+nonce equality and freshness, private/no-store caching, HSTS/MIME/referrer/framing,
+full enforced CSP without report-only or production inline/eval script exceptions,
+and caller-policy rejection. Assets remain immutable; product navigation, Swagger
+health execution and ReDoc search work. Documentation nonces/caching and OAuth
+redirect headers pass. The controlled isolated-browser response blocks an
+unnonced script under the actual hosted policy; zero unexpected policy reports
+were observed in normal public journeys. Existing development Sentry delivery
+returned HTTP 200; production Sentry remains inactive.
+
+The full production desktop Chrome/Pixel 7 fixture suite under standard-header
+stripping passes 137 tests with two existing skips, including private account,
+cart/checkout/recovery and framing cases; frontend 367 units, nonce patch 15
+regressions and backend 319 tests (19 infrastructure skips), build/lint/types/format
+pass. Public hosted observations do not claim private hosted commerce writes,
+Safari coverage or continuous monitoring. The original failed nonce observation
+and correction remain in the [policy runbook](../security-headers.md); bounded
+style/documentation exceptions and rollback stay explicit. No new service,
+collector, secret, account, paid upgrade or scheduled wakeup was added.
+
+This completes the existing VIN-126 outcome once: 23/29 (79%). VIN-248 remains
+its baseline slice, and the correction/promotion add no extra outcomes. Next is
+VIN-45's safe-preview design; no next implementation begins at this closeout.
