@@ -123,7 +123,14 @@ def test_documentation_nonces_are_fresh_and_match_candidate_policy(client, path)
         nonces.append(nonce)
         assert all(tag.get("nonce") == nonce for tag in tags.scripts + tags.styles)
         candidate = response.headers["content-security-policy-report-only"]
-        assert f"script-src 'nonce-{nonce}'" in candidate
+        assert (
+            next(
+                directive
+                for directive in candidate.split("; ")
+                if directive.startswith("script-src ")
+            )
+            == f"script-src 'nonce-{nonce}'"
+        )
         assert "'unsafe-inline'" not in next(
             directive
             for directive in candidate.split("; ")

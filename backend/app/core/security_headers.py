@@ -45,7 +45,7 @@ def candidate_content_policy(document: str | None = None, nonce: str = "") -> st
     ]
     script_sources = f"'nonce-{nonce}'"
     if document in {"swagger", "redoc"}:
-        script_sources += " https://cdn.jsdelivr.net"
+        # External UI scripts carry a nonce too; no broad CDN script allowance.
         image_sources = "'self' data: https://fastapi.tiangolo.com"
         if document == "redoc":
             image_sources += " https://cdn.redoc.ly"
