@@ -139,9 +139,12 @@ browser form produced no observable application response, so it is not a pass.
 The later creation request in
 [run 37069992201](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37069992201)
 was rejected before credentials/upload because PR #265 had already merged. Use a
-fresh reviewed open PR for the remaining proof; do not weaken the open-source guard
-or reuse the retired URL. Record the final result and cleanup on VIN-45 before
-claiming its portfolio outcome.
+fresh reviewed open PR and repeat the full fictional login/cart/account/host
+isolation journey on that completing preview alongside headers/release and
+wrong-origin proof, then retire it. The earlier checkpoint is partial evidence,
+not a substitute for the complete single-preview proving event. Do not weaken
+the open-source guard or reuse the retired URL. Record the final result and cleanup
+on VIN-45 before claiming its portfolio outcome.
 
 ## Sources
 
