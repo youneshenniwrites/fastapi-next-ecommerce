@@ -50,10 +50,12 @@ remains pending on a genuine eligible update; manual merges do not satisfy it.
 VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
 acceptance does not mean active implementation and adds no portfolio completion credit.
 
-**Current execution priority — 1 October:** VIN-158 hosted isolation, retry and
-cleanup are verified. Resume VIN-89 hosted cart recovery, then VIN-126 deployed
-security headers and VIN-45 safe previews. VIN-146/VIN-147 delivery-efficiency
-work follows portfolio delivery unless a concrete blocker needs a bounded repair.
+**Current execution priority — 2 October:** VIN-158 hosted isolation, retry and
+cleanup and VIN-248’s baseline MIME/referrer header slice are verified. The owner
+selected VIN-146 frontend CI speed as the next bounded task; its latest issue
+handoff owns current measurement and delivery state. After that, resume VIN-89
+hosted cart recovery, remaining VIN-126 security headers and VIN-45 safe previews.
+VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
 adds no separate checklist credit. VIN-237 password visibility is delivered in
@@ -202,7 +204,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] **#45 BLOCKED — agent design/implementation:** deliver reviewed previews with isolated data, exact origins, safe credentials and verified login/cart; see unblock actions above.
 - [ ] Expand cart coverage measurement and validate comparison gates before requiring them.
 - [ ] Resolve exact-head review enforcement — #38; add types around new backend services.
-- [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup is claimed; VIN-146’s actual improvement acceptance remains unchecked and the issue remains open/Backlog.
+- [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup was claimed at that deadline. VIN-146’s new improvement work is active on 2 October; its issue records measured results and current acceptance. This historical disposition earns no additional credit when the follow-up completes.
 - [x] Run complete hosted sandbox purchase with fictional data — VIN-30, development `8685cc1`, 23 September; [success/history, cancellation, expiry and duplicate replay evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026).
 - [ ] Perform disposable restore rehearsal and document recovery — scoped #130.
 - [ ] Review full journey for keyboard/mobile/accessibility — scoped #131, not formal full conformance.

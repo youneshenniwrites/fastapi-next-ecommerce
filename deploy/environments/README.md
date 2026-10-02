@@ -105,8 +105,11 @@ code, or add a write-enabled pull_request_target workflow that executes PR code.
 
 ## Delivery sequence
 
-PR: lint/types/contract → unit/integration tests → build/browser tests → Codex
-review → development preview. Backend changes use disposable CI databases; promotion
+PR: backend integration checks, frontend quality checks and production build/browser
+tests run on isolated runners → all applicable checks and Codex review pass →
+development preview when its separate policy is delivered. Frontend quality and
+browser jobs run concurrently; the entire workflow must succeed before delivery.
+Backend changes use disposable CI databases; promotion
 to the shared development API is explicit and serialized. A frontend preview does
 not imply a dedicated backend/database for every PR.
 
