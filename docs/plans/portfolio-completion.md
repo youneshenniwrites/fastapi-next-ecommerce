@@ -56,7 +56,9 @@ frontend CI speed is verified and Done through PR #251. VIN-89 cart recovery is
 merged in PR #252 and verified on hosted development; its evidence is linked below.
 VIN-126 is verified through the staged policy, guarded nonce correction and
 enforcement in PRs #254–#256. Its hosted release and evidence are recorded below.
-VIN-45 safe previews are next; no next implementation starts automatically.
+VIN-45 is active: [PR #264](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/264)
+merged guarded preview orchestration and exact-origin sessions as `064bfae`.
+Hosted preview verification and retirement remain open; no outcome is credited.
 VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
@@ -154,21 +156,21 @@ is organization, not a replacement progress denominator.
 
 | Order | Story | Bounded proving vehicle |
 | --- | --- | --- |
-| 1 | VIN-45 safe frontend previews | Design the trust/origin boundary, then one reviewed manually requested preview and fictional login/cart/retirement proof |
+| 1 | VIN-45 safe frontend previews | One reviewed manually requested preview, fictional login/cart/ownership and wrong-origin proof, then exact-deployment retirement |
 | 2 | VIN-258 disposable restore | Restore a fictional backup into an isolated target; verify schema/data, measure recovery, record limitations and cleanup |
 | 3 | VIN-259 focused accessibility | Keyboard/mobile journey matrix and existing automated checks; fix in-scope blockers without claiming full WCAG conformance |
 | 4 | VIN-260 cart coverage | Extend one meaningful cart component boundary; validate existing head/base/negative comparison cases without rebuilding reporting |
 | 5 | VIN-38 review enforcement, plus VIN-261 service types | Small adapter compatibility, policy-aware protection proof and scoped order/payment type checks; both required for one existing outcome |
 | 6 | VIN-262 final interview package | Reconcile delivered VIN-198 script/setup/architecture/limits and record final fictional five-minute rehearsal after prerequisites |
 
-All unstarted work stays Backlog; VIN-45 is next, not already underway. If preview
+All unstarted work stays Backlog; VIN-45 is active for hosted verification. If preview
 provider constraints block safe delivery, continue with independent VIN-258 rather
 than waiting for an owner-only action that has not been established. VIN-38’s
 trigger compatibility must be revalidated before its documented November policy
 change; required-check settings need their reviewed design and explicit settings
-authorization. No protection, deployment or implementation change occurs during
-this refinement. VIN-147/VIN-172, broader enterprise work and optional monitoring
-polish retain separate scopes and do not earn new baseline credit.
+authorization. This refinement itself added no protection, deployment or implementation
+change; the later VIN-45 implementation is recorded above. VIN-147/VIN-172,
+broader enterprise work and optional monitoring polish retain separate scopes and do not earn new baseline credit.
 
 ### Wider backlog disposition — refined 2 October 2026
 
@@ -198,15 +200,16 @@ and remaining decisions; this is a priority index, not another completion checkl
 ### Blockers and unblock actions
 
 VIN-45 remains an unfinished finish-line dependency. Development monitoring
-(VIN-121) and joined-trace proof (VIN-223) are complete. Preview design is planned; a demonstrated provider blocker must not prevent
+(VIN-121) and joined-trace proof (VIN-223) are complete. Preview design and
+implementation are merged; a demonstrated hosted provider blocker must not prevent
 independent restore/accessibility work.
 
 | Ticket / board status | Verified dependency | Next unblock action | Who acts | Completion evidence |
 | --- | --- | --- | --- | --- |
-| [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Backlog** | Reviewed-revision preview design, exact origins and credential/data isolation are not implemented. Existing development hosting and automatic main delivery are already delivered; no current external account blocker is established by the ticket. | Agent defines the preview trust boundary and implements a scoped workflow using isolated development data and server-only credentials. Identify any actual missing platform configuration before requesting owner action. | **Agent:** design, implementation, preview login/cart tests and retirement docs. **Owner:** only a demonstrated account/configuration dependency. | Reviewed preview revision/URL, exact allowed origin, isolated credentials/data, working login/cart, creation and retirement instructions. |
+| [#45 Safe PR previews](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/45) · **Active** | [Design and implementation](../design/frontend-previews.md) merged in PR #264. Preview source shares only fictional development API data and uses host-only cookies; it is not a database clone. Hosted acceptance remains unverified. | Review and check a small source PR containing current main, then request its exact-head preview from trusted main; verify login/cart/ownership, wrong-origin rejection and exact deployment retirement. | **Agent:** hosted verification, cleanup and evidence. **Owner:** only a demonstrated access dependency. | Reviewed preview revision/URL, exact allowed origin, development-only configuration, working fictional login/cart, creation and retirement proof. |
 
 **Unblock order:** Follow the current execution priority above. VIN-45 remains
-in stage 6; its design work is agent work, not an established owner-only wait.
+in stage 6; its remaining hosted verification is agent work, not an established owner-only wait.
 Recheck blockers at each story handoff and record evidence on the source issue.
 An unresolved outcome stays unchecked at portfolio acceptance.
 
@@ -253,7 +256,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 #### 6 — Hosted portfolio finish
 
-- [ ] **#45 — planned agent design/implementation:** deliver reviewed previews with isolated data, exact origins, safe credentials and verified login/cart; see unblock actions above.
+- [ ] **#45 — merged implementation, hosted proof pending:** verify one reviewed preview with fictional development data, exact origins, safe credentials, login/cart and retirement; see unblock actions above.
 - [ ] Expand cart coverage measurement and validate comparison gates before requiring them — VIN-260; reuse the delivered VIN-57/VIN-97 foundation.
 - [ ] Resolve exact-head review enforcement — VIN-38; add scoped order/payment service types — VIN-261. Both complete this one existing outcome.
 - [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup was claimed at that deadline. VIN-146’s subsequent browser-runtime improvement is verified and Done through PR #251; its issue records the 2 October measurements and delivery evidence. This historical disposition earns no additional credit for that follow-up.
