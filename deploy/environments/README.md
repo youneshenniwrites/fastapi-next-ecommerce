@@ -269,3 +269,11 @@ Retain the gated hook and regression tests for
 future repeatable checks. Record actual proof and cleanup before VIN-158 Done;
 adding this mechanism alone earns no checklist credit. No schedule, paid service,
 production activation or owner phone coordination is involved.
+
+## Reviewed frontend previews (VIN-45)
+
+The [bounded preview design and usage](../../docs/design/frontend-previews.md) uses
+manual trusted-main orchestration, exact reviewed PR revisions and the development
+frontend Preview target. Host-only sessions share fictional development data; no
+production credentials or database clone are provided. Hosted login/cart and
+retirement acceptance remain open until the source ticket records proof.
