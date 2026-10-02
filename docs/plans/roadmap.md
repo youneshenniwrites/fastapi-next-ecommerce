@@ -37,7 +37,7 @@ owns current handoffs and evidence. This roadmap indexes capabilities.
 - Public-demo abuse throttling: fixed-window 429s on auth/write endpoints with documented limits and headers (#109, eviction follow-up #115).
 
 - Storefront rate-limit feedback is merged (#156 / #159, `2cfc95f`).
-- Cart read-timeout correction is merged (#89 / #160, `b03d641`); merge does not establish hosted acceptance. See #89 for remaining verification.
+- Cart read-timeout correction (#89 / #160, `b03d641`) and mutation cancellation/offline recovery correction (PR #252, `a03545d`) are merged. VIN-89 hosted development persistence, deliberate reconnect, independent carts and returned-tab account switching are [verified](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/89#issuecomment-5957737474); arbitrary late-commit ordering remains a documented limitation.
 
 ## Frontend design-system work
 
@@ -52,8 +52,9 @@ snapshots and server-owned totals. Drafts never reserve inventory or place a
 purchase. See [ADR 0002](../decisions/0002-order-transactions.md); VIN-119 implements
 atomic placement with stock/price/cart revalidation and customer-scoped retries;
 PR #181 is merged. VIN-120 customer checkout/history merged in PR #188. VIN-30 sandbox implementation merged in PR #194; development activation and hosted purchase/cancellation/expiry proof were verified on 23 September (see the canonical plan).
-PR #187 merged account-fixture/cart actionability test corrections; broader VIN-89
-recovery and hosted acceptance remain outstanding.
+PR #187 merged account-fixture/cart actionability test corrections. VIN-89’s subsequent
+bounded recovery and hosted acceptance are verified through PR #252; see the
+canonical plan for evidence and retained limitations.
 
 ## Current priorities
 

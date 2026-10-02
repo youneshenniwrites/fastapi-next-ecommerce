@@ -25,14 +25,14 @@ claiming demo completion. A concise scaling discussion belongs to the interview
 package: distinguish measured limits from hypotheses; do not add Redis, replicas or
 new services solely for demonstration. No additional plan or infrastructure is approved.
 
-## Progress at a glance — 1 October 2026
+## Progress at a glance — 2 October 2026
 
 **Current stage: 6 of 6, hosted verification and portfolio evidence.** Checkout and sandbox purchase are verified on development; remaining hosted acceptance stays explicit below. Stage counts are not effort estimates.
 
 | Stage | Status | What remains |
 | --- | --- | --- |
 | 1. Accurate baseline | ✅ Complete | Baseline evidence linked from #155 |
-| 2. Reliable cart and rate limits | ⏸ Cart hosted proof pending | VIN-158 same-instance visitor isolation is verified; VIN-89 hosted acceptance remains |
+| 2. Reliable cart and rate limits | ✅ Complete | VIN-158 same-instance visitor isolation and VIN-89 hosted recovery are verified |
 | 3. Security and monitoring | ⛔ Partly blocked | #121 foundation complete; #126 remains actionable |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted purchase verified in stage 6 |
 | 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted proof verified in stage 6 |
@@ -51,10 +51,10 @@ VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinish
 acceptance does not mean active implementation and adds no portfolio completion credit.
 
 **Current execution priority — 2 October:** VIN-158 hosted isolation, retry and
-cleanup and VIN-248’s baseline MIME/referrer header slice are verified. The owner
-selected VIN-146 frontend CI speed as the next bounded task; its latest issue
-handoff owns current measurement and delivery state. After that, resume VIN-89
-hosted cart recovery, remaining VIN-126 security headers and VIN-45 safe previews.
+cleanup and VIN-248’s baseline MIME/referrer header slice are verified. VIN-146
+frontend CI speed is verified and Done through PR #251. VIN-89 cart recovery is
+merged in PR #252 and verified on hosted development; its evidence is linked below.
+Next are remaining VIN-126 security headers and VIN-45 safe previews.
 VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
@@ -66,20 +66,20 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. Merge alone did not
 prove hosted configuration or visitor isolation. The earlier 1 October checkpoint records configuration and throttling/retry; the later PR #244 probe now establishes same-instance visitor isolation and retry.
 
-**Verified progress:** `██████████████░░░░░░` **21 / 29 outcomes (72%, revised scope)**.
+**Verified progress:** `███████████████░░░░░` **22 / 29 outcomes (76%, revised scope)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 6/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 2/3: the reviewed privacy gate and hosted monitoring foundation are complete. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; it does not claim a speed improvement or complete VIN-146.
+Baseline is 3/3, reliability 7/7, checkout 5/5, payment implementation 3/3 and hosted finish 2/8. Security/monitoring is 2/3: the reviewed privacy gate and hosted monitoring foundation are complete. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; that historical item does not claim a speed improvement. VIN-146’s later implementation and delivery are verified separately without extra credit.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-72% · 21/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
+76% · 22/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Payment implementation and hosted payment acceptance are complete; outstanding security headers and other hosted outcomes remain unchecked.
 
 **Historical sequence change (21 September; current priority above supersedes this handoff):** VIN-118 order drafts are delivered. Continue feature delivery with
 VIN-119 atomic placement and VIN-120 checkout/history, both now delivered. VIN-30 hosted payment verification is complete. The subsequent development monitoring foundation and joined-trace proof are now verified in VIN-121 and VIN-223; follow the current execution priority above.
-At the earlier checkpoint, VIN-158 same-instance visitor isolation remained open; the later closeout below supersedes that limitation. VIN-89 remains open for hosted proof; VIN-147 CI optimization stays
+At the earlier checkpoint, VIN-158 same-instance visitor isolation and VIN-89 hosted proof remained open; the later closeouts below supersede both gaps. VIN-147 CI optimization stays
 Backlog. Security/monitoring and hosted acceptance remain finish-line requirements,
 but do not block independent checkout development. Keep one implementation story active.
 
@@ -103,8 +103,8 @@ is Done; the browser checkout journey belongs to VIN-120.
 
 **22 September handoff:** PR #187 merged (`b5ced34`) with account-fixture and
 cart actionability regression corrections; 99 local browser tests passed with
-2 existing device-specific skips, and required CI passed. VIN-89 retains broader
-recovery/hosted acceptance in Backlog. VIN-120 checkout submission, confirmation
+2 existing device-specific skips, and required CI passed. At that checkpoint VIN-89 retained broader
+recovery/hosted acceptance in Backlog; the 2 October closeout below supersedes that state. VIN-120 checkout submission, confirmation
 and history merged in PR #188; VIN-30 implementation merged in PR #194. Its hosted verification was completed on 23 September (see evidence above). VIN-38 now covers the owner-requested Dependabot reviewer-policy change above;
 it does not add portfolio feature completion credit.
 
@@ -174,7 +174,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [x] Implement and merge readable 429/retry feedback — #156 / #159, `2cfc95f`.
 - [x] Verify the rate-limit implementation on the actual hosted revision — VIN-158, [1 October hosted evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378); reviewed application source `f4e6307`, active development deployments, HTTP 429 and deliberate retry.
 - [x] Merge the cart read-timeout correction — #89 / #160, `b03d641`. Independent deadlines are limited to reads; general late-write ordering remains a documented limitation. Merge alone does not complete hosted acceptance.
-- [ ] Verify merged recovery on hosted development using fictional data.
+- [x] Verify merged recovery on hosted development using fictional data — VIN-89 / PR #252, release `a03545d`; [hosted persistence, disconnected-write recovery, independent carts and returned-tab account switching](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/89#issuecomment-5957737474). Both tested carts were emptied and sessions signed out.
 - [x] Merge authenticated customer write-budget isolation — VIN-158 / PR #163, `b47be4a`; tests and both reviews completed.
 - [x] Merge anonymous identity and test-threshold separation — VIN-158 / PR #164, `4d3bbd9`. Required CI and both reviews passed on `308824b`; hosted acceptance remains separate.
 - [x] Configure the dedicated paired server-only signing key and verify actual Vercel identity/retry behavior — VIN-158. Paired configuration and initial retry are [verified](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5936301378); the [PR #244 automated probe](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909932392) proves A429 → B401 → A429 and A's later 401 retry with one limiter witness, ordered sequences and matching release `847092c`. Both development diagnostic flags were disabled, redeployed and verified absent from login responses; [closeout and cleanup evidence](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5938473213) is recorded.
@@ -204,7 +204,7 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] **#45 BLOCKED — agent design/implementation:** deliver reviewed previews with isolated data, exact origins, safe credentials and verified login/cart; see unblock actions above.
 - [ ] Expand cart coverage measurement and validate comparison gates before requiring them.
 - [ ] Resolve exact-head review enforcement — #38; add types around new backend services.
-- [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup was claimed at that deadline. VIN-146’s new improvement work is active on 2 October; its issue records measured results and current acceptance. This historical disposition earns no additional credit when the follow-up completes.
+- [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup was claimed at that deadline. VIN-146’s subsequent browser-runtime improvement is verified and Done through PR #251; its issue records the 2 October measurements and delivery evidence. This historical disposition earns no additional credit for that follow-up.
 - [x] Run complete hosted sandbox purchase with fictional data — VIN-30, development `8685cc1`, 23 September; [success/history, cancellation, expiry and duplicate replay evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026).
 - [ ] Perform disposable restore rehearsal and document recovery — scoped #130.
 - [ ] Review full journey for keyboard/mobile/accessibility — scoped #131, not formal full conformance.
@@ -276,6 +276,18 @@ Acceptance: committed-but-unacknowledged writes reconcile; controls remain
 read-only until a fresh authoritative read; account changes never expose or mutate
 the previous cart. Keep documented last-writer-wins absolute quantities;
 atomic multi-device increments are outside this release.
+
+**Verified closeout — 2 October 2026:** PR #252 preserves mutation cancellation
+through the installed Next.js fetch wrapper and keeps recovery available when the
+browser reports an offline connection. Its current-head Codex review and required
+CI passed. [Normal gated development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37039903815)
+deployed `a03545d`; release metadata matched before the [fictional-customer hosted check](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/89#issuecomment-5957737474).
+Persistence, deliberate reconnect without write replay, independent desktop/mobile
+carts and returned-tab account switching passed. Local committed-write/uncertain-write
+fixtures retain the original assertions and deadlines; all 24 targeted repeats and
+129 active full-suite cases passed without retries, with two existing skips.
+This verifies the bounded recovery outcome, not arbitrary delayed-commit ordering
+or a common root cause for every historical intermittent observation.
 
 ### 2C. Limiter trust
 
