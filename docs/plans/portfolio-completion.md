@@ -156,7 +156,7 @@ is organization, not a replacement progress denominator.
 
 | Order | Story | Bounded proving vehicle |
 | --- | --- | --- |
-| 1 | VIN-45 safe frontend previews | Design the trust/origin boundary, then one reviewed manually requested preview and fictional login/cart/retirement proof |
+| 1 | VIN-45 safe frontend previews | One reviewed manually requested preview, fictional login/cart/ownership and wrong-origin proof, then exact-deployment retirement |
 | 2 | VIN-258 disposable restore | Restore a fictional backup into an isolated target; verify schema/data, measure recovery, record limitations and cleanup |
 | 3 | VIN-259 focused accessibility | Keyboard/mobile journey matrix and existing automated checks; fix in-scope blockers without claiming full WCAG conformance |
 | 4 | VIN-260 cart coverage | Extend one meaningful cart component boundary; validate existing head/base/negative comparison cases without rebuilding reporting |
