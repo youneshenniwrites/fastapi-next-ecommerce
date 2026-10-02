@@ -107,7 +107,7 @@ Sandbox payments VIN-30 is complete on development; production payments remain d
 [session design](../design/customer-sessions.md) and [delivery rules](../delivery.md).
 
 Hosting setup #44 and production workflow acceptance #46 are complete.
-Development and production are live; #45 tracks the remaining frontend previews.
+Development and production are live; VIN-45’s [reviewed manual frontend previews](../design/frontend-previews.md#verified-closeout--2-october-2026) are verified, including exact retirement.
 Account journey verification (#27) is complete; the persistent cart API (#71) and cart storefront (#72) are delivered (#80). Azure is deferred; no extra API billing is allowed.
 
 ### Telemetry refinement

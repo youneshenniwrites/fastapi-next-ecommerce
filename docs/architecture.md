@@ -59,7 +59,7 @@ on 8 September 2026. Both environments are deployed and verified: production
 requires successful exact-main CI, applies migrations, deploys the API before the
 frontend and checks public endpoints. GitHub-triggered production delivery is
 verified (#46); development delivery mirrors that gate for the dev environment
-(#108, hostname fix #113). Frontend PR previews remain #45. See the
+(#108, hostname fix #113). [Reviewed manual frontend previews](design/frontend-previews.md#verified-closeout--2-october-2026) are verified under VIN-45. See the
 [environment plan](../deploy/environments/README.md) for configuration and rollout.
 Azure is retained as optional future migration (#31), not the immediate target.
 The legacy AWS Terraform is not used for this deployment.

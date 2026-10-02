@@ -19,7 +19,7 @@ priorities, status and acceptance gates. This page describes product direction o
    protections with checkout, not as a later patch. Add sandbox payments afterward.
 5. Free hosted demo: development and production are live on isolated Vercel/Neon
    resources, with secret stores, API docs and verified GitHub-triggered production
-   delivery (#46). Frontend PR previews (#45) remain to finish this milestone. No paid
+   delivery (#46) and [verified reviewed manual frontend previews](../design/frontend-previews.md#verified-closeout--2-october-2026) (VIN-45). No paid
    upgrades, card or extra API billing.
 6. Interview package: architecture diagram, decision records with alternatives,
    test evidence, and a five-minute demonstration walkthrough.
