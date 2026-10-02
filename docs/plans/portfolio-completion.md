@@ -54,7 +54,9 @@ acceptance does not mean active implementation and adds no portfolio completion 
 cleanup and VIN-248’s baseline MIME/referrer header slice are verified. VIN-146
 frontend CI speed is verified and Done through PR #251. VIN-89 cart recovery is
 merged in PR #252 and verified on hosted development; its evidence is linked below.
-Next are remaining VIN-126 security headers and VIN-45 safe previews.
+VIN-126’s report-only stage is merged in PR #254; a hosted framework-nonce
+mismatch is being corrected before enforcement. VIN-45 safe previews follow its
+verified closeout.
 VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
