@@ -282,5 +282,10 @@ production activation or owner phone coordination is involved.
 The [bounded preview design and usage](../../docs/design/frontend-previews.md) uses
 manual trusted-main orchestration, exact reviewed PR revisions and the development
 frontend Preview target. Host-only sessions share fictional development data; no
-production credentials or database clone are provided. Hosted login/cart and
-retirement acceptance remain open until the source ticket records proof.
+production credentials or database clone are provided. The
+[2 October hosted checkpoint](../../docs/design/frontend-previews.md#hosted-checkpoint--2-october-2026)
+records protected preview creation, fictional login/cart ownership, host isolation
+and exact retirement. Application headers/release identity and wrong-origin HTTP
+rejection remain unverified on VIN-45; the ticket is not Done. Repeat the full
+fictional login/cart/ownership/host journey alongside those checks on the completing
+reviewed preview, then retire it; the first checkpoint alone is partial evidence.
