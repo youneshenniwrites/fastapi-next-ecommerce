@@ -12,8 +12,8 @@ def assert_security_headers(response):
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
     assert response.headers["x-frame-options"] == "DENY"
-    assert response.headers["content-security-policy"] == "frame-ancestors 'none'"
-    candidate = response.headers["content-security-policy-report-only"]
+    assert "content-security-policy-report-only" not in response.headers
+    candidate = response.headers["content-security-policy"]
     assert "default-src 'none'" in candidate
     assert "base-uri 'none'" in candidate
     assert "object-src 'none'" in candidate
@@ -54,9 +54,7 @@ def test_real_api_responses_keep_headers_and_content_types(
     if status == 401:
         assert response.headers["www-authenticate"] == "Bearer"
     if content_type != "text/html":
-        assert response.headers["content-security-policy-report-only"] == (
-            DENY_CONTENT_POLICY
-        )
+        assert response.headers["content-security-policy"] == (DENY_CONTENT_POLICY)
 
 
 def test_cors_preflight_keeps_baseline_headers(client):
@@ -71,9 +69,7 @@ def test_cors_preflight_keeps_baseline_headers(client):
     assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
     assert response.headers["access-control-allow-credentials"] == "true"
     assert_security_headers(response)
-    assert (
-        response.headers["content-security-policy-report-only"] == DENY_CONTENT_POLICY
-    )
+    assert response.headers["content-security-policy"] == DENY_CONTENT_POLICY
 
 
 def test_unhandled_failure_keeps_default_body_and_still_propagates(monkeypatch):
@@ -87,9 +83,7 @@ def test_unhandled_failure_keeps_default_body_and_still_propagates(monkeypatch):
     assert response.text == "Internal Server Error"
     assert response.headers["content-type"] == "text/plain; charset=utf-8"
     assert_security_headers(response)
-    assert (
-        response.headers["content-security-policy-report-only"] == DENY_CONTENT_POLICY
-    )
+    assert response.headers["content-security-policy"] == DENY_CONTENT_POLICY
     with TestClient(app) as error_client:
         with pytest.raises(RuntimeError, match="fictional failure"):
             error_client.get("/health")
@@ -109,7 +103,7 @@ class DocumentationTags(HTMLParser):
 
 
 @pytest.mark.parametrize("path", ["/docs", "/redoc", "/docs/oauth2-redirect"])
-def test_documentation_nonces_are_fresh_and_match_candidate_policy(client, path):
+def test_documentation_nonces_are_fresh_and_match_enforced_policy(client, path):
     nonces = []
     for _ in range(2):
         response = client.get(path)
@@ -122,7 +116,7 @@ def test_documentation_nonces_are_fresh_and_match_candidate_policy(client, path)
         assert len(nonce) >= 32
         nonces.append(nonce)
         assert all(tag.get("nonce") == nonce for tag in tags.scripts + tags.styles)
-        candidate = response.headers["content-security-policy-report-only"]
+        candidate = response.headers["content-security-policy"]
         assert (
             next(
                 directive
@@ -208,13 +202,11 @@ def test_documentation_head_and_errors_keep_method_semantics(client, path):
     assert response.status_code == 200
     assert response.content == b""
     assert response.headers["cache-control"] == "private, no-store"
-    assert (
-        "script-src 'nonce-" in response.headers["content-security-policy-report-only"]
-    )
+    assert "script-src 'nonce-" in response.headers["content-security-policy"]
     error = client.post(path)
     assert error.status_code == 405
     assert_security_headers(error)
-    assert error.headers["content-security-policy-report-only"] == DENY_CONTENT_POLICY
+    assert error.headers["content-security-policy"] == DENY_CONTENT_POLICY
 
 
 def test_hsts_uses_https_scope_and_ignores_forwarded_proto(client):
@@ -233,7 +225,7 @@ def test_hsts_uses_https_scope_and_ignores_forwarded_proto(client):
         assert_security_headers(preflight)
 
 
-def test_unhandled_https_error_keeps_transport_and_candidate_headers(monkeypatch):
+def test_unhandled_https_error_keeps_transport_and_enforced_headers(monkeypatch):
     def fail(*args, **kwargs):
         raise RuntimeError("fictional failure")
 
@@ -244,9 +236,7 @@ def test_unhandled_https_error_keeps_transport_and_candidate_headers(monkeypatch
         response = secure_client.get("/health")
     assert response.status_code == 500
     assert_security_headers(response)
-    assert (
-        response.headers["content-security-policy-report-only"] == DENY_CONTENT_POLICY
-    )
+    assert response.headers["content-security-policy"] == DENY_CONTENT_POLICY
 
 
 @pytest.mark.parametrize("scope_type", ["websocket", "lifespan"])

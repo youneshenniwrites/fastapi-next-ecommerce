@@ -105,14 +105,15 @@ Use the [hosted sandbox walkthrough and five-minute script](../docs/demo.md#try-
 for a customer-facing demonstration. The [payment runbook](../docs/sandbox-payments.md)
 owns setup, recovery and dated evidence; production payments remain disabled.
 
-## Staged content security policy
+## Content security policy
 
-VIN-126 adds fresh request nonces and report-only CSP, with enforced framing denial.
+VIN-126 promotes fresh request nonces to enforced CSP, with framing denial.
 The root waits for request-time rendering; nonce-bearing HTML is private/no-store.
 Production script policy excludes inline/eval exceptions; Zod uses its supported
 CSP-compatible interpreter. The normal browser suite captures unexpected policy
-violations, while controlled probes verify reporting and framing behavior.
+violations, while controlled probes verify script rejection and framing behavior.
 The guarded Next 16.3.6 render-policy transport patch addresses a hosted nonce
 mismatch; it fails closed on unknown framework sources/versions.
-See [policy exceptions, staging and rollback](../docs/security-headers.md). Hosted
-rollout and enforcement remain pending; this stage alone does not finish VIN-126.
+See [policy exceptions, staging and rollback](../docs/security-headers.md).
+[VIN-126](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/126)
+records the actual merge, hosted verification and acceptance evidence.

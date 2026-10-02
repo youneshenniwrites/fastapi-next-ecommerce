@@ -28,8 +28,8 @@ export function proxy(request: NextRequest) {
   headers.set("x-vindor-render-csp", policy);
   headers.set("x-nonce", nonce);
   const response = NextResponse.next({ request: { headers } });
-  // Report-only first; framing is already enforced by the baseline CSP/XFO.
-  response.headers.set("Content-Security-Policy-Report-Only", policy);
+  // Enforce the verified nonce policy; renderer and response use the same value.
+  response.headers.set("Content-Security-Policy", policy);
   // Public photos keep their cache policy. Missing-photo HTML is rendered
   // dynamically by the root layout and receives Next's private/no-store policy.
   if (!request.nextUrl.pathname.startsWith("/photos/"))

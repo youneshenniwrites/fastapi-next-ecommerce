@@ -62,7 +62,7 @@ test("baseline security headers cover pages, errors and assets", async ({
   }
 });
 
-test("candidate CSP uses fresh nonces on real pages and preserves hydration", async ({
+test("enforced CSP uses fresh nonces on real pages and preserves hydration", async ({
   page,
   request,
 }) => {
@@ -80,8 +80,8 @@ test("candidate CSP uses fresh nonces on real pages and preserves hydration", as
   ]) {
     const response = await page.goto(path);
     const headers = response!.headers();
-    const candidate = headers["content-security-policy-report-only"];
-    expect(headers["content-security-policy"]).toBe("frame-ancestors 'none'");
+    const candidate = headers["content-security-policy"];
+    expect(headers["content-security-policy-report-only"]).toBeUndefined();
     expect(headers["x-frame-options"]).toBe("DENY");
     expect(headers["cache-control"]).toContain("private");
     expect(headers["cache-control"]).toContain("no-store");
@@ -109,7 +109,7 @@ test("candidate CSP uses fresh nonces on real pages and preserves hydration", as
       "content-security-policy-report-only": "script-src 'unsafe-inline'",
     },
   });
-  const policy = forged.headers()["content-security-policy-report-only"];
+  const policy = forged.headers()["content-security-policy"];
   expect(policy).not.toContain("attacker");
   expect(policy).toContain("'strict-dynamic'");
 });
@@ -354,7 +354,7 @@ test("new products have distinct photographs and working detail pages", async ({
 
 test.describe("CSP negative probes", () => {
   test.use({ allowCspViolations: true });
-  test("report-only observes untrusted inline scripts without enforcing yet", async ({
+  test("enforced CSP blocks untrusted inline scripts", async ({
     page,
     cspViolations,
   }) => {
@@ -369,12 +369,12 @@ test.describe("CSP negative probes", () => {
     await page.goto("/login");
     expect(
       await page.evaluate(() => Reflect.get(window, "fictionalInlineProbe")),
-    ).toBe(true);
+    ).toBeUndefined();
     await expect
       .poll(() =>
         cspViolations.some(
           (v) =>
-            v.disposition === "report" && v.directive.startsWith("script-src"),
+            v.disposition === "enforce" && v.directive.startsWith("script-src"),
         ),
       )
       .toBe(true);
@@ -403,7 +403,7 @@ test.describe("CSP negative probes", () => {
   });
 });
 
-test("API documentation renders under its candidate policies", async ({
+test("API documentation renders under its enforced policies", async ({
   page,
   isMobile,
 }) => {
