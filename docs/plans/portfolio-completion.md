@@ -61,10 +61,13 @@ orchestration and guidance; the completing preview passed fictional login/cart,
 account/host isolation, exact source identity, enforced headers and actual wrong-origin
 HTTP rejection. The temporary share link was revoked and the exact preview retired;
 [complete evidence and limits](../design/frontend-previews.md#verified-closeout--2-october-2026)
-are recorded. Next is VIN-258's disposable restore rehearsal; no next implementation
-begins at this closeout.
-VIN-147’s repeated-work strategy remains deferred.
-Keep one implementation story active; paused work stays Backlog. Monitoring
+are recorded. VIN-258's disposable restore rehearsal is implemented in PR #268;
+its protected merge is blocked by the existing dependency advisory in VIN-269.
+On 3 October the owner authorized independent VIN-270 email normalization,
+VIN-259 accessibility and VIN-260 cart coverage work in isolated worktrees, plus
+VIN-147's first bounded duplicate-trigger improvement. Those implementations
+are in progress; broader queue/grouping and review enforcement remain separate.
+Normal execution keeps one story active unless the owner authorizes parallel work. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
 adds no separate checklist credit. VIN-237 password visibility is delivered in
 PR #239. Source issues and VIN-155 hold detailed daily handoffs.
