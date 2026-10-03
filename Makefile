@@ -45,6 +45,10 @@ demo:
 admin:
 	cd backend && uv run python -m app.bootstrap admin --email "$(EMAIL)"
 
+.PHONY: restore-rehearsal
+restore-rehearsal:
+	cd backend && uv run python scripts/restore_rehearsal.py
+
 .PHONY: frontend frontend-check
 frontend:
 	cd frontend && npm ci && npm run dev
