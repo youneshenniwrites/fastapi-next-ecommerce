@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import EmailStr, TypeAdapter, ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,7 @@ from app.schemas.user import UserCreate, UserRead
 router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+EMAIL_ADAPTER = TypeAdapter(EmailStr)
 
 
 @router.post(
@@ -75,7 +77,13 @@ def login(
     Submit an application/x-www-form-urlencoded body. The username field is the
     account email. Returns a bearer JWT; use it in Authorization: Bearer <token>.
     """
-    user = crud_user.get_user_by_email(db, email=form_data.username)
+    # Use signup's normalization; invalid input still takes the dummy hash path.
+    try:
+        email = EMAIL_ADAPTER.validate_python(form_data.username)
+    except ValidationError:
+        user = None
+    else:
+        user = crud_user.get_user_by_email(db, email=email)
     valid, updated_hash = password_hash.verify_and_update(
         form_data.password, user.hashed_password if user else DUMMY_HASH
     )
