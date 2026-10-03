@@ -11,6 +11,7 @@ These checks support review; they do not certify production readiness.
 | `make coverage` | Tests plus branch-aware coverage, with an 85% minimum |
 | `make audit` | Audit the installed locked Python environment for known vulnerabilities |
 | `make requirements-check` | Detect drift between uv.lock and the pip compatibility export |
+| `make restore-rehearsal` | Restore a freshly generated fictional database into a separate disposable local target; [runbook](restore-rehearsal.md) |
 | `make hooks` | Install optional local pre-commit checks |
 | `make hooks-check` | Run the hooks over tracked files |
 
