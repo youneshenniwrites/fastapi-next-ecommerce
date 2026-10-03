@@ -46,7 +46,11 @@ function AddToCartControl({
       <Button
         disabled
         aria-busy="true"
-        className={compact ? "h-10" : "h-12 w-full"}
+        className={
+          compact
+            ? "h-auto min-h-10 w-full whitespace-normal px-2 py-2"
+            : "h-12 w-full"
+        }
       >
         Loading…
       </Button>
@@ -55,7 +59,14 @@ function AddToCartControl({
 
   if (cart.state.status === "guest") {
     return (
-      <Button asChild className={compact ? "h-10" : "h-12 w-full"}>
+      <Button
+        asChild
+        className={
+          compact
+            ? "h-auto min-h-10 w-full whitespace-normal px-2 py-2"
+            : "h-12 w-full"
+        }
+      >
         <Link href="/login" prefetch={false}>
           <ShoppingCart aria-hidden="true" />
           Sign in to add
@@ -70,7 +81,11 @@ function AddToCartControl({
         <Button
           onClick={() => cart.refresh()}
           variant="outline"
-          className={compact ? "h-10" : "h-12 w-full"}
+          className={
+            compact
+              ? "h-auto min-h-10 w-full whitespace-normal px-2 py-2"
+              : "h-12 w-full"
+          }
         >
           Try again
         </Button>
@@ -97,7 +112,11 @@ function AddToCartControl({
         onClick={() => void add()}
         disabled={pending || outOfStock || cart.readOnly}
         aria-busy={pending}
-        className={compact ? "h-10" : "h-12 w-full"}
+        className={
+          compact
+            ? "h-auto min-h-10 w-full whitespace-normal px-2 py-2"
+            : "h-12 w-full"
+        }
       >
         {pending ? (
           <LoaderCircle

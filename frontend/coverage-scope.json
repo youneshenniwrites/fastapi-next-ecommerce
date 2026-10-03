@@ -2,7 +2,9 @@
   "include": [
     "src/lib/**/*.ts",
     "src/components/account-form.tsx",
-    "src/components/retry-catalog.tsx"
+    "src/components/retry-catalog.tsx",
+    "src/components/add-to-cart-button.tsx",
+    "src/components/cart-private-region.tsx"
   ],
   "exclude": ["src/lib/api/schema.d.ts"]
 }
