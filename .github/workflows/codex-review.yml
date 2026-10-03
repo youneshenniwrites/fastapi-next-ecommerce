@@ -6,7 +6,8 @@ on:
     types: [created, edited, deleted]
   workflow_run:
     workflows: [Codex review events]
-    types: [requested, completed]
+    # The permissionless relay has no work to inspect before completion.
+    types: [completed]
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:

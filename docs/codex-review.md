@@ -53,7 +53,9 @@ reactions and resolved threads (GitHub scheduling may be delayed).
 
 The write-enabled workflow uses pull_request_target, default-branch issue_comment,
 schedule, manual and default-branch workflow_run events. Review submissions,
-edits and dismissals trigger a separate permissionless relay; the receiver reads
+edits and dismissals trigger a separate permissionless relay. Its completion alone
+refreshes the gate, including failed or cancelled completion; an early requested
+event no longer duplicates that inspection. The receiver reads
 fresh GitHub evidence and never trusts relay artifacts or executes its code. It executes only the protected default branch's gate code,
 never pull-request code. It does not install PR dependencies or interpolate PR
 content into shell commands. Evidence is paginated with bounded cursors. A failure
