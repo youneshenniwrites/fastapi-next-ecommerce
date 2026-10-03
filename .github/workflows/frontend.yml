@@ -95,12 +95,16 @@ jobs:
           python3 ../scripts/coverage_summary.py --kind frontend --report coverage/lcov.info
           --outcome "$COVERAGE_OUTCOME" --artifact-url "$COVERAGE_ARTIFACT_URL"
           >> "$GITHUB_STEP_SUMMARY"
-  browser:
-    name: Frontend · Production build and browser tests
+  browser_shards:
+    name: Frontend · Browser shard ${{ matrix.shard }}/3
     needs: [changes]
     if: needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     container:
       # Match the locked Playwright SDK; keep tag and immutable digest together.
       image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
@@ -146,32 +150,98 @@ jobs:
           await browser.close();
           JS
       - name: Test desktop, mobile, accessibility and failure states
-        run: npm run test:e2e
+        run: npm run test:e2e -- --shard=${{ matrix.shard }}/3 --reporter=list,blob,html
       - name: Upload browser report, screenshots and failure traces
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: frontend-browser-evidence
+          name: frontend-browser-evidence-${{ matrix.shard }}
           path: |
             frontend/playwright-report
             frontend/test-results
           retention-days: 14
+      - name: Upload mergeable browser report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-browser-blob-${{ matrix.shard }}
+          path: frontend/blob-report/*.zip
+          if-no-files-found: error
+          retention-days: 14
       - name: Package the standalone build
+        if: matrix.shard == 1
         run: tar -czf storefront-build.tar.gz -C .next/standalone .
-      - name: Upload validated storefront build
+      - name: Upload candidate storefront build
+        if: matrix.shard == 1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: storefront-build-candidate
+          path: frontend/storefront-build.tar.gz
+          retention-days: 14
+
+  browser:
+    # Keep the existing protected check, and never let failed/skipped shards pass it.
+    name: Frontend · Production build and browser tests
+    needs: [changes, browser_shards]
+    if: always() && (needs.changes.result != 'success' || needs.changes.outputs.docs_only != 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require every browser shard to succeed
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          SHARDS_RESULT: ${{ needs.browser_shards.result }}
+        run: |
+          test "$CHANGES_RESULT" = success && test "$SHARDS_RESULT" = success
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download all shard reports
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: frontend-browser-blob-*
+          path: frontend/blob-reports
+          merge-multiple: true
+      - name: Download candidate build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: storefront-build-candidate
+          path: frontend
+      - name: Require complete reports and candidate build
+        run: |
+          test "$(find frontend/blob-reports -maxdepth 1 -name '*.zip' | wc -l)" -eq 3
+          test -s frontend/storefront-build.tar.gz
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Set up pinned npm
+        run: npm install --global npm@11.19.1
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Merge browser reports
+        working-directory: frontend
+        run: npx --no-install playwright merge-reports --reporter=html blob-reports
+      - name: Upload combined browser report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-browser-evidence
+          path: frontend/playwright-report
+          if-no-files-found: error
+          retention-days: 14
+      - name: Publish validated storefront build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: storefront-build
           path: frontend/storefront-build.tar.gz
+          if-no-files-found: error
           retention-days: 14
-      - name: Summarize build and deployment status
-        if: always()
+      - name: Summarize browser validation
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
-          ## Storefront delivery
-          See the named checks above for build and browser-test results.
-          Successful runs publish the standalone build and browser evidence as artifacts.
-          **Deployment: separate workflow.** This workflow validates and packages the frontend.
-          Production delivery deploys verified main commits to Vercel and runs smoke checks.
-          Frontend PR previews remain tracked in #45.
+          All three isolated browser shards passed. The combined report and validated standalone build are attached.
+          Each shard retains one worker and the existing retries and privacy settings.
+          Deployment remains separate and requires the whole exact-main verification workflow to succeed.
           EOF
