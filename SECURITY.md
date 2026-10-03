@@ -21,10 +21,13 @@ to active admins, hashes new passwords with Argon2, and upgrades legacy bcrypt
 hashes on login. Product constraints are enforced at API and database boundaries.
 Local credentials are generated into an ignored file and excluded from Docker builds.
 
-CI audits locked Python dependencies, validates code/tests, and checks PostgreSQL
-migrations. These checks do not prove the app is ready for production. Rate limiting,
-password recovery, full security scanning, and production hardening remain roadmap work. The health endpoint checks process
-liveness; it is not a database-readiness or security assessment.
+CI audits locked Python and frontend dependencies, validates code/tests, and checks
+PostgreSQL migrations. The owner-approved, development-only VIN-269 audit exception
+is [bounded and expires on 10 October 2026](docs/tooling.md#temporary-vin-269-tooling-exception--expires-10-october-2026); it is accepted risk, not remediation.
+Rate limiting is implemented with process-local counters; it is not a distributed
+limit across serverless instances. Password recovery, full security scanning and
+production hardening remain roadmap work. These checks do not prove production
+readiness. The health endpoint checks process liveness, not database readiness.
 
 Do not deploy the legacy AWS Terraform as part of this project's current roadmap.
 Vercel Hobby and Neon Free are the demo targets; see deploy/environments/README.md.

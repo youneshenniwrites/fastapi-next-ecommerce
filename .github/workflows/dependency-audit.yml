@@ -53,11 +53,13 @@ jobs:
         run: npm install --global npm@11.19.1
       - name: Audit locked frontend dependencies
         working-directory: frontend
-        run: npm audit --json > audit.json
+        run: python3 ../scripts/frontend_audit.py
       - name: Upload audit results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: frontend-dependency-audit
-          path: frontend/audit.json
+          path: |
+            frontend/audit.json
+            frontend/audit-runtime.json
           retention-days: 14
