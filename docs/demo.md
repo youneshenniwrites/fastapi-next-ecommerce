@@ -73,10 +73,14 @@ presentation sequence, not a measured completion-time guarantee.
   [payment lifecycle decisions](decisions/0003-sandbox-payments.md) explain ownership,
   idempotency, money and inventory boundaries. [Architecture](architecture.md)
   describes the components and hosting.
-- No real fulfilment, refunds or production payment activation. Hosted monitoring
-  verification, restore rehearsal, hosted reliability checks and the focused accessibility
-  review remain unfinished. Do not claim enterprise readiness or full accessibility
-  conformance; consult the [single completion plan](plans/portfolio-completion.md).
+- [Disposable restore rehearsal](restore-rehearsal.md) is verified on merged
+  revision `0f547cb`; [VIN-258](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/258)
+  records schema/data/sequence agreement, ownership checks and cleanup. Its tiny
+  local fictional dataset does not establish hosted recovery guarantees.
+- No real fulfilment, refunds or production payment activation. Consult the
+  [single completion plan](plans/portfolio-completion.md) for verified monitoring,
+  reliability and remaining delivery acceptance. Do not claim enterprise readiness
+  or full accessibility conformance.
 
 ## Prepare a disposable local demo
 
