@@ -85,9 +85,22 @@ def evaluate(report, status, policy, files, now):
 
 def run_audit(frontend, runtime=False):
     """Retain raw reports even when audit fails; never turn network errors green."""
-    command = ["npm", "audit", "--json"]
+    # CLI includes override NODE_ENV/npm omit defaults: a production shell must
+    # not turn the complete audit into a silently clean runtime-only audit.
+    command = [
+        "npm",
+        "audit",
+        "--json",
+        "--audit-level=info",
+        "--package-lock-only",
+        "--include=prod",
+        "--include=optional",
+        "--include=peer",
+    ]
     if runtime:
         command.append("--omit=dev")
+    else:
+        command.append("--include=dev")
     result = subprocess.run(
         command, cwd=frontend, capture_output=True, text=True, timeout=120, check=False
     )

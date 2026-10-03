@@ -166,6 +166,29 @@ class FrontendAuditTests(unittest.TestCase):
         ):
             self.assertEqual(audit.main(), 1)
 
+    def test_audit_scope_is_explicit_even_in_production_shell(self):
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(audit.subprocess, "run") as run,
+        ):
+            run.return_value.stdout = json.dumps(self.clean())
+            run.return_value.returncode = 0
+            with patch.dict(
+                "os.environ", {"NODE_ENV": "production", "NPM_CONFIG_OMIT": "dev"}
+            ):
+                for runtime in (False, True):
+                    audit.run_audit(Path(directory), runtime=runtime)
+                    command = run.call_args.args[0]
+                    for flag in [
+                        "--package-lock-only",
+                        "--audit-level=info",
+                        "--include=prod",
+                        "--include=optional",
+                        "--include=peer",
+                    ]:
+                        self.assertIn(flag, command)
+                    self.assertIn("--omit=dev" if runtime else "--include=dev", command)
+
 
 if __name__ == "__main__":
     unittest.main()
