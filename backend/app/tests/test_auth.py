@@ -35,9 +35,59 @@ def test_register_login_and_me(client):
     assert me.json()["email"] == "new@example.com"
 
 
+def test_login_accepts_registration_email_normalization(client):
+    email = "Audit@EXAMPLE.COM"
+    registered = client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "password123"},
+    )
+    assert registered.status_code == 201
+    assert registered.json()["email"] == "Audit@example.com"
+    login = client.post(
+        "/api/v1/auth/login",
+        data={"username": email, "password": "password123"},
+    )
+    assert login.status_code == 200
+    profile = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {login.json()['access_token']}"},
+    )
+    assert profile.json()["id"] == registered.json()["id"]
+    # EmailStr normalizes the domain, preserving the local part's spelling.
+    different_local_part = client.post(
+        "/api/v1/auth/login",
+        data={"username": "audit@example.com", "password": "password123"},
+    )
+    assert different_local_part.status_code == 401
+
+
+def test_invalid_login_email_still_verifies_dummy_password(client, monkeypatch):
+    from app.api.v1 import auth
+
+    calls = []
+    monkeypatch.setattr(
+        auth.password_hash,
+        "verify_and_update",
+        lambda password, encoded: calls.append((password, encoded)) or (False, None),
+    )
+    result = client.post(
+        "/api/v1/auth/login",
+        data={"username": "not-an-email", "password": "password123"},
+    )
+    assert result.status_code == 401
+    assert result.json()["detail"] == "Incorrect email or password"
+    assert result.headers["www-authenticate"] == "Bearer"
+    assert calls == [("password123", auth.DUMMY_HASH)]
+
+
 @pytest.mark.parametrize(
     "email,password",
-    [("test@example.com", "wrongpassword"), ("absent@example.com", "password123")],
+    [
+        ("test@example.com", "wrongpassword"),
+        ("test@EXAMPLE.COM", "wrongpassword"),
+        ("absent@EXAMPLE.COM", "password123"),
+        ("not-an-email", "password123"),
+    ],
 )
 def test_invalid_login(client, user, email, password):
     response = client.post(
@@ -74,7 +124,7 @@ def test_disabled_user_cannot_login_or_use_token(client, user, token, db):
     assert (
         client.post(
             "/api/v1/auth/login",
-            data={"username": user.email, "password": "password123"},
+            data={"username": "test@EXAMPLE.COM", "password": "password123"},
         ).status_code
         == 401
     )
