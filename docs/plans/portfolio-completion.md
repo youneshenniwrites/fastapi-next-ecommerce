@@ -68,8 +68,8 @@ ownership, corrupted-archive rejection and owned-resource cleanup all passed on
 are observations on tiny fictional data, not hosted recovery guarantees;
 [VIN-258](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/258)
 holds complete evidence and review limits. VIN-260 is merged in PR #274; its
-coverage closeout evidence still needs verification. Finish PR #273 for VIN-259
-and the remaining post-merge checks next. The owner prioritized finishing this demo before
+coverage closeout evidence still needs verification. VIN-259 is merged in PR #273;
+its hosted accessibility verification remains pending. Finish those post-merge checks next. The owner prioritized finishing this demo before
 new customer features. VIN-270 email normalization is merged in PR #271.
 VIN-147’s first bounded duplicate-trigger improvement is in PR #272; its broader
 repeated-work strategy remains deferred. Prepared VIN-261 typing is paused in
