@@ -16,7 +16,13 @@ Inspect the working tree, intended base, full diff, linked issue and existing PR
 
 Check the issue against the canonical ticket boundaries in the delivery rules linked above. If the diff materially expands the outcome, refine its scope before opening the PR; retain necessary tests and safeguards in the same viable slice. Refresh the issue handoff with the PR and actual verification state.
 
-Use [self-review](../self-review/SKILL.md) before requesting external review. Fill the canonical template from the final implementation: a short customer or contributor outcome, linked issue, factual acceptance criteria, tests actually run and relevant limitations. The PR acceptance checklist contains only observed, verified deliverables; never tick an unverified outcome or pad it with unchecked future work. Put pending CI/review in Review and genuine post-merge verification in Deployment notes. Keep every unfulfilled ticket criterion open on its source issue with the proving PR/event and next action; use Refs for partial delivery and do not hide unfinished scope to make a checklist look complete. An unverified implementation outcome must remain explicitly unfinished, not be relabeled as post-merge work. Keep self-review disclosure brief and link current-head external review and CI evidence with their actual state; pending or failed checks must not be described as passed. Keep assignment in the sidebar rather than repeating owner/reviewer metadata or review checkboxes. Use Closes only for a fully completed issue; otherwise Refs. Remove irrelevant optional sections and Jira placeholders.
+Use [self-review](../self-review/SKILL.md) before requesting external review.
+Apply the canonical [human-readable PR writing standard](../../../docs/delivery.md#human-readable-pr-writing)
+when creating or refreshing the entire description; read its failure/deferral example.
+Summarize checks and review in short, plain-English bullets, with detailed proof
+linked or collapsed.
+
+Fill the canonical template from the final implementation: a short customer or contributor outcome, linked issue, factual acceptance criteria, tests actually run and relevant limitations. The PR acceptance checklist contains only observed, verified deliverables; never tick an unverified outcome or pad it with unchecked future work. Put pending CI/review in Review and genuine post-merge verification in Deployment notes. Keep every unfulfilled ticket criterion open on its source issue with the proving PR/event and next action; use Refs for partial delivery and do not hide unfinished scope to make a checklist look complete. An unverified implementation outcome must remain explicitly unfinished, not be relabeled as post-merge work. Keep self-review disclosure brief and link current-head external review and CI evidence with their actual state; pending or failed checks must not be described as passed. Keep assignment in the sidebar rather than repeating owner/reviewer metadata or review checkboxes. Use Closes only for a fully completed issue; otherwise Refs. Remove irrelevant optional sections and Jira placeholders.
 
 Before requesting external review, complete [preflight-review](../preflight-review/SKILL.md)
 and record actual evidence; it does not replace the selected external review.
@@ -54,4 +60,5 @@ link PRs from issues instead of adding separate PR cards.
 
 Before pushing or requesting review for a feature/status change, complete the
 [required documentation status check](../../../docs/delivery.md#required-documentation-status-check).
-Record its terms, contexts and corrections in the PR Review section.
+Record its terms, contexts and corrections in linked or collapsed evidence under
+Review, following the writing standard above. Keep material blockers visible.

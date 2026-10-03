@@ -142,8 +142,9 @@ handoffs separately. Matches are candidates, not proof; no matches is not a pass
 
 Reconcile statements as implemented, merged, deployed or operationally verified
 using actual evidence. Preserve historical statements with explicit context.
-Keep daily handoffs in the tracking issue. In the PR Review section record the
-terms, documents checked and corrections (or why no updates are needed). This is
+Keep daily handoffs in the tracking issue. Record search terms, documents checked
+and corrections (or why no updates are needed) in linked or collapsed evidence
+under Review, following the [PR writing standard](#human-readable-pr-writing). This is
 a required agent review step, not an automated correctness guarantee or CI gate.
 
 ## Common PR description and reviewers
@@ -157,8 +158,8 @@ Conventional Commits commit/squash subjects; never copy the PR title into squash
 The [PR template](../.github/pull_request_template.md) defines the Issue/Problem opening, Summary,
 optional Before / After, Acceptance criteria, Testing, Review, and optional
 Deployment notes. Lead with a short customer or contributor outcome; fill
-acceptance criteria from the issue and testing with the tested commit and actual
-results. PR acceptance checklists contain only observed, verified deliverables. Pending CI/review belongs in Review; genuine post-merge verification belongs in Deployment notes and remains open on the source issue. Never tick unverified work or omit unfinished implementation scope to imply completion. Use Refs for partial ticket delivery. Use a brief self-review disclosure plus linked current-head external review
+acceptance criteria from the issue and describe actual testing results using the
+[PR writing standard](#human-readable-pr-writing). PR acceptance checklists contain only observed, verified deliverables. Pending CI/review belongs in Review; genuine post-merge verification belongs in Deployment notes and remains open on the source issue. Never tick unverified work or omit unfinished implementation scope to imply completion. Use Refs for partial ticket delivery. Use a brief self-review disclosure plus linked current-head external review
 and CI evidence. State pending or failed results honestly and refresh evidence
 after changes. Keep owner assignment and labels in the sidebar, without duplicate
 review checkboxes or owner/reviewer metadata in the body. Remove irrelevant
@@ -170,6 +171,69 @@ integration and verify completion on the current commit. A named reviewer in the
 body is not evidence of a request or approval. The ownership skill contains the
 operational steps; AGENTS.md routes future sessions to it. External approval
 remains required before merge, including maintenance PRs.
+
+## Human-readable PR writing
+
+This is the canonical writing standard for the entire PR description, including
+refreshes after review. Write for someone who has not followed the chat. Explain
+the problem and resulting behavior first; keep the summary to a short paragraph.
+Rewrite around the final change instead of appending a running investigation log.
+Keep issue linkage and verified acceptance criteria in the template's structure.
+
+- **Testing:** normally two to four short bullets describing what was checked and
+  the result. Use behavior names: “Cart survives a reload — passed,” rather than a
+  command transcript. Mention a meaningful skip, failure or untested scenario.
+- **Review:** normally one to three short bullets covering self-review, the actual
+  external-review result and any blocker or next action. Link the current review
+  and CI using readable labels. Say “Codex review pending” or “CI failed: cart retry
+  test,” not a paragraph of protocol terminology.
+- **Evidence:** keep commands, full revision hashes, detailed counts, logs, search
+  terms and review-protocol proof in a linked record or a collapsed `<details>`
+  section. Preserve the tested/reviewed revisions and all evidence required by the
+  review policy; change their placement, not the verification requirements.
+- **Material limits stay visible:** keep merge blockers, relevant security risk,
+  unverified behavior and owner-approved deferrals above the fold. Explain each
+  briefly with its consequence and next action; a link alone is insufficient.
+  A deferred finding is not a clean review. Earlier passing runs do not prove a
+  failing current run is fixed, and an old review does not approve a new commit.
+
+These are writing defaults, not word-count gates. Add detail when a reader needs
+it to assess a complex change. Remove irrelevant sections, boilerplate, repeated
+metadata and unrelated reassurances. Before saving, read only the expanded text:
+can a reviewer tell what changed, what works and what still prevents merging?
+
+### Example: failed CI and an approved minor deferral
+
+Illustrative wording, not the current status of any PR. Replace evidence labels
+with real links and include the actual follow-up issue when using this pattern.
+
+**Avoid:** “Final preflight covers full head SHA against base SHA; bounded-review
+authorization applies, current-head CI is mandatory, prior runs passed and no
+approval is claimed.” That describes procedure without explaining the decision.
+
+**Prefer:**
+
+**Summary**
+
+Remove a duplicate review refresh when a CI run starts. Review results still
+refresh when the run finishes.
+
+**Testing**
+
+- Review-trigger checks and formatting pass.
+- Browser CI fails when retrying a cart after a session error. Local reruns pass,
+  but the intermittent failure is still unexplained.
+
+**Review**
+
+- Self-review complete; no additional problems found.
+- Codex reviewed the latest commit. The owner approved deferring one wording
+  correction to the linked documentation issue; this is not a clean review.
+- Merge is blocked by the cart test. Investigate the failure and obtain passing CI.
+
+Place the linked CI run, review, deferral authorization and follow-up issue next
+to those statements. Put exact revisions and reproduction commands in a collapsed
+“Verification details” section if they are not already in the linked evidence.
 
 ## Reusable skills
 

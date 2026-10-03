@@ -28,7 +28,9 @@ in Deployment notes. Keep every unfulfilled ticket criterion open on its source
 issue with its proving PR/event and next action. Use Refs for partial delivery;
 use Closes only when the ticket is fully completed. Do not hide unfinished scope
 or relabel an unverified implementation outcome as post-merge work to make the
-checklist appear complete. Report the tested commit and actual results.
+checklist appear complete. Follow the canonical
+[PR writing standard](../../../docs/delivery.md#human-readable-pr-writing): report actual
+results in plain English and preserve the tested commit in linked or collapsed evidence.
 Keep Review to a brief self-review disclosure and links to current-head external
 review and CI evidence, explicitly noting pending or failed results. Remove
 unused optional sections. Keep owner assignment and labels in the sidebar; do

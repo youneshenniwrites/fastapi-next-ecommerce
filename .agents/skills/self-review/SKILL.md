@@ -23,4 +23,6 @@ changes require current-head review. This does not waive branch protection.
 
 Before concluding a feature/status review, complete the
 [required documentation status check](../../../docs/delivery.md#required-documentation-status-check).
-Record its terms, contexts and corrections in the PR Review section.
+Record its terms, contexts and corrections in linked or collapsed evidence under
+Review. Follow the [PR writing standard](../../../docs/delivery.md#human-readable-pr-writing)
+for the visible summary; keep material blockers visible.
