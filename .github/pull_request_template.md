@@ -21,18 +21,13 @@ Describe the customer or contributor outcome in 1–3 sentences: what changes an
 
 ## Testing
 
-Give the tested commit, checks and results. Note skipped checks and relevant limitations.
+<!-- Follow docs/delivery.md#human-readable-pr-writing. Normally use 2–4 short bullets: behavior checked — result. Keep meaningful failures/skips visible; link or collapse commands, revisions and detailed counts. -->
 
 ## Review
 
-Briefly disclose self-review and its outcome. Normally link current-head external
-review and CI results, stating pending or failed results honestly. For a qualifying human-authored
-pure-main-sync exception, link the original reviews and the evidence comment
-required by docs/codex-review.md: full R/B/M/H revisions, reviewed-main evidence,
-merge-tree/exact-diff checks, interaction assessment and current-head CI. State
-“Owner-authorized review carry-forward; H not externally reviewed” and retain
-any explicit deferrals. Refresh evidence after changes; never imply that original
-reviews approve H.
+<!-- Normally use 1–3 short bullets: self-review outcome; actual external review/CI status with readable links; blocker and next action, if any. Keep approved deferrals and material risks visible. Do not paste the investigation history or policy text. -->
+
+<!-- Preserve exact tested/reviewed revisions and required protocol proof in linked evidence or optional <details><summary>Verification details</summary>...</details>. For pure-main-sync carry-forward, visibly state that the owner-authorized exception is used and the current commit was not externally reviewed; link the full evidence required by docs/codex-review.md. Never imply the old review approves the new commit. -->
 
 <!-- Verified Dependabot PRs follow docs/dependabot.md: current-head CodeRabbit APPROVED review, resolved findings and CI; do not request Codex. -->
 
