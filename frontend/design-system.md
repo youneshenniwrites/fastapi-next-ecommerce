@@ -68,7 +68,8 @@ See the [design-system Wiki](https://github.com/youneshenniwrites/fastapi-next-e
 ## Consistency rules
 
 Buttons, text inputs and select triggers use the shared rounded-md token (4px).
-Form actions/fields are 48px tall; compact catalog controls are 40px tall.
+Form actions/fields are 48px tall; compact catalog controls are at least 40px
+tall. Product actions fit their cards and wrap complete labels on narrow screens.
 Keep the global 2px warm keyboard outline with 4px offset; do not layer additional
 focus rings onto it. Image containers remain rectangular; supporting panels may
 use the existing 8px radius, and decorative icon badges may remain circular.
