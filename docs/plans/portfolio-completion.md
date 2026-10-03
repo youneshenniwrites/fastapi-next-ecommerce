@@ -67,9 +67,12 @@ ownership, corrupted-archive rejection and owned-resource cleanup all passed on
 3 October at 20:59 UTC. The 0.083-second local restore and 1.481-second backup age
 are observations on tiny fictional data, not hosted recovery guarantees;
 [VIN-258](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/258)
-holds complete evidence and review limits. Finish the prepared VIN-259/VIN-260 PRs
-and their post-merge checks next. The owner prioritized finishing this demo before
-new customer features; scoped VIN-261 typing is underway while the prepared queue lands.
+holds complete evidence and review limits. PR #274 for VIN-260 merged as `d67226d`
+on 3 October at 21:10 UTC, but coverage acceptance still needs verification.
+VIN-259's PR #273 and deployed accessibility proof remain pending.
+The owner prioritized finishing this demo before new customer features and clearing
+the outstanding PR queue before resuming implementation. VIN-261 typing is paused
+in Backlog; its local uncommitted draft is preserved, with no implementing PR.
 VIN-147’s repeated-work strategy remains deferred.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
@@ -174,7 +177,8 @@ is organization, not a replacement progress denominator.
 | 5 | VIN-262 final interview package | Reconcile delivered VIN-198 script/setup/architecture/limits and record final fictional five-minute rehearsal after prerequisites |
 
 All unstarted work stays Backlog; VIN-45 and VIN-258 are verified.
-VIN-259/VIN-260 await final delivery acceptance, and scoped VIN-261 work is active. VIN-38’s
+VIN-259/VIN-260 await final delivery acceptance. Scoped VIN-261 work is paused
+until the outstanding queue clears. VIN-38’s
 trigger compatibility must be revalidated before its documented November policy
 change; required-check settings need their reviewed design and explicit settings
 authorization. This refinement itself added no protection, deployment or implementation
