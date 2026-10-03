@@ -237,3 +237,137 @@ test("public relay preserves signed bytes and rejects unsigned requests", async 
   expect(accepted.status()).toBe(200);
   expect(await accepted.json()).toEqual({ received: true });
 });
+
+test("keyboard demo journey keeps catalog, login, cart and sandbox return accessible", async ({
+  page,
+  request,
+}, info) => {
+  if (info.project.name.includes("Pixel"))
+    await page.setViewportSize({ width: 320, height: 740 });
+  const { expectAccessibleLayout, keyboardActivate } =
+    await import("./accessibility-helpers");
+  const email = `accessibility-${crypto.randomUUID()}@example.com`;
+  const password = "fictional-accessibility-password";
+  expect(
+    (
+      await request.post(`${API}/api/v1/auth/register`, {
+        data: { email, password },
+      })
+    ).status(),
+  ).toBe(201);
+  await page.goto("/");
+  await expect(page.getByRole("status")).toHaveText("12 objects");
+  await expectAccessibleLayout(page);
+  await keyboardActivate(
+    page,
+    page.getByRole("link", { name: /Oak Monitor Stand/ }),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Oak Monitor Stand", exact: true }),
+  ).toBeVisible();
+  await expectAccessibleLayout(page);
+  await keyboardActivate(
+    page,
+    page.getByRole("main").getByRole("link", { name: "Sign in to add" }),
+  );
+  await expect(page.getByLabel("Email address")).toBeEnabled();
+  await expectAccessibleLayout(page);
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill("incorrect-password");
+  await keyboardActivate(
+    page,
+    page.getByRole("button", { name: "Sign in", exact: true }),
+  );
+  const alert = page.getByRole("main").getByRole("alert");
+  await expect(alert).toContainText("incorrect");
+  await expect(alert).toBeFocused();
+  await expectAccessibleLayout(page);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await keyboardActivate(
+    page,
+    page.getByRole("button", { name: "Sign in", exact: true }),
+  );
+  await expect(page).toHaveURL(/\/#collection$/);
+  await page.goto("/products/1");
+  await keyboardActivate(
+    page,
+    page.getByRole("button", { name: "Add to cart", exact: true }),
+  );
+  await expect(page.getByRole("main").getByRole("status")).toContainText(
+    "Saved",
+  );
+  await keyboardActivate(
+    page,
+    page.getByRole("link", { name: "View your cart", exact: true }),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Your cart.", exact: true }),
+  ).toBeVisible();
+  const update = page.getByRole("button", { name: "Update", exact: true });
+  await expect(update).toBeEnabled();
+  await expect(update).toHaveCSS("opacity", "1");
+  await expectAccessibleLayout(page);
+  await keyboardActivate(
+    page,
+    page.getByRole("button", { name: "Review checkout", exact: true }),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Review your order" }),
+  ).toBeVisible();
+  await expectAccessibleLayout(page);
+  await keyboardActivate(
+    page,
+    page.getByRole("button", { name: "Place demo order", exact: true }),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Your demo order" }),
+  ).toBeVisible();
+  const orderPath = new URL(page.url()).pathname;
+  const orderId = Number(orderPath.split("/").at(-1));
+  await expect(
+    page
+      .getByRole("main")
+      .getByText("Awaiting sandbox payment", { exact: false }),
+  ).toBeVisible();
+  await expectAccessibleLayout(page);
+  await page.route("https://checkout.stripe.com/**", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: "<h1>Disposable sandbox provider</h1>",
+    }),
+  );
+  await keyboardActivate(
+    page,
+    page.getByRole("button", { name: "Pay with Stripe sandbox", exact: true }),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Disposable sandbox provider" }),
+  ).toBeVisible();
+  expect(
+    (
+      await request.post(`${API}/__test/payment-event`, {
+        data: {
+          order_id: orderId,
+          state: "paid",
+          event_id: `evt_accessibility_${orderId}`,
+        },
+      })
+    ).status(),
+  ).toBe(200);
+  await page.goto(`${orderPath}?payment=return`);
+  await expect(
+    page.getByRole("main").getByText("Paid — sandbox only", { exact: false }),
+  ).toBeVisible();
+  await expect(page.getByRole("main").getByRole("status")).toContainText(
+    "Sandbox payment confirmed by the server",
+  );
+  await expectAccessibleLayout(page);
+  await keyboardActivate(
+    page,
+    page.getByRole("link", { name: "Order history", exact: true }),
+  );
+  await expect(
+    page.getByRole("link", { name: new RegExp(`Order #${orderId} — Paid`) }),
+  ).toBeVisible();
+  await expectAccessibleLayout(page);
+});

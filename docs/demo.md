@@ -50,16 +50,20 @@ as part of a five-minute presentation.
 Prepare a fictional account and an in-stock item first. This is a suggested
 presentation sequence, not a measured completion-time guarantee.
 
-| Time | Show | Explain |
-| --- | --- | --- |
-| 0:00–0:45 | Catalog and signed-in navigation | Fictional GBP shop; Next.js storefront, FastAPI and PostgreSQL; free Vercel/Neon hosting. |
-| 0:45–1:30 | Cart and checkout draft | Prices/totals belong to the server. A draft reserves nothing. |
-| 1:30–2:15 | Place the order | Atomic placement claims inventory; retry identity prevents duplicate placement. |
-| 2:15–3:30 | Stripe sandbox and paid confirmation | Only verified server-side payment evidence establishes paid state; payment does not deduct stock twice. |
-| 3:30–4:00 | Order history | The same customer's order and final status persist across navigation. |
-| 4:00–5:00 | Linked evidence and limitations below | Explain what was tested, what is still unfinished and why the design is bounded. |
+| Time      | Show                                  | Explain                                                                                                 |
+| --------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 0:00–0:45 | Catalog and signed-in navigation      | Fictional GBP shop; Next.js storefront, FastAPI and PostgreSQL; free Vercel/Neon hosting.               |
+| 0:45–1:30 | Cart and checkout draft               | Prices/totals belong to the server. A draft reserves nothing.                                           |
+| 1:30–2:15 | Place the order                       | Atomic placement claims inventory; retry identity prevents duplicate placement.                         |
+| 2:15–3:30 | Stripe sandbox and paid confirmation  | Only verified server-side payment evidence establishes paid state; payment does not deduct stock twice. |
+| 3:30–4:00 | Order history                         | The same customer's order and final status persist across navigation.                                   |
+| 4:00–5:00 | Linked evidence and limitations below | Explain what was tested, what is still unfinished and why the design is bounded.                        |
 
 ### Evidence and honest limits
+
+- [Focused keyboard/mobile journey evidence](accessibility-journey.md) records
+  the local production matrix, mobile overflow repair and public hosted sanity.
+  Deployment verification and delivery acceptance remain on VIN-259.
 
 - [Hosted payment evidence](sandbox-payments.md#hosted-development-evidence--23-september-2026)
   records purchase/history, stock before/after payment, cancellation, expiry and

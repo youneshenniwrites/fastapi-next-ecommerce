@@ -1,20 +1,27 @@
 import { test, expect } from "./security-fixture";
+import {
+  expectAccessibleLayout,
+  keyboardActivate,
+} from "./accessibility-helpers";
 test("empty catalog and upstream failure are distinct and recoverable", async ({
   page,
   request,
 }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
   await request.post("http://127.0.0.1:18301/scenario/empty");
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "A little space for something new." }),
   ).toBeVisible();
+  await expectAccessibleLayout(page);
   await request.post("http://127.0.0.1:18301/scenario/error");
   await page.reload();
   await expect(
     page.getByRole("alert", { name: "Catalog unavailable" }),
   ).toContainText("We couldn’t reach the catalog");
   await request.post("http://127.0.0.1:18301/scenario/empty");
-  await page.getByRole("button", { name: "Try again" }).click();
+  await expectAccessibleLayout(page);
+  await keyboardActivate(page, page.getByRole("button", { name: "Try again" }));
   await expect(
     page.getByRole("heading", { name: "A little space for something new." }),
   ).toBeVisible();
@@ -23,6 +30,7 @@ test("loading state is visible while catalog fetch is pending", async ({
   page,
   request,
 }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await request.post("http://127.0.0.1:18301/scenario/slow");
   await page.goto("/", { waitUntil: "commit" });
@@ -36,6 +44,7 @@ test("loading state is visible while catalog fetch is pending", async ({
     "animation-name",
     "none",
   );
+  await expectAccessibleLayout(page);
   await expect(
     page.getByRole("heading", { name: "A little space for something new." }),
   ).toBeVisible();

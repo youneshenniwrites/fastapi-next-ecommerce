@@ -178,11 +178,9 @@ test("out-of-stock, missing products and responsive keyboard navigation", async 
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
   await page.keyboard.press("Enter");
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBeTruthy();
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(page.viewportSize()!.width);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.screenshot({
     path: `test-results/catalog-${info.project.name}.png`,
@@ -265,11 +263,11 @@ test("mobile navigation supports keyboard, dismissal and real links", async ({
   await expect(dialog).not.toBeVisible();
   await expect(page).toHaveURL(/#collection$/);
   await page.setViewportSize({ width: 320, height: 740 });
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBeTruthy();
+  // innerWidth grows to match overflowing content on mobile; the configured
+  // viewport remains 320px and catches clipped product actions.
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
 test("mobile navigation closes when resizing to desktop", async ({
