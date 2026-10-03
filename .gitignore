@@ -5,6 +5,7 @@ backend/.env
 
 frontend/storefront-build.tar.gz
 frontend/audit.json
+frontend/audit-runtime.json
 
 __pycache__/
 
