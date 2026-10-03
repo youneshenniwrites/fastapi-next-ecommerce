@@ -29,6 +29,31 @@ It audits development dependencies too. A failure must be investigated: dependen
 vulnerabilities and an unavailable advisory service both produce unsuccessful runs.
 Do not bypass or globally suppress failures to make CI green.
 
+### Temporary VIN-269 tooling exception — expires 10 October 2026
+
+On 3 October the owner approved accepting only
+[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+on the verified development-only `braces` dependency paths until
+**10 October 2026, 23:59 UTC**. This accepts the risk; it does not fix the package.
+The current full audit reports seven dependent entries from this one advisory.
+Runtime-only auditing is clean. The exposure is development glob processing in
+Next ESLint/shadcn tooling; arbitrary untrusted patterns can exhaust its stack.
+No published patched release was verified; unsafe downgrades/forks were rejected.
+
+Run `python3 scripts/frontend_audit.py` from the repository root with the pinned
+Node/npm on PATH. Both existing frontend audit jobs use this same gate. It retains
+complete `frontend/audit.json` and `frontend/audit-runtime.json` reports and emits
+an explicit accepted-risk summary. Other advisories, changed dependency files or
+paths, runtime findings, malformed/unavailable audit evidence and expiry fail.
+`frontend/audit-exception.json` pins the exact manifest/lockfile and reviewed graph.
+Raw `npm audit` still fails while this upstream issue remains present.
+
+[VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
+remains open for remediation. Install a verified compatible upstream fix when
+available, confirm the complete audit is clean, then remove the exception and
+its fixture/guard in the same reviewed change. Do not silently extend expiry or
+refresh hashes to accommodate dependency changes. No branch protection is disabled.
+
 Dependabot checks Python/uv, GitHub Actions, and backend Docker dependencies weekly.
 Python patch updates are grouped; open PR counts are limited. Applicable CI and
 current-head CodeRabbit approval remain mandatory. The [dependency continuation](dependabot.md)

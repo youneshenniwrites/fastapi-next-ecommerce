@@ -1,0 +1,43 @@
+{
+  "issue": "https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269",
+  "advisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+  "expiresAt": "2026-10-10T23:59:00+00:00",
+  "files": {
+    "package.json": "144a36db9300e557a3da36521a8d34a2959016120e162c76b0de2e9072d1855d",
+    "package-lock.json": "81640a00754df9a2043521b08558c4015fc511585b7b298ad803f0b6793cc776"
+  },
+  "packages": {
+    "@next/eslint-plugin-next": {
+      "nodes": ["node_modules/@next/eslint-plugin-next"],
+      "via": ["fast-glob"]
+    },
+    "@ts-morph/common": {
+      "nodes": ["node_modules/@ts-morph/common"],
+      "via": ["fast-glob"]
+    },
+    "braces": {
+      "nodes": ["node_modules/braces"],
+      "via": ["https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"]
+    },
+    "fast-glob": {
+      "nodes": [
+        "node_modules/@ts-morph/common/node_modules/fast-glob",
+        "node_modules/fast-glob",
+        "node_modules/shadcn/node_modules/fast-glob"
+      ],
+      "via": ["micromatch"]
+    },
+    "micromatch": {
+      "nodes": ["node_modules/micromatch"],
+      "via": ["braces"]
+    },
+    "shadcn": {
+      "nodes": ["node_modules/shadcn"],
+      "via": ["fast-glob", "ts-morph"]
+    },
+    "ts-morph": {
+      "nodes": ["node_modules/ts-morph"],
+      "via": ["@ts-morph/common"]
+    }
+  }
+}
