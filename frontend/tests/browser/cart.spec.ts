@@ -166,12 +166,37 @@ test("signed-in cart journey persists across reload and logout/login", async ({
   const add = page
     .getByRole("main")
     .getByRole("button", { name: /Add to cart|Saved to cart/ });
+  const token = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "local-session",
+  )!.value;
+  const readCart = async () => {
+    const response = await request.get(`${API}/api/v1/cart/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(response.ok()).toBe(true);
+    return await response.json();
+  };
+  expect((await readCart()).items).toEqual([]);
+  let addDispatches = 0;
+  const countAdd = (request: import("@playwright/test").Request) => {
+    if (request.method() === "POST" && request.headers()["next-action"])
+      addDispatches++;
+  };
+  page.on("request", countAdd);
   await add.focus();
   await expect(add).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByText("Saved.", { exact: false })).toBeVisible();
   const count = page.getByTestId("cart-count").first();
   await expect(count).toHaveText("1");
+  page.off("request", countAdd);
+  expect(addDispatches).toBe(1);
+  const saved = await readCart();
+  expect(saved.items).toHaveLength(1);
+  expect(saved.items[0]).toMatchObject({
+    product: { id: item.id },
+    quantity: 1,
+  });
 
   // Reload restores the saved cart and count.
   await page.reload();
