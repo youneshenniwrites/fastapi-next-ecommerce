@@ -6,16 +6,22 @@ existing thresholds, test-step outcome and a link to its downloadable report.
 A PR workflow normally tests GitHub's synthetic merge revision (`GITHUB_SHA`),
 not the PR head alone. These summaries do not compare against a base revision.
 
-| Measurement | Included scope | Existing enforced thresholds |
-| --- | --- | --- |
-| Backend | `backend/app`, excluding `app/tests` | coverage.py combined line/branch score ≥85% |
-| Frontend | Maintained `src/lib/**/*.ts`, `AccountForm` and `RetryCatalog` | Vitest statements ≥95%, branches ≥90%, functions 100%, lines ≥95%, globally and separately for the original catalog/session group |
+| Measurement | Included scope                                                                                         | Existing enforced thresholds                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| Backend     | `backend/app`, excluding `app/tests`                                                                   | coverage.py combined line/branch score ≥85%                                                                                       |
+| Frontend    | Maintained `src/lib/**/*.ts`, `AccountForm`, `RetryCatalog`, `AddToCartButton` and `CartPrivateRegion` | Vitest statements ≥95%, branches ≥90%, functions 100%, lines ≥95%, globally and separately for the original catalog/session group |
 
 The frontend percentage is **not coverage of the entire frontend**. The shared
 `frontend/coverage-scope.json` includes all maintained library TypeScript (even
-files not imported by a test) and two interactive components. Unit tests exercise
+files not imported by a test) and four interactive components. Unit tests exercise
 credential validation/submission/error recovery, pre-hydration credential guards,
-API origin/cache/timeout behavior, conditional utility classes and catalog retry.
+API origin/cache/timeout behavior, conditional utility classes, catalog retry, single add admission, uncertain-write recovery
+and private cart activation/session boundaries. The cart tests render the real
+`CartProvider` but replace the Server Action, router and session boundary with
+controlled inputs; their dispatch counts are unit evidence, not hosted HTTP proof.
+The provider itself, cart page/view and route composition stay outside the measured
+unit denominator. The cart browser journey separately counts one Server Action
+POST and reads the authoritative backend quantity before/after that activation.
 Other components and route composition remain outside unit measurement: their
 Next.js routing, navigation and layout integration is exercised by browser tests.
 Generated API declarations are excluded because contract generation validates them;
@@ -62,7 +68,6 @@ are read from coverage.py; the renderer does not reconstruct the configured
 source/omit rules from XML. Update the scope label/documentation whenever those
 rules change. Frontend report filenames must exactly match the shared include/exclude scope expanded against the checkout; missing, duplicate and unexpected files fail validation.
 
-
 ## Regression policy
 
 The comparison job enforces a maximum **0.5 percentage-point decrease** in line
@@ -75,6 +80,11 @@ globally and independently for the original catalog/session group.
 
 An unavailable/incompatible baseline skips only the total-regression comparison;
 the changed-line gate still applies. No changed measured executable lines means
-N/A, not invented coverage. Source scope changes are disclosed as incompatible,
+N/A, not invented coverage. VIN-260 adds two components to this denominator. Its old-scope base report is
+incompatible, so that PR skips only total-regression comparison; the new head
+still needs all absolute thresholds, report validation and changed-line gates.
+Subsequent compatible baselines compare the expanded scope normally.
+
+Source scope changes are disclosed as incompatible,
 and generated/unmeasured lines never count as covered. Include/exclude patterns
 in `frontend/coverage-scope.json` are shared by collection and report validation.
