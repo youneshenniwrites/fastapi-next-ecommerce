@@ -83,6 +83,9 @@ Registration asks users to sign in after success; it does not retry writes or
 silently authenticate. An uncertain response advises trying sign-in before
 registering again. Login always navigates to `/#collection`, ignoring query-string
 redirect destinations. Credentials are not persisted in browser storage or traces.
+FastAPI applies the same `EmailStr` validation and normalization at signup and
+login; domain casing is normalized while local-part casing is preserved. Invalid
+login input retains the generic authentication failure.
 Password reset and email verification remain separate work.
 
 
