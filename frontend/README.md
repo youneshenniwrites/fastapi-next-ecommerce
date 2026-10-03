@@ -26,16 +26,16 @@ available. See [recovery and its limitations](../docs/design/cart-storefront.md#
 
 ## Verification
 
-| Command              | Check                                                                 |
-| -------------------- | --------------------------------------------------------------------- |
-| npm run lint         | ESLint, TypeScript lint rules, React hooks and Next.js rules          |
-| npm run format:check | Prettier formatting                                                   |
-| npm run typecheck    | TypeScript and generated route types                                  |
-| npm test             | Catalog/money and session unit tests with enforced coverage           |
-| npm run build        | Production Next.js standalone build                                   |
-| npm run test:e2e     | Desktop/mobile catalog and full account journey, axe and fault states |
-| npm audit            | Locked dependency vulnerability audit                                 |
-| npm run api:check    | Generated schema/type drift against Git                               |
+| Command              | Check                                                                    |
+| -------------------- | ------------------------------------------------------------------------ |
+| npm run lint         | ESLint, TypeScript lint rules, React hooks and Next.js rules             |
+| npm run format:check | Prettier formatting                                                      |
+| npm run typecheck    | TypeScript and generated route types                                     |
+| npm test             | Maintained library and selected interaction tests with enforced coverage |
+| npm run build        | Production Next.js standalone build                                      |
+| npm run test:e2e     | Desktop/mobile catalog and full account journey, axe and fault states    |
+| npm audit            | Locked dependency vulnerability audit                                    |
+| npm run api:check    | Generated schema/type drift against Git                                  |
 
 Before browser tests, run make setup at the root, npm run build here, and
 npx playwright install chromium (add --with-deps on Linux). Tests use ports

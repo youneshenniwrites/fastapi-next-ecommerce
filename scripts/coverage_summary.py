@@ -19,7 +19,8 @@ SCOPES = {
     ),
     "frontend": (
         (
-            "All maintained src/lib TypeScript plus AccountForm and RetryCatalog. "
+            "All maintained src/lib TypeScript plus AccountForm, RetryCatalog, "
+            "AddToCartButton and CartPrivateRegion. "
             "Generated API declarations are excluded. This is NOT whole-frontend "
             "coverage; other components and routes have separate browser evidence."
         ),

@@ -17,7 +17,7 @@ pinned action SHAs, timeouts and cancellation of superseded runs.
 The frontend quality job starts independently; the browser job starts after its
 docs-only filter. Both unchanged named checks must pass; delivery requires the
 whole exact-main frontend workflow to succeed. Backend jobs also run independently
-so failures do not hide other evidence. Frontend unit coverage measures maintained library TypeScript plus AccountForm and RetryCatalog;
+so failures do not hide other evidence. Frontend unit coverage measures maintained library TypeScript plus AccountForm, RetryCatalog, AddToCartButton and CartPrivateRegion;
 route rendering, API integration and failure screens are covered by browser tests.
 FastAPI's generated OpenAPI snapshot is checked in CI so API drift fails the PR.
 
