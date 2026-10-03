@@ -106,3 +106,19 @@ issue and feature terms. This lists tracked documentation references with file/l
 locations for human inspection. It does not validate their truth, inspect remote
 Wiki/issues, or replace current-head review. Record the inspection in the PR Review
 section; no new CI gate or custom command is introduced.
+
+## Review-trigger efficiency (VIN-147)
+
+The review gate refreshes once when the permissionless review-event relay completes,
+rather than both when it is requested and when it completes. PR/comment events,
+the five-minute recovery schedule, manual refresh and trusted execution remain.
+Completion is not filtered by success: the gate still reads authoritative GitHub
+review evidence after failed or cancelled relay runs. This removes a duplicate
+refresh and its downstream continuation opportunity per new relay lifecycle;
+it does not make the application/browser tests faster or remove security checks.
+
+Five completed workflow samples and timestamps are linked from VIN-147. Expected
+reduction: one early gate refresh and its downstream continuation opportunity per
+new relay lifecycle. No repository-wide percentage or hosted runtime improvement
+is claimed before merge and comparable observation. Reverting this slice restores
+`[requested, completed]`; merge queue/grouping and empty-queue setup remain separate.

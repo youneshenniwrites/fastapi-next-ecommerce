@@ -734,12 +734,18 @@ test("cart retry recovers a failed server session check", async ({
 }) => {
   await savedCart(page, request);
   await fault(page, request, { identity: "fail" });
+  // The server error can render before the client's initial identity read. Keep
+  // that read failing too, or it can recover the cart before the explicit retry.
+  const initialSession = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/api/session/me",
+  );
   await page.goto("/cart");
-  await expect(
-    page.getByRole("button", { name: "Try again", exact: true }),
-  ).toBeVisible();
+  expect((await initialSession).status()).toBe(503);
+  const retry = page.getByRole("button", { name: "Try again", exact: true });
+  await expect(retry).toBeVisible();
+  await retry.click({ trial: true });
   await fault(page, request, {});
-  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await retry.click();
   await expect(
     page.getByText("Qty 1", { exact: true }).filter({ visible: true }),
   ).toBeVisible();
