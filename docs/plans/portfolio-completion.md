@@ -293,9 +293,9 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 - [ ] Review full journey for keyboard/mobile/accessibility — VIN-259, the scoped demo subset of #131, not formal full conformance.
 - [ ] Update architecture/setup/limits and deliver the final five-minute demo package — VIN-262. The
   [walkthrough and script](../demo.md#five-minute-demonstration-script) are documented
-  under VIN-198; final package reconciliation follows the remaining
-  accessibility and review-enforcement/service-typing outcomes
-  listed above. Security and monitoring stage 3 is already verified. This documentation
+  under VIN-198; final package reconciliation follows the still-unchecked
+  prerequisite outcomes in this checklist. Security and monitoring stage 3 is
+  already verified. This documentation
   alone adds no completion credit.
 
 **Finish line:** reproducible hosted sandbox purchase, correct money/inventory,
