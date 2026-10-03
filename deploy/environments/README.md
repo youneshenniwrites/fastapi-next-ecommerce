@@ -116,7 +116,8 @@ PR: backend integration checks, frontend quality checks and production build/bro
 tests run on isolated runners → all applicable checks and Codex review pass →
 a manually requested protected development preview under the
 [reviewed preview policy](../../docs/design/frontend-previews.md). Frontend quality and
-browser jobs run concurrently; the entire workflow must succeed before delivery.
+browser shards run concurrently on isolated runners; the protected browser check
+requires all shards, and the entire workflow must succeed before delivery.
 Backend changes use disposable CI databases; promotion
 to the shared development API is explicit and serialized. A frontend preview does
 not imply a dedicated backend/database for every PR.
