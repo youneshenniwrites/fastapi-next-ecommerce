@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 import { useSession } from "@/components/session-provider";
+const subscribe = () => () => {};
 export function AccountLink({
   className,
   onClick,
@@ -9,7 +11,14 @@ export function AccountLink({
   onClick?: () => void;
 }) {
   const session = useSession();
-  if (session.status === "loading") {
+  // The session can resolve before this streamed header hydrates. Match its
+  // server placeholder first, then render the current session normally.
+  const hydrated = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+  if (!hydrated || session.status === "loading") {
     return (
       <span className={className} aria-busy="true">
         Account
