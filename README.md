@@ -68,6 +68,7 @@ For the storefront, use Node 24.20.0 and npm 11.19.1:
 make demo
 cd frontend
 cp -n .env.example .env.local
+# Existing file? Merge the session settings below before continuing.
 npm ci
 npm run dev
 ```
@@ -75,6 +76,16 @@ npm run dev
 The local example enables sessions for the exact origin
 [127.0.0.1:3000](http://127.0.0.1:3000). Preserve existing configuration;
 if you change ports, update `API_BASE_URL` and `APP_ORIGIN` in `.env.local`.
+An older `.env.local` may contain only `API_BASE_URL`: `cp -n` leaves it unchanged.
+Before starting the storefront, add or update these two entries in that file,
+preserving other settings and using your actual browser port:
+
+```dotenv
+APP_ORIGIN=http://127.0.0.1:3000
+ALLOW_LOCAL_HTTP_SESSIONS=true
+```
+
+These HTTP settings are for loopback development only, never hosted deployments.
 See [frontend setup](frontend/README.md). Re-run `make dev` after changing containerized code.
 
 ```sh
@@ -251,7 +262,8 @@ This is a [senior SWE portfolio project](docs/plans/portfolio.md).
 [Sandbox payments](docs/sandbox-payments.md#hosted-development-evidence--23-september-2026) are verified on development; non-payment checkout and order history
 merged in PR #188. The customer
 account journey and the signed-in cart storefront are implemented and covered by desktop/mobile browser tests. Follow the
-[completion plan](docs/plans/portfolio-completion.md) for the remaining work.
+[completion plan](docs/plans/portfolio-completion.md) for verified demo acceptance
+and deferred post-demo work.
 
 ## Try the sandbox shopping journey
 

@@ -70,7 +70,8 @@ presentation sequence, not a measured completion-time guarantee.
   the local production matrix, mobile overflow and hydration repairs, and passing
   desktop/mobile checks on deployed development on 4 October. VIN-259’s bounded
   accessibility acceptance is verified; this does not establish full accessibility
-  conformance. Remaining demo work is tracked in the [completion plan](plans/portfolio-completion.md).
+  conformance. Verified demo acceptance and deferred follow-ups are recorded in
+  the [completion plan](plans/portfolio-completion.md).
 
 - [Hosted payment evidence](sandbox-payments.md#hosted-development-evidence--23-september-2026)
   records purchase/history, stock before/after payment, cancellation, expiry and
@@ -86,7 +87,7 @@ presentation sequence, not a measured completion-time guarantee.
   local fictional dataset does not establish hosted recovery guarantees.
 - No real fulfilment, refunds or production payment activation. Consult the
   [single completion plan](plans/portfolio-completion.md) for verified monitoring,
-  reliability and remaining delivery acceptance. Do not claim enterprise readiness
+  reliability and deferred post-demo work. Do not claim enterprise readiness
   or full accessibility conformance.
 
 Keep these boundaries visible during the presentation:
@@ -170,6 +171,7 @@ cannot grant admin access. Start the storefront from the repository root:
 ```sh
 cd frontend
 cp -n .env.example .env.local
+# Existing file? Merge the session settings below before continuing.
 npm ci
 npm run dev
 ```
@@ -178,6 +180,11 @@ Browse `http://127.0.0.1:3000`, matching the example's exact `APP_ORIGIN` and
 explicit local HTTP session permission. Preserve existing configuration. For an
 isolated stack, change `API_BASE_URL` and `APP_ORIGIN` to its API/browser ports
 as well as the [backend port settings](development.md#configuration).
+If `.env.local` already exists, `cp -n` leaves it untouched. Before starting the
+frontend, merge `APP_ORIGIN=http://127.0.0.1:3000` (your exact browser origin) and
+`ALLOW_LOCAL_HTTP_SESSIONS=true` into that file, updating existing entries rather
+than duplicating keys. Keep its API URL and other settings intact. Older files
+with only `API_BASE_URL` cannot support account actions until this step is done.
 
 `make demo` seeds twelve products only when the catalog is empty. Reruns leave all
 existing products untouched, including changed names, prices and depleted stock.

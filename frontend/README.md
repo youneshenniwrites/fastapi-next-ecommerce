@@ -12,6 +12,7 @@ From the root, run make dev and make demo. Then from frontend/:
 
 ```sh
 cp -n .env.example .env.local
+# Existing file? Merge the session settings below before continuing.
 npm ci
 npm run dev
 ```
@@ -28,6 +29,12 @@ five-second transport cancellation signal and are never automatically replayed.
 An uncertain cart write stays read-only until a fresh authoritative snapshot.
 Known offline route refreshes are deferred so the recovery control remains
 available. See [recovery and its limitations](../docs/design/cart-storefront.md#request-deadlines-and-timeout-recovery).
+
+For an older `.env.local` containing only `API_BASE_URL`, `cp -n` makes no change.
+Before `npm run dev`, add or update `APP_ORIGIN=http://127.0.0.1:3000` and
+`ALLOW_LOCAL_HTTP_SESSIONS=true` in that existing file, substituting your actual
+browser port and preserving its other values. Missing session settings cause
+account actions to return service-unavailable responses.
 
 ## Verification
 
