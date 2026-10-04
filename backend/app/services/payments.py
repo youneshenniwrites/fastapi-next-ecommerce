@@ -3,14 +3,16 @@
 import json
 import secrets
 import string
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol
+from typing import Literal, TypedDict, cast
 
 import stripe
 from fastapi import HTTPException
 from sqlalchemy import event as sqlalchemy_event
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from stripe.params.checkout import SessionCreateParams
 
 from app.core.observability import (
     ReconciliationRequired,
@@ -21,18 +23,16 @@ from app.core.observability import (
 from app.core.settings import settings
 from app.models.order import Order, PaymentEvent
 from app.models.product import Product
+from app.providers.payment_types import PaymentProvider, PaymentSession
 from app.providers.stripe import StripeProvider
 
 
-class PaymentProvider(Protocol):
-    def account_id(self) -> str: ...
-    def create(self, params: dict[str, Any], key: str) -> dict[str, Any]: ...
-    def retrieve(self, session_id: str) -> dict[str, Any]: ...
-    def expire(self, session_id: str) -> dict[str, Any]: ...
-    def event(self, payload: bytes, signature: str) -> dict[str, Any]: ...
-    def find_sessions(
-        self, reference: str, expires_at: int
-    ) -> tuple[list[dict[str, Any]], bool]: ...
+class StartedPayment(TypedDict):
+    order: Order
+    checkout_url: str | None
+
+
+type TerminalPaymentState = Literal["paid", "failed", "cancelled", "expired"]
 
 
 def get_provider() -> PaymentProvider:
@@ -62,7 +62,7 @@ def lock_order(db: Session, order_id: int, user_id: int | None = None) -> Order:
     return order
 
 
-def finish(db: Session, order: Order, state: str) -> None:
+def finish(db: Session, order: Order, state: TerminalPaymentState) -> None:
     """Order lock, then sorted product locks: claim disposal occurs exactly once."""
     if order.payment_status != "pending":
         return
@@ -92,7 +92,7 @@ def finish(db: Session, order: Order, state: str) -> None:
     order.payment_checkout_url = None
 
 
-def validate_session(order: Order, session: dict[str, Any]) -> None:
+def validate_session(order: Order, session: PaymentSession) -> None:
     metadata = session.get("metadata") or {}
     if (
         session.get("livemode") is not False
@@ -113,9 +113,9 @@ def validate_session(order: Order, session: dict[str, Any]) -> None:
 def apply_session(
     db: Session,
     order: Order,
-    session: dict[str, Any],
+    session: PaymentSession,
     *,
-    terminal: str = "expired",
+    terminal: Literal["expired", "cancelled"] = "expired",
     failed: bool = False,
     verified_paid: bool = False,
 ) -> None:
@@ -147,17 +147,32 @@ def apply_session(
         )
 
 
-def provider_call(call, *args):
+def provider_call[**P, T](call: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
     """Uncertain provider outcomes retain inventory and the durable retry identity."""
     try:
-        return call(*args)
+        return call(*args, **kwargs)
     except stripe.StripeError:
         raise HTTPException(
             503, "Payment provider is unavailable; check payment status before retrying"
         ) from None
 
 
-def request_params(order: Order, account_id: str) -> dict[str, Any]:
+def managed_expiry(order: Order) -> datetime:
+    # ck_orders_payment_managed guarantees this for every managed order.
+    assert order.payment_expires_at is not None
+    return order.payment_expires_at
+
+
+def request_account(params: SessionCreateParams) -> str | None:
+    # JSON persisted by request_params contains a plain metadata dictionary, not
+    # the alternate StripeObject representation permitted by the SDK input type.
+    metadata = params.get("metadata", {})
+    return cast(dict[str, str], metadata).get("stripe_account_id")
+
+
+def request_params(order: Order, account_id: str) -> SessionCreateParams:
+    # The same database constraint guarantees the durable intent identity.
+    assert order.payment_reference is not None
     origin = settings.STRIPE_CHECKOUT_ORIGIN.rstrip("/")
     return {
         "mode": "payment",
@@ -169,7 +184,7 @@ def request_params(order: Order, account_id: str) -> dict[str, Any]:
         },
         "success_url": f"{origin}/orders/{order.id}?payment=return",
         "cancel_url": f"{origin}/orders/{order.id}?payment=cancelled",
-        "expires_at": int(aware(order.payment_expires_at).timestamp()),
+        "expires_at": int(aware(managed_expiry(order)).timestamp()),
         "integration_identifier": "vindor_"
         + "".join(secrets.choice(string.ascii_lowercase) for _ in range(8)),
         "line_items": [
@@ -189,7 +204,7 @@ def request_params(order: Order, account_id: str) -> dict[str, Any]:
 
 def get_session(
     db: Session, user_id: int | None, order_id: int, *, create: bool
-) -> tuple[PaymentProvider, dict[str, Any] | None]:
+) -> tuple[PaymentProvider, PaymentSession | None]:
     """Persist creation parameters once before I/O, including after lost responses.
 
     Stripe retains idempotency keys for at least 24 hours. After 23 hours an
@@ -215,7 +230,7 @@ def get_session(
             return provider, None
         session_id = order.payment_session_id
         if not session_id and order.payment_started_at is None:
-            if aware(order.payment_expires_at) <= now():
+            if aware(managed_expiry(order)) <= now():
                 finish(db, order, "expired")
                 db.commit()
                 return provider, None
@@ -232,14 +247,16 @@ def get_session(
                 request_params(order, account_id), separators=(",", ":")
             )
         if not session_id:
+            # Started time and request are persisted together before provider I/O.
+            assert order.payment_started_at is not None
             if aware(order.payment_started_at) + timedelta(hours=23) <= now():
                 raise ReconciliationRequired(
                     409, "Uncertain payment creation requires operator reconciliation"
                 )
             if order.payment_request is None:
                 raise ReconciliationRequired(409, "Original payment request is missing")
-            params = json.loads(order.payment_request)
-            if params.get("metadata", {}).get("stripe_account_id") != account_id:
+            params = cast(SessionCreateParams, json.loads(order.payment_request))
+            if request_account(params) != account_id:
                 raise ReconciliationRequired(
                     409,
                     "Payment account identity changed or is missing; operator reconciliation required",
@@ -257,7 +274,7 @@ def get_session(
     return provider, session
 
 
-def start_payment(db: Session, user_id: int, order_id: int) -> dict[str, Any]:
+def start_payment(db: Session, user_id: int, order_id: int) -> StartedPayment:
     _, session = get_session(db, user_id, order_id, create=True)
     try:
         order = lock_order(db, order_id, user_id)
@@ -356,22 +373,20 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
             return reconcile_known_session(db, order_id, session_id)
         if order.payment_started_at is None:
             raise HTTPException(409, "Payment has no uncertain creation attempt")
-        if now() < aware(order.payment_expires_at) + timedelta(minutes=5):
+        if now() < aware(managed_expiry(order)) + timedelta(minutes=5):
             raise HTTPException(409, "Payment expiry window has not elapsed")
         reference = order.payment_reference
+        assert reference is not None  # ck_orders_payment_managed
         if order.payment_request is None:
             raise ReconciliationRequired(409, "Original payment request is missing")
-        account_id = (
-            json.loads(order.payment_request)
-            .get("metadata", {})
-            .get("stripe_account_id")
-        )
+        params = cast(SessionCreateParams, json.loads(order.payment_request))
+        account_id = request_account(params)
         if not account_id:
             raise ReconciliationRequired(
                 409,
                 "Original payment account is unknown; absence cannot be established",
             )
-        expiry = int(aware(order.payment_expires_at).timestamp())
+        expiry = int(aware(managed_expiry(order)).timestamp())
         db.commit()
     except Exception:
         db.rollback()
@@ -390,18 +405,18 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
         return reconcile_known_session(db, order_id, matches[0]["id"])
     try:
         order = lock_order(db, order_id)
-        session_id = order.payment_session_id
+        rebound_session_id = order.payment_session_id
         if (
             order.payment_reference != reference
-            or int(aware(order.payment_expires_at).timestamp()) != expiry
+            or int(aware(managed_expiry(order)).timestamp()) != expiry
         ):
             raise HTTPException(409, "Payment intent changed during reconciliation")
-        if not session_id:
+        if not rebound_session_id:
             finish(db, order, "expired")
         db.commit()
-        if session_id:
+        if rebound_session_id:
             # A webhook or concurrent operator bound the session during the scan.
-            return reconcile_known_session(db, order_id, session_id)
+            return reconcile_known_session(db, order_id, rebound_session_id)
         return order
     except Exception:
         db.rollback()
@@ -475,11 +490,11 @@ def handle_webhook(db: Session, payload: bytes, signature: str) -> None:
 
 
 @sqlalchemy_event.listens_for(Session, "after_commit")
-def _record_committed_release(session):
+def _record_committed_release(session: Session) -> None:
     for outcome in session.info.pop("inventory_release_observations", []):
         record_inventory_release(outcome)
 
 
 @sqlalchemy_event.listens_for(Session, "after_rollback")
-def _discard_rolled_back_release(session):
+def _discard_rolled_back_release(session: Session) -> None:
     session.info.pop("inventory_release_observations", None)
