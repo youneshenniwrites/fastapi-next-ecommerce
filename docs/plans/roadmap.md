@@ -3,7 +3,7 @@
 Purpose: [senior SWE portfolio plan](portfolio.md).
 The [canonical portfolio completion plan](portfolio-completion.md) owns progress,
 priorities and acceptance gates; [VIN-155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
-owns current handoffs and evidence. This roadmap indexes capabilities.
+owns completed-demo handoffs and evidence; new catalog work lives in [VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288). This roadmap indexes capabilities.
 
 ## Landed foundation
 
@@ -60,15 +60,26 @@ canonical plan for evidence and retained limitations.
 
 Use the [single portfolio completion plan and checklist](portfolio-completion.md)
 for current work, dependencies, blockers and acceptance gates. This roadmap is an
-index of delivered capabilities, not a second ordered plan. Issue #155 holds
-handoffs and evidence; the board holds workflow state.
+index of delivered capabilities, not a second ordered plan. Issue #155 retains completed-demo evidence; VIN-288 and its children hold the
+new customer-release handoffs. The board holds workflow state in separate
+Customer features and Technical improvements views.
 
 Azure (#31) and broader enterprise work remain deferred as specified in that plan.
 
-Beyond the shopping journey, the [enterprise readiness epic](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/125)
+The next planned customer release expands catalog discovery and content up to
+100 workspace/home-office products: server queries, pagination, categories,
+product information and a safe curated import. VIN-287 is paused and amended,
+not delivered. Follow the canonical plan for the dependency order.
+
+Catalog administration (VIN-295) is a separate deferred roadmap. VIN-300 groups
+later sign-in continuity, account recovery and purchase support.
+
+Beyond the shopping journey, the [technical readiness epic](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/125)
 sequences security hardening, reliability, and scale/compliance work, with scoped
-tickets for security headers (#126), password reset (#127), refunds (#128), SLOs
-(#129), restore drills (#130), and the WCAG audit (#131).
+tickets for SLOs (#129), restore drills (#130), the WCAG audit (#131),
+monitoring/CI improvements and feature-flag discovery (#294). Password reset
+(#127) and refunds (#128) now sit under the separate customer follow-up epic
+VIN-300. Security headers (#126) are delivered.
 VIN-126’s portfolio header outcome is now verified on development and production;
 see the canonical plan for its enforced-release evidence. Other enterprise scope
 remains deferred.
