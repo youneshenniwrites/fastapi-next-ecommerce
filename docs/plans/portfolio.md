@@ -24,6 +24,17 @@ priorities, status and acceptance gates. This page describes product direction o
 6. Interview package: architecture diagram, decision records with alternatives,
    test evidence, and a five-minute demonstration walkthrough.
 
+## After the completed demo
+
+VIN-288 plans a richer workspace/home-office catalog of up to 100 items, useful
+product information and full-catalog discovery. Category and media data should
+remain product-agnostic so a later assortment does not require name-based code.
+VIN-295 separately saves owner catalog administration; it is explicitly deferred,
+with store-model discovery still open. New product work remains a fictional,
+sandbox shop unless the owner separately approves a real-business transition.
+The canonical plan owns ordering; these are planned capabilities, not delivered
+features or new VIN-155 completion criteria.
+
 ## Success criteria
 
 A reviewer can run the demo without editing code, navigate a coherent shopping

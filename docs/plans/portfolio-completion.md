@@ -7,9 +7,10 @@ checklist into issues, the Wiki or separate dashboards. Visuals are views of thi
 plan, not additional sources of truth.
 
 [Tracking issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
-contains current handoffs, evidence and links to this plan and implementation
-issues. The board owns workflow state. Record scope/sequence changes here and link
-them from #155. Preserve historical evidence. Keep one implementation story active
+contains the completed demo handoff and evidence. New customer work is tracked
+in [VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288)
+and its child stories. The board owns workflow state. Record scope/sequence changes here and link
+them from the relevant epic. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
 
 ## Recruiter-readiness feedback decision — 22 September 2026
@@ -146,13 +147,13 @@ it does not add portfolio feature completion credit.
 **Board convention:** issue cards only; PRs stay linked from their issue rather
 than appearing as duplicate cards. This applies to dependency PRs as well.
 
-**Issue priorities and targets:** High = core demo or active delivery; medium =
-supporting delivery efficiency/evidence; low = post-demo. All issues carry one
-priority label, a category, milestone and project link. Dependencies and blockers
-still govern this plan's sequence. Milestones express outcomes, not promised dates.
-Existing Customer accounts milestones are retained. Closed-ticket priorities are
-retrospective classification; cancelled VIN-42 stays archived and not planned.
-VIN-147 is medium; its start follows portfolio delivery unless it resolves a concrete blocker.
+**Issue priorities and targets — 4 October 2026:** Urgent means a verified
+security or delivery deadline; high is the selected customer release; medium is
+supporting or later work; low is explicitly deferred/optional. Priority does not
+mean an issue is unblocked. Milestones express outcomes, not promised dates.
+The board's Workstream field separates Customer features from Technical
+improvements; neither workstream replaces status or priority. Closed-ticket
+classifications remain historical, and cancelled VIN-42 stays archived.
 
 **PR naming (owner-approved 21 September):** `[VIN-N] [type] Description`.
 PR descriptions open with a linked Issue/title, Closes/Refs, and a separate
@@ -224,33 +225,85 @@ requests this canonical-plan correction. PR #276 delivered the correction; VIN-2
 that documentation closeout merged. The source issue retains its review/merge evidence. This verifies one existing outcome, with no extra credit for
 supporting tests or documentation.
 
-### Wider backlog disposition — refined 2 October 2026
+### Customer roadmap and separate technical backlog — 4 October 2026
 
-The whole open backlog was checked against current code and issue/merge evidence.
-Source tickets own their refined scope, first bounded deliverable, proving vehicle
-and remaining decisions; this is a priority index, not another completion checklist.
+VIN-155 is complete at **29/29 revised outcomes**. The following is new planned
+work, not extra demo completion credit. The owner selected a modest expansion of
+the workspace/home-office assortment, **up to 100 products**;
+roughly 60 is a planning target, not a reason to add filler. The earlier 500-product
+idea is superseded. Implementation is paused while this refinement is recorded.
 
-- **Customer features next:** the scoped demo outcomes above are verified. Select
-  the next independently testable customer story with the owner; VIN-127 password
-  recovery is a candidate, not active implementation. VIN-178’s remaining
-  branch-status activation coordinates with deferred VIN-38; implemented
-  validation is not enforced protection.
-- **Supporting maintenance:** VIN-250 now also owns VIN-63’s stale-page HTTP 200
-  cases; VIN-63 is consolidated, not delivered. VIN-172 live autonomous dependency
-  proof, VIN-147 repeated-CI strategy and VIN-227 reviewer-routing races remain scoped
-  supporting work. A demonstrated blocker may justify reprioritization.
-- **Optional post-demo:** VIN-241 readable error alerts, VIN-242 reviewer visibility,
-  VIN-204 browser RUM, VIN-243 provider widget assessment, VIN-186 component cleanup,
-  VIN-184 discovery matching and VIN-154 skills-host policy are individually bounded.
-- **Enterprise discovery:** VIN-125 retains broader account recovery (VIN-127),
-  refund/void decisions (VIN-128), measured SLOs (VIN-129), full restore guarantees
-  (VIN-130), full accessibility conformance (VIN-131) and optional Azure (VIN-31).
-  Unresolved product/spend/provider decisions are recorded, not silently answered.
-- **Stale backlog closed with proof:** VIN-84 framework guidance is present in
-  current scoped instructions and the published reconciliation; VIN-225’s routine-doc
-  workflow automatically requested PR #257’s actual current-head CodeRabbit approval
-  without a Codex status; VIN-238’s cross-network probe was delivered under VIN-158.
-  These housekeeping closures add no portfolio credit.
+The board has two filtered views in one project, without duplicate issue cards:
+[Customer features](https://github.com/users/youneshenniwrites/projects/1/views/3)
+and [Technical improvements](https://github.com/users/youneshenniwrites/projects/1/views/4).
+Source issues own acceptance, dependencies, decisions and handoffs. The original
+Delivery board remains available as the combined overview.
+
+**Current customer release — VIN-288:** catalog expansion and discovery, in order:
+
+| Story | Customer or contract outcome | Dependency |
+| --- | --- | --- |
+| [VIN-289](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/289) | Search/filter/sort the full catalog before bounded pagination; preserve existing API consumers | First unblocked story after planning |
+| [VIN-287](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/287) | Next.js server-rendered pages, URL filters, share and product-return continuity | VIN-289 |
+| [VIN-290](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/290) | Data-backed categories and accessible navigation | VIN-287 |
+| [VIN-291](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/291) | Useful bounded product facts and photos independent of mutable names | VIN-290 |
+| [VIN-292](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/292) | Curated assortment, provenance and a repeatable non-destructive import | VIN-290/291 and paged browsing |
+
+VIN-287's six-file uncommitted draft is preserved; its three URL unit tests pass,
+but type checking failed and browser verification has not run. Its amended issue
+replaces local filtering of the first 100 items with server-backed navigation.
+It is paused in Backlog, with no implementing PR. VIN-250's separate unfinished
+smoke-retry draft is also preserved and parked; neither is a delivered feature.
+
+**Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
+FastAPI filters and orders before paging, owns authoritative prices/stock and
+returns bounded results plus matching totals. Next.js Server Components consume
+generated API types; URL parameters own applied search/filter/page. Offset pages
+with stable ID tie-breaks are sufficient for this catalog. No new search vendor,
+Redis, React Query or hosting migration is justified by this scope. Categories,
+media references and bounded product facts should be product-agnostic data;
+that does not require a dynamic schema builder or multi-tenant architecture.
+
+The initial content remains within the existing clearly labelled fictional-demo
+boundary. No supplier feed was selected. VIN-292 must review representative
+products, category names, factual copy and image rights before bulk preparation
+or import. Preserve existing product IDs, admin edits, edition guards, carts,
+order snapshots and reserved inventory. The release-content cap is not a global
+limit on future admin-created records.
+
+**Later customer roadmaps:** [VIN-295](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/295)
+saves catalog administration as a separate, explicitly deferred epic: product
+editing, category management, safe publishing and limited merchandising controls
+(VIN-296–299). The owner deferred single-shop versus separate-shop discovery;
+none of that implementation blocks the current catalog release.
+[VIN-300](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/300)
+groups later sign-in continuity (VIN-293), account recovery/verification (VIN-127)
+and sandbox refund/void decisions (VIN-128). Reset must invalidate all existing
+sessions; hosted email delivery still needs a sender/provider decision. These
+stories retain their remaining product decisions rather than assuming a launch.
+
+**Technical improvements — VIN-125:** keep security, RUM, Sentry, reliability,
+CI and feature-flag discovery in the technical view. VIN-294 records the earlier
+feature-flag research request as discovery, with no tool selected or installed.
+VIN-269's approved advisory-specific exception expires **10 October 2026 at
+23:59 UTC**; no extension or verified remediation is claimed. That deadline stays
+urgent while independent customer work proceeds. VIN-172's recorded credential
+expiry (28 October) and VIN-38's recorded trigger-policy deadline (2 November)
+must be revalidated before action. Routine tooling cannot displace customer
+features without a demonstrated blocker. VIN-38 remains owner-deferred; verified
+external reviews and protected CI continue.
+
+Planning references: [Antonio's category lesson](https://www.codewithantonio.com/workshops/build-a-multi-tenant-e-commerce-with-nextjs-tailwind-v4-stripe-connect/category-pages~8bo5l),
+[product-model lesson](https://www.codewithantonio.com/workshops/build-a-multi-tenant-e-commerce-with-nextjs-tailwind-v4-stripe-connect/products~q3axx),
+[Next.js URL search/pagination](https://nextjs.org/learn/dashboard-app/adding-search-and-pagination)
+and [PostgreSQL LIMIT/OFFSET ordering](https://www.postgresql.org/docs/current/queries-limit.html).
+These inform navigation and query design, not a replacement technology stack.
+No tutorial code or assets were copied. Verify installed-version APIs when coding.
+
+Historical backlog cleanup from 2 October remains valid: VIN-84 framework
+guidance, VIN-225 routine-documentation review and VIN-238 cross-network proof
+were closed with evidence on their source issues. Those closures add no new
+portfolio completion credit.
 
 ### Blockers and unblock actions
 
@@ -527,8 +580,9 @@ GBP, fictional products/users, sandbox payments. No real fulfilment, shipping
 integrations, promotions or tax engine. Do not rewrite working architecture or
 revert revalidation solely because the earlier audit was inaccurate. Defer Azure,
 microservices, Redis/search, refunds, broad SLOs and formal full WCAG conformance.
-Password recovery/email verification remain follow-ups unless demo acceptance
-requires them. Pagination becomes required beyond 100 storefront products.
+Password recovery/email verification remain later customer follow-ups under VIN-300.
+The original demo used a first-100-item boundary; the planned VIN-287 catalog
+release requires pagination even with roughly 60 products.
 Deployment-script consolidation, placeholder cleanup and image-patch retirement
 are maintenance, not checkout prerequisites. External configuration blockers stay
 visible while the next independent story proceeds.
