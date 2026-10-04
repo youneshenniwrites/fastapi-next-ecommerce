@@ -79,7 +79,8 @@ Run these from the repository root after `make setup`:
 | `make setup` | Generate local configuration and install dependencies from uv.lock |
 | `make dev` | Build/start the PostgreSQL, migration, and API containers |
 | `make down` | Stop containers without deleting the database volume |
-| `make check` | Ruff lint, format check, and isolated backend tests |
+| `make check` | Ruff lint, format check, scoped service types, and isolated backend tests |
+| `make typecheck` | Check order/payment service types and verify representative type errors are rejected |
 | `make coverage` | Run tests with branch-aware coverage and an 85% minimum |
 | `make audit` | Audit the locked Python environment for known vulnerabilities |
 | `make requirements-check` | Verify the pip export matches uv.lock |
@@ -201,7 +202,8 @@ coverage scope, local hooks, and how to handle dependency-update failures.
 [Coverage reports](docs/coverage.md) explains Actions summaries, downloadable HTML
 and the deliberately limited frontend measurement.
 
-Backend static type checking, code scanning and remaining review/coverage
+Backend static checking covers order/payment services and their directly used
+payment interfaces; [scope and commands](docs/tooling.md#scoped-backend-service-types-vin-261) explain its limits. Code scanning and remaining review/coverage
 enforcement are further tooling increments. Application CI and audit contexts are
 required by current branch protection; verify live repository rules before
 claiming that additional workflows are required.

@@ -85,9 +85,11 @@ published with typed-model and revalidation changes merged (#132/#133). The
 19 September correction distinguishes maintainability work from the invalid
 refresh-import finding; #84’s remaining guidance slice is now verified in
 AGENTS.md, scoped skills and framework documentation, with closeout on the ticket.
-Static type checking, code scanning and remaining review/coverage required-check
-rules are further controls, not claims of open PRs. Consult their source issues
-and the live queue before starting work. Frontend lint/type/build and browser checks are implemented.
+Scoped static checking for order/payment services and their payment interfaces is
+implemented under VIN-261; [tooling scope](../tooling.md#scoped-backend-service-types-vin-261) records its limits. Repository-wide typing, code scanning and remaining
+review/coverage required-check rules are further controls. Consult their source
+issues and the live queue before starting work. Frontend lint/type/build and
+browser checks are implemented.
 Sentry SDK scaffolding is merged in the API and storefront (#122/#123).
 #121’s revised-scope monitoring foundation is complete: PR #203 implements
 error/transaction/log/metric privacy filtering and serialized-payload tests.

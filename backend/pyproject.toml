@@ -26,6 +26,7 @@ dev = [
     "pip-audit>=2.9,<3",
     "pytest-cov>=6,<8",
     "pre-commit>=4,<5",
+    "mypy==2.4.0",
 ]
 
 [tool.pytest.ini_options]
@@ -37,6 +38,17 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["app/services/orders.py", "app/services/payments.py", "app/providers/stripe.py", "app/providers/payment_types.py"]
+strict = true
+disallow_any_explicit = true
+show_error_codes = true
+warn_unused_configs = true
+# Follow imported types without turning this bounded gate into a repository-wide
+# migration. Explicit files above remain fully checked; imports are not skipped.
+follow_imports = "silent"
 
 [tool.coverage.run]
 branch = true

@@ -1,6 +1,6 @@
 COMPOSE = docker compose --env-file backend/.env -f compose.yaml
 
-.PHONY: setup dev down check migrate test lint coverage audit hooks hooks-check requirements-check
+.PHONY: setup dev down check typecheck migrate test lint coverage audit hooks hooks-check requirements-check
 setup:
 	python3 backend/scripts/dev_setup.py
 	cd backend && uv sync --locked
@@ -11,8 +11,11 @@ dev: setup
 down:
 	$(COMPOSE) down
 
-check:
+check: typecheck
 	cd backend && uv run ruff check . && uv run ruff format --check . && uv run pytest -q
+
+typecheck:
+	cd backend && uv run --locked python scripts/check_service_types.py
 
 migrate:
 	cd backend && uv run alembic upgrade head

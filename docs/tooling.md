@@ -2,12 +2,13 @@
 
 The repository checks both applications. See [CI pipeline](ci.md) for frontend
 quality, build/browser checks and the named backend stages. Backend checks cover
-lint/format/tests, PostgreSQL, containers/migrations and dependency auditing.
+lint/format, scoped service types, tests, PostgreSQL, containers/migrations and dependency auditing.
 These checks support review; they do not certify production readiness.
 
 | Command | Purpose |
 | --- | --- |
-| `make check` | Ruff lint/format and isolated tests |
+| `make check` | Ruff lint/format, scoped service types and isolated tests |
+| `make typecheck` | Check order/payment service boundaries and prove representative mistakes are rejected |
 | `make coverage` | Tests plus branch-aware coverage, with an 85% minimum |
 | `make audit` | Audit the installed locked Python environment for known vulnerabilities |
 | `make requirements-check` | Detect drift between uv.lock and the pip compatibility export |
@@ -66,9 +67,32 @@ CI actions are pinned to reviewed commit SHAs, with version comments for readers
 Dependabot can propose updated pins. Jobs have time limits and read-only repository
 permissions. The backend workflow cancels superseded runs for the same ref.
 
-Next tooling increments should add static type checking as the SQLAlchemy models
-are typed, code scanning, and repository rules for required checks. Those controls
-are not enabled by this PR and should not be claimed as implemented.
+Scoped service typing is described below. Repository-wide typing, code scanning
+and additional required-check rules remain further increments; this gate does not
+establish those controls.
+
+## Scoped backend service types (VIN-261)
+
+Run `make typecheck` from the repository root after installing locked development
+dependencies. `make check` and the backend quality CI job run the same checker.
+Pinned mypy checks `app/services/orders.py`, `app/services/payments.py`,
+`app/providers/stripe.py` and `app/providers/payment_types.py` with strict settings.
+The service wrapper preserves provider argument and return types; payload types
+retain absent and nullable fields. Runtime validation still establishes payment
+binding, ownership, amount and state.
+
+The runner also checks temporary examples: valid service/provider calls must
+pass, while a wrong order identifier, an invalid terminal payment state, an
+unchecked nullable checkout URL and an incorrect provider return assignment must
+fail with the expected diagnostics.
+It removes these examples afterward. This verifies that the scoped gate catches
+representative mistakes; it does not prove runtime correctness.
+
+Imported modules supply their annotations but their own diagnostics are outside
+this bounded gate. Routes, other services, tests and the full backend are not
+claimed strictly typed. The existing behavior tests, coverage, API-contract,
+PostgreSQL and container checks remain separate requirements. SDK payload casts
+stay at the provider/persisted transport boundary and do not authorize payment.
 
 ## Dependency review decisions — 8 September 2026
 
