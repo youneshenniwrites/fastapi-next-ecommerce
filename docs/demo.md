@@ -62,8 +62,10 @@ presentation sequence, not a measured completion-time guarantee.
 ### Evidence and honest limits
 
 - [Focused keyboard/mobile journey evidence](accessibility-journey.md) records
-  the local production matrix, mobile overflow repair and public hosted sanity.
-  Deployment verification and delivery acceptance remain on VIN-259.
+  the local production matrix, mobile overflow and hydration repairs, and passing
+  desktop/mobile checks on deployed development on 4 October. VIN-259’s bounded
+  accessibility acceptance is verified; this does not establish full accessibility
+  conformance. Remaining demo work is tracked in the [completion plan](plans/portfolio-completion.md).
 
 - [Hosted payment evidence](sandbox-payments.md#hosted-development-evidence--23-september-2026)
   records purchase/history, stock before/after payment, cancellation, expiry and

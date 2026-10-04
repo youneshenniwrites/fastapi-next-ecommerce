@@ -25,7 +25,7 @@ claiming demo completion. A concise scaling discussion belongs to the interview
 package: distinguish measured limits from hypotheses; do not add Redis, replicas or
 new services solely for demonstration. No additional plan or infrastructure is approved.
 
-## Progress at a glance — 3 October 2026
+## Progress at a glance — 4 October 2026
 
 **Current stage: 6 of 6, hosted verification and portfolio evidence.** Checkout and sandbox purchase are verified on development; remaining hosted acceptance stays explicit below. Stage counts are not effort estimates.
 
@@ -36,7 +36,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 | 3. Security and monitoring | ✅ Complete | #121 monitoring foundation and #126 hosted header enforcement are verified |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted purchase verified in stage 6 |
 | 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted proof verified in stage 6 |
-| 6. Hosted demo and evidence | Incomplete | Three outcomes remain; scoped tickets and sequence below |
+| 6. Hosted demo and evidence | Incomplete | Two outcomes remain: service typing (VIN-261) and the final demo package (VIN-262) |
 
 **Payment implementation merged (23 September):** PR #194 merged as `0e89efd` after clean Codex review, CodeRabbit approval and passing CI on `9adfff8`. Sandbox sessions, signed webhooks and inventory recovery are delivered. VIN-30 is complete: development revision `8685cc1` passed the real sandbox purchase, history, cancellation, expiry and duplicate-expiry replay on 23 September, 19:20–19:30 UTC, with paid-stock verification at 19:42–19:44 UTC. See [hosted evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026). Production sandbox payments remain disabled; no live payments are enabled.
 
