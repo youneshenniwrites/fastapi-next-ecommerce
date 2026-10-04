@@ -66,6 +66,11 @@ test("enforced CSP uses fresh nonces on real pages and preserves hydration", asy
   page,
   request,
 }) => {
+  const hydrationErrors: string[] = [];
+  page.on("pageerror", (error) => {
+    if (/hydration|Minified React error #418/i.test(error.message))
+      hydrationErrors.push(error.message);
+  });
   let previous = "";
   for (const path of [
     "/",
@@ -95,6 +100,10 @@ test("enforced CSP uses fresh nonces on real pages and preserves hydration", asy
       );
     expect(scripts.length).toBeGreaterThan(0);
     expect(scripts.every((value) => value === nonce)).toBe(true);
+    await expect(
+      page.locator('nav[aria-label="Main navigation"] a[href="/login"]'),
+    ).toBeAttached();
+    expect(hydrationErrors).toEqual([]);
   }
   const photo = await request.get("/photos/mat.webp");
   expect(photo.status()).toBe(200);
