@@ -13,6 +13,7 @@ import stripe
 from fastapi import HTTPException
 from pydantic import SecretStr, ValidationError
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.settings import Settings, settings
 from app.crud.product import delete_product, update_product
@@ -136,6 +137,91 @@ def test_creation_response_loss_reuses_exact_intent(db, managed, provider):
     payments.start_payment(db, uid, oid)
     assert provider.requests[0] == provider.requests[1]
     assert len(provider.sessions) == 1
+
+
+@pytest.mark.parametrize("unknown_scan", [False, True])
+def test_missing_saved_request_retains_reservation(
+    db, managed, provider, monkeypatch, unknown_scan
+):
+    oid, pid, uid = managed
+    if unknown_scan:
+        prepare_unknown_scan(db, managed, provider, monkeypatch)
+    else:
+        provider.lose_response = True
+        with pytest.raises(HTTPException):
+            payments.start_payment(db, uid, oid)
+    order = db.get(Order, oid)
+    order.payment_request = None
+    db.commit()
+    previous_requests = len(provider.requests)
+    with pytest.raises(HTTPException) as error:
+        if unknown_scan:
+            payments.reconcile_unknown_session(db, oid)
+        else:
+            payments.start_payment(db, uid, oid)
+    assert error.value.status_code == 409
+    assert error.value.detail == "Original payment request is missing"
+    assert db.get(Order, oid).payment_status == "pending"
+    assert db.get(Order, oid).payment_session_id is None
+    product = db.get(Product, pid)
+    assert (product.stock, product.reserved_stock) == (1, 2)
+    assert len(provider.requests) == previous_requests
+
+
+def test_placement_between_identity_read_and_lock_can_retry(
+    db, user, provider, monkeypatch
+):
+    """A changed order must not persist a request without its provider identity."""
+    uid = user.id
+    product = Product(name="Fictional race tea", price=Decimal("2.35"), stock=3)
+    db.add(product)
+    db.commit()
+    pid = product.id
+    oid = prepare(db, uid, product, 2)
+    commit = db.commit
+    placed = False
+    identity_calls = []
+
+    def account_id():
+        assert not db.in_transaction()
+        identity_calls.append(True)
+        return "acct_fictional_fixture"
+
+    def commit_then_place():
+        nonlocal placed
+        commit()
+        if not placed:
+            placed = True
+            # Commit placement after the payment read, before its locked refresh.
+            with Session(db.get_bind()) as other:
+                place_order(other, uid, oid, "interleaved-placement")
+
+    monkeypatch.setattr(provider, "account_id", account_id)
+    monkeypatch.setattr(db, "commit", commit_then_place)
+    try:
+        payments.start_payment(db, uid, oid)
+    except HTTPException as error:
+        assert error.status_code == 409
+    else:
+        pytest.fail(
+            "Creation used an unknown account: "
+            f"{provider.requests[0][0]['metadata']['stripe_account_id']!r}"
+        )
+    order = db.get(Order, oid)
+    assert order.payment_status == "pending"
+    assert order.payment_started_at is None
+    assert order.payment_request is None
+    assert order.idempotency_key == "interleaved-placement"
+    assert (db.get(Product, pid).stock, db.get(Product, pid).reserved_stock) == (1, 2)
+    assert provider.requests == []
+    assert provider.sessions == {}
+    assert identity_calls == []
+
+    monkeypatch.setattr(db, "commit", commit)
+    assert payments.start_payment(db, uid, oid)["checkout_url"]
+    assert identity_calls == [True]
+    assert len(provider.requests) == len(provider.sessions) == 1
+    assert (db.get(Product, pid).stock, db.get(Product, pid).reserved_stock) == (1, 2)
 
 
 def test_paid_only_signed_event_and_no_second_decrement(db, managed, provider):

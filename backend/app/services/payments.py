@@ -222,6 +222,8 @@ def get_session(
             if not create:
                 db.commit()
                 return provider, None
+            if account_id is None:
+                raise HTTPException(409, "Order changed before payment; retry payment")
             order.payment_started_at = now()
             # Immutable expiry remains valid throughout our 23-hour replay window:
             # >=30 minutes ahead, with margin below Stripe's 24-hour maximum.
@@ -234,6 +236,8 @@ def get_session(
                 raise ReconciliationRequired(
                     409, "Uncertain payment creation requires operator reconciliation"
                 )
+            if order.payment_request is None:
+                raise ReconciliationRequired(409, "Original payment request is missing")
             params = json.loads(order.payment_request)
             if params.get("metadata", {}).get("stripe_account_id") != account_id:
                 raise ReconciliationRequired(
@@ -355,6 +359,8 @@ def reconcile_unknown_session(db: Session, order_id: int) -> Order:
         if now() < aware(order.payment_expires_at) + timedelta(minutes=5):
             raise HTTPException(409, "Payment expiry window has not elapsed")
         reference = order.payment_reference
+        if order.payment_request is None:
+            raise ReconciliationRequired(409, "Original payment request is missing")
         account_id = (
             json.loads(order.payment_request)
             .get("metadata", {})
