@@ -30,7 +30,8 @@ for resumable verification, then stop at the authorized finish line.
 
 - `make setup`: preserve or create local credentials and install locked dependencies.
 - `make dev`: build and start PostgreSQL, run migrations, and start the API.
-- `make check`: lint, format check, and isolated backend tests.
+- `make check`: lint, format check, scoped service types, and isolated backend tests.
+- `make typecheck`: strict order/payment boundary checks and representative rejection proof.
 - `make down`: stop the local stack while preserving its database volume.
 - `make migrate`: apply migrations to the configured local database.
 - `make coverage`: test with branch-aware coverage and the 85% minimum.

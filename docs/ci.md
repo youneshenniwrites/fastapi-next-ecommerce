@@ -7,7 +7,7 @@ pinned action SHAs, timeouts and cancellation of superseded runs.
 
 | Workflow / job | Ordered work | Evidence |
 | --- | --- | --- |
-| Backend / Lint, contract and unit tests | Locked install → lint → format → export consistency → tests/coverage | Coverage summary, XML and HTML |
+| Backend / Lint, contract and unit tests | Locked install → lint → format → scoped service types and checker proof → export consistency → tests/coverage | Coverage summary, XML and HTML |
 | Backend / PostgreSQL integration tests | Start disposable PostgreSQL → create separate migration DB → full tests | Test logs |
 | Backend / Container build and migration smoke tests | Image build → migrations/startup → HTTP smoke → schema consistency → rollback/reapply | Failure logs |
 | Frontend / Lint, types, contract and unit tests | npm ci → regenerate/check API contract → formatting → lint → types → unit coverage → audit | Scoped coverage summary, LCOV and HTML |
