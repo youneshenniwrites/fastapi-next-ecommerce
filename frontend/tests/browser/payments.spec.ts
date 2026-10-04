@@ -263,7 +263,11 @@ test("keyboard demo journey keeps catalog, login, cart and sandbox return access
     page.getByRole("link", { name: /Oak Monitor Stand/ }),
   );
   await expect(
-    page.getByRole("heading", { name: "Oak Monitor Stand", exact: true }),
+    page.getByRole("heading", {
+      name: "Oak Monitor Stand",
+      level: 1,
+      exact: true,
+    }),
   ).toBeVisible();
   await expectAccessibleLayout(page);
   await keyboardActivate(
