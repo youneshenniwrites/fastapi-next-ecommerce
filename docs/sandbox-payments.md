@@ -42,8 +42,11 @@ released. Session line items and amounts come only from persisted order snapshot
 Do not enable adjustable quantities, promotions, shipping or tax on this integration.
 
 The approved free sandbox setup and development activation were verified on
-23 September 2026. The destination uses the public frontend relay because direct
-API access requires Vercel sign-in. The hosted evidence below proves the deployed
+23 September 2026. At that checkpoint, direct API access required Vercel sign-in,
+so the destination used the public frontend relay. That relay remains configured;
+the stable development API alias was subsequently verified as public, while
+preview protection remains deployment-specific (see [current API access](../deploy/environments/README.md#development-api-access-and-preview-protection)).
+The hosted evidence below proves the deployed
 journey. Production sandbox payments and their relay remain disabled.
 
 For a guided presentation, use the [customer walkthrough and five-minute script](demo.md#try-the-hosted-sandbox-shop).
