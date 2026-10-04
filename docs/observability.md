@@ -86,9 +86,11 @@ method, 5k errors, 5M spans, 5GB logs and 5GB application metrics included, with
 zero usage at inspection. Recheck limits before future activation; these are dated
 account observations, not permanent vendor guarantees. Use signal-specific controls:
 
-- **Traces and spans** — low `SENTRY_TRACES_SAMPLE_RATE` (0.1 in production, 1.0
-  in local dev). If span quota is at risk, reduce this value first; never add
-  payment.
+- **Traces and spans** — the backend's `SENTRY_TRACES_SAMPLE_RATE` defaults to
+  0.1 and can be reduced through backend configuration. The frontend uses 1.0
+  only in Node development mode and 0.1 otherwise; it does not currently read
+  that environment variable. A frontend sampling change requires a reviewed
+  configuration-code change. Reduce sampling if quota is at risk; never add payment.
 - **Errors** — spike protection in the Sentry project settings (inbound data
   filters, rate limits per DSN). The existing auth/write throttling
   ([abuse protection](api.md#abuse-protection-rate-limits)) limits abusive
@@ -105,7 +107,9 @@ numbers and simple static code identifiers. Local filenames lose directory roots
 Next bundle filenames retain only the artifact path. Valid source-map debug UUIDs
 and matching sanitized artifact paths survive for symbolication. They discard complete request/user data,
 URLs, arbitrary extras/contexts/tags, breadcrumbs, stack source/local variables and
-span data. Exception text and messages remain `[Filtered]`. Transaction/span labels
+arbitrary span data. Validated HTTP method and response status are the narrow
+exception described in [safe HTTP metadata](#safe-http-method-and-response-metadata-vin-232).
+Exception text and messages remain `[Filtered]`. Transaction/span labels
 are derived from a closed operation vocabulary (for example `Storefront request`,
 `API request`, `Next.js function`, `Database query`); unknown operations become
 `Application operation`. Existing backend commerce route-template labels remain.

@@ -11,12 +11,17 @@ Install Node 24.20.0 (or use nvm install from this directory) and npm 11.19.1.
 From the root, run make dev and make demo. Then from frontend/:
 
 ```sh
+cp -n .env.example .env.local
 npm ci
 npm run dev
 ```
 
 Open http://127.0.0.1:3000. The server defaults to http://127.0.0.1:8000 for FastAPI.
-To change it, set API_BASE_URL in an ignored .env.local; see .env.example. No CORS
+The example also sets `APP_ORIGIN=http://127.0.0.1:3000` and explicit loopback
+HTTP session permission; these are required for local account actions. Preserve
+an existing `.env.local`. If you change either port, update `API_BASE_URL` and
+the exact browser `APP_ORIGIN` there. Never enable local HTTP sessions on a hosted
+deployment. No CORS
 configuration is necessary: only the Next.js server calls FastAPI. Fetches are
 uncached. Reads have a five-second complete-response deadline; writes use a
 five-second transport cancellation signal and are never automatically replayed.

@@ -62,11 +62,23 @@ For a first API request, authentication, and Postman import, follow the
 [API onboarding guide](docs/api.md). The [checked-in OpenAPI contract](frontend/openapi.json)
 can be downloaded even while the API is offline; executing requests requires the stack.
 
-For the storefront, run `make demo`, then `cd frontend && npm ci && npm run dev`
-with Node 24.20.0 and npm 11.19.1. Open [127.0.0.1:3000](http://127.0.0.1:3000).
+For the storefront, use Node 24.20.0 and npm 11.19.1:
+
+```sh
+make demo
+cd frontend
+cp -n .env.example .env.local
+npm ci
+npm run dev
+```
+
+The local example enables sessions for the exact origin
+[127.0.0.1:3000](http://127.0.0.1:3000). Preserve existing configuration;
+if you change ports, update `API_BASE_URL` and `APP_ORIGIN` in `.env.local`.
 See [frontend setup](frontend/README.md). Re-run `make dev` after changing containerized code.
 
 ```sh
+cd ..      # return from frontend/ to the repository root
 make down  # stops the stack and preserves PostgreSQL data
 ```
 
@@ -107,9 +119,11 @@ logging, and troubleshooting.
 The working request path is:
 
 ```text
-HTTP client → FastAPI routes/dependencies → CRUD helpers → SQLAlchemy → PostgreSQL
-                       │
-                       └─ Pydantic validation, JWT checks, admin permissions
+Browser → Next.js server reads/actions → FastAPI routes/dependencies
+                                        ├─ CRUD / order and payment services → SQLAlchemy → PostgreSQL
+                                        └─ Payment service → Stripe sandbox adapter
+
+FastAPI validates inputs, authenticates users and enforces ownership/permissions.
 ```
 
 The Next.js App Router frontend consumes generated types from FastAPI's OpenAPI contract.
@@ -130,8 +144,8 @@ All resource routes use `/api/v1`. Authentication uses an OAuth2-style password
 form and bearer access tokens. Registration never grants admin privileges.
 Abusive auth/write request rates are throttled with `429` responses; see the
 [abuse-protection section](docs/api.md#abuse-protection-rate-limits). Errors,
-traces, logs, and metrics have SDK support. Hosted activation remains gated by
-VIN-121 privacy verification and configuration; see the
+traces, logs, and metrics have SDK support. Development monitoring and a joined
+storefront/API trace are verified; production monitoring is not activated. See the
 [observability runbook](docs/observability.md).
 
 | Method | Path | Access |

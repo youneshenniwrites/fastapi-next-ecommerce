@@ -1,7 +1,8 @@
 # Current architecture
 
-FastAPI exposes /health and /api/v1/auth and /api/v1/products and /api/v1/cart. SQLAlchemy models
-represent users, products and customer cart lines. PostgreSQL is the development runtime;
+FastAPI exposes /health and the /api/v1/auth, /api/v1/products, /api/v1/cart,
+/api/v1/orders and /api/v1/payments contracts. SQLAlchemy models represent users,
+products, customer cart lines, orders and payment attempts/events. PostgreSQL is the development runtime;
 SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
 The frontend/ directory provides the Next.js catalog and product-detail storefront.
