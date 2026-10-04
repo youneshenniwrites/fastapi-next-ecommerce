@@ -61,6 +61,11 @@ presentation sequence, not a measured completion-time guarantee.
 
 ### Evidence and honest limits
 
+- [Development monitoring](observability.md#hosted-trace-continuity--verified-1-october-2026)
+  includes verified error/commerce signals and one joined storefront/API trace.
+  Privacy filtering and sampling remain explicit; production monitoring is not
+  activated. This rehearsal reuses that evidence rather than generating a new
+  monitoring incident.
 - [Focused keyboard/mobile journey evidence](accessibility-journey.md) records
   the local production matrix, mobile overflow and hydration repairs, and passing
   desktop/mobile checks on deployed development on 4 October. VIN-259’s bounded
@@ -84,9 +89,65 @@ presentation sequence, not a measured completion-time guarantee.
   reliability and remaining delivery acceptance. Do not claim enterprise readiness
   or full accessibility conformance.
 
+Keep these boundaries visible during the presentation:
+
+- Unstarted unpaid orders can retain reserved stock until a customer status check
+  or [operator reconciliation](sandbox-payments.md#recovery) after their deadline.
+  There is no durable background expiry worker.
+- Rate-limit counters are process-local. Restarts, multiple instances and shared
+  networks limit protection; this is not a distributed traffic budget.
+- Cart recovery uses a fresh server read, but does not prove ordering for every
+  [late-committing write](design/cart-storefront.md#request-deadlines-and-timeout-recovery).
+  Relative changes are not atomic across clients.
+- Signing out clears the browser cookie; it does not revoke a copied JWT before
+  its expiry. See [session boundaries](design/customer-sessions.md).
+- Catalog filtering covers at most 100 loaded products. Connection recovery and
+  free-tier hosting are not measured capacity or availability guarantees. See
+  [hosting limits and rollback](../deploy/environments/README.md#runtime-limits).
+
+Maintenance stays separate from the demo: [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
+owns the dependency exception expiring **10 October 2026 at 23:59 UTC**;
+[VIN-147](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/147)
+owns remaining workflow overhead; [VIN-279](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/279)
+owns temporary framework patches. [VIN-38](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/38)
+automatic review enforcement is owner-deferred; verified reviews and protected CI
+remain required. [VIN-261](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/261)
+delivered scoped service typing, not repository-wide static checking.
+
+### Final rehearsal — 4 October 2026
+
+The development shop ran deployed application revision `5fb29af`, whose
+[actual gated delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37228378685)
+passed migrations, API/storefront deployment and public checks. A new fictional
+account was registered and signed in before the timed presentation.
+
+From **19:39:50 to 19:43:51 UTC**, the browser journey completed product detail,
+one-item cart, a £12.90 GBP draft, placement, Stripe's displayed **Sandbox** card
+checkout, server-confirmed **Paid — sandbox only**, history and the same paid
+order detail. Order #7 contains one Notebook Set. Payment-detail saving stayed
+off; the account was signed out afterward. The fictional paid record and its
+inventory claim remain as evidence; no production data or real payment was used.
+
+The shopping segment took **4 minutes 1 second** in this single run, including a
+browser-tool timeout while filling Stripe's form. Preparation, documentation
+inspection and narration were not timed. The five-minute table is a presentation
+budget, not proof that every complete narrated demo fits it. Monitoring, restore
+and accessibility evidence above were checked separately and retain their
+original dates and scope.
+
+A clean source archive of main `074bbc3`, without existing configuration or
+dependencies, also bootstrapped on isolated local ports and a new PostgreSQL
+volume: `make setup`, `make dev`, migrations, `make demo` (twelve GBP products,
+one out of stock), frontend installation/start and fictional registration,
+login, profile and logout passed. Local Stripe was not configured. The owned
+stack was stopped afterward; its disposable volume was retained, not reset.
+
 ## Prepare a disposable local demo
 
-For a fresh checkout, follow [development setup](development.md) first. The local
+For a fresh checkout, follow the [README quick start](../README.md#quick-start)
+and [development configuration](development.md) first. Python 3.12, uv, running
+Docker/Compose, Node 24.20.0 and npm 11.19.1 are required. No cloud account is
+needed locally. The local
 bootstrap below does not configure Stripe; local sandbox integration requires the
 separate [payment configuration](sandbox-payments.md#configuration-and-activation).
 
@@ -104,7 +165,19 @@ make admin EMAIL=admin@example.com
 The admin command prompts twice for a private password (8–128 characters). There
 is no shared default password, command-line password option, or generated secret
 in output. Use the account in `/docs` through the login endpoint. Public signup
-cannot grant admin access. Start the storefront with cd frontend && npm ci && npm run dev; browse 127.0.0.1:3000.
+cannot grant admin access. Start the storefront from the repository root:
+
+```sh
+cd frontend
+cp -n .env.example .env.local
+npm ci
+npm run dev
+```
+
+Browse `http://127.0.0.1:3000`, matching the example's exact `APP_ORIGIN` and
+explicit local HTTP session permission. Preserve existing configuration. For an
+isolated stack, change `API_BASE_URL` and `APP_ORIGIN` to its API/browser ports
+as well as the [backend port settings](development.md#configuration).
 
 `make demo` seeds twelve products only when the catalog is empty. Reruns leave all
 existing products untouched, including changed names, prices and depleted stock.
