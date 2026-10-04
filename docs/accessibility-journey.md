@@ -90,17 +90,21 @@ checks and intentionally skipped two desktop-only mobile-menu cases. Its one
 failure exposed the product-heading synchronization bug described above. After
 that assertion was corrected, all six desktop/mobile keyboard journeys passed
 without retries (three runs per viewport). Both desktop and mobile security tests
-passed their new hydration checks across nine routes each. Full current-commit CI
-and external review remain required before merge.
+passed their new hydration checks across nine routes each.
+[PR #282](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/282)
+then merged after all CI and a clean Codex review of its current commit.
+[The merged-main frontend run](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37223989500)
+also passed before delivery.
 
 ## Public hosted sanity and cleanup
 
-On 4 October, read-only Chromium checks visited `/`, `/login`, `/register`,
+On 4 October at 18:46 UTC, final read-only Chromium checks visited `/`, `/login`, `/register`,
 `/cart`, `/orders` and `/products/1` on
 [the development app](https://forme-ecommerce-development.vercel.app), at
-320×740 and 1280×900. The deployed revision was `7d5930f`, confirmed by
-[development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37158916746).
-All twelve responses were HTTP 200, fit the viewport and passed axe. Each route's
+320×740 and 1280×900. The deployed revision was `5ebde00`, confirmed by
+[development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37224305159).
+All twelve responses were HTTP 200, fit the viewport and passed axe. No
+JavaScript page errors, including hydration errors, were observed. Each route's
 first Tab focused the named Skip to content link with a solid 2px outline.
 Mobile navigation opened by keyboard and returned focus to its trigger on Escape.
 The compact catalog actions all fit their cards, verifying the earlier mobile repair.
@@ -108,8 +112,8 @@ The compact catalog actions all fit their cards, verifying the earlier mobile re
 Two desktop routes still reported React #418 before this hydration repair.
 A separate phase-instrumented probe observed the same error before axe ran;
 local development diagnostics identified the account-link span/anchor mismatch.
-The hydration repair requires a fresh hosted check after deployment; current
-acceptance evidence and remaining work are recorded on VIN-259.
+The final deployed check above passed after that repair. Current ticket disposition
+and detailed evidence are recorded on VIN-259.
 
 No hosted login, account creation, cart mutation or payment was performed; no
 hosted data cleanup was needed. Local accounts, carts, orders and signed webhook
@@ -120,5 +124,5 @@ prove third-party Stripe conformance or a new hosted paid purchase.
 
 Visual inspection and browser-assisted keyboard checks cover the narrow task
 sequence. Screen-reader speech, every possible tab order, all devices and formal
-conformance were not evaluated. Current-head CI/review and the repaired hosted
-hydration check must be recorded before VIN-259 is marked Done.
+conformance were not evaluated. This verifies VIN-259’s bounded demo acceptance;
+broader accessibility conformance remains VIN-131.

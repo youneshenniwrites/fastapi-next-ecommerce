@@ -25,7 +25,7 @@ claiming demo completion. A concise scaling discussion belongs to the interview
 package: distinguish measured limits from hypotheses; do not add Redis, replicas or
 new services solely for demonstration. No additional plan or infrastructure is approved.
 
-## Progress at a glance — 3 October 2026
+## Progress at a glance — 4 October 2026
 
 **Current stage: 6 of 6, hosted verification and portfolio evidence.** Checkout and sandbox purchase are verified on development; remaining hosted acceptance stays explicit below. Stage counts are not effort estimates.
 
@@ -36,7 +36,7 @@ new services solely for demonstration. No additional plan or infrastructure is a
 | 3. Security and monitoring | ✅ Complete | #121 monitoring foundation and #126 hosted header enforcement are verified |
 | 4. Checkout | ✅ Complete | Non-payment journey delivered by PR #188; hosted purchase verified in stage 6 |
 | 5. Sandbox payment implementation | ✅ Complete | PR #194 merged; development activation and hosted proof verified in stage 6 |
-| 6. Hosted demo and evidence | Incomplete | Three outcomes remain; scoped tickets and sequence below |
+| 6. Hosted demo and evidence | Incomplete | Two outcomes remain: service typing (VIN-261) and the final demo package (VIN-262) |
 
 **Payment implementation merged (23 September):** PR #194 merged as `0e89efd` after clean Codex review, CodeRabbit approval and passing CI on `9adfff8`. Sandbox sessions, signed webhooks and inventory recovery are delivered. VIN-30 is complete: development revision `8685cc1` passed the real sandbox purchase, history, cancellation, expiry and duplicate-expiry replay on 23 September, 19:20–19:30 UTC, with paid-stock verification at 19:42–19:44 UTC. See [hosted evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026). Production sandbox payments remain disabled; no live payments are enabled.
 
@@ -67,18 +67,26 @@ ownership, corrupted-archive rejection and owned-resource cleanup all passed on
 3 October at 20:59 UTC. The 0.083-second local restore and 1.481-second backup age
 are observations on tiny fictional data, not hosted recovery guarantees;
 [VIN-258](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/258)
-holds complete evidence and review limits. VIN-260 is merged in PR #274, and its
-coverage artifacts and preserved gates are verified as recorded below. Issue/board
-closeout follows the reviewed documentation merge. VIN-259 is merged in PR #273;
-actual deployment of `cd541ef` and twelve hosted guest checks are verified. Three
-intermittent React #418 hydration errors still require disposition on
-[VIN-259](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/259),
-so its full accessibility outcome stays unchecked. Finish that acceptance next. The owner prioritized finishing this demo before
-new customer features. VIN-270 email normalization is merged in PR #271.
-VIN-147’s first bounded duplicate-trigger improvement merged in PR #272 as
-`9d48342`; its broader
-repeated-work strategy remains deferred. Prepared VIN-261 typing is paused in
-Backlog while the existing closeout/review queue is completed, following the owner’s latest direction.
+holds complete evidence and review limits. VIN-260 is delivered through PR #274
+and its reviewed documentation closeout. VIN-259's mobile repair (PR #273) and
+account-navigation hydration repair (PR #282) are merged and deployed. The
+4 October check of development `5ebde00` passed all twelve guest route/viewport
+cases with no hydration errors or axe violations; keyboard/menu/focus and layout
+checks passed. See [the bounded evidence and limits](../accessibility-journey.md).
+The accessibility outcome is verified; documentation closeout completes its ticket.
+
+The owner prioritized finishing the demo before new customer features. On
+4 October they explicitly deferred VIN-38 automatic review enforcement until
+after the demo. Existing current-commit verified external review, resolved
+conversations, applicable CI and protected merges remain required. No protection
+is weakened, and automatic enforcement is not claimed as delivered. VIN-38 stays
+open in Backlog outside VIN-155's blocking sub-issues. The remaining demo work is
+VIN-261 scoped service typing, then VIN-262 final package verification.
+
+VIN-270 email normalization is merged in PR #271. VIN-147's duplicate-trigger slice
+merged in PR #272; its broader repeated-work strategy remains deferred. PR #281
+subsequently verified faster browser CI through three isolated test groups.
+The preserved VIN-261 draft resumes after the accessibility documentation closeout.
 Keep one implementation story active; paused work stays Backlog. Monitoring
 follow-ups VIN-223, VIN-230 and VIN-232 are complete; their [runbook evidence](../observability.md#hosted-trace-continuity--verified-1-october-2026)
 adds no separate checklist credit. VIN-237 password visibility is delivered in
@@ -89,14 +97,14 @@ CI and completed Codex/CodeRabbit review of `308824b`. Anonymous signed identity
 test-threshold separation and the form-focus correction are merged. Merge alone did not
 prove hosted configuration or visitor isolation. The earlier 1 October checkpoint records configuration and throttling/retry; the later PR #244 probe now establishes same-instance visitor isolation and retry.
 
-**Verified progress:** `██████████████████░░` **26 / 29 outcomes (90%, revised scope)**.
+**Verified progress:** `███████████████████░` **27 / 29 outcomes (93%, revised scope)**.
 This counts verified acceptance outcomes, not effort or time remaining.
-Baseline is 3/3, reliability 7/7, checkout 5/5, payment implementation 3/3 and hosted finish 5/8. Security/monitoring is 3/3: privacy, hosted monitoring and deployed security headers are verified. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; that historical item does not claim a speed improvement. VIN-146’s later implementation and delivery are verified separately without extra credit.
+Baseline is 3/3, reliability 7/7, checkout 5/5, payment implementation 3/3 and hosted finish 6/8. Security/monitoring is 3/3: privacy, hosted monitoring and deployed security headers are verified. The additional hosted-finish outcome records VIN-146’s cache-speed claim as unproven at its existing deadline; that historical item does not claim a speed improvement. VIN-146’s later implementation and delivery are verified separately without extra credit.
 PR #188 merged as `765ee9b`: checkout, confirmation/detail and history are delivered.
 Current-head CI passed 107 browser tests with 2 existing skips, plus 241 unit tests;
 Codex completed a clean review and CodeRabbit approved. All review findings were resolved.
 VIN-120 and its checkout parent VIN-29 are complete. Use one progress metric:
-90% · 26/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
+93% · 27/29 outcomes (revised scope). Hide Sub-issues progress in the saved board view;
 retain the issue hierarchy for organization, not as a competing completion metric.
 Payment implementation and hosted payment acceptance are complete; the remaining hosted-finish outcomes stay unchecked.
 
@@ -166,30 +174,28 @@ At that checkpoint, VIN-158 awaited hosted verification; VIN-118 is Done followi
 
 **Diagnostics cleanup verified:** Both development diagnostic flags were saved false and [normal gated redeployment attempt 2](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/36909436876/attempts/2) succeeded. At 19:00:05 UTC, direct API and storefront login probes both returned deliberate 401 responses with no `X-Vindor-Limiter-*` headers; storefront HTML still advertised release `847092c`. The [VIN-158 evidence record](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/158#issuecomment-5938473213) links same-instance proof and records cleanup. The existing identity outcome is verified, bringing progress to 21/29 (72%); no extra outcome is created for the probe tooling.
 
-### Remaining delivery order — updated 3 October 2026
+### Remaining delivery order — updated 4 October 2026
 
-Refinement itself added no completed outcomes. Verified VIN-45, VIN-258 and VIN-260 acceptance
-bring progress to 26/29 (90%), with three existing finish-line outcomes still open. Small stories link from VIN-155;
-enterprise VIN-130/VIN-131 remain broader work under VIN-125. The issue hierarchy
-is organization, not a replacement progress denominator.
+Verified accessibility acceptance brings progress to 27/29 (93%). Two existing
+finish-line outcomes remain: scoped service typing and the final demo package.
+The owner-approved VIN-38 deferral changes that outcome's scope, not its count;
+no credit is awarded for undelivered automatic enforcement. Enterprise
+VIN-130/VIN-131 remain broader work under VIN-125. The issue hierarchy is
+organization, not a replacement progress denominator.
 
 | Order | Story | Bounded proving vehicle |
 | --- | --- | --- |
 | Done | VIN-258 disposable restore | Merged PR #268 and clean merged-revision rehearsal; local-only recovery limits and cleanup recorded |
-| 2 | VIN-259 focused accessibility | Keyboard/mobile journey matrix and existing automated checks; fix in-scope blockers without claiming full WCAG conformance |
-| Verified; documentation closeout | VIN-260 cart coverage | Merged PR #274; matching final-head/merged-main artifacts and preserved comparison guards, with expanded-scope baseline limits disclosed below |
-| 4 | VIN-38 review enforcement, plus VIN-261 service types | Small adapter compatibility, policy-aware protection proof and scoped order/payment type checks; both required for one existing outcome |
-| 5 | VIN-262 final interview package | Reconcile delivered VIN-198 script/setup/architecture/limits and record final fictional five-minute rehearsal after prerequisites |
+| Verified; documentation closeout | VIN-259 focused accessibility | Merged PRs #273/#282; desktop/mobile journey plus twelve deployed guest checks, with no hydration errors or axe violations |
+| Done | VIN-260 cart coverage | Merged PR #274 and documentation closeout; matching artifacts and preserved comparison guards |
+| Next | VIN-261 service types | Scoped order/payment type checks and negative proof; retain existing verified-review and protected-CI requirements |
+| Then | VIN-262 final interview package | Reconcile the delivered script, setup, architecture and limits; record the final fictional five-minute rehearsal |
 
-All unstarted work stays Backlog; VIN-45, VIN-258 and VIN-260 acceptance are verified.
-VIN-260 stays open until this documentation closeout lands. VIN-259 awaits
-hydration-error disposition and final accessibility acceptance; VIN-261 is paused
-pending queue clearance. VIN-38’s
-trigger compatibility must be revalidated before its documented November policy
-change; required-check settings need their reviewed design and explicit settings
-authorization. This refinement itself added no protection, deployment or implementation
-change; the later VIN-45 implementation is recorded above. VIN-147/VIN-172,
-broader enterprise work and optional monitoring polish retain separate scopes and do not earn new baseline credit.
+VIN-38 remains post-demo Backlog. Its future trigger compatibility must be
+revalidated before the documented November policy change; any required-check or
+merge-path settings still require reviewed design and explicit authorization.
+VIN-147/VIN-172, broader enterprise work and optional monitoring polish retain
+separate scopes and earn no additional baseline credit.
 
 ### Cart coverage acceptance — 3 October 2026
 
@@ -241,7 +247,7 @@ and remaining decisions; this is a priority index, not another completion checkl
 
 VIN-45's same-preview hosted proof and cleanup are verified. Development monitoring
 (VIN-121) and joined-trace proof (VIN-223) are also complete. The next dependency is
-VIN-259’s hydration-error disposition and final accessibility acceptance; keep actual access/configuration blockers
+VIN-261’s scoped typing and negative checker proof; keep actual access/configuration blockers
 on the source issues. VIN-269 retains an explicitly approved, expiring development-only
 audit exception through 10 October at 23:59 UTC; upstream remediation remains open. An unresolved outcome stays unchecked at portfolio acceptance.
 
@@ -290,11 +296,11 @@ its hosted proof. Existing scaffolding does not complete an outstanding outcome.
 
 - [x] **VIN-45 — reviewed manual preview verified:** one reviewed deployment passed fictional login/cart/ownership, host isolation, exact source identity, enforced headers and application wrong-origin rejection; temporary access was revoked and exact retirement verified. See [complete hosted evidence](../design/frontend-previews.md#verified-closeout--2-october-2026).
 - [x] Expand cart coverage measurement and validate comparison gates before requiring them — VIN-260 / PR #274, merged `d67226d`; final-head and merged-main coverage agree. See [scope limits and preserved gate evidence](#cart-coverage-acceptance--3-october-2026).
-- [ ] Resolve exact-head review enforcement — VIN-38; add scoped order/payment service types — VIN-261. Both complete this one existing outcome.
+- [ ] Add scoped order/payment service types — VIN-261; retain verified current-commit review and protected CI. Owner deferred automatic enforcement (VIN-38) after the demo on 4 October; it is not delivered or credited.
 - [x] Record browser-cache speed benefit as **unproven at the 1 October deadline** — #146; [expiry disposition and reasons](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/146#issuecomment-5934521461). Cache reuse is verified, but the 4m48s warm-cache observation versus the 5m25s cache-miss baseline changed test scope and included a retry. No controlled speedup was claimed at that deadline. VIN-146’s subsequent browser-runtime improvement is verified and Done through PR #251; its issue records the 2 October measurements and delivery evidence. This historical disposition earns no additional credit for that follow-up.
 - [x] Run complete hosted sandbox purchase with fictional data — VIN-30, development `8685cc1`, 23 September; [success/history, cancellation, expiry and duplicate replay evidence](../sandbox-payments.md#hosted-development-evidence--23-september-2026).
 - [x] Perform disposable restore rehearsal and document recovery — VIN-258 / PR #268, merged `0f547cb`; clean merged-revision verification and cleanup recorded on VIN-258. Local fictional PostgreSQL only; enterprise/hosted recovery remains #130.
-- [ ] Review full journey for keyboard/mobile/accessibility — VIN-259, the scoped demo subset of #131, not formal full conformance.
+- [x] Review the bounded keyboard/mobile/accessibility journey — VIN-259, merged PRs #273/#282 and deployed `5ebde00` verification on 4 October; [evidence and limits](../accessibility-journey.md). This is the scoped demo subset of #131, not formal full conformance.
 - [ ] Update architecture/setup/limits and deliver the final five-minute demo package — VIN-262. The
   [walkthrough and script](../demo.md#five-minute-demonstration-script) are documented
   under VIN-198; final package reconciliation follows the still-unchecked
@@ -479,7 +485,8 @@ signatures and webhook/redirect races work without real data or charges.
   behavior and document preview creation/retirement.
 - **Controls:** measure cart state/action coverage and keep UI browser evidence.
   Require comparison checks only after relevant/docs-only behavior is validated.
-  Resolve #38 exact-head review enforcement separately from CI. Add backend types
+  Retain verified current-commit reviews and protected CI; automatic enforcement
+  (#38) is owner-deferred until after the demo. Add backend types
   incrementally around order/payment services. Measure #146 on a suitable run or
   record the claim as unproven at its existing deadline.
 - **Evidence:** complete the hosted development journey with fictional data.
