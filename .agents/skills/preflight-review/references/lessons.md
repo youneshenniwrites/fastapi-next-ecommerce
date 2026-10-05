@@ -27,6 +27,12 @@ footer; a trusted prefix plus a commit anywhere in the body can admit contradict
 prose. Preserve actual protocol fixtures and reject inserted/trailing findings
 ([PR #93](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/93#discussion_r3997324325)).
 
+Deduplicate every accepted authoritative review-request form before applying a
+per-head retry budget. A bare manual request may be awaiting a summary even when
+it has no automation marker; absence of that marker does not authorize another
+model request. Test the initial-request and retry paths before a summary exists
+([PR #308](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/308#discussion_r4188762860)).
+
 ## UI lifecycle and accessibility — PRs 56, 66, 78
 
 Inspect portaled overlays when crossing breakpoints; hiding a trigger’s wrapper

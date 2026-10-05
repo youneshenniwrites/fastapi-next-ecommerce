@@ -111,6 +111,42 @@ class QuotaRetryTests(unittest.TestCase):
         }
         self.assertFalse(self.allowed([self.request, self.response, request]))
 
+    def test_initial_bare_request_suppresses_automation_before_summary_exists(self):
+        bare = self.request | {"body": "@codex review"}
+        self.assertFalse(self.allowed([bare]))
+        self.assertFalse(self.allowed([bare, self.response]))
+
+    def test_outsider_bare_request_does_not_suppress_automation(self):
+        bare = self.request | {"body": "@codex review", "author_association": "NONE"}
+        self.assertTrue(self.allowed([bare]))
+
+    def test_marker_stripped_by_edit_suppresses_automation(self):
+        bare = self.request | {
+            "body": "@codex review",
+            "updated_at": (self.start + timedelta(days=3)).isoformat(),
+        }
+        self.assertFalse(self.allowed([bare]))
+        newer = self.make_request(3, self.start + timedelta(days=2))
+        response = self.make_response(4, self.start + timedelta(days=2, minutes=1))
+        self.assertFalse(self.allowed([bare, newer, response]))
+
+    def test_newer_unedited_bound_request_supersedes_bare_request(self):
+        bare = self.request | {"body": "@codex review"}
+        newer = self.make_request(3, self.start + timedelta(days=2))
+        response = self.make_response(4, self.start + timedelta(days=2, minutes=1))
+        self.assertFalse(self.allowed([bare, newer]))
+        self.assertTrue(self.allowed([bare, newer, response]))
+        self.sha = "b" * 40
+        self.assertTrue(self.allowed([bare, newer, response]))
+
+    def test_edited_bound_request_cannot_supersede_bare_request(self):
+        bare = self.request | {"body": "@codex review"}
+        newer = self.make_request(3, self.start + timedelta(days=2)) | {
+            "updated_at": (self.start + timedelta(days=3)).isoformat(),
+        }
+        self.sha = "b" * 40
+        self.assertFalse(self.allowed([bare, newer]))
+
     def test_stale_quota_and_missing_or_edited_request_times_do_not_retry(self):
         self.assertFalse(
             self.allowed(

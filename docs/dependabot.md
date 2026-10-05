@@ -34,7 +34,10 @@ GitHub receives the expected head SHA and enforces branch protection.
 
 The workflow updates an outdated branch before requesting review, waits for CI,
 and requests Codex review when needed. Requests are deduplicated by the full head
-SHA. Only the observed, trusted, unedited Codex quota-exhaustion response permits
+SHA. An authoritative bare `@codex review` request also suppresses automation
+until a newer unedited commit-bound request supersedes it; removing a marker by
+editing a request cannot trigger another automatic review. Only the observed,
+trusted, unedited Codex quota-exhaustion response permits
 an automatic retry: at most two per revision (three requests total), waiting at
 least 24 hours before the first retry and seven days after another quota response
 before the second. This conservative backoff covers a possible weekly reset when

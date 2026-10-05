@@ -25,9 +25,23 @@ def timestamp(value):
 
 def may_request(comments, sha, now=None, reviews=()):
     marker = f"<!-- codex-review-head:{sha} -->"
-    requests = [
-        c for c in comments if review_request(c) and marker in c.get("body", "")
-    ]
+    authoritative = [c for c in comments if review_request(c)]
+    bare = [c for c in authoritative if c.get("body", "").strip() == "@codex review"]
+    bound = [c for c in authoritative if c not in bare]
+    # Bare requests can start a real review before a summary exists. Their head
+    # and budget are unknown, so only a later unedited bound request can supersede
+    # them. An edit stripping an old marker also invalidates earlier supersession.
+    for request in bare:
+        updated = timestamp(request.get("updated_at"))
+        if updated is None or not any(
+            c.get("id", 0) > request.get("id", 0)
+            and c.get("created_at") == c.get("updated_at")
+            and (created := timestamp(c.get("created_at"))) is not None
+            and created >= updated
+            for c in bound
+        ):
+            return False
+    requests = [c for c in bound if marker in c.get("body", "")]
     if not requests:
         return True
     if len(requests) >= MAX_REQUESTS:
