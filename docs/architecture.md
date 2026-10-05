@@ -8,7 +8,11 @@ SQLite is used for isolated unit/API tests. Alembic controls database schema.
 The frontend/ directory provides the Next.js catalog and product-detail storefront.
 Tailwind v4 and shadcn/ui supply shared themed primitives; page layouts compose reusable storefront components. See [frontend design system](../frontend/design-system.md).
 Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
-browser receives product data for local filtering. Signed-in cart persistence and the cart storefront are implemented; see [cart API](design/cart-api.md).
+browser receives product data for local filtering. The additive
+[catalog query endpoint](api.md#catalog-search-and-pagination-vin-289) filters and
+orders the full catalog before returning a bounded page and matching count in
+one database statement. VIN-287 will integrate it into server-rendered navigation;
+the existing browser filtering remains until then. Signed-in cart persistence and the cart storefront are implemented; see [cart API](design/cart-api.md).
 Authenticated order drafts preserve GBP snapshots without reserving stock or
 placing purchases. Atomic placement is implemented separately: an owned draft and
 customer-scoped retry key drive one transaction for stock revalidation, inventory

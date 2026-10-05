@@ -26,6 +26,7 @@ Price = Annotated[
 Stock = Annotated[int, Field(ge=0, le=2147483647, strict=True)]
 Description = Annotated[str, Field(max_length=10000)]
 Currency = Literal["GBP"]
+ProductSort = Literal["featured", "name", "price-asc", "price-desc"]
 
 
 class ProductBase(BaseModel):
@@ -64,3 +65,12 @@ class ProductRead(ProductBase):
     @field_serializer("price", when_used="json")
     def serialize_price(self, price: Decimal) -> str:
         return format(price, ".2f")
+
+
+class ProductPageRead(BaseModel):
+    """A bounded catalog slice and the count of all matching products."""
+
+    items: list[ProductRead]
+    total: int
+    limit: int
+    skip: int
