@@ -464,9 +464,14 @@ def test_webhook_reconciliation_is_technical_and_reasons_are_bounded(monkeypatch
     ] == {"reason": "duplicate_event"}
 
 
-def test_real_fastapi_transaction_has_safe_operation(client):
+def test_real_fastapi_transaction_has_safe_operation(db):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
     from sentry_sdk.integrations.fastapi import FastApiIntegration
     from sentry_sdk.transport import Transport
+
+    from app.api.v1 import cart, products
+    from app.db.session import get_db
 
     envelopes = []
 
@@ -481,13 +486,24 @@ def test_real_fastapi_transaction_has_safe_operation(client):
         traces_sample_rate=1,
         before_send_transaction=scrub_event,
     ):
-        response = client.put(
-            "/api/v1/cart/items/1?token=fictional-secret",
-            json={"quantity": 1},
-            headers={"X-Private": "fictional-secret"},
-        )
-        assert response.status_code == 401
-        assert client.get("/api/v1/products/?token=fictional-secret").status_code == 200
+        # Match production startup: initialize Sentry before building the app.
+        # FastAPI caches included route handlers, so the shared client can retain
+        # uninstrumented handlers built by earlier tests before SDK initialization.
+        app = FastAPI()
+        app.include_router(cart.router, prefix="/api/v1/cart")
+        app.include_router(products.router, prefix="/api/v1/products")
+        app.dependency_overrides[get_db] = lambda: db
+        with TestClient(app) as client:
+            response = client.put(
+                "/api/v1/cart/items/1?token=fictional-secret",
+                json={"quantity": 1},
+                headers={"X-Private": "fictional-secret"},
+            )
+            assert response.status_code == 401
+            assert (
+                client.get("/api/v1/products/?token=fictional-secret").status_code
+                == 200
+            )
         sentry_sdk.flush()
     transactions = [
         item.payload.json
