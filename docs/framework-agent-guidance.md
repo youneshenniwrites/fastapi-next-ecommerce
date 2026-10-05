@@ -81,12 +81,12 @@ Next.js 16.3.4–16.3.6's standalone image optimizer can permanently hang an unc
 variant when the first client disconnects. This caused repeated browser CI
 failures after navigation. See [upstream issue #96538](https://github.com/vercel/next.js/issues/96538)
 and the accepted [fix #98168](https://github.com/vercel/next.js/pull/98168).
-Stable 16.3.6 still lacks that fix as verified on 28 September 2026.
+Stable 16.3.8 still lacks that fix as verified on 5 October 2026.
 
 `frontend/scripts/patch-next-image.mjs` applies the response-socket-only backport
 after `npm ci` and before `npm run build`. It preserves the request socket for
 protocol/address handling and the response-body size limit. Both distributed
-module formats are checked against exact 16.3.6 source hashes before either is
+module formats are checked against exact 16.3.8 source hashes before either is
 written; unexpected versions/content fail the command. It is idempotent and
 changes no application code or image assertions. `npm test` checks disconnected
 and live callers, request metadata, size limits and the patch guards.
@@ -104,3 +104,9 @@ PR #209: the published 16.3.6 CJS/ESM optimizer hashes are identical to 16.3.5.
 The unpatched disconnected-caller regression still times out; retain the backport
 with those verified hashes and accept only 16.3.6. Patched runtime, body-limit,
 idempotence and partial-patch guards remain covered.
+
+PR #305: the published 16.3.8 image optimizer still times out for a disconnected
+caller without the backport. Verified new CJS/ESM hashes and retained the exact
+version guard. The CSP source modules are unchanged; compiled bundles have new
+verified hashes. All 19 image/CSP regressions pass, including nonce transport,
+body limits, disconnected callers and rejection of tampered or partial patches.

@@ -50,6 +50,13 @@ paths, runtime findings, malformed/unavailable audit evidence and expiry fail.
 `frontend/audit-exception.json` pins the exact manifest/lockfile and reviewed graph.
 Raw `npm audit` still fails while this upstream issue remains present.
 
+PR #305 reassessment (5 October): the Next.js, ESLint plugin, Vitest and
+Vitest coverage updates retain the same seven development-only advisory entries, exact
+paths and zero runtime findings. shadcn remains at 4.21.0 because 4.21.1 adds
+an affected `@shadcn/registry` path outside the accepted graph. The dependency-file
+hashes were renewed after fresh full/runtime audits; the advisory, accepted graph
+and 10 October expiry are unchanged. This is accepted risk, not remediation.
+
 PR #306 reassessment (5 October): tailwind-merge 3.7.0 changes no accepted
 advisory packages or dependency paths. Fresh full and runtime reports retain the
 same seven development-only entries and zero runtime findings. The exact file

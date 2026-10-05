@@ -41,25 +41,25 @@ const files = [
   },
   {
     path: "dist/compiled/next-server/app-page.runtime.dev.js",
-    hash: "900814f488707dff14dfc66f313f64264c26621bc17a788d9d9ac6cd12e59645",
+    hash: "1f49ee04e4b57d5ddedbf6ac31d6d7d5291870a402d9c73163b854e30a866a95",
     before: devOriginal,
     after: devReplacement,
   },
   {
     path: "dist/compiled/next-server/app-page-turbo.runtime.dev.js",
-    hash: "c3a724c261bd3b1f5cf6cdf236d14d1d55be142d5d552052271af09ec3bede7d",
+    hash: "a7fab4da4d388d820fc90c0cb6c4d3c48ecaeab112221c6f0509a2c76abaa99f",
     before: devOriginal,
     after: devReplacement,
   },
   {
     path: "dist/compiled/next-server/app-page.runtime.prod.js",
-    hash: "afc6dfed1d8a1ce821180121db58cd7eff0d350ff12c7f1d7a95490819f526ba",
+    hash: "db2e2475cd331a55c4bd1400993c435ee731edd1c0d32890dc08d1aafca37654",
     before: prodOriginal,
     after: prodReplacement,
   },
   {
     path: "dist/compiled/next-server/app-page-turbo.runtime.prod.js",
-    hash: "51ebd20128d7ef089886b9c3237fa71e3fee2f00c3f87803ede4261948186a0b",
+    hash: "ca0f4655986a7c3af2028753e2bc74f3a49a0f1118810459f111f0c9a2f9cdfb",
     before: prodOriginal,
     after: prodReplacement,
   },
@@ -70,7 +70,7 @@ export function patchNextCsp(nextDirectory) {
   const { version } = JSON.parse(
     readFileSync(join(nextDirectory, "package.json")),
   );
-  if (version !== "16.3.6") {
+  if (version !== "16.3.8") {
     throw new Error(
       `Review/remove the Next CSP nonce workaround before using Next ${version}`,
     );
