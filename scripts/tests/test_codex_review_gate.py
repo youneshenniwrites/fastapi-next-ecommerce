@@ -437,3 +437,54 @@ class DependabotReviewPolicy(unittest.TestCase):
             inspect.assert_called_once_with("owner/repo", 1)
             self.assertEqual(api.call_args.args[1]["state"], "pending")
             self.assertEqual(api.call_args.args[1]["context"], "Codex review")
+
+
+class RocketCleanEvidence(SwishCleanEvidence):
+    """Replay the exact PR #308 response and all inherited evidence checks."""
+
+    def clean_comment(self):
+        comment = ReviewEvidence.clean_comment(self)
+        comment["body"] = (
+            (Path(__file__).with_name("fixtures") / "codex-clean-rocket.txt")
+            .read_text()
+            .replace("3bea4ab8be", self.sha[:10])
+        )
+        return comment
+
+    def test_observed_full_comment(self):
+        self.assertEqual(
+            evaluate(
+                self.sha, [self.request, self.summary, self.clean_comment()], {}, False
+            )[0],
+            "success",
+        )
+
+    def test_unrecognized_clean_wording_stays_pending(self):
+        for signoff in (":rocket: But fix this.", ":rocket", "🚀", ""):
+            with self.subTest(signoff=signoff):
+                comment = self.clean_comment()
+                comment["body"] = comment["body"].replace(":rocket:", signoff)
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [self.request, self.summary, comment], {}, False
+                    )[0],
+                    "pending",
+                )
+
+    def test_inserted_or_trailing_prose_stays_pending(self):
+        body = self.clean_comment()["body"]
+        for changed in (
+            body.replace(
+                "**Reviewed commit:**", "But I found an issue\n**Reviewed commit:**"
+            ),
+            body + "But I found an issue",
+            body.replace("</details>", "But I found an issue</details>"),
+        ):
+            with self.subTest(body=changed):
+                comment = self.clean_comment() | {"body": changed}
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [self.request, self.summary, comment], {}, False
+                    )[0],
+                    "pending",
+                )
