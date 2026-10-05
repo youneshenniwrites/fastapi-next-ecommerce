@@ -12,7 +12,7 @@ caller-supplied CSP, private render-policy and nonce headers before Next.js rend
 waits for a request. Pages are private/no-store; immutable static assets retain
 normal caching. Vercel’s hosted stage-one HTML omitted framework nonces even
 though the response policy carried them; standalone output did not. A guarded
-Next.js 16.3.6 compatibility patch lets the renderer read the same policy from
+Next.js 16.3.8 compatibility patch lets the renderer read the same policy from
 `x-vindor-render-csp`, using Next’s existing validated nonce parser. Proxy
 overwrites this private transport on application routes and strips all caller
 policy/nonce headers on framework/tunnel exceptions. It is not an additional
