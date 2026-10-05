@@ -3,8 +3,8 @@
   "advisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
   "expiresAt": "2026-10-10T23:59:00+00:00",
   "files": {
-    "package.json": "144a36db9300e557a3da36521a8d34a2959016120e162c76b0de2e9072d1855d",
-    "package-lock.json": "81640a00754df9a2043521b08558c4015fc511585b7b298ad803f0b6793cc776"
+    "package.json": "bd9e7290477b0d2695b75dc4849db3c496bb12f06fb21c0d07e06f8799c7150f",
+    "package-lock.json": "dde71e65213d1ab9a91a5f8da20aed52de30943a5e2eff1b1486f21768f82e1a"
   },
   "packages": {
     "@next/eslint-plugin-next": {
