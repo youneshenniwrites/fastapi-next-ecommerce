@@ -148,6 +148,50 @@ Do not delete database volumes to fix a startup error. Redact credentials and
 personal data before sharing logs. Restart the stack after restarting your machine
 if the services are no longer running.
 
+## Catalog search and pagination (VIN-289)
+
+`GET /api/v1/products/search` is a public, additive endpoint for querying the
+complete catalog. Existing `GET /api/v1/products/` consumers still receive a list;
+product details and admin writes keep their existing contracts.
+
+| Parameter | Default | Accepted values |
+| --- | --- | --- |
+| `q` | No search | Product-name substring, at most 100 characters before trimming |
+| `in_stock` | `false` | Boolean; `true` requires available stock greater than zero |
+| `sort` | `featured` | `featured`, `name`, `price-asc`, `price-desc` |
+| `limit` | `24` | Integer from 1 to 100 |
+| `skip` | `0` | Integer from 0 to 100000 |
+
+```sh
+curl --fail 'http://localhost:8000/api/v1/products/search?q=desk&in_stock=true&sort=price-asc&limit=24&skip=0'
+```
+
+The response contains `items`, the matching `total`, and the applied `limit` and
+`skip`. Search, stock selection and ordering apply before pagination. A page
+beyond the final result has empty `items` while retaining the matching total.
+Invalid bounds, unknown sorts, overlong searches, NUL characters and invalid
+booleans return 422.
+An empty or whitespace-only search applies no name filter. Percent, underscore
+and backslash are literal search characters, rather than SQL wildcards.
+
+PostgreSQL performs case-insensitive matching using its database locale; name
+ordering uses `lower(name)` and the database collation. SQLite's local test
+fixtures fold ASCII case only. Featured order is ascending product ID, preserving
+the existing catalog sequence; it does not imply merchandising scores. Every
+sort ends with ascending product ID to make ties deterministic. Prices remain
+exact, two-place GBP strings; reserved inventory is not exposed.
+
+The page and count share a single database snapshot. With unchanged data, repeated
+pages retain their order. Inserts, deletes, stock changes or edits between requests
+can move results and change totals; offset pagination is not a frozen browsing
+session. No new index or migration is needed for the planned catalog size.
+
+The browser still filters its first 100 loaded products. VIN-287 will connect
+this endpoint to server-rendered pagination and URL-owned filters; VIN-289 alone
+does not change that interface.
+
+## Other response contracts
+
 The schema documents request/response models, bearer security requirements,
 pagination bounds, and 400/401/403/404/409 errors where applicable. FastAPI documents
 422 validation errors. Products return prices as exact two-place GBP strings;

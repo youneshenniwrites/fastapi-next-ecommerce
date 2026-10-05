@@ -1,4 +1,4 @@
-from typing import List
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -10,11 +10,18 @@ from app.crud.product import (
     delete_product,
     get_product,
     get_products,
+    search_products,
     update_product,
 )
 from app.db.session import get_db
 from app.schemas.errors import RATE_LIMITED_RESPONSE, ErrorResponse
-from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
+from app.schemas.product import (
+    ProductCreate,
+    ProductPageRead,
+    ProductRead,
+    ProductSort,
+    ProductUpdate,
+)
 
 router = APIRouter()
 AUTH_ERRORS = {
@@ -40,6 +47,33 @@ def read_products(
     db: Session = Depends(get_db),
 ):
     return get_products(db=db, skip=skip, limit=limit)
+
+
+@router.get(
+    "/search",
+    response_model=ProductPageRead,
+    summary="Search and page the complete catalog",
+    description=(
+        "Public, server-filtered catalog page. Search matches product names, ignores "
+        "case using the database locale and treats percent/underscore as literal "
+        "characters. Featured order "
+        "uses stable product IDs; name ordering follows the database collation "
+        "after lowercasing. All sorts break ties by ID. Each page and its count "
+        "share one database snapshot; catalog edits can change later requests."
+    ),
+)
+def search_catalog(
+    db: Annotated[Session, Depends(get_db)],
+    q: Annotated[str | None, Query(max_length=100, pattern=r"^[^\x00]*$")] = None,
+    in_stock: Annotated[bool, Query()] = False,
+    sort: Annotated[ProductSort, Query()] = "featured",
+    skip: Annotated[int, Query(ge=0, le=100000)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 24,
+):
+    items, total = search_products(
+        db, query=q, in_stock=in_stock, sort=sort, skip=skip, limit=limit
+    )
+    return ProductPageRead(items=items, total=total, limit=limit, skip=skip)
 
 
 @router.get(
