@@ -300,6 +300,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/products/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search and page the complete catalog
+         * @description Public, server-filtered catalog page. Search matches product names, ignores case using the database locale and treats percent/underscore as literal characters. Featured order uses stable product IDs; name ordering follows the database collation after lowercasing. All sorts break ties by ID. Each page and its count share one database snapshot; catalog edits can change later requests.
+         */
+        get: operations["search_catalog_api_v1_products_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/products/{product_id}": {
         parameters: {
             query?: never;
@@ -490,6 +510,20 @@ export interface components {
             price: number | string;
             /** Stock */
             stock: number;
+        };
+        /**
+         * ProductPageRead
+         * @description A bounded catalog slice and the count of all matching products.
+         */
+        ProductPageRead: {
+            /** Items */
+            items: components["schemas"]["ProductRead"][];
+            /** Limit */
+            limit: number;
+            /** Skip */
+            skip: number;
+            /** Total */
+            total: number;
         };
         /** ProductRead */
         ProductRead: {
@@ -1528,6 +1562,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    search_catalog_api_v1_products_search_get: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                in_stock?: boolean;
+                sort?: "featured" | "name" | "price-asc" | "price-desc";
+                skip?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductPageRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

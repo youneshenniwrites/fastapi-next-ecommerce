@@ -8,6 +8,22 @@ def test_openapi_documents_security_errors_and_money(client):
     assert write["security"] == [{"OAuth2PasswordBearer": []}]
     assert {"201", "401", "403", "422"} <= write["responses"].keys()
     assert not paths["/api/v1/products/"]["get"].get("security")
+    catalog = paths["/api/v1/products/search"]["get"]
+    assert not catalog.get("security")
+    assert catalog["responses"]["200"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ProductPageRead"
+    }
+    parameters = {item["name"]: item["schema"] for item in catalog["parameters"]}
+    assert parameters["limit"]["default"] == 24
+    assert parameters["limit"]["maximum"] == 100
+    assert parameters["skip"]["maximum"] == 100000
+    assert parameters["sort"]["enum"] == ["featured", "name", "price-asc", "price-desc"]
+    assert set(schema["components"]["schemas"]["ProductPageRead"]["required"]) == {
+        "items",
+        "total",
+        "limit",
+        "skip",
+    }
     assert (
         schema["components"]["schemas"]["ProductRead"]["properties"]["price"]["type"]
         == "string"

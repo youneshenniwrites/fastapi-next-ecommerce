@@ -389,6 +389,38 @@
         "title": "ProductCreate",
         "type": "object"
       },
+      "ProductPageRead": {
+        "description": "A bounded catalog slice and the count of all matching products.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProductRead"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "skip": {
+            "title": "Skip",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "skip"
+        ],
+        "title": "ProductPageRead",
+        "type": "object"
+      },
       "ProductRead": {
         "additionalProperties": false,
         "properties": {
@@ -2068,6 +2100,108 @@
           }
         ],
         "summary": "Create a product",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/v1/products/search": {
+      "get": {
+        "description": "Public, server-filtered catalog page. Search matches product names, ignores case using the database locale and treats percent/underscore as literal characters. Featured order uses stable product IDs; name ordering follows the database collation after lowercasing. All sorts break ties by ID. Each page and its count share one database snapshot; catalog edits can change later requests.",
+        "operationId": "search_catalog_api_v1_products_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "pattern": "^[^\\x00]*$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "in_stock",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "In Stock",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "featured",
+              "enum": [
+                "featured",
+                "name",
+                "price-asc",
+                "price-desc"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100000,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPageRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search and page the complete catalog",
         "tags": [
           "Products"
         ]
