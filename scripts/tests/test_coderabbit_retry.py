@@ -6,7 +6,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from coderabbit_retry import may_request
-from dependabot_reconcile import review_request
+
+
+def review_request(comment):
+    return comment.get("author_association") in {
+        "OWNER",
+        "MEMBER",
+        "COLLABORATOR",
+    } and comment.get("body", "").splitlines()[0:1] == ["@coderabbitai review"]
 
 
 class RetryTests(unittest.TestCase):

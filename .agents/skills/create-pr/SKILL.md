@@ -6,9 +6,10 @@ description: Create or refresh an ecommerce pull request with issue linkage, acc
 Select the reviewer before taking review actions: verified Dependabot PRs follow
 [dependency policy](../../../docs/dependabot.md); eligible routine documentation
 follows the [documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
-Both use CodeRabbit without Codex requests or statuses. All other human-authored
-PRs use Codex. Reclassify the complete diff after changes; mixed and agent-policy
-changes require Codex.
+Dependabot and other non-exempt PRs use Codex within the existing subscription
+allowance. Only eligible routine documentation uses CodeRabbit without Codex
+requests or statuses. Reclassify the complete diff after changes; mixed and
+agent-policy changes require Codex.
 
 Read [delivery rules](../../../docs/delivery.md), the [PR template](../../../.github/pull_request_template.md), and the existing [naming](../ecommerce-naming/SKILL.md) and [ownership](../ecommerce-pr-ownership/SKILL.md) skills. Resolve paths relative to this file; run repository commands from the repository root.
 

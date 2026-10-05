@@ -71,7 +71,7 @@ refresh hashes to accommodate dependency changes. No branch protection is disabl
 
 Dependabot checks Python/uv, GitHub Actions, and backend Docker dependencies weekly.
 Python patch updates are grouped; open PR counts are limited. Applicable CI and
-current-head CodeRabbit approval remain mandatory. The [dependency continuation](dependabot.md)
+verified clean current-head Codex review remain mandatory. The [dependency continuation](dependabot.md)
 repairs eligible stale requirements exports using trusted, offline tooling. Unsafe
 inputs and genuine test failures remain blocked for investigation.
 Frontend npm dependency updates are enabled weekly, with at most two open PRs.

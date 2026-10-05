@@ -78,6 +78,7 @@ def clean_result(body, sha):
         "Keep them coming!",
         "Delightful!",
         "You're on a roll.",
+        ":rocket:",
     ):
         result = (
             f"Codex Review: Didn't find any major issues. {signoff} "
@@ -344,15 +345,6 @@ def publish_reviews(repo, target, only_pr=None):
     pulls = pages(f"repos/{repo}/pulls?state=open")
     groups = {}
     for pr in pulls:
-        # Dependabot uses CodeRabbit approval; do not publish a misleading Codex
-        # pending/success status for this explicitly owner-exempt class.
-        if (
-            pr.get("user", {}).get("login") == "dependabot[bot]"
-            and pr.get("base", {}).get("ref") == "main"
-            and (pr.get("head", {}).get("repo") or {}).get("full_name") == repo
-            and pr.get("head", {}).get("ref", "").startswith("dependabot/")
-        ):
-            continue
         try:
             routine, current = inspect_routine(repo, pr["number"], api, pages)
         except Exception:  # noqa: BLE001 - unknown eligibility never grants exemption

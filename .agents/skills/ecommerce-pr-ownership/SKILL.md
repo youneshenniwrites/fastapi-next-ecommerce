@@ -6,9 +6,10 @@ description: Set and verify the owner's assignment and appropriate labels when o
 Select the reviewer before taking review actions: verified Dependabot PRs follow
 [dependency policy](../../../docs/dependabot.md); eligible routine documentation
 follows the [documentation exception](../../../docs/codex-review.md#routine-documentation-review-exception-vin-225).
-Both use CodeRabbit without Codex requests or statuses. All other human-authored
-PRs use Codex. Reclassify the complete diff after changes; mixed and agent-policy
-changes require Codex.
+Dependabot and other non-exempt PRs use Codex within the existing subscription
+allowance. Only eligible routine documentation uses CodeRabbit without Codex
+requests or statuses. Reclassify the complete diff after changes; mixed and
+agent-policy changes require Codex.
 
 Use ecommerce-naming for branch, commit, and PR naming before creation.
 
@@ -85,4 +86,4 @@ The exact-head review instructions above have one exception: the owner-authorize
 Apply every evidence and CI condition before omitting a repeat review; all other
 changes require current-head review. This does not waive branch protection.
 
-For verified Dependabot PRs, use [dependency policy](../../../docs/dependabot.md) instead of the Codex request/status steps above: CodeRabbit reviews the current head; automation approves and merges only after its APPROVED review, resolved findings and CI.
+For verified Dependabot PRs, follow [dependency policy](../../../docs/dependabot.md): trusted continuation requests Codex on the current head and approves/merges only after verified clean review evidence, resolved findings and CI. Avoid duplicate manual requests; missing review or exhausted allowance keeps delivery pending.
