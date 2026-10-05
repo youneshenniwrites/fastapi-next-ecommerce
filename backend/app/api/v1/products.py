@@ -64,7 +64,7 @@ def read_products(
 )
 def search_catalog(
     db: Annotated[Session, Depends(get_db)],
-    q: Annotated[str | None, Query(max_length=100)] = None,
+    q: Annotated[str | None, Query(max_length=100, pattern=r"^[^\x00]*$")] = None,
     in_stock: Annotated[bool, Query()] = False,
     sort: Annotated[ProductSort, Query()] = "featured",
     skip: Annotated[int, Query(ge=0, le=100000)] = 0,

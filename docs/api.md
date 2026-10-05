@@ -169,7 +169,8 @@ curl --fail 'http://localhost:8000/api/v1/products/search?q=desk&in_stock=true&s
 The response contains `items`, the matching `total`, and the applied `limit` and
 `skip`. Search, stock selection and ordering apply before pagination. A page
 beyond the final result has empty `items` while retaining the matching total.
-Invalid bounds, unknown sorts, overlong searches and invalid booleans return 422.
+Invalid bounds, unknown sorts, overlong searches, NUL characters and invalid
+booleans return 422.
 An empty or whitespace-only search applies no name filter. Percent, underscore
 and backslash are literal search characters, rather than SQL wildcards.
 

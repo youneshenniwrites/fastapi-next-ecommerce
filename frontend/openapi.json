@@ -2118,6 +2118,7 @@
               "anyOf": [
                 {
                   "maxLength": 100,
+                  "pattern": "^[^\\x00]*$",
                   "type": "string"
                 },
                 {

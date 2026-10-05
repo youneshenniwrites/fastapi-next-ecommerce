@@ -120,6 +120,7 @@ def test_sort_ties_break_by_product_id(client, db, sort, expected):
         {"skip": 100001},
         {"sort": "recent"},
         {"q": "x" * 101},
+        {"q": "desk\x00"},
         {"in_stock": "perhaps"},
     ],
 )
