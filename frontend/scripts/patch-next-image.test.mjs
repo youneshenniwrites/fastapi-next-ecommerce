@@ -125,11 +125,10 @@ test("patch is idempotent and rejects unexpected versions or source", () => {
       readFileSync(target, "utf8"),
       content + "\n// unexpected modification\n",
     );
-    writeFileSync(
-      join(fixture, "package.json"),
-      JSON.stringify({ version: "16.3.7" }),
-    );
-    assert.throws(() => patchNextImage(fixture), /Review\/remove/);
+    for (const version of ["16.3.6", "16.3.7", "16.3.9", "16.3.8-canary.0"]) {
+      writeFileSync(join(fixture, "package.json"), JSON.stringify({ version }));
+      assert.throws(() => patchNextImage(fixture), /Review\/remove/);
+    }
   } finally {
     rmSync(fixture, { recursive: true, force: true });
   }

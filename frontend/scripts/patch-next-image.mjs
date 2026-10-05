@@ -25,14 +25,14 @@ const replacement = `        const mocked = {
 const files = [
   {
     path: "dist/server/image-optimizer.js",
-    hash: "d005f98c0e82235b16f422427c43dfea578f5303887ea69b690237c7649aa987",
+    hash: "38b92fde5bc72aa23c999d283052da11a6dfb36be75c2d92683d539551065a3c",
     call: "(0, _mockrequest.createRequestResponseMocks)",
     request: "_mockrequest.MockedRequest",
     response: "_mockrequest.MockedResponse",
   },
   {
     path: "dist/esm/server/image-optimizer.js",
-    hash: "2fa2bb2cb42772a1816230ebe3672243576023cde7cc2b1c507a79289f67c5a1",
+    hash: "b5dd6849f39477e7e17f61e3428d53a548f2d83d8837fb03274ab59a4f576f34",
     call: "createRequestResponseMocks",
     request: "MockedRequest",
     response: "MockedResponse",
@@ -48,7 +48,7 @@ export function patchNextImage(nextDirectory) {
   const { version } = JSON.parse(
     readFileSync(join(nextDirectory, "package.json")),
   );
-  if (version !== "16.3.6") {
+  if (version !== "16.3.8") {
     throw new Error(
       `Review/remove the Next image backport before using Next ${version}`,
     );

@@ -36,7 +36,7 @@ const selections = paths.map((path) => {
 });
 // npm's postinstall may already have patched the installed package. Restore only
 // the known one-line edit in test fixtures; the patch's full hashes still validate
-// that these are the actual installed 16.3.6 sources, never handcrafted renderers.
+// that these are the actual installed 16.3.8 sources, never handcrafted renderers.
 const sources = paths.map((path, index) =>
   readFileSync(join(nextDirectory, path), "utf8").replace(
     selections[index].after,
@@ -254,7 +254,7 @@ test("all sources patch exactly once and accept reversible mixed install states"
 test("unexpected versions and source edits reject before any source changes", () => {
   const directory = fixture();
   try {
-    for (const version of ["16.3.5", "16.3.7", "16.3.6-canary.0"]) {
+    for (const version of ["16.3.6", "16.3.7", "16.3.9", "16.3.8-canary.0"]) {
       writeFileSync(
         join(directory, "package.json"),
         JSON.stringify({ version }),
@@ -264,7 +264,7 @@ test("unexpected versions and source edits reject before any source changes", ()
     }
     writeFileSync(
       join(directory, "package.json"),
-      JSON.stringify({ version: "16.3.6" }),
+      JSON.stringify({ version: "16.3.8" }),
     );
     for (const [badIndex, badPath] of paths.entries()) {
       const { before: originalSelection, after: patchedSelection } =
