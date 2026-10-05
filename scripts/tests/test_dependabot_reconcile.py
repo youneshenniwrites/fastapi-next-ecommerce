@@ -28,9 +28,7 @@ class ReconcileTests(unittest.TestCase):
         self.comments = [
             {
                 "author_association": "OWNER",
-                "body": "@coderabbitai review\n<!-- coderabbit-review-head:"
-                + "a" * 40
-                + " -->",
+                "body": "@codex review\n<!-- codex-review-head:" + "a" * 40 + " -->",
             }
         ]
         self.state = "success"
@@ -75,8 +73,8 @@ class ReconcileTests(unittest.TestCase):
 
     def test_findings_without_marker_do_not_request_review_or_stall_queue(self):
         for reason in (
-            "Resolve review conversations before automatic merging",
-            "Obtain CodeRabbit approval after its latest findings",
+            "Resolve review conversations and obtain a clean re-review",
+            "Obtain a new clean review after the latest review findings",
         ):
             self.setUp()
             self.comments = []
@@ -89,7 +87,42 @@ class ReconcileTests(unittest.TestCase):
     def test_running_review_does_not_request_another_review(self):
         self.comments = []
         self.state = "pending"
-        self.reason = "CodeRabbit has an unfinished review"
+        self.reason = "Codex review is running or has not completed successfully"
+        self.run_reconcile()
+        self.assertEqual(self.writes(), [])
+
+    def test_quota_stopped_review_retries_then_deduplicates(self):
+        from codex_retry import QUOTA_NOTICE
+        from codex_review_gate import BOT_ID
+
+        self.state = "pending"
+        self.reason = "Codex review is running or has not completed successfully"
+        self.comments[0].update(
+            id=1,
+            created_at="2020-01-01T00:00:00Z",
+            updated_at="2020-01-01T00:00:00Z",
+        )
+        self.comments.append(
+            {
+                "id": 2,
+                "user": {"id": BOT_ID, "type": "Bot"},
+                "body": QUOTA_NOTICE,
+                "created_at": "2020-01-01T00:01:00Z",
+                "updated_at": "2020-01-01T00:01:00Z",
+            }
+        )
+        self.run_reconcile()
+        self.assertEqual(len(self.writes()), 1)
+        self.comments.append(
+            {
+                **self.comments[0],
+                "id": 3,
+                "body": self.writes()[0][1]["body"],
+                "created_at": "2020-01-02T00:02:00Z",
+                "updated_at": "2020-01-02T00:02:00Z",
+            }
+        )
+        self.calls = []
         self.run_reconcile()
         self.assertEqual(self.writes(), [])
 
@@ -157,8 +190,31 @@ class ReconcileTests(unittest.TestCase):
         self.run_reconcile()
         self.assertEqual(
             self.writes()[0][1]["body"],
-            "@coderabbitai review\n<!-- coderabbit-review-head:" + "a" * 40 + " -->",
+            "@codex review\n<!-- codex-review-head:" + "a" * 40 + " -->",
         )
+
+    def test_coderabbit_request_does_not_consume_codex_request(self):
+        self.state = "pending"
+        self.comments[0]["body"] = (
+            self.comments[0]["body"]
+            .replace("@codex review", "@coderabbitai review")
+            .replace("codex-review-head:", "coderabbit-review-head:")
+        )
+        self.run_reconcile()
+        self.assertEqual(len(self.writes()), 1)
+        self.assertTrue(self.writes()[0][1]["body"].startswith("@codex review\n"))
+
+    def test_head_change_before_review_request_does_not_consume_allowance(self):
+        self.state = "pending"
+        self.comments = []
+
+        def mutate():
+            if self.reads == 2:
+                self.pr["head"]["sha"] = "b" * 40
+
+        self.mutate = mutate
+        self.run_reconcile()
+        self.assertEqual(self.writes(), [])
 
     def test_new_findings_before_merge_block(self):
         def mutate():
@@ -175,7 +231,7 @@ class ReconcileTests(unittest.TestCase):
         self.assertEqual(self.reads, 1)
         self.assertEqual(self.writes(), [])
 
-    def test_failed_ci_never_requests_paid_review(self):
+    def test_failed_ci_never_consumes_review_allowance(self):
         self.comments = []
         self.states = ["FAILURE"]
         self.run_reconcile()
@@ -205,7 +261,7 @@ class ReconcileTests(unittest.TestCase):
 
     def test_explicit_findings_skip_to_next_queue_candidate(self):
         self.state = "pending"
-        self.reason = "Resolve review conversations before automatic merging"
+        self.reason = "Resolve review conversations and obtain a clean re-review"
         self.run_reconcile(count=3)
         self.assertEqual(self.reads, 3)
         self.assertEqual(self.writes(), [])
@@ -351,7 +407,7 @@ class ApprovalLifecycleTests(unittest.TestCase):
         return [
             {
                 "author_association": "OWNER",
-                "body": f"@coderabbitai review\n<!-- coderabbit-review-head:{self.sha} -->",
+                "body": f"@codex review\n<!-- codex-review-head:{self.sha} -->",
             }
         ]
 
@@ -447,6 +503,15 @@ class ApprovalLifecycleTests(unittest.TestCase):
         self.assertEqual(self.reviews[2][0]["state"], "DISMISSED")
         self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
 
+    def test_old_coderabbit_policy_approval_is_revoked_before_pending_stop(self):
+        from dependabot_reconcile import CODERABBIT_APPROVAL
+
+        self.reviews[2] = [{**self.own(90), "body": CODERABBIT_APPROVAL}]
+        self.states = ["PENDING"]
+        self.run_queue(count=2)
+        self.assertEqual(self.reviews[2][0]["state"], "DISMISSED")
+        self.assertFalse(any(p.endswith("/merge") for p, _ in self.calls))
+
     def test_valid_previous_approval_merges_without_duplicate_or_dismissal(self):
         self.reviews[1] = [self.own()]
         self.run_queue()
@@ -463,6 +528,23 @@ class ApprovalLifecycleTests(unittest.TestCase):
 
 
 class WorkflowContinuationTests(unittest.TestCase):
+    def test_production_entry_point_inspects_codex_and_live_review_activity(self):
+        from unittest.mock import patch
+
+        import dependabot_reconcile as continuation
+
+        with (
+            patch.dict("os.environ", {"GITHUB_REPOSITORY": "owner/repo"}, clear=True),
+            patch.object(continuation.gate, "pages", return_value=[]),
+            patch.object(continuation, "reconcile", return_value=[]) as reconcile,
+        ):
+            continuation.main()
+        self.assertIs(reconcile.call_args.args[5], continuation.gate.inspect)
+        self.assertIs(
+            reconcile.call_args.kwargs["review_history"],
+            continuation.gate.review_history,
+        )
+
     def test_every_pr_ci_workflow_can_resume_the_queue(self):
         import re
 

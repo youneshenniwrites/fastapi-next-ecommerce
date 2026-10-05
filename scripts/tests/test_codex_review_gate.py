@@ -106,6 +106,14 @@ class ReviewEvidence(unittest.TestCase):
         self.reactions[10][0]["user"] = {"id": 1, "type": "User"}
         self.assertEqual(self.result(), "pending")
 
+    def test_coderabbit_approval_cannot_replace_codex_evidence(self):
+        review = {
+            "user": {"id": 136622811, "type": "Bot"},
+            "state": "APPROVED",
+            "commit_id": self.sha,
+        }
+        self.assertEqual(evaluate(self.sha, [], {}, False, [review])[0], "pending")
+
     def test_stale_commit(self):
         self.summary["body"] = self.summary["body"].replace("aaaaaaa", "bbbbbbb")
         self.assertEqual(self.result(), "pending")
@@ -402,8 +410,8 @@ class OnARollCleanEvidence(DelightfulCleanEvidence):
         )
 
 
-class DependabotExemption(unittest.TestCase):
-    def test_no_codex_status_for_same_repo_dependency_pr(self):
+class DependabotReviewPolicy(unittest.TestCase):
+    def test_dependency_pr_requires_live_codex_review_and_publishes_pending(self):
         from scripts import codex_review_gate as gate
 
         pr = {
@@ -418,9 +426,14 @@ class DependabotExemption(unittest.TestCase):
         }
         with (
             patch.object(gate, "pages", return_value=[pr]),
-            patch.object(gate, "inspect") as inspect,
+            patch.object(gate, "inspect_routine", return_value=(False, pr)),
+            patch.object(gate, "latest_status", return_value=None),
+            patch.object(
+                gate, "inspect", return_value=("a" * 40, "pending", "Awaiting Codex")
+            ) as inspect,
             patch.object(gate, "api") as api,
         ):
             gate.publish_reviews("owner/repo", "https://example.com", only_pr=1)
-            inspect.assert_not_called()
-            api.assert_not_called()
+            inspect.assert_called_once_with("owner/repo", 1)
+            self.assertEqual(api.call_args.args[1]["state"], "pending")
+            self.assertEqual(api.call_args.args[1]["context"], "Codex review")

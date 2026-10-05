@@ -48,8 +48,10 @@ VIN-172 reopened on 28 September for dependency continuation (PR #214).
 PR #217 switched Dependabot review to CodeRabbit; PR #218 added bounded rate-limit
 retries. Both are merged. Live unattended review → approval → protected merge proof
 remains pending on a genuine eligible update; manual merges do not satisfy it.
-VIN-38 and VIN-172 are deferred while portfolio delivery resumes. Their unfinished
-acceptance does not mean active implementation and adds no portfolio completion credit.
+On 5 October the owner resumed VIN-172 and authorized replacing the unavailable
+CodeRabbit bot seat with reviews covered by the existing Codex subscription.
+The replacement and live proof are tracked on VIN-172; VIN-38 enforcement remains
+deferred. This maintenance work adds no portfolio completion credit.
 
 **Current execution priority — 4 October:** VIN-158 hosted isolation, retry and
 cleanup and VIN-248’s baseline MIME/referrer header slice are verified. VIN-146

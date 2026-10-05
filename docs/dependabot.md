@@ -1,17 +1,20 @@
 # Dependabot maintenance (VIN-172)
 
-VIN-38 replaces Codex review for verified Dependabot PRs with CodeRabbit review.
-The owner approved this policy on 29 September 2026. Human-authored PRs retain
-Codex review. Every eligible dependency PR requires CodeRabbit's current-head
-`APPROVED` review, no unresolved review findings, and applicable CI before an
-Actions approval and SHA-bound protected squash merge. A comment, reaction or
-compliment is not approval. Missing, stale or contradictory review evidence blocks
-merging; the automation does not infer approval from prose.
+On 5 October 2026 the owner approved Codex review using the existing subscription
+allowance for verified Dependabot PRs, replacing the CodeRabbit-only policy from
+29 September. CodeRabbit's bot seat was unavailable on the account's Free plan.
+No new subscription, API billing or purchased credits are configured.
 
-This supersedes the Codex-reviewed policy introduced by PR #214 and the older
-patch/minor policy-only exception. Rollout and live proof remain pending until
-recorded on VIN-38 and VIN-172; merging a PR manually is not proof of autonomy.
-No paid API or scheduled Codex chat is configured.
+Every eligible dependency PR requires verified clean current-head Codex evidence
+under the [review protocol](codex-review.md), no unresolved findings, and applicable
+CI before an Actions approval and SHA-bound protected squash merge. A comment,
+reaction or shared commit status alone is not approval. Missing, stale, edited or
+contradictory evidence blocks merging. Human-authored review policy is unchanged.
+
+Live proof of this replacement remains pending until recorded on VIN-172;
+manually merging a PR is not proof of autonomy. No scheduled Codex chat is added.
+Included review allowance is finite: exhaustion keeps delivery pending rather
+than enabling paid usage or bypassing review.
 
 ## Continuation
 
@@ -30,11 +33,14 @@ can proceed. There is no permanent auto-merge authorization or administrator byp
 GitHub receives the expected head SHA and enforces branch protection.
 
 The workflow updates an outdated branch before requesting review, waits for CI,
-and requests CodeRabbit review when needed. A trusted rate-limit response can permit
-at most two retries per revision (three requests total). The retry waits at least
-one hour and respects a longer advertised minute-based reset plus five minutes;
-an unknown reset waits 24 hours. Later bot activity supersedes a limit notice.
-Missing or malformed evidence and exhausted attempts leave the PR blocked.
+and requests Codex review when needed. Requests are deduplicated by the full head
+SHA. Only the observed, trusted, unedited Codex quota-exhaustion response permits
+an automatic retry: at most two per revision (three requests total), waiting at
+least 24 hours before the first retry and seven days after another quota response
+before the second. This conservative backoff covers a possible weekly reset when
+the provider reports no reset time; it does not guarantee quota availability.
+Later review activity supersedes a quota notice. Unknown, unavailable or malformed
+responses, unresolved findings and exhausted attempts stay pending for investigation.
 Existing workflow events/polling perform recovery; no new timer is added. It checks current evidence and CI again immediately before
 merging, and withdraws its own approvals when their supporting evidence is stale
 or delivery cannot proceed. Existing approvals are checked across the bounded
@@ -55,7 +61,7 @@ workspace and source configuration are rejected.
 The subprocess receives no GitHub credentials. The workflow never checks out or
 executes PR code or consumes PR artifacts. A repair changes only requirements.txt,
 is parent-bound to the inspected head and uses a non-forced ref update. CI and
-CodeRabbit must approve the repaired revision. Lock/manifest inconsistencies that cannot
+Codex must complete a clean review of the repaired revision. Lock/manifest inconsistencies that cannot
 be exported safely remain visible failures; the requirements check stays enabled.
 
 ## Credential and repository configuration
@@ -66,7 +72,7 @@ Actions secret: a fine-grained token restricted to this repository, with Content
 and Pull requests read/write and the required read-only Metadata permission.
 No administration or protection-bypass permission is needed.
 
-The member token requests CodeRabbit reviews, updates branches, publishes generated
+The member token requests Codex reviews, updates branches, publishes generated
 exports and merges. Unlike the built-in Actions token, these events can trigger
 normal CI and main deployment workflows. The built-in token records the approval.
 The privileged jobs run trusted main code with checkout credentials disabled.
@@ -77,10 +83,14 @@ log or source file. Missing/expired credentials require renewal, not bypassing
 review. Dependabot-triggered events may lack the repository secret; the trusted
 completion workflow provides continuation with that secret.
 
-Enable CodeRabbit automatic review for Dependabot and its request-changes/approval
-workflow (`reviews.request_changes_workflow: true`). Approval must be a GitHub
-review bound to the current commit, not an optimistic summary. See the
-[CodeRabbit configuration reference](https://docs.coderabbit.ai/reference/configuration).
+Keep the repository connected to Codex Code Review. Trusted continuation posts
+one current-head `@codex review` request after CI is ready; do not add a second
+unconditional automatic review trigger. The existing subscription allowance is
+used, not an API key. Never purchase credits or upgrade the account to clear a
+queue. The adapter verifies the trusted bot, completed summary, reviewed revision,
+clean result and unresolved threads on this PR directly before merging. See
+[official GitHub review guidance](https://learn.chatgpt.com/docs/third-party/github)
+and [usage limits](https://learn.chatgpt.com/docs/pricing).
 
 Record the first live request, approval and protected merge on VIN-172 before
 claiming this replacement automation is operationally verified. Script tests alone

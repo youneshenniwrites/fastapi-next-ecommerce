@@ -29,7 +29,7 @@ Describe the customer or contributor outcome in 1–3 sentences: what changes an
 
 <!-- Preserve exact tested/reviewed revisions and required protocol proof in linked evidence or optional <details><summary>Verification details</summary>...</details>. For pure-main-sync carry-forward, visibly state that the owner-authorized exception is used and the current commit was not externally reviewed; link the full evidence required by docs/codex-review.md. Never imply the old review approves the new commit. -->
 
-<!-- Verified Dependabot PRs follow docs/dependabot.md: current-head CodeRabbit APPROVED review, resolved findings and CI; do not request Codex. -->
+<!-- Verified Dependabot PRs follow docs/dependabot.md: verified clean current-head Codex evidence, resolved findings and CI; avoid duplicate review requests. -->
 
 <!-- Assignment and labels belong in the sidebar. Follow docs/codex-review.md: required current-head CI and external review (or the fully evidenced pure-main-sync exception) gate merge; the Codex review status is informational pending #38. -->
 
