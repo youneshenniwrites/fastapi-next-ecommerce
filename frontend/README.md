@@ -69,8 +69,9 @@ representative, not exact product specifications or brand endorsements. Unknown
 products use a neutral Lucide placeholder.
 
 The catalog currently loads at most 100 products and filters those loaded items;
-a notice appears at that limit. Server-side search/pagination is a future increment
-before a larger catalog. Registration, login and the signed-in cart are implemented;
+a notice appears at that limit. FastAPI's additive [catalog search endpoint](../docs/api.md#catalog-search-and-pagination-vin-289)
+supports full-catalog filtering and pagination; VIN-287 will connect it to the
+server-rendered storefront. Registration, login and the signed-in cart are implemented;
 VIN-120 checkout submission, confirmation and order history merged in PR #188; VIN-30 sandbox payments merged in PR #194 and were verified on development on 23 September; production payments remain disabled. See the canonical completion plan for merge/deployment status. See the [cart architecture and manual
 walkthrough](../docs/design/cart-storefront.md). Automated accessibility checks supplement manual keyboard/mobile
 review; they do not constitute a full accessibility certification.
