@@ -50,6 +50,12 @@ paths, runtime findings, malformed/unavailable audit evidence and expiry fail.
 `frontend/audit-exception.json` pins the exact manifest/lockfile and reviewed graph.
 Raw `npm audit` still fails while this upstream issue remains present.
 
+PR #306 reassessment (5 October): tailwind-merge 3.7.0 changes no accepted
+advisory packages or dependency paths. Fresh full and runtime reports retain the
+same seven development-only entries and zero runtime findings. The exact file
+hashes were renewed after that comparison; the advisory, graph and 10 October
+expiry are unchanged. This remains accepted risk, not remediation.
+
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
 available, confirm the complete audit is clean, then remove the exception and
