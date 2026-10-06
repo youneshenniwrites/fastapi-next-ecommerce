@@ -15,7 +15,9 @@ Identify the requested finish line and existing authorization. Continue through
 implementation, relevant tests, self-review/preflight, create-pr, review fixes,
 eligible merge, authorized deployment verification and docs/board closeout.
 Invoke the existing named skills for these operations rather than duplicating
-policy here. PR creation, CI starting or a review comment is not itself completion.
+policy here. create-pr opens the pull request ready for review, never as a draft,
+and ecommerce-pr-ownership copies the owner, scope labels, and the linked issue's
+priority and milestone into the sidebar. PR creation, CI starting or a review comment is not itself completion.
 A create-PR-only or review-only request retains its narrower finish line.
 Example finish line: deliver VIN-30 through reviewed PRs, merge under existing
 policy, verify development and update plan/board until complete or genuinely blocked.

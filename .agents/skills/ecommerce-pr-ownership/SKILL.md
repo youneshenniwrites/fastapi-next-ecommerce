@@ -1,6 +1,6 @@
 ---
 name: ecommerce-pr-ownership
-description: Set and verify the owner's assignment and appropriate labels when opening or repairing pull requests in this ecommerce repository.
+description: Set and verify owner assignment, scope labels, the linked issue's priority and milestone, and a ready-for-review pull request. Never leave a pull request in draft.
 ---
 
 Select the reviewer before taking review actions: verified Dependabot PRs follow
@@ -39,20 +39,38 @@ not duplicate them or add review checkboxes to the body. Link real issues and
 never claim unverified review or test success. Use this structure when maintaining bot PRs, preserving useful
 upstream release information.
 
+Open every pull request ready for review. Never create one as a draft, and never
+convert a ready pull request back to a draft, including when the creation tool
+defaults to draft. A draft is not a handoff. Do not add the pull request to the
+project board; the linked issue card is the only board item.
+
 After creating a PR, choose labels that describe its actual scope: bug,
 enhancement, documentation, tooling, dependencies, github_actions, or docker.
-Apply assignment and labels from the repository root:
+Apply assignment, those scope labels, and the linked issue sidebar from the
+repository root:
 
 ```sh
 python3 .agents/skills/ecommerce-pr-ownership/scripts/set_metadata.py PR_NUMBER --labels documentation tooling
 ```
 
-Replace PR_NUMBER with the actual number and select the relevant labels. The
-helper uses additive REST operations, preserves other assignees/labels, and reads
-back the result. `--dry-run` reads the PR and prints intended changes without
-writing. Re-running it is safe if a previous call only partially succeeded.
+Replace PR_NUMBER with the actual number and select the relevant scope labels.
+The helper links the issue from the PR title's `[VIN-N]` key, otherwise from
+Closes/Fixes/Resolves, otherwise from Refs. It assigns youneshenniwrites, adds
+the scope labels plus every `priority:` label on that issue, and sets the
+issue's milestone on the pull request. It does not invent a priority or
+milestone when the issue has none. Adding assignees and scope labels keeps
+people and scope labels already on the pull request. If adding the assignee is
+rejected, the fallback update sends the people already assigned plus the owner.
+A later run matches the linked issue again: it clears a milestone the issue no
+longer has, and removes a `priority:` label the issue no longer has. It does
+not send a milestone update when the pull request already matches, including
+when both are empty. The helper
+reads the sidebar back. `--dry-run` reads the PR and prints intended changes
+without writing. Re-running it is safe if a previous call only partially succeeded.
 
-Verify author, assignee, and labels before handing off a PR. CODEOWNERS expresses
+Verify author, assignee, scope labels, priority labels, and milestone before
+handing off a PR. A pull request that is still a draft, or that is missing the
+linked issue's milestone or `priority:` label, is incomplete. CODEOWNERS expresses
 code-review ownership; it does not assign PRs or make an author's own review an
 independent approval. Follow root review/CI/merge instructions separately.
 
