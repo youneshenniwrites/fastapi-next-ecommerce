@@ -159,10 +159,19 @@ class ApplySidebar(unittest.TestCase):
 
         with patch.object(metadata, "api", fake_api):
             metadata.assign_owner(311, ["reviewer"])
+            metadata.assign_owner(311, [metadata.OWNER, "reviewer", metadata.OWNER])
         self.assertIn(
             (
                 "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311",
                 {"assignees": ["reviewer", metadata.OWNER]},
+                "PATCH",
+            ),
+            calls,
+        )
+        self.assertIn(
+            (
+                "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311",
+                {"assignees": [metadata.OWNER, "reviewer"]},
                 "PATCH",
             ),
             calls,
@@ -209,10 +218,14 @@ class ApplySidebar(unittest.TestCase):
             "body": "",
             "user": {"login": "owner"},
             "assignees": [{"login": "reviewer"}],
-            "labels": [{"name": "documentation"}, {"name": "priority: high"}],
+            "labels": [
+                {"name": "documentation"},
+                {"name": "tooling"},
+                {"name": "priority: high"},
+            ],
         }
         calls = []
-        readback = issue(milestone=None, labels=("documentation",))
+        readback = issue(milestone=None, labels=("documentation", "tooling"))
         readback["assignees"] = [{"login": "reviewer"}, {"login": metadata.OWNER}]
 
         def fake_api(path, payload=None, method=None):
@@ -236,11 +249,18 @@ class ApplySidebar(unittest.TestCase):
             metadata.main()
         self.assertIn(
             (
-                "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311/labels/priority%3A%20high",
+                "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311/assignees",
+                {"assignees": [metadata.OWNER]},
                 None,
-                "DELETE",
             ),
             calls,
+        )
+        self.assertEqual(
+            [path for path, _, method in calls if method == "DELETE"],
+            [
+                "repos/youneshenniwrites/fastapi-next-ecommerce"
+                "/issues/311/labels/priority%3A%20high"
+            ],
         )
         self.assertIn(
             (
@@ -253,6 +273,52 @@ class ApplySidebar(unittest.TestCase):
         reported = json.loads(output.getvalue())
         self.assertIsNone(reported["milestone"])
         self.assertNotIn("priority: high", reported["labels"])
+        self.assertIn("tooling", reported["labels"])
+
+    def test_readback_fails_when_a_cleared_issue_sidebar_remains(self):
+        pull = {
+            "title": "[VIN-287] [docs] Record delivery",
+            "body": "",
+            "user": {"login": "owner"},
+            "labels": [{"name": "documentation"}, {"name": "priority: high"}],
+        }
+
+        def fake_api(path, payload=None, method=None):
+            if path.endswith("/pulls/311"):
+                return pull
+            if path.endswith("/issues/287"):
+                return issue(milestone=None, labels=("enhancement",))
+            if path.endswith("/issues/311") and method is None:
+                return issue(
+                    milestone=5,
+                    labels=("documentation", "priority: high"),
+                )
+            return {}
+
+        with (
+            patch.object(metadata, "api", fake_api),
+            patch("sys.argv", ["set_metadata.py", "311", "--labels", "documentation"]),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            metadata.main()
+        self.assertIn("priority", str(raised.exception))
+
+        def milestone_remains(path, payload=None, method=None):
+            if path.endswith("/pulls/311"):
+                return pull
+            if path.endswith("/issues/287"):
+                return issue(milestone=None, labels=("enhancement",))
+            if path.endswith("/issues/311") and method is None:
+                return issue(milestone=5, labels=("documentation",))
+            return {}
+
+        with (
+            patch.object(metadata, "api", milestone_remains),
+            patch("sys.argv", ["set_metadata.py", "311", "--labels", "documentation"]),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            metadata.main()
+        self.assertIn("milestone", str(raised.exception))
 
     def test_missing_milestone_is_a_failure(self):
         pull = {
