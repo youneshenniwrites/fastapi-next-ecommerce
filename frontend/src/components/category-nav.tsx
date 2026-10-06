@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import type { components } from "@/lib/api/schema";
 import { collectionHref, type CollectionFilters } from "@/lib/collection-url";
 import { cn } from "@/lib/utils";
 
-export type CategoryCount = {
-  slug: string;
-  name: string;
-  count: number;
-};
+export type CategoryCount = components["schemas"]["CategoryCount"];
 
 function label(name: string, count: number) {
   const noun = count === 1 ? "object" : "objects";
