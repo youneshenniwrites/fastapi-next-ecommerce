@@ -58,10 +58,13 @@ The helper links the issue from the PR title's `[VIN-N]` key, otherwise from
 Closes/Fixes/Resolves, otherwise from Refs. It assigns youneshenniwrites, adds
 the scope labels plus every `priority:` label on that issue, and sets the
 issue's milestone on the pull request. It does not invent a priority or
-milestone when the issue has none. The helper uses additive REST operations,
-preserves other assignees and labels, and reads the sidebar back. `--dry-run`
-reads the PR and prints intended changes without writing. Re-running it is safe
-if a previous call only partially succeeded.
+milestone when the issue has none. Adding assignees and scope labels keeps
+people and scope labels already on the pull request. If adding the assignee is
+rejected, the fallback update sends the people already assigned plus the owner.
+A later run matches the linked issue again: it clears a milestone the issue no
+longer has, and removes a `priority:` label the issue no longer has. The helper
+reads the sidebar back. `--dry-run` reads the PR and prints intended changes
+without writing. Re-running it is safe if a previous call only partially succeeded.
 
 Verify author, assignee, scope labels, priority labels, and milestone before
 handing off a PR. A pull request that is still a draft, or that is missing the

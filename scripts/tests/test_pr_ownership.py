@@ -158,11 +158,11 @@ class ApplySidebar(unittest.TestCase):
             return {}
 
         with patch.object(metadata, "api", fake_api):
-            metadata.assign_owner(311)
+            metadata.assign_owner(311, ["reviewer"])
         self.assertIn(
             (
                 "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311",
-                {"assignees": [metadata.OWNER]},
+                {"assignees": ["reviewer", metadata.OWNER]},
                 "PATCH",
             ),
             calls,
@@ -202,6 +202,57 @@ class ApplySidebar(unittest.TestCase):
         self.assertTrue(
             any(method == "PATCH" and payload == {"milestone": 5} for _, payload, method in calls)
         )
+
+    def test_rerun_clears_a_milestone_and_priority_the_issue_removed(self):
+        pull = {
+            "title": "[VIN-287] [docs] Record delivery",
+            "body": "",
+            "user": {"login": "owner"},
+            "assignees": [{"login": "reviewer"}],
+            "labels": [{"name": "documentation"}, {"name": "priority: high"}],
+        }
+        calls = []
+        readback = issue(milestone=None, labels=("documentation",))
+        readback["assignees"] = [{"login": "reviewer"}, {"login": metadata.OWNER}]
+
+        def fake_api(path, payload=None, method=None):
+            calls.append((path, payload, method))
+            if path.endswith("/pulls/311"):
+                return pull
+            if path.endswith("/issues/287"):
+                return issue(milestone=None, labels=("enhancement",))
+            if path.endswith("/assignees"):
+                return {}
+            if path.endswith("/issues/311") and method is None:
+                return readback
+            return {}
+
+        output = io.StringIO()
+        with (
+            patch.object(metadata, "api", fake_api),
+            patch("sys.argv", ["set_metadata.py", "311", "--labels", "documentation"]),
+            redirect_stdout(output),
+        ):
+            metadata.main()
+        self.assertIn(
+            (
+                "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311/labels/priority%3A%20high",
+                None,
+                "DELETE",
+            ),
+            calls,
+        )
+        self.assertIn(
+            (
+                "repos/youneshenniwrites/fastapi-next-ecommerce/issues/311",
+                {"milestone": None},
+                "PATCH",
+            ),
+            calls,
+        )
+        reported = json.loads(output.getvalue())
+        self.assertIsNone(reported["milestone"])
+        self.assertNotIn("priority: high", reported["labels"])
 
     def test_missing_milestone_is_a_failure(self):
         pull = {

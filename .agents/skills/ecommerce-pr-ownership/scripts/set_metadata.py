@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import subprocess
+from urllib.parse import quote
 
 REPO = "youneshenniwrites/fastapi-next-ecommerce"
 OWNER = "youneshenniwrites"
@@ -69,16 +70,28 @@ def issue_sidebar(issue):
     return milestone, priority
 
 
-def assign_owner(pr):
-    """Add the owner, retrying with a patch when the assignee route is forbidden."""
+def assign_owner(pr, current):
+    """Add the owner. The fallback update keeps people already assigned."""
     try:
         api(f"repos/{REPO}/issues/{pr}/assignees", {"assignees": [OWNER]})
     except subprocess.CalledProcessError:
+        kept = list(dict.fromkeys([*(current or []), OWNER]))
         api(
             f"repos/{REPO}/issues/{pr}",
-            {"assignees": [OWNER]},
+            {"assignees": kept},
             method="PATCH",
         )
+
+
+def drop_stale_priority(pr, current_labels, desired):
+    """Remove priority labels the linked issue no longer has."""
+    desired_set = set(desired)
+    for name in current_labels or []:
+        if name.startswith("priority:") and name not in desired_set:
+            api(
+                f"repos/{REPO}/issues/{pr}/labels/{quote(name, safe='')}",
+                method="DELETE",
+            )
 
 
 def main():
@@ -90,6 +103,8 @@ def main():
     if args.pr < 1:
         parser.error("PR number must be positive")
     pull = api(f"repos/{REPO}/pulls/{args.pr}")
+    existing_assignees = [user["login"] for user in pull.get("assignees") or []]
+    existing_labels = [label["name"] for label in pull.get("labels") or []]
     source = linked_issue_number(pull.get("title"), pull.get("body"))
     linked = api(f"repos/{REPO}/issues/{source}") if source else None
     milestone, priority = issue_sidebar(linked)
@@ -112,14 +127,15 @@ def main():
     # Labels and the milestone are applied even if assignment is forbidden, so a
     # partial sidebar can be repaired by running the helper again.
     api(f"repos/{REPO}/issues/{args.pr}/labels", {"labels": [*args.labels, *priority]})
-    if milestone:
+    if source:
         api(
             f"repos/{REPO}/issues/{args.pr}",
-            {"milestone": milestone["number"]},
+            {"milestone": None if milestone is None else milestone["number"]},
             method="PATCH",
         )
+        drop_stale_priority(args.pr, existing_labels, priority)
     try:
-        assign_owner(args.pr)
+        assign_owner(args.pr, existing_assignees)
     except subprocess.CalledProcessError:
         pass
     issue = api(f"repos/{REPO}/issues/{args.pr}")
@@ -128,9 +144,15 @@ def main():
     applied = issue.get("milestone")
     if OWNER not in assigned or not set(args.labels).issubset(labels):
         raise SystemExit("GitHub did not retain the requested ownership/labels")
-    if milestone and (not applied or applied["number"] != milestone["number"]):
-        raise SystemExit("GitHub did not retain the linked issue milestone")
-    if not set(priority).issubset(labels):
+    if source:
+        actual_priority = [name for name in labels if name.startswith("priority:")]
+        if sorted(actual_priority) != sorted(priority):
+            raise SystemExit("GitHub did not match the linked issue priority")
+        applied_number = None if not applied else applied.get("number")
+        expected_number = None if not milestone else milestone["number"]
+        if applied_number != expected_number:
+            raise SystemExit("GitHub did not retain the linked issue milestone")
+    elif not set(priority).issubset(labels):
         raise SystemExit("GitHub did not retain the linked issue priority")
     print(
         json.dumps(
