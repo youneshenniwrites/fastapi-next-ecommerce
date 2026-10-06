@@ -148,10 +148,12 @@ test("browse, filter and view the real FastAPI catalog", async ({
   ).toBeVisible();
   await expect(page.getByRole("status")).toHaveText("12 objects");
   await page.getByRole("searchbox").fill("not present");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "No objects found." }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Clear filters" }).click();
+  await page.getByRole("link", { name: "Clear filters", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("12 objects");
   await page.getByRole("checkbox", { name: "In stock only" }).check();
   await expect(page.getByRole("status")).toHaveText("11 objects");
   await page.getByRole("combobox", { name: "Sort products" }).click();
@@ -160,6 +162,8 @@ test("browse, filter and view the real FastAPI catalog", async ({
     .click();
   await expect(page.locator(".product h3").first()).toHaveText("Notebook Set");
   await page.getByRole("searchbox").fill("Oak");
+  await page.getByRole("searchbox").press("Enter");
+  await expect(page.getByRole("status")).toHaveText("1 object");
   await page.getByRole("link", { name: /Oak Monitor Stand/ }).click();
   await expect(
     page.getByRole("heading", { name: "Oak Monitor Stand", exact: true }),
@@ -220,6 +224,7 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   await expect(search).toHaveCSS("border-radius", "4px");
   await expect(sort).toHaveCSS("border-radius", "4px");
   await search.fill("Oak");
+  await search.press("Enter");
   await expect(page.getByRole("status")).toHaveText("1 object");
   await search.focus();
   await expect(search).toBeFocused();
@@ -229,6 +234,8 @@ test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
   await expect(action).toBeFocused();
   await expect(action).toHaveCSS("outline-style", "solid");
   await search.fill("");
+  await search.press("Enter");
+  await expect(page.getByRole("status")).toHaveText("12 objects");
   await expect(
     page.getByRole("main").locator('[data-slot="badge"]'),
   ).toHaveText("Out of stock");

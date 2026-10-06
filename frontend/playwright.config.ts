@@ -83,6 +83,16 @@ export default defineConfig({
       testMatch: "catalog.spec.ts",
       use: { ...devices["Pixel 7"], baseURL: "http://127.0.0.1:3300" },
     },
+    ...["Desktop Chrome", "Pixel 7"].map((device) => ({
+      name: `collection-${device}`,
+      testMatch: "collection.spec.ts",
+      use: {
+        ...devices[device],
+        baseURL: "http://127.0.0.1:3303",
+        trace: "off" as const,
+        screenshot: "off" as const,
+      },
+    })),
     {
       name: "failure-states",
       testMatch: "states.spec.ts",
@@ -114,6 +124,26 @@ export default defineConfig({
     {
       command: "../backend/.venv/bin/python scripts/test-api.py",
       url: "http://127.0.0.1:18300/health",
+      reuseExistingServer: false,
+      timeout: 60000,
+    },
+    {
+      command: "../backend/.venv/bin/python scripts/test-api.py --paged",
+      url: "http://127.0.0.1:18303/health",
+      reuseExistingServer: false,
+      timeout: 60000,
+    },
+    {
+      command: "npm run start",
+      url: "http://127.0.0.1:3303",
+      env: {
+        API_BASE_URL: "http://127.0.0.1:18303",
+        PORT: "3303",
+        APP_ORIGIN: "http://127.0.0.1:3303",
+        ALLOW_LOCAL_HTTP_SESSIONS: "true",
+        HOSTNAME: "127.0.0.1",
+        NODE_OPTIONS: `--require=${JSON.stringify(nonceTransportFixture)}`,
+      },
       reuseExistingServer: false,
       timeout: 60000,
     },

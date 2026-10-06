@@ -11,6 +11,11 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--payments", action="store_true", help="Use isolated sandbox fixture on port 18302"
 )
+parser.add_argument(
+    "--paged",
+    action="store_true",
+    help="Add a 60-product catalog for pagination tests on port 18303",
+)
 args = parser.parse_args()
 backend = Path(__file__).resolve().parents[2] / "backend"
 with tempfile.TemporaryDirectory(prefix="forme-browser-") as directory:
@@ -41,6 +46,13 @@ with tempfile.TemporaryDirectory(prefix="forme-browser-") as directory:
         env=env,
         check=True,
     )
+    if args.paged:
+        subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent / "seed_paged_catalog.py")],
+            cwd=backend,
+            env=env,
+            check=True,
+        )
     process = subprocess.Popen(
         [
             sys.executable,
@@ -52,7 +64,7 @@ with tempfile.TemporaryDirectory(prefix="forme-browser-") as directory:
             "--host",
             "127.0.0.1",
             "--port",
-            "18302" if args.payments else "18300",
+            "18302" if args.payments else "18303" if args.paged else "18300",
         ],
         cwd=backend,
         env=env,

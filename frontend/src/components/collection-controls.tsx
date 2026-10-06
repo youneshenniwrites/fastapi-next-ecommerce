@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
@@ -29,6 +29,9 @@ export function CollectionControls({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // Show a changed checkbox/sort immediately while the server renders the
+  // results; it reverts to the URL-owned value if navigation is abandoned.
+  const [shown, setShown] = useOptimistic(filters);
   const [text, setText] = useState(filters.query);
   const [seen, setSeen] = useState(filters.query);
   // Back/Forward and Clear change the URL-owned query; adopt it without
@@ -42,6 +45,7 @@ export function CollectionControls({
   function go(next: CollectionFilters) {
     const href = collectionHref(next);
     startTransition(() => {
+      setShown(next);
       if (href === current) router.refresh();
       else router.push(href, { scroll: false });
     });
@@ -58,20 +62,20 @@ export function CollectionControls({
           className="flex min-w-0 basis-full gap-2 md:flex-1 md:basis-auto"
           onSubmit={(event) => {
             event.preventDefault();
-            go({ ...filters, query: text.trim(), page: 1 });
+            go({ ...shown, query: text.trim(), page: 1 });
           }}
         >
           {filters.inStock && <input type="hidden" name="in_stock" value="1" />}
           {filters.sort !== "featured" && (
-            <input type="hidden" name="sort" value={filters.sort} />
+            <input type="hidden" name="sort" value={shown.sort} />
           )}
           <div className="relative min-w-0 flex-1">
             <Search
-              className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
+              className="pointer-events-none absolute left-3 top-3.5 size-4 text-muted-foreground"
               aria-hidden="true"
             />
             <Input
-              className="h-10 pl-10"
+              className="h-11 pl-10"
               type="search"
               name="q"
               aria-label="Search collection"
@@ -86,7 +90,7 @@ export function CollectionControls({
             type="submit"
             variant="outline"
             size="lg"
-            className="min-h-10 shrink-0"
+            className="min-h-11 shrink-0"
             disabled={pending}
           >
             {pending ? "Searching…" : "Search"}
@@ -95,15 +99,15 @@ export function CollectionControls({
         <div className="flex min-h-11 w-28 shrink-0 items-center gap-2">
           <Checkbox
             id="in-stock"
-            checked={filters.inStock}
+            checked={shown.inStock}
             onCheckedChange={(checked) =>
-              go({ ...filters, inStock: checked === true, page: 1 })
+              go({ ...shown, inStock: checked === true, page: 1 })
             }
             className="size-5"
           />
           <label
             htmlFor="in-stock"
-            className="cursor-pointer whitespace-nowrap py-2 text-xs"
+            className="flex min-h-11 cursor-pointer items-center whitespace-nowrap text-xs"
           >
             In stock only
           </label>
@@ -116,16 +120,16 @@ export function CollectionControls({
             Sort by
           </label>
           <Select
-            value={filters.sort}
+            value={shown.sort}
             onValueChange={(value) => {
               const sort = sorts.find((candidate) => candidate === value);
-              if (sort) go({ ...filters, sort, page: 1 });
+              if (sort) go({ ...shown, sort, page: 1 });
             }}
           >
             <SelectTrigger
               id="sort-products"
               aria-label="Sort products"
-              className="h-10 w-[180px]"
+              className="h-11 w-[180px]"
             >
               <SelectValue />
             </SelectTrigger>
