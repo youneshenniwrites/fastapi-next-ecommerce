@@ -63,6 +63,13 @@ same seven development-only entries and zero runtime findings. The exact file
 hashes were renewed after that comparison; the advisory, graph and 10 October
 expiry are unchanged. This remains accepted risk, not remediation.
 
+PR #309 reassessment (6 October): locked updates within existing ranges move
+`sharp` to 0.35.5, `source-map-js` to 1.2.2, `@modelcontextprotocol/sdk` to
+1.32.1 and `proxy-addr` to 2.0.8. Fresh audits then report zero runtime findings
+and the same seven development-only `braces` entries, paths and advisory. Only
+the lockfile hash was renewed. The 10 October expiry is unchanged. This removes
+the new advisories; the `braces` exception remains accepted risk, not remediation.
+
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
 available, confirm the complete audit is clean, then remove the exception and
