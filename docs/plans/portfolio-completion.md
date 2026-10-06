@@ -270,10 +270,14 @@ merged as `4dad3b0` on 6 October 2026. Each product has one category. All is the
 omitted `category` parameter, unknown slugs say the category does not exist, and
 search, stock, sort, share and the product return path keep the category.
 Changing category resets the page. The product page shows the stored category.
-Required CI for that pull request passed before merge. The development API did
-not yet serve `GET /api/v1/categories/` when this note was written, so the gated
-hosted browse check is still open. VIN-290 is not Done until that check is
-recorded. VIN-291 is the next story after it.
+Required CI for that pull request passed before merge. Development release
+`4dad3b0` is on
+[the storefront](https://forme-ecommerce-development.vercel.app) and
+[the API](https://forme-api-development.vercel.app). Public browsing was checked
+there: Lighting shows Task Light, the product page names Lighting, Back to the
+collection keeps `category=lighting`, and an unknown slug says that category
+does not exist. `GET /api/v1/categories/` returns the seven workspace categories.
+VIN-291 is the next story.
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
