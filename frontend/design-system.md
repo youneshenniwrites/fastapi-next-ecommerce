@@ -30,8 +30,10 @@ helper. Do not install the whole registry. Add components for real feature needs
 
 SiteHeader/SiteFooter, SectionHeading, ProductCard and ProductDetails compose the
 storefront. The mobile Sheet has a labelled dialog, close control, focus trap and
-Escape dismissal; links close it before navigating. Sorting uses shadcn Select for a themed popup with keyboard and mobile interaction. Search uses Input,
-and the labelled Checkbox filters available stock.
+Escape dismissal; links close it before navigating. Sorting uses shadcn Select for a themed popup with keyboard and mobile interaction. Search uses Input
+inside a labelled search form that submits explicitly, and the labelled Checkbox
+filters available stock. Selections live in the URL; see the
+[collection URL contract](README.md#collection-urls-vin-287).
 
 All existing page layouts now use Tailwind utilities. Preflight is enabled after
 migrating the hero, catalog, details, loading, error and not-found pages; obsolete

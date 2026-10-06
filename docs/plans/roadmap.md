@@ -68,8 +68,8 @@ Azure (#31) and broader enterprise work remain deferred as specified in that pla
 
 The next planned customer release expands catalog discovery and content up to
 100 workspace/home-office products: server queries, pagination, categories,
-product information and a safe curated import. VIN-287 is paused and amended,
-not delivered. Follow the canonical plan for the dependency order.
+product information and a safe curated import. VIN-287 is implemented
+on a branch awaiting review, not delivered. Follow the canonical plan for the dependency order.
 
 Catalog administration (VIN-295) is a separate deferred roadmap. VIN-300 groups
 later sign-in continuity, account recovery and purchase support.

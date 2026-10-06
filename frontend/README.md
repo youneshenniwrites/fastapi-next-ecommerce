@@ -1,9 +1,10 @@
 # VINDOR storefront
 
 A fictional desk-accessories catalog for the senior SWE portfolio. Next.js App
-Router and React render catalog and detail pages against FastAPI; search, stock
-filtering and price/name sorting work in the browser. Prices remain decimal strings
-and are formatted/sorted with integer pennies, without floating-point money math.
+Router and React render catalog and detail pages against FastAPI; the home page
+is server-rendered and pages through the full catalog with URL-owned search, stock
+filtering and sorting. Prices remain decimal strings from the API and are
+formatted with integer pennies, without floating-point money math.
 
 ## Run locally
 
@@ -68,10 +69,9 @@ See [photo credits](PHOTO_CREDITS.md) for sources and licences. Photographs are
 representative, not exact product specifications or brand endorsements. Unknown
 products use a neutral Lucide placeholder.
 
-The catalog currently loads at most 100 products and filters those loaded items;
-a notice appears at that limit. FastAPI's additive [catalog search endpoint](../docs/api.md#catalog-search-and-pagination-vin-289)
-supports full-catalog filtering and pagination; VIN-287 will connect it to the
-server-rendered storefront. Registration, login and the signed-in cart are implemented;
+The catalog reads FastAPI's [catalog search endpoint](../docs/api.md#catalog-search-and-pagination-vin-289)
+on the server, so filtering, ordering and counts cover the whole catalog; see
+[Collection URLs](#collection-urls-vin-287). Registration, login and the signed-in cart are implemented;
 VIN-120 checkout submission, confirmation and order history merged in PR #188; VIN-30 sandbox payments merged in PR #194 and were verified on development on 23 September; production payments remain disabled. See the canonical completion plan for merge/deployment status. See the [cart architecture and manual
 walkthrough](../docs/design/cart-storefront.md). Automated accessibility checks supplement manual keyboard/mobile
 review; they do not constitute a full accessibility certification.
@@ -103,6 +103,28 @@ handler; a successful login always returns to the collection. Profile/navigation
 and sign-out are implemented in `/account`. Desktop/mobile tests cover the complete
 registration → login → profile → logout journey. See the [account verification
 guide](../docs/account-journey.md) for a manual walkthrough, test evidence and limits.
+
+## Collection URLs (VIN-287)
+
+The URL owns the applied collection selection, so links, refresh, Back/Forward and
+shared links reproduce the same controls and results.
+
+| Parameter  | Meaning                                         | Accepted values                                                  |
+| ---------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| `q`        | Applied search, after an explicit Search submit | 1-100 characters after trimming; `%` and `_` are literal         |
+| `in_stock` | Only products with stock                        | `1` (omitted otherwise)                                          |
+| `sort`     | Ordering                                        | `featured` (default, omitted), `name`, `price-asc`, `price-desc` |
+| `page`     | 24-product page                                 | Integer from 1 to 4167 (the API's maximum offset); 1 is omitted  |
+
+Canonical links list recognised, non-default parameters in that order, for example
+`/?q=lamp&in_stock=1&sort=price-asc&page=2#collection`. Changing search, stock or
+sort resets to page 1. Unknown parameters are ignored. A recognised parameter that
+is duplicated, oversized or invalid falls back to its default and shows a short
+notice. Product links and the product page's "Back to the collection" link carry
+only these parameters, never an external return URL. A page past the end shows a
+recovery state with a link to the last page. Share results copies the canonical
+absolute URL, or reveals a selectable link when the clipboard is unavailable.
+Offset pages are not a frozen snapshot: edits between requests can move products.
 
 ## UI components
 
