@@ -86,6 +86,9 @@ export function CollectionControls({
             go(next);
           }}
         >
+          {filters.category && (
+            <input type="hidden" name="category" value={filters.category} />
+          )}
           {filters.inStock && <input type="hidden" name="in_stock" value="1" />}
           {filters.sort !== "featured" && (
             <input type="hidden" name="sort" value={shown.sort} />

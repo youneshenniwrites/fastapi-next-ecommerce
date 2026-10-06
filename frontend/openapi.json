@@ -130,6 +130,47 @@
         "title": "CartRead",
         "type": "object"
       },
+      "CategoryCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "count"
+        ],
+        "title": "CategoryCount",
+        "type": "object"
+      },
+      "CategorySummary": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "CategorySummary",
+        "type": "object"
+      },
       "DraftCreate": {
         "additionalProperties": false,
         "properties": {
@@ -336,6 +377,13 @@
       "ProductCreate": {
         "additionalProperties": false,
         "properties": {
+          "category": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "title": "Category",
+            "type": "string"
+          },
           "currency": {
             "const": "GBP",
             "default": "GBP",
@@ -384,7 +432,8 @@
         "required": [
           "name",
           "price",
-          "stock"
+          "stock",
+          "category"
         ],
         "title": "ProductCreate",
         "type": "object"
@@ -424,6 +473,9 @@
       "ProductRead": {
         "additionalProperties": false,
         "properties": {
+          "category": {
+            "$ref": "#/components/schemas/CategorySummary"
+          },
           "currency": {
             "const": "GBP",
             "default": "GBP",
@@ -467,7 +519,8 @@
           "name",
           "price",
           "stock",
-          "id"
+          "id",
+          "category"
         ],
         "title": "ProductRead",
         "type": "object"
@@ -475,6 +528,20 @@
       "ProductUpdate": {
         "additionalProperties": false,
         "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
           "currency": {
             "anyOf": [
               {
@@ -1125,6 +1192,32 @@
         "summary": "Set an absolute cart quantity",
         "tags": [
           "Cart"
+        ]
+      }
+    },
+    "/api/v1/categories/": {
+      "get": {
+        "description": "Public workspace categories in display order, each with its product count. All is not a category; omit the catalog category filter to browse everything. Uncategorized is the stored fallback for products without a named category.",
+        "operationId": "read_categories_api_v1_categories__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryCount"
+                  },
+                  "title": "Response Read Categories Api V1 Categories  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List categories",
+        "tags": [
+          "Categories"
         ]
       }
     },
@@ -2107,7 +2200,7 @@
     },
     "/api/v1/products/search": {
       "get": {
-        "description": "Public, server-filtered catalog page. Search matches product names, ignores case using the database locale and treats percent/underscore as literal characters. Featured order uses stable product IDs; name ordering follows the database collation after lowercasing. All sorts break ties by ID. Each page and its count share one database snapshot; catalog edits can change later requests.",
+        "description": "Public, server-filtered catalog page. Search matches product names, ignores case using the database locale and treats percent/underscore as literal characters. Featured order uses stable product IDs; name ordering follows the database collation after lowercasing. All sorts break ties by ID. An optional category slug narrows the same snapshot; omit it to browse every category. Each page and its count share one database snapshot; catalog edits can change later requests.",
         "operationId": "search_catalog_api_v1_products_search_get",
         "parameters": [
           {
@@ -2155,6 +2248,27 @@
             }
           },
           {
+            "description": "Stored category slug. Omit to include every category.",
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Stored category slug. Omit to include every category.",
+              "title": "Category"
+            }
+          },
+          {
             "in": "query",
             "name": "skip",
             "required": false,
@@ -2189,6 +2303,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Category does not exist."
           },
           "422": {
             "content": {

@@ -34,14 +34,21 @@ it("changes the URL only when the search is submitted", async () => {
 it("keeps other filters, resets the page and refreshes an unchanged selection", async () => {
   render(
     <CollectionControls
-      filters={{ query: "Oak", inStock: true, sort: "name", page: 2 }}
+      filters={{
+        ...defaultFilters,
+        query: "Oak",
+        inStock: true,
+        sort: "name",
+        page: 2,
+        category: "lighting",
+      }}
     />,
   );
   await act(async () => {
     fireEvent.submit(screen.getByRole("search"));
   });
   expect(router.push).toHaveBeenCalledWith(
-    "/?q=Oak&in_stock=1&sort=name#collection",
+    "/?category=lighting&q=Oak&in_stock=1&sort=name#collection",
     { scroll: false },
   );
   cleanup();

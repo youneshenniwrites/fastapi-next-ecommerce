@@ -109,6 +109,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List categories
+         * @description Public workspace categories in display order, each with its product count. All is not a category; omit the catalog category filter to browse everything. Uncategorized is the stored fallback for products without a named category.
+         */
+        get: operations["read_categories_api_v1_categories__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orders/": {
         parameters: {
             query?: never;
@@ -309,7 +329,7 @@ export interface paths {
         };
         /**
          * Search and page the complete catalog
-         * @description Public, server-filtered catalog page. Search matches product names, ignores case using the database locale and treats percent/underscore as literal characters. Featured order uses stable product IDs; name ordering follows the database collation after lowercasing. All sorts break ties by ID. Each page and its count share one database snapshot; catalog edits can change later requests.
+         * @description Public, server-filtered catalog page. Search matches product names, ignores case using the database locale and treats percent/underscore as literal characters. Featured order uses stable product IDs; name ordering follows the database collation after lowercasing. All sorts break ties by ID. An optional category slug narrows the same snapshot; omit it to browse every category. Each page and its count share one database snapshot; catalog edits can change later requests.
          */
         get: operations["search_catalog_api_v1_products_search_get"];
         put?: never;
@@ -422,6 +442,22 @@ export interface components {
             /** Subtotal */
             subtotal: string;
         };
+        /** CategoryCount */
+        CategoryCount: {
+            /** Count */
+            count: number;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
+        /** CategorySummary */
+        CategorySummary: {
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
         /** DraftCreate */
         DraftCreate: {
             /** Lines */
@@ -496,6 +532,8 @@ export interface components {
         };
         /** ProductCreate */
         ProductCreate: {
+            /** Category */
+            category: string;
             /**
              * Currency
              * @default GBP
@@ -527,6 +565,7 @@ export interface components {
         };
         /** ProductRead */
         ProductRead: {
+            category: components["schemas"]["CategorySummary"];
             /**
              * Currency
              * @default GBP
@@ -546,6 +585,8 @@ export interface components {
         };
         /** ProductUpdate */
         ProductUpdate: {
+            /** Category */
+            category?: string | null;
             /** Currency */
             currency?: "GBP" | null;
             /** Description */
@@ -918,6 +959,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_categories_api_v1_categories__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryCount"][];
                 };
             };
         };
@@ -1572,6 +1633,8 @@ export interface operations {
                 q?: string | null;
                 in_stock?: boolean;
                 sort?: "featured" | "name" | "price-asc" | "price-desc";
+                /** @description Stored category slug. Omit to include every category. */
+                category?: string | null;
                 skip?: number;
                 limit?: number;
             };
@@ -1588,6 +1651,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductPageRead"];
+                };
+            };
+            /** @description Category does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Validation Error */

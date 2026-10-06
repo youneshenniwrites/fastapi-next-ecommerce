@@ -132,6 +132,11 @@ export function Catalog({
 
   if (total === 0) {
     const filtered = hasActiveFilters(filters);
+    const categoryOnly =
+      Boolean(filters.category) &&
+      filters.query === "" &&
+      !filters.inStock &&
+      filters.sort === "featured";
     return (
       <>
         <div className="my-5">
@@ -139,14 +144,18 @@ export function Catalog({
         </div>
         <div className={stateLayout}>
           <h3>
-            {filtered
-              ? "No objects found."
-              : "A little space for something new."}
+            {categoryOnly
+              ? "Nothing in this category yet."
+              : filtered
+                ? "No objects found."
+                : "A little space for something new."}
           </h3>
           <p>
-            {filtered
-              ? "Try another search or clear your filters."
-              : "The collection is empty. Please check back soon."}
+            {categoryOnly
+              ? "Try another category, or view the whole collection."
+              : filtered
+                ? "Try another search or clear your filters."
+                : "The collection is empty. Please check back soon."}
           </p>
           {filtered && (
             <Link href="/#collection" className={buttonVariants()}>

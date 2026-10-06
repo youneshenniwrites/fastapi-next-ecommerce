@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { apiClient } from "@/lib/api/client";
 import { ProductDetails } from "@/components/product-details";
-import { collectionHref, parseCollection } from "@/lib/collection-url";
+import { parseCollection } from "@/lib/collection-url";
 export const dynamic = "force-dynamic";
 export default async function ProductPage({
   params,
@@ -20,7 +20,5 @@ export default async function ProductPage({
   if (response.status === 404) notFound();
   if (!data || !response.ok) throw new Error("Product unavailable");
   const { filters } = parseCollection(await searchParams);
-  return (
-    <ProductDetails product={data} collectionHref={collectionHref(filters)} />
-  );
+  return <ProductDetails product={data} filters={filters} />;
 }

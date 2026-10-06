@@ -36,6 +36,7 @@ const product: Product = {
   price: "12.00",
   currency: "GBP",
   stock: 10,
+  category: { slug: "desk-organization", name: "Desk organization" },
 };
 function ready(owner = "cart@example.test", quantity = 1): CartSnapshot {
   return {

@@ -2,22 +2,33 @@ import { ProductImage } from "@/components/product-image";
 import Link from "next/link";
 import { ArrowLeft, Check, Minus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CollectionBreadcrumb } from "@/components/collection-breadcrumb";
 import { container, eyebrow } from "@/components/storefront-layout";
 import { cn } from "@/lib/utils";
 import { money, type Product } from "@/lib/catalog";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import {
+  collectionHref as buildCollectionHref,
+  type CollectionFilters,
+} from "@/lib/collection-url";
 export function ProductDetails({
   product,
-  collectionHref = "/#collection",
+  filters,
 }: {
   product: Product;
-  collectionHref?: string;
+  filters: CollectionFilters;
 }) {
+  const returnHref = buildCollectionHref(filters);
+  const categoryHref = buildCollectionHref({
+    ...filters,
+    category: product.category.slug,
+    page: 1,
+  });
   return (
     <main id="main" className={cn(container, "py-10 pb-20")}>
       <Link
         className="mb-8 inline-flex items-center gap-2 text-sm hover:underline"
-        href={collectionHref}
+        href={returnHref}
       >
         <ArrowLeft className="size-4" aria-hidden="true" /> Back to the
         collection
@@ -27,6 +38,13 @@ export function ProductDetails({
           <ProductImage name={product.name} priority />
         </div>
         <div className="min-w-0 py-4">
+          <CollectionBreadcrumb
+            items={[
+              { label: "Collection", href: returnHref },
+              { label: product.category.name, href: categoryHref },
+              { label: product.name },
+            ]}
+          />
           <p className={eyebrow}>THE WORKSPACE COLLECTION</p>
           <h1 className="mb-6 [overflow-wrap:anywhere] font-serif text-4xl leading-tight tracking-tight lg:text-5xl">
             {product.name}
@@ -62,8 +80,15 @@ export function ProductDetails({
           </div>
           <dl className="mt-8 text-xs [&_div]:flex [&_div]:justify-between [&_div]:gap-4 [&_div]:border-b [&_div]:border-border [&_div]:py-3">
             <div>
-              <dt>Collection</dt>
-              <dd>Everyday focus</dd>
+              <dt>Category</dt>
+              <dd>
+                <Link
+                  href={categoryHref}
+                  className="underline underline-offset-4"
+                >
+                  {product.category.name}
+                </Link>
+              </dd>
             </div>
             <div>
               <dt>Reference</dt>

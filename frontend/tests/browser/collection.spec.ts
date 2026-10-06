@@ -533,6 +533,136 @@ test("narrow layouts and states stay accessible", async ({ page }) => {
   expect(nav!.x + nav!.width).toBeLessThanOrEqual(320);
 });
 
+const categories = (page: Page) =>
+  page.getByRole("navigation", { name: "Categories" });
+
+test("category keeps search, stock and sort, resets the page, and is shareable", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"], {
+    origin: baseURL,
+  });
+  await page.goto("/?page=2");
+  await ready(page, `${total} objects · Page 2 of 3`);
+  await categories(page)
+    .getByRole("link", { name: "Lighting, 13 objects" })
+    .click();
+  await ready(page, "13 objects");
+  expect(relative(page)).toBe("/?category=lighting");
+  await expect(
+    page.getByRole("navigation", { name: "Breadcrumb" }),
+  ).toContainText("Lighting");
+  await expect(cards(page).first()).toHaveText("Task Light");
+
+  await search(page).fill("Lumen");
+  await search(page).press("Enter");
+  await ready(page, "12 objects");
+  expect(relative(page)).toBe("/?category=lighting&q=Lumen");
+  await stock(page).click();
+  await ready(page, "8 objects");
+  expect(relative(page)).toBe("/?category=lighting&q=Lumen&in_stock=1");
+  await chooseSort(page, "Name");
+  await ready(page, "8 objects");
+  expect(relative(page)).toBe(
+    "/?category=lighting&q=Lumen&in_stock=1&sort=name",
+  );
+
+  await page.getByRole("button", { name: "Share results" }).click();
+  await expect(page.getByText("Collection link copied.")).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    `${new URL(baseURL!).origin}/?category=lighting&q=Lumen&in_stock=1&sort=name#collection`,
+  );
+
+  await page.getByRole("link", { name: "Clear all filters" }).click();
+  await ready(page, `${total} objects · Page 1 of 3`);
+  expect(relative(page)).toBe("/");
+});
+
+test("unknown categories are not found and malformed ones reset", async ({
+  page,
+}) => {
+  await page.goto("/?category=not-a-real-category&q=oak");
+  await expect(
+    page.getByRole("heading", { name: "That category doesn’t exist." }),
+  ).toBeVisible();
+  expect(relative(page)).toBe("/?category=not-a-real-category&q=oak");
+  await page.getByRole("link", { name: "View all objects" }).click();
+  await ready(page, "1 object");
+  expect(relative(page)).toBe("/?q=oak");
+
+  await page.goto("/?category=all");
+  await expect(
+    page.getByRole("heading", { name: "That category doesn’t exist." }),
+  ).toBeVisible();
+
+  await page.goto("/?category=Lighting");
+  await ready(page, `${total} objects · Page 1 of 3`);
+  await expect(page.getByText(notice, { exact: false })).toBeVisible();
+  await expect(
+    categories(page).getByRole("link", { name: "All, 60 objects" }),
+  ).toHaveAttribute("aria-current", "page");
+});
+
+test("an empty category is distinct from a search with no matches", async ({
+  page,
+}) => {
+  await page.goto("/?category=workspace-comforts&q=Lumen");
+  await expect(
+    page.getByRole("heading", { name: "No objects found." }),
+  ).toBeVisible();
+  await page.goto("/?category=workspace-comforts");
+  await ready(page, "3 objects");
+  expect(relative(page)).toBe("/?category=workspace-comforts");
+});
+
+test("product details name the category and the return link keeps it", async ({
+  page,
+}) => {
+  await page.goto("/?category=lighting&sort=name");
+  await ready(page, "13 objects");
+  await page.getByRole("link", { name: /Task Light/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Task Light", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Everyday focus")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Lighting" }).first(),
+  ).toHaveAttribute("href", "/?category=lighting&sort=name#collection");
+  const back = page.getByRole("link", { name: "Back to the collection" });
+  await expect(back).toHaveAttribute(
+    "href",
+    "/?category=lighting&sort=name#collection",
+  );
+  await back.click();
+  await ready(page, "13 objects");
+  expect(relative(page)).toBe("/?category=lighting&sort=name");
+  await expect(search(page)).toHaveValue("");
+});
+
+test("category links are reachable from the keyboard on a narrow screen", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("/");
+  await ready(page, `${total} objects · Page 1 of 3`);
+  const lighting = categories(page).getByRole("link", {
+    name: "Lighting, 13 objects",
+  });
+  await lighting.scrollIntoViewIfNeeded();
+  await lighting.focus();
+  await expect(lighting).toBeFocused();
+  const box = await lighting.boundingBox();
+  expect(box!.height).toBeGreaterThanOrEqual(40);
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  await page.keyboard.press("Enter");
+  await ready(page, "13 objects");
+  expect(relative(page)).toBe("/?category=lighting");
+  await expectAccessibleLayout(page);
+});
+
 test("desktop selection and page are accessible with the collection controls", async ({
   page,
 }) => {
