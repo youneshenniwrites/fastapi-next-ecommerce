@@ -128,7 +128,14 @@ async function CatalogData({ filters }: { filters: CollectionFilters }) {
   try {
     const client = apiClient();
     const [categoryResult, result] = await Promise.all([
-      client.GET("/api/v1/categories/"),
+      client.GET("/api/v1/categories/", {
+        params: {
+          query: {
+            q: filters.query || undefined,
+            in_stock: filters.inStock || undefined,
+          },
+        },
+      }),
       client.GET("/api/v1/products/search", {
         params: {
           query: {

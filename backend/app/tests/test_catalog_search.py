@@ -211,6 +211,14 @@ def test_category_filter_combines_with_search_stock_and_sort(client, db):
     assert by_slug["lighting"] == 2
     assert by_slug["desk-organization"] == 1
     assert by_slug["uncategorized"] == 0
+    filtered = {
+        row["slug"]: row["count"]
+        for row in client.get(
+            "/api/v1/categories/", params={"q": "mat", "in_stock": "true"}
+        ).json()
+    }
+    assert filtered["desk-organization"] == 1
+    assert filtered["lighting"] == 0
 
 
 def test_category_page_is_independent_of_other_categories(client, db):

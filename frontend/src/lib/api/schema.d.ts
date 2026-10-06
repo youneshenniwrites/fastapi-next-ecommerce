@@ -118,7 +118,7 @@ export interface paths {
         };
         /**
          * List categories
-         * @description Public workspace categories in display order, each with its product count. All is not a category; omit the catalog category filter to browse everything. Uncategorized is the stored fallback for products without a named category.
+         * @description Public workspace categories in display order. Each count uses the same name search and stock filter as the catalog, and is not limited to one category. All is not a category; omit the catalog category filter to browse everything. Uncategorized is the stored fallback.
          */
         get: operations["read_categories_api_v1_categories__get"];
         put?: never;
@@ -965,7 +965,10 @@ export interface operations {
     };
     read_categories_api_v1_categories__get: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string | null;
+                in_stock?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -979,6 +982,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CategoryCount"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

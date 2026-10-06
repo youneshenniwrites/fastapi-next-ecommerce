@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy import func, select, true
+from sqlalchemy import and_, func, select, true
 from sqlalchemy.orm import Session, aliased, selectinload
 
 from app.models.category import Category
@@ -35,12 +35,27 @@ def require_category(db: Session, slug: str) -> Category:
     return category
 
 
-def list_category_counts(db: Session) -> list[tuple[Category, int]]:
-    """Return every stored category and its product count, in display order."""
+def name_matches(query: str | None):
+    """Case-insensitive name predicate, or None when the search is blank."""
+    if not (query := (query or "").strip()):
+        return None
+    literal = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return Product.name.ilike(f"%{literal}%", escape="\\")
+
+
+def list_category_counts(
+    db: Session, *, query: str | None = None, in_stock: bool = False
+) -> list[tuple[Category, int]]:
+    """Count products per category after the same search and stock filters."""
+    matched = [Product.category_id == Category.id]
+    if (predicate := name_matches(query)) is not None:
+        matched.append(predicate)
+    if in_stock:
+        matched.append(Product.stock > 0)
     return list(
         db.execute(
             select(Category, func.count(Product.id))
-            .outerjoin(Product, Product.category_id == Category.id)
+            .outerjoin(Product, and_(*matched))
             .group_by(Category.id)
             .order_by(Category.position, Category.id)
         ).all()
@@ -59,10 +74,8 @@ def search_products(
 ) -> tuple[list[Product], int]:
     """Filter before counting and paging, with ID as the final sort key."""
     predicates = []
-    if query := (query or "").strip():
-        # Escape SQL LIKE wildcards so searches for '%' and '_' are literal.
-        literal = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        predicates.append(Product.name.ilike(f"%{literal}%", escape="\\"))
+    if (predicate := name_matches(query)) is not None:
+        predicates.append(predicate)
     if in_stock:
         predicates.append(Product.stock > 0)
     if category_id is not None:

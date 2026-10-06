@@ -59,9 +59,22 @@ it("marks the selected category and describes an empty category", () => {
 });
 
 it("explains an empty category without calling it a failed search", () => {
-  render(
+  const { rerender } = render(
     <Catalog
       filters={{ ...defaultFilters, category: "workspace-comforts" }}
+      catalog={{ items: [], total: 0, limit: 24, skip: 0 }}
+    />,
+  );
+  expect(
+    screen.getByRole("heading", { name: "Nothing in this category yet." }),
+  ).toBeTruthy();
+  rerender(
+    <Catalog
+      filters={{
+        ...defaultFilters,
+        category: "workspace-comforts",
+        sort: "name",
+      }}
       catalog={{ items: [], total: 0, limit: 24, skip: 0 }}
     />,
   );

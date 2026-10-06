@@ -133,10 +133,7 @@ export function Catalog({
   if (total === 0) {
     const filtered = hasActiveFilters(filters);
     const categoryOnly =
-      Boolean(filters.category) &&
-      filters.query === "" &&
-      !filters.inStock &&
-      filters.sort === "featured";
+      Boolean(filters.category) && filters.query === "" && !filters.inStock;
     return (
       <>
         <div className="my-5">
