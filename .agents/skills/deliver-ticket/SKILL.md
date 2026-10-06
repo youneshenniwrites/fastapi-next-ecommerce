@@ -9,6 +9,13 @@ Read root AGENTS.md, docs/delivery.md, docs/delivery-mode.md and the issue's lat
 handoff. The existing portfolio-completion plan owns priorities; this skill is
 execution guidance, not another plan. Verify actual GitHub and Git state on resume.
 
+Move the picked issue card to In progress, read it back, and only then create a
+branch, edit code, or commit. Backlog means not started. In progress means
+started and unfinished, including a parent epic that already has merged
+children. Parent epics stay put. Done only when acceptance, review, CI, and
+merge are finished. In review when a ready PR is open and waiting on review.
+Never open a draft PR.
+
 ## Scope and persistence
 
 Identify the requested finish line and existing authorization. Continue through

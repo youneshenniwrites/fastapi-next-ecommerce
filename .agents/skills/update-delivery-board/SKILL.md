@@ -7,11 +7,15 @@ Read [delivery policy](../../../docs/delivery.md). Use gh/API for project https:
 
 Reuse the existing repository issue and board item; link bot maintenance PRs from their existing maintenance issue. Add missing items within the requested scope and assign the owner. Do not create draft cards to represent completed delivery or duplicate historical summaries from the Wiki.
 
+When authorized work starts on an issue, move that issue card to In progress before any code, branch, or commit, and read the status back. Parent epics stay put.
+
 Choose status from evidence:
-- Backlog: planned, not started work, including explicitly deferred follow-ups.
-- In progress: implementation underway; retain the repository's one-active-implementation convention. Set it when work starts, before any PR exists, so the board shows the phase instead of jumping Backlog to In review when the PR opens.
-- In review: an implementing PR is open, including while checks fail or review is pending.
-- Done: acceptance criteria are met and all required implementing PRs merged.
+- Backlog: not started, including explicitly deferred follow-ups.
+- In progress: started and unfinished, including a parent epic that already has merged children. Keep one implementation ticket active unless the owner authorized parallel work.
+- In review: a ready PR is open and waiting on review. Never open a draft PR.
+- Done: acceptance, review, CI, and merge are finished.
+
+Assignee youneshenniwrites, scope labels, milestone, and priority labels still apply.
 
 Do not equate issue closure with delivery: not-planned, duplicate or superseded work needs its actual disposition recorded, not Done. Partial merges do not complete the parent issue. Record blockers without inventing a fifth status. Archive a redundant/historical card only within cleanup authorization and preserve useful context in a linked issue or Wiki page.
 
