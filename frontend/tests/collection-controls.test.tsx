@@ -81,3 +81,22 @@ it("limits search text to the API maximum", () => {
   render(<CollectionControls filters={defaultFilters} />);
   expect(box().maxLength).toBe(100);
 });
+
+it("keeps searching until the address changes, then clears a different selection", async () => {
+  const filters = { ...defaultFilters, query: "chair" };
+  const { rerender } = render(<CollectionControls filters={filters} />);
+  fireEvent.change(box(), { target: { value: "lamp" } });
+  await act(async () => {
+    fireEvent.submit(screen.getByRole("search"));
+  });
+  rerender(<CollectionControls filters={filters} />);
+  expect(screen.getByRole("button", { name: "Searching…" })).toHaveProperty(
+    "disabled",
+    true,
+  );
+  rerender(<CollectionControls filters={defaultFilters} />);
+  expect(screen.getByRole("button", { name: "Search" })).toHaveProperty(
+    "disabled",
+    false,
+  );
+});

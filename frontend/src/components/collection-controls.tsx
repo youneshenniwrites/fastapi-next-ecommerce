@@ -36,7 +36,6 @@ export function CollectionControls({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [searching, setSearching] = useState(false);
-  const submittedQuery = useRef(filters.query);
   // Show a changed checkbox/sort immediately while the server renders the
   // results; it reverts to the URL-owned value if navigation is abandoned.
   const [shown, setShown] = useOptimistic(filters);
@@ -49,11 +48,15 @@ export function CollectionControls({
     setText(filters.query);
   }
   const current = collectionHref(filters);
+  const submittedHref = useRef(current);
+  const hrefAtSubmit = useRef(current);
   // The transition flag drops before the slow catalog response arrives.
-  // Keep the search button in its waiting state until the applied query matches.
+  // Stay on Searching while this address is unchanged, leave it when the
+  // address becomes the submitted selection or a different one.
   useEffect(() => {
-    if (filters.query === submittedQuery.current) setSearching(false);
-  }, [filters.query, searching]);
+    if (current === submittedHref.current || current !== hrefAtSubmit.current)
+      setSearching(false);
+  }, [current, searching]);
 
   function go(next: CollectionFilters) {
     const href = collectionHref(next);
@@ -76,9 +79,11 @@ export function CollectionControls({
           onSubmit={(event) => {
             event.preventDefault();
             const query = text.trim();
-            submittedQuery.current = query;
+            const next = { ...shown, query, page: 1 };
+            hrefAtSubmit.current = current;
+            submittedHref.current = collectionHref(next);
             setSearching(true);
-            go({ ...shown, query, page: 1 });
+            go(next);
           }}
         >
           {filters.inStock && <input type="hidden" name="in_stock" value="1" />}
