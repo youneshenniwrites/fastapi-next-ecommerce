@@ -218,6 +218,7 @@ class ApplySidebar(unittest.TestCase):
             "body": "",
             "user": {"login": "owner"},
             "assignees": [{"login": "reviewer"}],
+            "milestone": {"number": 5, "title": "Richer catalog and discovery"},
             "labels": [
                 {"name": "documentation"},
                 {"name": "tooling"},
@@ -319,6 +320,69 @@ class ApplySidebar(unittest.TestCase):
         ):
             metadata.main()
         self.assertIn("milestone", str(raised.exception))
+
+    def test_matching_milestone_is_not_sent(self):
+        pull = {
+            "title": "[VIN-312] [chore] Sidebar",
+            "body": "Closes #312",
+            "user": {"login": "owner"},
+            "labels": [{"name": "tooling"}],
+        }
+        calls = []
+        readback = issue(number=312, milestone=None, labels=("tooling",))
+        readback["assignees"] = [{"login": metadata.OWNER}]
+
+        def fake_api(path, payload=None, method=None):
+            calls.append((path, payload, method))
+            if path.endswith("/pulls/313"):
+                return pull
+            if path.endswith("/issues/312"):
+                return issue(number=312, milestone=None, labels=())
+            if path.endswith("/issues/313") and method is None:
+                return readback
+            return {}
+
+        with (
+            patch.object(metadata, "api", fake_api),
+            patch("sys.argv", ["set_metadata.py", "313", "--labels", "tooling"]),
+            redirect_stdout(io.StringIO()),
+        ):
+            metadata.main()
+        self.assertFalse(
+            any(payload and "milestone" in payload for _, payload, _ in calls)
+        )
+        self.assertTrue(any(path.endswith("/assignees") for path, _, _ in calls))
+
+        matched = {
+            "title": "[VIN-287] [docs] Record delivery",
+            "body": "",
+            "user": {"login": "owner"},
+            "labels": [{"name": "documentation"}, {"name": "priority: high"}],
+            "milestone": {"number": 5, "title": "Richer catalog and discovery"},
+        }
+        matched_calls = []
+
+        def same_number(path, payload=None, method=None):
+            matched_calls.append((path, payload, method))
+            if path.endswith("/pulls/311"):
+                return matched
+            if path.endswith("/issues/287"):
+                return issue()
+            if path.endswith("/issues/311") and method is None:
+                stored = issue(labels=("documentation", "priority: high"))
+                stored["assignees"] = [{"login": metadata.OWNER}]
+                return stored
+            return {}
+
+        with (
+            patch.object(metadata, "api", same_number),
+            patch("sys.argv", ["set_metadata.py", "311", "--labels", "documentation"]),
+            redirect_stdout(io.StringIO()),
+        ):
+            metadata.main()
+        self.assertFalse(
+            any(payload and "milestone" in payload for _, payload, _ in matched_calls)
+        )
 
     def test_missing_milestone_is_a_failure(self):
         pull = {

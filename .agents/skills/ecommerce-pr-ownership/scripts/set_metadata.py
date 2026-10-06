@@ -83,6 +83,13 @@ def assign_owner(pr, current):
         )
 
 
+def milestone_number(value):
+    """Return a milestone number, or None when the sidebar has no milestone."""
+    if not value:
+        return None
+    return value.get("number")
+
+
 def drop_stale_priority(pr, current_labels, desired):
     """Remove priority labels the linked issue no longer has."""
     desired_set = set(desired)
@@ -128,11 +135,13 @@ def main():
     # partial sidebar can be repaired by running the helper again.
     api(f"repos/{REPO}/issues/{args.pr}/labels", {"labels": [*args.labels, *priority]})
     if source:
-        api(
-            f"repos/{REPO}/issues/{args.pr}",
-            {"milestone": None if milestone is None else milestone["number"]},
-            method="PATCH",
-        )
+        desired_number = milestone_number(milestone)
+        if milestone_number(pull.get("milestone")) != desired_number:
+            api(
+                f"repos/{REPO}/issues/{args.pr}",
+                {"milestone": desired_number},
+                method="PATCH",
+            )
         drop_stale_priority(args.pr, existing_labels, priority)
     try:
         assign_owner(args.pr, existing_assignees)

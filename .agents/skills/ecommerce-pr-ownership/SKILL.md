@@ -62,7 +62,9 @@ milestone when the issue has none. Adding assignees and scope labels keeps
 people and scope labels already on the pull request. If adding the assignee is
 rejected, the fallback update sends the people already assigned plus the owner.
 A later run matches the linked issue again: it clears a milestone the issue no
-longer has, and removes a `priority:` label the issue no longer has. The helper
+longer has, and removes a `priority:` label the issue no longer has. It does
+not send a milestone update when the pull request already matches, including
+when both are empty. The helper
 reads the sidebar back. `--dry-run` reads the PR and prints intended changes
 without writing. Re-running it is safe if a previous call only partially succeeded.
 
