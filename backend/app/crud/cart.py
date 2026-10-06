@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from fastapi import HTTPException
 from sqlalchemy import delete, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.cart import CartLine
 from app.models.product import Product
@@ -19,6 +19,7 @@ def read_cart(db: Session, user_id: int) -> CartRead:
         .join(Product, Product.id == CartLine.product_id)
         .where(CartLine.user_id == user_id)
         .order_by(CartLine.product_id)
+        .options(selectinload(Product.category))
         .execution_options(populate_existing=True)
     ).all()
     items = [

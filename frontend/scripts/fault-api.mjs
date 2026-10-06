@@ -27,6 +27,10 @@ createServer((req, res) => {
     res.end('{"detail":"unavailable"}');
     return;
   }
+  if (path === "/api/v1/categories" || path === "/api/v1/categories/") {
+    res.end("[]");
+    return;
+  }
   if (path === "/api/v1/products/search") {
     const skip = Number(
       new URL(req.url, "http://127.0.0.1").searchParams.get("skip"),

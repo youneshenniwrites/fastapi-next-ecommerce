@@ -18,6 +18,15 @@ def test_openapi_documents_security_errors_and_money(client):
     assert parameters["limit"]["maximum"] == 100
     assert parameters["skip"]["maximum"] == 100000
     assert parameters["sort"]["enum"] == ["featured", "name", "price-asc", "price-desc"]
+    assert parameters["category"]["anyOf"][0]["pattern"] == (
+        "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    )
+    assert "404" in catalog["responses"]
+    categories = paths["/api/v1/categories/"]["get"]
+    assert not categories.get("security")
+    assert schema["components"]["schemas"]["ProductRead"]["properties"]["category"][
+        "$ref"
+    ].endswith("CategorySummary")
     assert set(schema["components"]["schemas"]["ProductPageRead"]["required"]) == {
         "items",
         "total",

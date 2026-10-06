@@ -111,17 +111,21 @@ shared links reproduce the same controls and results.
 
 | Parameter  | Meaning                                         | Accepted values                                                  |
 | ---------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| `category` | One workspace category                          | A stored slug such as `lighting`; omitted for All                |
 | `q`        | Applied search, after an explicit Search submit | 1-100 characters after trimming; `%` and `_` are literal         |
 | `in_stock` | Only products with stock                        | `1` (omitted otherwise)                                          |
 | `sort`     | Ordering                                        | `featured` (default, omitted), `name`, `price-asc`, `price-desc` |
 | `page`     | 24-product page                                 | Integer from 1 to 4167 (the API's maximum offset); 1 is omitted  |
 
 Canonical links list recognised, non-default parameters in that order, for example
-`/?q=lamp&in_stock=1&sort=price-asc&page=2#collection`. Changing search, stock or
-sort resets to page 1. Unknown parameters are ignored. A recognised parameter that
-is duplicated, oversized or invalid falls back to its default and shows a short
-notice. Product links and the product page's "Back to the collection" link carry
-only these parameters, never an external return URL. A page past the end shows a
+`/?category=lighting&q=lamp&in_stock=1&sort=price-asc&page=2#collection`. Changing
+search, stock, sort or category resets to page 1. All is the omitted `category`
+parameter, not a stored category. A well-formed unknown slug stays in the URL and
+shows that the category does not exist. Unknown parameters are ignored. A
+recognised parameter that is duplicated, oversized or invalid falls back to its
+default and shows a short notice. Product links and the product page's "Back to
+the collection" link carry only these parameters, never an external return URL.
+The product page names the product's category. A page past the end shows a
 recovery state with a link to the last page. Share results copies the canonical
 absolute URL, or reveals a selectable link when the clipboard is unavailable.
 Offset pages are not a frozen snapshot: edits between requests can move products.

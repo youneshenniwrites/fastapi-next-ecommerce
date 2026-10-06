@@ -174,7 +174,12 @@ def test_write_endpoints_share_one_bucket(client, user, token, db, monkeypatch):
     )
     throttled = client.post(
         "/api/v1/products/",
-        json={"name": "Throttled", "price": 5, "stock": 1},
+        json={
+            "name": "Throttled",
+            "price": 5,
+            "stock": 1,
+            "category": "uncategorized",
+        },
         headers=headers,
     )
     assert throttled.status_code == 429

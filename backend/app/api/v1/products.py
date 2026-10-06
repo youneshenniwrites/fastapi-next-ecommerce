@@ -8,6 +8,7 @@ from app.core.rate_limit import enforce_write_limit
 from app.crud.product import (
     create_product,
     delete_product,
+    get_category_by_slug,
     get_product,
     get_products,
     search_products,
@@ -58,20 +59,46 @@ def read_products(
         "case using the database locale and treats percent/underscore as literal "
         "characters. Featured order "
         "uses stable product IDs; name ordering follows the database collation "
-        "after lowercasing. All sorts break ties by ID. Each page and its count "
-        "share one database snapshot; catalog edits can change later requests."
+        "after lowercasing. All sorts break ties by ID. An optional category "
+        "slug narrows the same snapshot; omit it to browse every category. "
+        "Each page and its count share one database snapshot; catalog edits "
+        "can change later requests."
     ),
+    responses={
+        404: {"model": ErrorResponse, "description": "Category does not exist."},
+    },
 )
 def search_catalog(
     db: Annotated[Session, Depends(get_db)],
     q: Annotated[str | None, Query(max_length=100, pattern=r"^[^\x00]*$")] = None,
     in_stock: Annotated[bool, Query()] = False,
     sort: Annotated[ProductSort, Query()] = "featured",
+    category: Annotated[
+        str | None,
+        Query(
+            min_length=1,
+            max_length=64,
+            pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            description="Stored category slug. Omit to include every category.",
+        ),
+    ] = None,
     skip: Annotated[int, Query(ge=0, le=100000)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 24,
 ):
+    category_id = None
+    if category is not None:
+        found = get_category_by_slug(db, category)
+        if found is None:
+            raise HTTPException(status_code=404, detail="Category not found")
+        category_id = found.id
     items, total = search_products(
-        db, query=q, in_stock=in_stock, sort=sort, skip=skip, limit=limit
+        db,
+        query=q,
+        in_stock=in_stock,
+        sort=sort,
+        skip=skip,
+        limit=limit,
+        category_id=category_id,
     )
     return ProductPageRead(items=items, total=total, limit=limit, skip=skip)
 

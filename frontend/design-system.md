@@ -32,8 +32,10 @@ SiteHeader/SiteFooter, SectionHeading, ProductCard and ProductDetails compose th
 storefront. The mobile Sheet has a labelled dialog, close control, focus trap and
 Escape dismissal; links close it before navigating. Sorting uses shadcn Select for a themed popup with keyboard and mobile interaction. Search uses Input
 inside a labelled search form that submits explicitly, and the labelled Checkbox
-filters available stock. Selections live in the URL; see the
-[collection URL contract](README.md#collection-urls-vin-287).
+filters available stock. Selections live in the URL, including the workspace category; see the
+[collection URL contract](README.md#collection-urls-vin-287). Category choices are
+links with counts in a labelled navigation, and the collection and product pages
+show a breadcrumb. All is the cleared category, not a stored one.
 
 All existing page layouts now use Tailwind utilities. Preflight is enabled after
 migrating the hero, catalog, details, loading, error and not-found pages; obsolete

@@ -11,7 +11,7 @@ from fastapi.openapi.docs import (
 )
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app.api.v1 import auth, cart, diagnostics, orders, payments, products
+from app.api.v1 import auth, cart, categories, diagnostics, orders, payments, products
 from app.core.observability import CommerceMetricsMiddleware, init_observability
 from app.core.rate_limit_diagnostics import RateLimitDiagnosticsMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware, internal_server_error
@@ -172,7 +172,7 @@ async def health_check() -> dict[str, str]:
 
 
 # Routers.
-# from app.api.v1 import products, users
+app.include_router(categories.router, prefix="/api/v1/categories", tags=["Categories"])
 app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(orders.router)

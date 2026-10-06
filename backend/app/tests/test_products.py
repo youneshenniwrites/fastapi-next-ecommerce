@@ -17,7 +17,12 @@ def test_product_write_permissions(client, db, user, token, role, expected):
     db.commit()
     response = client.post(
         "/api/v1/products/",
-        json={"name": "New", "price": 12, "stock": 3},
+        json={
+            "name": "New",
+            "price": 12,
+            "stock": 3,
+            "category": "uncategorized",
+        },
         headers=headers,
     )
     assert response.status_code == expected
@@ -72,10 +77,20 @@ def admin_headers(user, token, db):
         {"currency": None},
         {"description": "x" * 10001},
         {"unknown": "value"},
+        {"category": "all"},
+        {"category": "Not A Slug"},
+        {"category": "missing-category"},
+        {"category": None},
     ],
 )
 def test_invalid_product_create(client, admin_headers, db, invalid):
-    payload = {"name": "Valid", "price": "12.34", "stock": 1, **invalid}
+    payload = {
+        "name": "Valid",
+        "price": "12.34",
+        "stock": 1,
+        "category": "uncategorized",
+        **invalid,
+    }
     response = client.post("/api/v1/products/", json=payload, headers=admin_headers)
     assert response.status_code == 422
     assert db.query(Product).count() == 0
@@ -92,6 +107,9 @@ def test_invalid_product_create(client, admin_headers, db, invalid):
         {"stock": -1},
         {"price": "12.345"},
         {"currency": "EUR"},
+        {"category": None},
+        {"category": "all"},
+        {"category": "missing-category"},
     ],
 )
 def test_invalid_product_update_preserves_record(client, admin_headers, db, invalid):
@@ -106,24 +124,42 @@ def test_invalid_product_update_preserves_record(client, admin_headers, db, inva
     assert product.name == "Original"
     assert product.stock == 2
     assert str(product.price) == "12.34"
+    assert product.category.slug == "uncategorized"
 
 
 def test_decimal_price_roundtrip_and_partial_update(client, admin_headers):
     created = client.post(
         "/api/v1/products/",
         headers=admin_headers,
-        json={"name": "  Tea  ", "price": "19.90", "stock": 2, "description": "Box"},
+        json={
+            "name": "  Tea  ",
+            "price": "19.90",
+            "stock": 2,
+            "description": "Box",
+            "category": "lighting",
+        },
     )
     assert created.status_code == 201
     product = created.json()
     assert product["name"] == "Tea"
     assert product["price"] == "19.90"
     assert product["currency"] == "GBP"
+    assert product["category"] == {"slug": "lighting", "name": "Lighting"}
     url = f"/api/v1/products/{product['id']}"
     response = client.put(url, json={"description": None}, headers=admin_headers)
     assert response.status_code == 200
     assert response.json()["description"] is None
     assert response.json()["price"] == "19.90"
+    assert response.json()["category"]["slug"] == "lighting"
+    moved = client.put(
+        url, json={"category": "writing-and-planning"}, headers=admin_headers
+    )
+    assert moved.status_code == 200
+    assert moved.json()["category"] == {
+        "slug": "writing-and-planning",
+        "name": "Writing and planning",
+    }
+    assert moved.json()["price"] == "19.90"
     assert client.get(url).json()["currency"] == "GBP"
     assert client.delete(url, headers=admin_headers).status_code == 204
     assert client.get(url).status_code == 404
@@ -159,24 +195,37 @@ def test_pagination_is_ordered(client, db):
     ],
 )
 def test_database_constraints_reject_invalid_writes(db, values):
-    from sqlalchemy import insert
+    from sqlalchemy import insert, select
     from sqlalchemy.exc import DataError, IntegrityError
 
+    from app.models.category import Category
+
+    category_id = db.scalar(select(Category.id).where(Category.slug == "uncategorized"))
     with pytest.raises((IntegrityError, DataError)):
         db.execute(
             insert(Product).values(
-                {"name": "Valid", "price": 1, "stock": 1, "currency": "GBP", **values}
+                {
+                    "name": "Valid",
+                    "price": 1,
+                    "stock": 1,
+                    "currency": "GBP",
+                    "category_id": category_id,
+                    **values,
+                }
             )
         )
         db.commit()
     db.rollback()
 
 
-@pytest.mark.parametrize("field", ["name", "price", "stock", "currency"])
+@pytest.mark.parametrize("field", ["name", "price", "stock", "currency", "category_id"])
 def test_database_required_columns(db, field):
-    from sqlalchemy import insert
+    from sqlalchemy import insert, select
     from sqlalchemy.exc import IntegrityError
 
+    from app.models.category import Category
+
+    category_id = db.scalar(select(Category.id).where(Category.slug == "uncategorized"))
     with pytest.raises(IntegrityError):
         db.execute(
             insert(Product).values(
@@ -185,6 +234,7 @@ def test_database_required_columns(db, field):
                     "price": 1,
                     "stock": 1,
                     "currency": "GBP",
+                    "category_id": category_id,
                     field: None,
                 }
             )

@@ -25,6 +25,8 @@ export type CollectionFilters = {
   inStock: boolean;
   sort: Sort;
   page: number;
+  /** Stored category slug. Empty means All, which is not a category. */
+  category: string;
 };
 
 export const defaultFilters: CollectionFilters = {
@@ -32,7 +34,10 @@ export const defaultFilters: CollectionFilters = {
   inStock: false,
   sort: "featured",
   page: 1,
+  category: "",
 };
+
+const categorySlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export type RawParams =
   URLSearchParams | Record<string, string | string[] | undefined>;
@@ -92,12 +97,19 @@ export function parseCollection(input: RawParams): {
       filters.page = Number(page);
     else rejected = true;
   }
+  const category = single("category");
+  if (category !== undefined) {
+    if (category.length <= 64 && categorySlug.test(category))
+      filters.category = category;
+    else rejected = true;
+  }
   return { filters, rejected };
 }
 
 /** Canonical query string: recognised, non-default parameters in fixed order. */
 export function collectionQuery(filters: CollectionFilters): string {
   const params = new URLSearchParams();
+  if (filters.category) params.set("category", filters.category);
   if (filters.query) params.set("q", filters.query);
   if (filters.inStock) params.set("in_stock", "1");
   if (filters.sort !== defaultFilters.sort) params.set("sort", filters.sort);
@@ -114,7 +126,8 @@ export function hasActiveFilters(filters: CollectionFilters): boolean {
   return (
     filters.query !== "" ||
     filters.inStock ||
-    filters.sort !== defaultFilters.sort
+    filters.sort !== defaultFilters.sort ||
+    filters.category !== ""
   );
 }
 

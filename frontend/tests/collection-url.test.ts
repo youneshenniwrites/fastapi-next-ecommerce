@@ -25,8 +25,18 @@ describe("collection URL parsing", () => {
 
   it("reads every recognised parameter", () => {
     expect(parse("q=%20oak%20&in_stock=1&sort=price-desc&page=3")).toEqual({
-      filters: { query: "oak", inStock: true, sort: "price-desc", page: 3 },
+      filters: {
+        query: "oak",
+        inStock: true,
+        sort: "price-desc",
+        page: 3,
+        category: "",
+      },
       rejected: false,
+    });
+    expect(parse("category=lighting&page=4").filters).toMatchObject({
+      category: "lighting",
+      page: 4,
     });
   });
 
@@ -109,8 +119,18 @@ describe("canonical collection URLs", () => {
         sort: "name",
         inStock: true,
         query: "desk mat",
+        category: "lighting",
       }),
-    ).toBe("/?q=desk+mat&in_stock=1&sort=name&page=2#collection");
+    ).toBe(
+      "/?category=lighting&q=desk+mat&in_stock=1&sort=name&page=2#collection",
+    );
+    expect(
+      collectionHref({
+        ...defaultFilters,
+        category: "lighting",
+        page: 4,
+      }),
+    ).toBe("/?category=lighting&page=4#collection");
   });
 
   it("round-trips awkward search text through serialization", () => {
@@ -153,5 +173,16 @@ describe("active filters", () => {
     expect(hasActiveFilters({ ...defaultFilters, query: "oak" })).toBe(true);
     expect(hasActiveFilters({ ...defaultFilters, inStock: true })).toBe(true);
     expect(hasActiveFilters({ ...defaultFilters, sort: "name" })).toBe(true);
+    expect(hasActiveFilters({ ...defaultFilters, category: "lighting" })).toBe(
+      true,
+    );
+    expect(parse("category=ALL")).toMatchObject({
+      filters: { category: "" },
+      rejected: true,
+    });
+    expect(parse("category=all").filters.category).toBe("all");
+    expect(parse("category=not-a-category").filters.category).toBe(
+      "not-a-category",
+    );
   });
 });

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { CatalogSkeleton } from "@/components/catalog-skeleton";
 import { ArrowUpRight, Minus } from "lucide-react";
 import {
@@ -13,8 +14,11 @@ import { RetryCatalog } from "@/components/retry-catalog";
 import Image from "next/image";
 import { apiClient } from "@/lib/api/client";
 import { Catalog } from "@/components/catalog";
+import { CategoryNav } from "@/components/category-nav";
+import { CollectionBreadcrumb } from "@/components/collection-breadcrumb";
 import { CollectionControls } from "@/components/collection-controls";
 import {
+  collectionHref,
   collectionQuery,
   pageSize,
   parseCollection,
@@ -119,30 +123,81 @@ export default async function Home({
 
 async function CatalogData({ filters }: { filters: CollectionFilters }) {
   let catalog;
+  let categories;
+  let missingCategory = false;
   try {
-    const result = await apiClient().GET("/api/v1/products/search", {
-      params: {
-        query: {
-          q: filters.query || undefined,
-          in_stock: filters.inStock || undefined,
-          sort: filters.sort,
-          skip: skipForPage(filters.page),
-          limit: pageSize,
+    const client = apiClient();
+    const [categoryResult, result] = await Promise.all([
+      client.GET("/api/v1/categories/", {
+        params: {
+          query: {
+            q: filters.query || undefined,
+            in_stock: filters.inStock || undefined,
+          },
         },
-      },
-    });
-    if (result.error || !result.data) throw new Error("Catalog unavailable");
-    catalog = result.data;
+      }),
+      client.GET("/api/v1/products/search", {
+        params: {
+          query: {
+            q: filters.query || undefined,
+            in_stock: filters.inStock || undefined,
+            sort: filters.sort,
+            category: filters.category || undefined,
+            skip: skipForPage(filters.page),
+            limit: pageSize,
+          },
+        },
+      }),
+    ]);
+    if (categoryResult.error || !categoryResult.data)
+      throw new Error("Catalog unavailable");
+    categories = categoryResult.data;
+    if (result.response.status === 404 && filters.category)
+      missingCategory = true;
+    else if (result.error || !result.data)
+      throw new Error("Catalog unavailable");
+    else catalog = result.data;
   } catch {
     catalog = null;
+    categories = null;
   }
-  return catalog === null ? (
-    <div className={stateLayout} role="alert" aria-label="Catalog unavailable">
-      <h3>The collection is taking a moment.</h3>
-      <p>We couldn’t reach the catalog. Please try again shortly.</p>
-      <RetryCatalog />
-    </div>
-  ) : (
-    <Catalog catalog={catalog} filters={filters} />
+  if (categories === null || (catalog === null && !missingCategory)) {
+    return (
+      <div
+        className={stateLayout}
+        role="alert"
+        aria-label="Catalog unavailable"
+      >
+        <h3>The collection is taking a moment.</h3>
+        <p>We couldn’t reach the catalog. Please try again shortly.</p>
+        <RetryCatalog />
+      </div>
+    );
+  }
+  const selected = categories.find(
+    (category) => category.slug === filters.category,
+  );
+  const allHref = collectionHref({ ...filters, category: "", page: 1 });
+  const crumbs = missingCategory
+    ? [{ label: "Collection", href: allHref }, { label: "Unknown category" }]
+    : selected
+      ? [{ label: "Collection", href: allHref }, { label: selected.name }]
+      : [{ label: "Collection" }];
+  return (
+    <>
+      <CollectionBreadcrumb items={crumbs} />
+      <CategoryNav categories={categories} filters={filters} />
+      {missingCategory || !catalog ? (
+        <div className={stateLayout}>
+          <h3>That category doesn’t exist.</h3>
+          <p>Choose a category from the list, or view the whole collection.</p>
+          <Link href={allHref} className={buttonVariants()}>
+            View all objects
+          </Link>
+        </div>
+      ) : (
+        <Catalog catalog={catalog} filters={filters} />
+      )}
+    </>
   );
 }

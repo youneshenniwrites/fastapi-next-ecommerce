@@ -1,4 +1,5 @@
 from app.models.cart import CartLine
+from app.models.category import Category
 from app.models.demo_catalog import DemoCatalog
 from app.models.order import Order, OrderLine, PaymentEvent
 from app.models.product import Product
@@ -9,6 +10,7 @@ __all__ = [
     "Order",
     "OrderLine",
     "CartLine",
+    "Category",
     "DemoCatalog",
     "Product",
     "User",

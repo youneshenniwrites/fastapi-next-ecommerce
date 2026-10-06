@@ -1,17 +1,24 @@
+from __future__ import annotations
+
 from datetime import datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
+    ForeignKey,
     Numeric,
     String,
     Text,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.category import Category
 
 
 class Product(Base):
@@ -50,3 +57,11 @@ class Product(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "categories.id", name="fk_products_category_id", ondelete="RESTRICT"
+        ),
+        nullable=False,
+        index=True,
+    )
+    category: Mapped[Category] = relationship(back_populates="products")

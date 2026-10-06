@@ -37,6 +37,7 @@ def test_migration_upgrade_downgrade_and_metadata(tmp_path):
         "demo_catalog_editions",
         "orders",
         "order_lines",
+        "categories",
     } <= set(inspect(engine).get_table_names())
     schema = inspect(engine)
     assert schema.get_pk_constraint("cart_lines")["constrained_columns"] == [
@@ -123,5 +124,97 @@ def test_existing_product_migration_preserves_money_and_rejects_loss(tmp_path):
         assert (
             connection.execute(text("SELECT price FROM products")).scalar_one() == 1.234
         )
+    migrate("downgrade", "base")
+    engine.dispose()
+
+
+def test_category_migration_assigns_known_products_without_overwriting_edits(tmp_path):
+    """Keep ids and edits, and only fill a category for known names or the fallback."""
+    from decimal import Decimal
+
+    from sqlalchemy import create_engine, inspect, text
+
+    url = f"sqlite:///{tmp_path / 'categories.db'}"
+    env = dict(os.environ, DATABASE_URL=url)
+
+    def migrate(*args):
+        subprocess.run(
+            [sys.executable, "-m", "alembic", *args],
+            cwd=BACKEND,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    migrate("upgrade", "0007")
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO products (name, description, price, currency, stock) "
+                "VALUES "
+                "('Task Light', 'Edited copy', 12.34, 'GBP', 5), "
+                "('Renamed object', 'Keep me', 8.00, 'GBP', 3)"
+            )
+        )
+        before = (
+            connection.execute(
+                text(
+                    "SELECT id, name, description, price, stock FROM products ORDER BY id"
+                )
+            )
+            .mappings()
+            .all()
+        )
+    migrate("upgrade", "head")
+    migrate("check")
+    with engine.connect() as connection:
+        rows = (
+            connection.execute(
+                text(
+                    "SELECT products.id, products.name, products.description, "
+                    "products.price, products.stock, categories.slug "
+                    "FROM products JOIN categories ON categories.id = products.category_id "
+                    "ORDER BY products.id"
+                )
+            )
+            .mappings()
+            .all()
+        )
+        assert (
+            connection.execute(
+                text("SELECT COUNT(*) FROM categories WHERE slug = 'all'")
+            ).scalar_one()
+            == 0
+        )
+    assert [row["id"] for row in rows] == [row["id"] for row in before]
+    assert rows[0]["name"] == "Task Light"
+    assert rows[0]["description"] == "Edited copy"
+    assert Decimal(str(rows[0]["price"])) == Decimal("12.34")
+    assert rows[0]["stock"] == 5
+    assert rows[0]["slug"] == "lighting"
+    assert rows[1]["name"] == "Renamed object"
+    assert rows[1]["description"] == "Keep me"
+    assert Decimal(str(rows[1]["price"])) == Decimal("8.00")
+    assert rows[1]["stock"] == 3
+    assert rows[1]["slug"] == "uncategorized"
+    migrate("downgrade", "0007")
+    assert "category_id" not in {
+        column["name"] for column in inspect(engine).get_columns("products")
+    }
+    assert "categories" not in inspect(engine).get_table_names()
+    with engine.connect() as connection:
+        kept = (
+            connection.execute(
+                text("SELECT name, description, price, stock FROM products ORDER BY id")
+            )
+            .mappings()
+            .all()
+        )
+    assert kept[0]["name"] == "Task Light"
+    assert kept[0]["description"] == "Edited copy"
+    assert Decimal(str(kept[0]["price"])) == Decimal("12.34")
+    assert kept[1]["name"] == "Renamed object"
     migrate("downgrade", "base")
     engine.dispose()
