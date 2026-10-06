@@ -251,11 +251,14 @@ Delivery board remains available as the combined overview.
 | [VIN-291](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/291) | Useful bounded product facts and photos independent of mutable names | VIN-290 |
 | [VIN-292](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/292) | Curated assortment, provenance and a repeatable non-destructive import | VIN-290/291 and paged browsing |
 
-VIN-287 is implemented on the Cursor session branch (server-rendered pages, URL
-filters, share and product return) with unit, component and browser tests, but it
-has no PR, external review or merge yet; the board and this plan stay at their last
-recorded status until that happens. VIN-250's separate unfinished
-smoke-retry draft is also preserved and parked; neither is a delivered feature.
+VIN-287 is implemented on
+[PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
+(`feat/vin-287-share-collection`): server-rendered pages, URL filters, share
+and product return, with unit, component and browser tests in that branch.
+External review, CI, merge and hosted verification are still outstanding, so
+the story stays In progress and is not a delivered feature. VIN-250's separate
+unfinished smoke-retry draft is also preserved and parked; it is not a
+delivered feature either.
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
