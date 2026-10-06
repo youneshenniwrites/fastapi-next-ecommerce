@@ -46,8 +46,10 @@ export function CartLink({
       onClick={onClick}
       onPointerDown={(event) => {
         // The streamed header is replaced when the cart snapshot arrives. A
-        // click that lands during that swap never finishes, so start the
-        // full navigation at press time. Modified clicks keep native behavior.
+        // mouse click that lands during that swap never finishes, so a mouse
+        // press starts the navigation. Touch contact is not activation: a
+        // finger can still scroll or long-press. If that gesture ends after
+        // the header was replaced, finish it from the window.
         if (
           event.button !== 0 ||
           event.metaKey ||
@@ -56,7 +58,26 @@ export function CartLink({
           event.altKey
         )
           return;
-        window.location.assign("/cart");
+        if (event.pointerType === "mouse") {
+          window.location.assign("/cart");
+          return;
+        }
+        const link = event.currentTarget;
+        const pointerId = event.pointerId;
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const finish = (end: PointerEvent) => {
+          if (end.pointerId !== pointerId) return;
+          window.removeEventListener("pointerup", finish);
+          window.removeEventListener("pointercancel", finish);
+          if (end.type === "pointercancel") return;
+          if (Math.hypot(end.clientX - startX, end.clientY - startY) > 10)
+            return;
+          if (link.isConnected) return;
+          window.location.assign("/cart");
+        };
+        window.addEventListener("pointerup", finish);
+        window.addEventListener("pointercancel", finish);
       }}
     >
       {content}
