@@ -80,7 +80,12 @@ def test_cli_transactions_and_login(db, client, monkeypatch, capsys):
     result = client.post(
         "/api/v1/products/",
         headers={"Authorization": f"Bearer {token}"},
-        json={"name": "Admin product", "price": "1.20", "stock": 1},
+        json={
+            "name": "Admin product",
+            "price": "1.20",
+            "stock": 1,
+            "category": "desk-organization",
+        },
     )
     assert result.status_code == 201
     assert "demo-password123" not in capsys.readouterr().out

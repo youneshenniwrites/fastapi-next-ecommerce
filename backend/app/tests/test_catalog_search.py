@@ -1,7 +1,9 @@
 """Public catalog queries against disposable SQLite and CI PostgreSQL databases."""
 
 import pytest
+from sqlalchemy import select
 
+from app.models.category import Category
 from app.models.product import Product
 
 SEARCH = "/api/v1/products/search"
@@ -149,6 +151,78 @@ def test_empty_and_out_of_range_catalog_pages(client, db):
         "limit": 24,
         "skip": 100,
     }
+
+
+def _categorized(db, name, *, category, price="1.00", stock=1):
+    category_id = db.scalar(select(Category.id).where(Category.slug == category))
+    return Product(name=name, price=price, stock=stock, category_id=category_id)
+
+
+def test_category_filter_combines_with_search_stock_and_sort(client, db):
+    db.add_all(
+        [
+            _categorized(db, "Task Light", category="lighting", price="30.00", stock=2),
+            _categorized(db, "Desk Lamp", category="lighting", price="10.00", stock=0),
+            _categorized(
+                db,
+                "Felt Desk Mat",
+                category="desk-organization",
+                price="20.00",
+                stock=4,
+            ),
+        ]
+    )
+    db.commit()
+
+    lighting = client.get(
+        SEARCH,
+        params={"category": "lighting", "sort": "price-asc", "in_stock": "true"},
+    )
+    assert lighting.status_code == 200
+    assert [item["name"] for item in lighting.json()["items"]] == ["Task Light"]
+    assert lighting.json()["total"] == 1
+    assert lighting.json()["items"][0]["category"]["slug"] == "lighting"
+
+    combined = client.get(
+        SEARCH,
+        params={"category": "lighting", "q": "mat", "sort": "name"},
+    )
+    assert combined.json() == {"items": [], "total": 0, "limit": 24, "skip": 0}
+
+    everything = client.get(SEARCH)
+    assert everything.json()["total"] == 3
+    assert client.get(SEARCH, params={"category": "all"}).status_code == 404
+    assert client.get(SEARCH, params={"category": "not-a-category"}).status_code == 404
+    assert client.get(SEARCH, params={"category": "Lighting"}).status_code == 422
+    assert client.get(SEARCH, params={"category": ""}).status_code == 422
+
+    counts = client.get("/api/v1/categories/").json()
+    assert [row["slug"] for row in counts] == [
+        "desk-organization",
+        "ergonomics-and-stands",
+        "lighting",
+        "writing-and-planning",
+        "tech-accessories",
+        "workspace-comforts",
+        "uncategorized",
+    ]
+    assert "all" not in {row["slug"] for row in counts}
+    by_slug = {row["slug"]: row["count"] for row in counts}
+    assert by_slug["lighting"] == 2
+    assert by_slug["desk-organization"] == 1
+    assert by_slug["uncategorized"] == 0
+
+
+def test_category_page_is_independent_of_other_categories(client, db):
+    db.add_all(
+        _categorized(db, f"Lamp {number}", category="lighting") for number in range(3)
+    )
+    db.add(_categorized(db, "Mat", category="desk-organization"))
+    db.commit()
+    page = client.get(SEARCH, params={"category": "lighting", "limit": 2, "skip": 2})
+    assert page.status_code == 200
+    assert page.json()["total"] == 3
+    assert [item["name"] for item in page.json()["items"]] == ["Lamp 2"]
 
 
 def test_maximum_page_and_blank_search(client, db):

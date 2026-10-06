@@ -46,11 +46,13 @@ token = login["access_token"]
 assert request("/api/v1/auth/me", token=token)["email"] == email
 request("/api/v1/products/")
 request(
-    "/api/v1/products/", {"name": "Forbidden", "price": 1, "stock": 1}, expected=401
+    "/api/v1/products/",
+    {"name": "Forbidden", "price": 1, "stock": 1, "category": "uncategorized"},
+    expected=401,
 )
 request(
     "/api/v1/products/",
-    {"name": "Forbidden", "price": 1, "stock": 1},
+    {"name": "Forbidden", "price": 1, "stock": 1, "category": "uncategorized"},
     token=token,
     expected=403,
 )

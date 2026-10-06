@@ -7,7 +7,9 @@ from pydantic import ValidationError
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.catalog_taxonomy import PRODUCT_CATEGORIES
 from app.core.security import get_password_hash
+from app.crud.product import require_category
 from app.db.session import SessionLocal
 from app.models.demo_catalog import DemoCatalog
 from app.models.product import Product
@@ -65,6 +67,26 @@ DEMO_PRODUCTS += ADDITIONAL_DEMO_PRODUCTS
 CATALOG_EDITION = "twelve-products"
 
 
+def _demo_product(db, name, description, price, stock) -> Product:
+    """Build one demo product in its known category without touching other rows."""
+    slug = PRODUCT_CATEGORIES[name]
+    data = ProductCreate(
+        name=name,
+        description=description,
+        price=price,
+        stock=stock,
+        currency="GBP",
+        category=slug,
+    )
+    try:
+        category = require_category(db, slug)
+    except Exception as exc:
+        raise ValueError(
+            "Catalog categories are missing; apply migrations before seeding."
+        ) from exc
+    return Product(**data.model_dump(exclude={"category"}), category=category)
+
+
 def seed_demo(db):
     """Populate only an empty catalog; never overwrite or replenish existing data."""
     if db.get_bind().dialect.name == "postgresql":
@@ -74,10 +96,7 @@ def seed_demo(db):
     if db.scalar(select(Product.id).limit(1)) is not None:
         return 0
     for name, description, price, stock in DEMO_PRODUCTS:
-        data = ProductCreate(
-            name=name, description=description, price=price, stock=stock, currency="GBP"
-        )
-        db.add(Product(**data.model_dump()))
+        db.add(_demo_product(db, name, description, price, stock))
     db.add(DemoCatalog(edition=CATALOG_EDITION))
     db.flush()
     return len(DEMO_PRODUCTS)
@@ -96,10 +115,7 @@ def expand_demo(db):
     if db.scalar(select(Product.id).where(Product.name.in_(names)).limit(1)):
         raise ValueError("Expansion names already exist; inspect the catalog manually.")
     for name, description, price, stock in ADDITIONAL_DEMO_PRODUCTS:
-        data = ProductCreate(
-            name=name, description=description, price=price, stock=stock, currency="GBP"
-        )
-        db.add(Product(**data.model_dump()))
+        db.add(_demo_product(db, name, description, price, stock))
     db.add(DemoCatalog(edition=CATALOG_EDITION))
     db.flush()
     return len(ADDITIONAL_DEMO_PRODUCTS)
