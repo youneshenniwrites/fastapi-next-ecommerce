@@ -23,7 +23,9 @@ The ecommerce-maintenance skill is also locally authored. It connects dependency
 updates and maintenance documentation to the checks actually present in this repo.
 
 The locally authored ecommerce-pr-ownership skill and REST helper assign the
-owner and add scope labels after PR creation; they preserve actual authorship.
+owner, add scope and priority labels, and copy the linked issue's milestone
+after PR creation. Pull requests are opened ready for review, never as drafts.
+The helper preserves actual authorship.
 
 The locally authored ecommerce-naming skill applies
 [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) to

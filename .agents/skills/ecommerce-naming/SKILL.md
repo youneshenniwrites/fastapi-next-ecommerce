@@ -21,7 +21,7 @@ Commits subject to `gh pr merge --squash --subject`, including the VIN-N alias.
 Do not use the VIN-prefixed PR title as the squash commit subject.
 Retain exact-head CI and review requirements from AGENTS.md. If scope changes,
 update the PR title to describe the final diff; branch names need not be renamed
-solely for a minor scope adjustment. Use the ownership skill for assignment/labels.
+solely for a minor scope adjustment. Use the ownership skill for assignment, scope labels, the linked issue's priority and milestone. Open the pull request ready for review, never as a draft.
 
 When creating or refreshing a Dependabot PR, preserve its upstream title under
 the VIN-172 exception. Do not rename it to the manual PR format. Commits and
