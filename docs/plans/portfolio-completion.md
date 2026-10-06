@@ -265,6 +265,16 @@ fixtures. VIN-250's separate
 unfinished smoke-retry draft is also preserved and parked; it is not a
 delivered feature either.
 
+VIN-290's category implementation is on main. [PR #316](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/316)
+merged as `4dad3b0` on 6 October 2026. Each product has one category. All is the
+omitted `category` parameter, unknown slugs say the category does not exist, and
+search, stock, sort, share and the product return path keep the category.
+Changing category resets the page. The product page shows the stored category.
+Required CI for that pull request passed before merge. The development API did
+not yet serve `GET /api/v1/categories/` when this note was written, so the gated
+hosted browse check is still open. VIN-290 is not Done until that check is
+recorded. VIN-291 is the next story after it.
+
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
 returns bounded results plus matching totals. Next.js Server Components consume

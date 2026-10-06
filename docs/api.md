@@ -158,6 +158,7 @@ product details and admin writes keep their existing contracts.
 | --- | --- | --- |
 | `q` | No search | Product-name substring, at most 100 characters before trimming |
 | `in_stock` | `false` | Boolean; `true` requires available stock greater than zero |
+| `category` | Every category | One stored slug, such as `lighting`. Omit it for All. `all` is not a stored category |
 | `sort` | `featured` | `featured`, `name`, `price-asc`, `price-desc` |
 | `limit` | `24` | Integer from 1 to 100 |
 | `skip` | `0` | Integer from 0 to 100000 |
@@ -170,7 +171,9 @@ The response contains `items`, the matching `total`, and the applied `limit` and
 `skip`. Search, stock selection and ordering apply before pagination. A page
 beyond the final result has empty `items` while retaining the matching total.
 Invalid bounds, unknown sorts, overlong searches, NUL characters and invalid
-booleans return 422.
+booleans return 422. An unknown `category` slug returns 404. A malformed slug,
+including an empty value, returns 422. All is the omitted parameter, not the
+slug `all`.
 An empty or whitespace-only search applies no name filter. Percent, underscore
 and backslash are literal search characters, rather than SQL wildcards.
 
@@ -191,6 +194,12 @@ The storefront home page calls this endpoint on the server for every page
 [frontend README](../frontend/README.md#collection-urls-vin-287); the browser no
 longer filters a preloaded list. FastAPI and PostgreSQL stay authoritative for
 matching, ordering, totals, prices and stock.
+
+`GET /api/v1/categories/` lists the public categories in display order (VIN-290).
+Each count uses the same `q` and `in_stock` filters as the catalog and is not
+limited to one category. Uncategorized is the stored fallback for products the
+migration could not match. Category navigation, breadcrumbs and the product page
+use this list together with the search `category` parameter.
 
 ## Other response contracts
 

@@ -70,7 +70,10 @@ The next planned customer release expands catalog discovery and content up to
 100 workspace/home-office products: server queries, pagination, categories,
 product information and a safe curated import. VIN-287 is delivered in
 [PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
-(`e163ee7`). Follow the canonical plan for the dependency order.
+(`e163ee7`). VIN-290's category browsing is merged in
+[PR #316](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/316)
+(`4dad3b0`); the hosted development browse check is still open. Follow the
+canonical plan for the dependency order.
 
 Catalog administration (VIN-295) is a separate deferred roadmap. VIN-300 groups
 later sign-in continuity, account recovery and purchase support.
