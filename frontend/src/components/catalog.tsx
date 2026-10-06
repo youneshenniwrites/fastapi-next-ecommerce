@@ -1,118 +1,190 @@
-"use client";
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { stateLayout } from "@/components/storefront-layout";
-import { filterProducts, type Product, type Sort } from "@/lib/catalog";
-export function Catalog({ products }: { products: Product[] }) {
-  const [query, setQuery] = useState("");
-  const [inStock, setInStock] = useState(false);
-  const [sort, setSort] = useState<Sort>("featured");
-  const visible = filterProducts(products, query, inStock, sort);
+import { PageLink, ResultsStatus } from "@/components/collection-navigation";
+import { ShareCollection } from "@/components/share-collection";
+import type { Product } from "@/lib/catalog";
+import {
+  collectionHref,
+  collectionQuery,
+  hasActiveFilters,
+  pageSize,
+  pageWindow,
+  totalPages,
+  type CollectionFilters,
+} from "@/lib/collection-url";
+
+export type CatalogPage = {
+  items: Product[];
+  total: number;
+  limit: number;
+  skip: number;
+};
+
+const disabledStep =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-border px-3 text-xs opacity-50";
+
+function Pagination({
+  filters,
+  pages,
+}: {
+  filters: CollectionFilters;
+  pages: number;
+}) {
+  const at = (page: number) => collectionHref({ ...filters, page });
   return (
-    <>
-      <div className="flex flex-wrap items-center gap-4 border-y border-border py-4">
-        <div className="relative min-w-0 basis-full md:flex-1 md:basis-auto">
-          <Search
-            className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            className="h-10 pl-10"
-            type="search"
-            aria-label="Search collection"
-            placeholder="Find something for your space…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex min-h-11 w-24 shrink-0 items-center gap-2">
-          <Checkbox
-            id="in-stock"
-            checked={inStock}
-            onCheckedChange={(checked) => setInStock(checked === true)}
-            className="size-5"
-          />
-          <label
-            htmlFor="in-stock"
-            className="cursor-pointer whitespace-nowrap py-2 text-xs"
-          >
-            In stock only
-          </label>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <label
-            htmlFor="sort-products"
-            className="w-10 shrink-0 whitespace-nowrap text-xs"
-          >
-            Sort by
-          </label>
-          <Select
-            value={sort}
-            onValueChange={(value) => setSort(value as Sort)}
-          >
-            <SelectTrigger
-              id="sort-products"
-              aria-label="Sort products"
-              className="h-10 w-[180px]"
+    <nav aria-label="Collection pages" className="mt-12">
+      <ul className="flex flex-wrap items-center justify-center gap-2">
+        <li>
+          {filters.page > 1 ? (
+            <PageLink href={at(filters.page - 1)} rel="prev">
+              <ChevronLeft aria-hidden="true" /> Previous
+            </PageLink>
+          ) : (
+            <span aria-disabled="true" className={disabledStep}>
+              <ChevronLeft aria-hidden="true" /> Previous
+            </span>
+          )}
+        </li>
+        {pageWindow(filters.page, pages).map((page, index) =>
+          page === null ? (
+            <li
+              key={`gap-${index}`}
+              aria-hidden="true"
+              className="px-1 text-muted-foreground"
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="featured">Featured</SelectItem>
-              <SelectItem value="price-asc">Price: low to high</SelectItem>
-              <SelectItem value="price-desc">Price: high to low</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-            </SelectContent>
-          </Select>
+              …
+            </li>
+          ) : (
+            <li key={page}>
+              <PageLink
+                href={at(page)}
+                current={page === filters.page}
+                aria-label={`Page ${page}`}
+              >
+                {page}
+              </PageLink>
+            </li>
+          ),
+        )}
+        <li>
+          {filters.page < pages ? (
+            <PageLink href={at(filters.page + 1)} rel="next">
+              Next <ChevronRight aria-hidden="true" />
+            </PageLink>
+          ) : (
+            <span aria-disabled="true" className={disabledStep}>
+              Next <ChevronRight aria-hidden="true" />
+            </span>
+          )}
+        </li>
+      </ul>
+    </nav>
+  );
+}
+
+export function Catalog({
+  catalog,
+  filters,
+}: {
+  catalog: CatalogPage;
+  filters: CollectionFilters;
+}) {
+  const { items, total } = catalog;
+  const pages = totalPages(total);
+  const outOfRange = items.length === 0 && total > 0;
+  const noun = total === 1 ? "object" : "objects";
+  const status = `${total} ${noun}${pages > 1 && !outOfRange ? ` · Page ${filters.page} of ${pages}` : ""}`;
+  const returnQuery = collectionQuery(filters);
+
+  if (outOfRange) {
+    return (
+      <>
+        <div className="my-5">
+          <ResultsStatus>{status}</ResultsStatus>
         </div>
-      </div>
-      <p role="status" className="my-5 text-xs text-muted-foreground">
-        {visible.length} {visible.length === 1 ? "object" : "objects"}
-        {products.length === 100
-          ? " · Showing the first 100 catalog items"
-          : ""}
-      </p>
-      {visible.length ? (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-10">
-          {visible.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+        <div className={stateLayout}>
+          <h3>That page doesn’t exist.</h3>
+          <p>
+            This selection has {pages} {pages === 1 ? "page" : "pages"}. It may
+            have changed since the link was shared.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <PageLink
+              href={collectionHref({ ...filters, page: pages })}
+              className="min-h-12"
+            >
+              Go to the last page
+            </PageLink>
+            <Link
+              href={collectionHref({ ...filters, page: 1 })}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Back to page one
+            </Link>
+          </div>
         </div>
-      ) : (
+      </>
+    );
+  }
+
+  if (total === 0) {
+    const filtered = hasActiveFilters(filters);
+    return (
+      <>
+        <div className="my-5">
+          <ResultsStatus>{status}</ResultsStatus>
+        </div>
         <div className={stateLayout}>
           <h3>
-            {products.length
+            {filtered
               ? "No objects found."
               : "A little space for something new."}
           </h3>
           <p>
-            {products.length
+            {filtered
               ? "Try another search or clear your filters."
               : "The collection is empty. Please check back soon."}
           </p>
-          {products.length > 0 && (
-            <Button
-              onClick={() => {
-                setQuery("");
-                setInStock(false);
-              }}
-            >
+          {filtered && (
+            <Link href="/#collection" className={buttonVariants()}>
               Clear filters
-            </Button>
+            </Link>
           )}
         </div>
-      )}
+      </>
+    );
+  }
+
+  const first = catalog.skip + 1;
+  return (
+    <>
+      <div className="my-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <ResultsStatus>{status}</ResultsStatus>
+          {pages > 1 && (
+            <p className="text-xs text-muted-foreground">
+              Showing {first}–{Math.min(total, catalog.skip + items.length)}
+            </p>
+          )}
+        </div>
+        <ShareCollection
+          key={collectionHref(filters)}
+          href={collectionHref(filters)}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-10">
+        {items.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            returnQuery={returnQuery}
+          />
+        ))}
+      </div>
+      {total > pageSize && <Pagination filters={filters} pages={pages} />}
     </>
   );
 }

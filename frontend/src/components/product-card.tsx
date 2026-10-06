@@ -4,10 +4,19 @@ import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { money, type Product } from "@/lib/catalog";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  returnQuery = "",
+}: {
+  product: Product;
+  returnQuery?: string;
+}) {
   return (
     <article className="product min-w-0">
-      <Link href={`/products/${product.id}`} className="group block">
+      <Link
+        href={`/products/${product.id}${returnQuery}`}
+        className="group block"
+      >
         <div className="relative overflow-hidden bg-muted">
           <ProductImage name={product.name} />
           {product.stock === 0 && (
