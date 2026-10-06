@@ -38,10 +38,27 @@ export function CartLink({
     </>
   );
   const classes = cn("inline-flex items-center gap-2", className);
-  // Always a full navigation. Swapping this control to a client Link while the
-  // cart is loading drops a click that lands as the header refreshes after sign-in.
   return (
-    <a href="/cart" aria-label={label} className={classes} onClick={onClick}>
+    <a
+      href="/cart"
+      aria-label={label}
+      className={classes}
+      onClick={onClick}
+      onPointerDown={(event) => {
+        // The streamed header is replaced when the cart snapshot arrives. A
+        // click that lands during that swap never finishes, so start the
+        // full navigation at press time. Modified clicks keep native behavior.
+        if (
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return;
+        window.location.assign("/cart");
+      }}
+    >
       {content}
     </a>
   );
