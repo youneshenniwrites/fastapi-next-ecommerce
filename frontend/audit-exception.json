@@ -4,7 +4,7 @@
   "expiresAt": "2026-10-10T23:59:00+00:00",
   "files": {
     "package.json": "f2ed11a285725446ada0117f5ac7859a07880bb589054119169f5fcfef8d7c6f",
-    "package-lock.json": "49e8a1ee1c4586d55d5f323c5b0b262d36f365e113a2e31c36087d6469140da1"
+    "package-lock.json": "163bcfbf4889247afbdd079c757f9bf044547610f80fcfc147d6a109226505c2"
   },
   "packages": {
     "@next/eslint-plugin-next": {

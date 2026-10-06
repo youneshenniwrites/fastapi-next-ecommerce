@@ -27,6 +27,20 @@ createServer((req, res) => {
     res.end('{"detail":"unavailable"}');
     return;
   }
+  if (path === "/api/v1/products/search") {
+    const skip = Number(
+      new URL(req.url, "http://127.0.0.1").searchParams.get("skip"),
+    );
+    const page = (total) =>
+      JSON.stringify({ items: [], total, limit: 24, skip: skip || 0 });
+    if (mode === "slow") {
+      setTimeout(() => res.end(page(0)), 1500);
+      return;
+    }
+    // A shared link can outlive the data that made its page number valid.
+    res.end(page(mode === "range" ? 30 : 0));
+    return;
+  }
   if (path.startsWith("/api/v1/products/")) {
     if (path !== "/api/v1/products/") {
       res.statusCode = 404;

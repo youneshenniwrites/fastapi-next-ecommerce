@@ -102,7 +102,8 @@ Keep these boundaries visible during the presentation:
   Relative changes are not atomic across clients.
 - Signing out clears the browser cookie; it does not revoke a copied JWT before
   its expiry. See [session boundaries](design/customer-sessions.md).
-- Catalog filtering covers at most 100 loaded products. Connection recovery and
+- Catalog browsing is paged by the API (24 per page) and offset pages can shift
+  when products change between requests. Connection recovery and
   free-tier hosting are not measured capacity or availability guarantees. See
   [hosting limits and rollback](../deploy/environments/README.md#runtime-limits).
 

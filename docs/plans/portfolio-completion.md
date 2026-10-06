@@ -251,11 +251,14 @@ Delivery board remains available as the combined overview.
 | [VIN-291](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/291) | Useful bounded product facts and photos independent of mutable names | VIN-290 |
 | [VIN-292](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/292) | Curated assortment, provenance and a repeatable non-destructive import | VIN-290/291 and paged browsing |
 
-VIN-287's six-file uncommitted draft is preserved; its three URL unit tests pass,
-but type checking failed and browser verification has not run. Its amended issue
-replaces local filtering of the first 100 items with server-backed navigation.
-It is paused in Backlog, with no implementing PR. VIN-250's separate unfinished
-smoke-retry draft is also preserved and parked; neither is a delivered feature.
+VIN-287 is implemented on
+[PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
+(`feat/vin-287-share-collection`): server-rendered pages, URL filters, share
+and product return, with unit, component and browser tests in that branch.
+External review, CI, merge and hosted verification are still outstanding, so
+the story stays In progress and is not a delivered feature. VIN-250's separate
+unfinished smoke-retry draft is also preserved and parked; it is not a
+delivered feature either.
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
@@ -584,7 +587,8 @@ revert revalidation solely because the earlier audit was inaccurate. Defer Azure
 microservices, Redis/search, refunds, broad SLOs and formal full WCAG conformance.
 Password recovery/email verification remain later customer follow-ups under VIN-300.
 The original demo used a first-100-item boundary; the planned VIN-287 catalog
-release requires pagination even with roughly 60 products.
+release requires pagination even with roughly 60 products (implemented in the
+VIN-287 branch, not yet merged).
 Deployment-script consolidation, placeholder cleanup and image-patch retirement
 are maintenance, not checkout prerequisites. External configuration blockers stay
 visible while the next independent story proceeds.

@@ -6,12 +6,18 @@ import { container, eyebrow } from "@/components/storefront-layout";
 import { cn } from "@/lib/utils";
 import { money, type Product } from "@/lib/catalog";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-export function ProductDetails({ product }: { product: Product }) {
+export function ProductDetails({
+  product,
+  collectionHref = "/#collection",
+}: {
+  product: Product;
+  collectionHref?: string;
+}) {
   return (
     <main id="main" className={cn(container, "py-10 pb-20")}>
       <Link
         className="mb-8 inline-flex items-center gap-2 text-sm hover:underline"
-        href="/#collection"
+        href={collectionHref}
       >
         <ArrowLeft className="size-4" aria-hidden="true" /> Back to the
         collection

@@ -13,8 +13,21 @@ import { RetryCatalog } from "@/components/retry-catalog";
 import Image from "next/image";
 import { apiClient } from "@/lib/api/client";
 import { Catalog } from "@/components/catalog";
+import { CollectionControls } from "@/components/collection-controls";
+import {
+  collectionQuery,
+  pageSize,
+  parseCollection,
+  skipForPage,
+  type CollectionFilters,
+} from "@/lib/collection-url";
 export const dynamic = "force-dynamic";
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { filters, rejected } = parseCollection(await searchParams);
   return (
     <main id="main">
       <section
@@ -67,8 +80,15 @@ export default function Home() {
           title="Find your focus."
           description="Small details. A different kind of day."
         />
-        <Suspense fallback={<CatalogSkeleton />}>
-          <CatalogData />
+        {rejected && (
+          <p className="mb-4 text-xs text-muted-foreground">
+            Some options in that link weren’t recognised, so those options were
+            reset.
+          </p>
+        )}
+        <CollectionControls filters={filters} />
+        <Suspense key={collectionQuery(filters)} fallback={<CatalogSkeleton />}>
+          <CatalogData filters={filters} />
         </Suspense>
       </section>
       <section
@@ -97,24 +117,32 @@ export default function Home() {
   );
 }
 
-async function CatalogData() {
-  let products;
+async function CatalogData({ filters }: { filters: CollectionFilters }) {
+  let catalog;
   try {
-    const result = await apiClient().GET("/api/v1/products/", {
-      params: { query: { limit: 100, skip: 0 } },
+    const result = await apiClient().GET("/api/v1/products/search", {
+      params: {
+        query: {
+          q: filters.query || undefined,
+          in_stock: filters.inStock || undefined,
+          sort: filters.sort,
+          skip: skipForPage(filters.page),
+          limit: pageSize,
+        },
+      },
     });
     if (result.error || !result.data) throw new Error("Catalog unavailable");
-    products = result.data;
+    catalog = result.data;
   } catch {
-    products = null;
+    catalog = null;
   }
-  return products === null ? (
+  return catalog === null ? (
     <div className={stateLayout} role="alert" aria-label="Catalog unavailable">
       <h3>The collection is taking a moment.</h3>
       <p>We couldn’t reach the catalog. Please try again shortly.</p>
       <RetryCatalog />
     </div>
   ) : (
-    <Catalog products={products} />
+    <Catalog catalog={catalog} filters={filters} />
   );
 }

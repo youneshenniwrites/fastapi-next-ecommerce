@@ -186,9 +186,11 @@ pages retain their order. Inserts, deletes, stock changes or edits between reque
 can move results and change totals; offset pagination is not a frozen browsing
 session. No new index or migration is needed for the planned catalog size.
 
-The browser still filters its first 100 loaded products. VIN-287 will connect
-this endpoint to server-rendered pagination and URL-owned filters; VIN-289 alone
-does not change that interface.
+The storefront home page calls this endpoint on the server for every page
+(24 products per page) using the URL-owned selection described in the
+[frontend README](../frontend/README.md#collection-urls-vin-287); the browser no
+longer filters a preloaded list. FastAPI and PostgreSQL stay authoritative for
+matching, ordering, totals, prices and stock.
 
 ## Other response contracts
 
