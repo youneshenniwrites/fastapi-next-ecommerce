@@ -110,10 +110,6 @@ export function collectionHref(filters: CollectionFilters): string {
   return `/${collectionQuery(filters)}#collection`;
 }
 
-export function productHref(id: number, filters: CollectionFilters): string {
-  return `/products/${id}${collectionQuery(filters)}`;
-}
-
 export function hasActiveFilters(filters: CollectionFilters): boolean {
   return (
     filters.query !== "" ||

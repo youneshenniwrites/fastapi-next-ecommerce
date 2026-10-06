@@ -6,7 +6,7 @@ import {
   maxPage,
   pageWindow,
   parseCollection,
-  productHref,
+  hasActiveFilters,
   skipForPage,
   sorts,
   totalPages,
@@ -121,13 +121,6 @@ describe("canonical collection URLs", () => {
     }
   });
 
-  it("builds product links that carry only recognised selections", () => {
-    expect(productHref(7, { ...defaultFilters, query: "oak", page: 3 })).toBe(
-      "/products/7?q=oak&page=3",
-    );
-    expect(productHref(7, defaultFilters)).toBe("/products/7");
-  });
-
   it("never emits an external destination for hostile input", () => {
     const hostile = parse(
       "q=%2F%2Fevil.example&next=//evil.example&return=https://evil.example",
@@ -150,5 +143,15 @@ describe("pagination helpers", () => {
     expect(pageWindow(1, 20)).toEqual([1, 2, 3, 4, null, 20]);
     expect(pageWindow(10, 20)).toEqual([1, null, 9, 10, 11, null, 20]);
     expect(pageWindow(20, 20)).toEqual([1, null, 17, 18, 19, 20]);
+  });
+});
+
+describe("active filters", () => {
+  it("ignores the page number but notices each recognised filter", () => {
+    expect(hasActiveFilters(defaultFilters)).toBe(false);
+    expect(hasActiveFilters({ ...defaultFilters, page: 3 })).toBe(false);
+    expect(hasActiveFilters({ ...defaultFilters, query: "oak" })).toBe(true);
+    expect(hasActiveFilters({ ...defaultFilters, inStock: true })).toBe(true);
+    expect(hasActiveFilters({ ...defaultFilters, sort: "name" })).toBe(true);
   });
 });

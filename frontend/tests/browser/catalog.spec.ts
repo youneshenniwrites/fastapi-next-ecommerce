@@ -350,6 +350,7 @@ test("new products have distinct photographs and working detail pages", async ({
   ]) {
     await page.goto("/");
     await page.getByRole("searchbox").fill(name);
+    await page.getByRole("searchbox").press("Enter");
     await expect(page.getByRole("status")).toHaveText("1 object");
     await page.getByRole("link", { name: new RegExp(name) }).click();
     await expect(
