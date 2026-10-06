@@ -251,12 +251,17 @@ Delivery board remains available as the combined overview.
 | [VIN-291](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/291) | Useful bounded product facts and photos independent of mutable names | VIN-290 |
 | [VIN-292](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/292) | Curated assortment, provenance and a repeatable non-destructive import | VIN-290/291 and paged browsing |
 
-VIN-287 is implemented on
-[PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
-(`feat/vin-287-share-collection`): server-rendered pages, URL filters, share
-and product return, with unit, component and browser tests in that branch.
-External review, CI, merge and hosted verification are still outstanding, so
-the story stays In progress and is not a delivered feature. VIN-250's separate
+VIN-287 is delivered. [PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
+merged as `e163ee7` on 6 October 2026. CodeRabbit approved `a188022` and required
+CI passed. Codex review of that commit is an owner-authorized deferral because
+the allowance is exhausted; it is not a clean Codex review (VIN-38). Development
+release `e163ee7` is on
+[the storefront](https://forme-ecommerce-development.vercel.app). Public browsing
+was checked there: search submits from the address bar, an unknown search is
+empty, a product link keeps the query on the way back, Share copied the link,
+page 2 of the six-product catalog shows the out-of-range recovery, and the cart
+page opens. Multi-page results beyond page one were proved by the CI browser
+fixtures. VIN-250's separate
 unfinished smoke-retry draft is also preserved and parked; it is not a
 delivered feature either.
 
@@ -586,9 +591,9 @@ integrations, promotions or tax engine. Do not rewrite working architecture or
 revert revalidation solely because the earlier audit was inaccurate. Defer Azure,
 microservices, Redis/search, refunds, broad SLOs and formal full WCAG conformance.
 Password recovery/email verification remain later customer follow-ups under VIN-300.
-The original demo used a first-100-item boundary; the planned VIN-287 catalog
-release requires pagination even with roughly 60 products (implemented in the
-VIN-287 branch, not yet merged).
+The original demo used a first-100-item boundary. VIN-287 now serves one page
+at a time from the address bar, including when the catalog is smaller than one
+page.
 Deployment-script consolidation, placeholder cleanup and image-patch retirement
 are maintenance, not checkout prerequisites. External configuration blockers stay
 visible while the next independent story proceeds.
