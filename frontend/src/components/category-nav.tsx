@@ -34,8 +34,8 @@ export function CategoryNav({
     })),
   ];
   return (
-    <nav aria-label="Categories" className="mb-4 overflow-x-auto p-1">
-      <ul className="flex w-max min-w-full gap-2">
+    <nav aria-label="Categories" className="mb-4 p-1">
+      <ul className="flex flex-wrap gap-2">
         {items.map((item) => {
           const current = item.slug === filters.category;
           return (
@@ -53,7 +53,7 @@ export function CategoryNav({
                     variant: current ? "default" : "outline",
                     size: "lg",
                   }),
-                  "min-h-11",
+                  "min-h-11 whitespace-normal text-left",
                 )}
               >
                 {item.name}
