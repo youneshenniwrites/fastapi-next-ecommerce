@@ -9,16 +9,18 @@ Read root AGENTS.md, docs/delivery.md, docs/delivery-mode.md and the issue's lat
 handoff. The existing portfolio-completion plan owns priorities; this skill is
 execution guidance, not another plan. Verify actual GitHub and Git state on resume.
 
-Read the live project status before changing it. When authorized implementation
-starts and the card is still Backlog or has no status, move that issue card to
-In progress, read it back, and only then create a branch, edit code, or commit.
-Leave a card that is already In progress. Leave In review in place when a ready
-pull request is already open, including before the next edit or commit. Backlog
-means not started. In progress means started and unfinished, including a parent
-epic that already has merged children. Parent epics stay put. Done only when
-acceptance, review, CI, and merge are finished. In review when a ready PR is
-open and waiting on review, and also while checks fail or review changes are
-still being addressed. Never open a draft PR.
+Read the live project status, and whether a ready pull request is still open,
+before changing the card. When authorized implementation starts or resumes,
+move that issue card to In progress, read it back, and only then create a
+branch, edit code, or commit. Do this for Backlog, no status, Done, and In
+review after its ready pull request has closed. Leave a card that is already
+In progress. Leave In review in place only while a ready pull request is still
+open, including while checks fail or review changes are still being addressed.
+Parent epics stay put. Backlog means not started. In progress means started
+and unfinished, including a parent epic that already has merged children. Done
+only when acceptance, review, CI, and merge are finished. In review when a
+ready PR is open and waiting on review, and also while checks fail or review
+changes are still being addressed. Never open a draft PR.
 
 ## Scope and persistence
 

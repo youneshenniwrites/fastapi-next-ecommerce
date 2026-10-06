@@ -7,7 +7,7 @@ Read [delivery policy](../../../docs/delivery.md). Use gh/API for project https:
 
 Reuse the existing repository issue and board item; link bot maintenance PRs from their existing maintenance issue. Add missing items within the requested scope and assign the owner. Do not create draft cards to represent completed delivery or duplicate historical summaries from the Wiki.
 
-When authorized work starts on an issue, read the live status first. If the card is Backlog or has no status, move it to In progress before any code, branch, or commit, and read the status back. Leave a card that is already In progress. Leave In review in place when a ready pull request is already open. Parent epics stay put.
+When authorized work starts or resumes on an issue, read the live status and whether a ready pull request is still open. Move the card to In progress before any code, branch, or commit, and read the status back, when it is Backlog, has no status, is Done, or is In review after its ready pull request has closed. Leave a card that is already In progress. Leave In review in place only while a ready pull request is still open. Parent epics stay put.
 
 Choose status from evidence:
 - Backlog: not started, including explicitly deferred follow-ups.
