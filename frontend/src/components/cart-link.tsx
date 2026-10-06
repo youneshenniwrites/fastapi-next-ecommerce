@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { Badge } from "@/components/ui/badge";
@@ -39,23 +38,11 @@ export function CartLink({
     </>
   );
   const classes = cn("inline-flex items-center gap-2", className);
-  if (cart.state.status === "ready") {
-    // Full navigation discards cached private cart state on account changes.
-    return (
-      <a href="/cart" aria-label={label} className={classes} onClick={onClick}>
-        {content}
-      </a>
-    );
-  }
+  // Always a full navigation. Swapping this control to a client Link while the
+  // cart is loading drops a click that lands as the header refreshes after sign-in.
   return (
-    <Link
-      href="/cart"
-      prefetch={false}
-      aria-label={label}
-      className={classes}
-      onClick={onClick}
-    >
+    <a href="/cart" aria-label={label} className={classes} onClick={onClick}>
       {content}
-    </Link>
+    </a>
   );
 }
