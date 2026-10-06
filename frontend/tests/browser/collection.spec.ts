@@ -626,7 +626,8 @@ test("product details name the category and the return link keeps it", async ({
   await expect(
     page.getByRole("heading", { name: "Task Light", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText("Everyday focus")).toHaveCount(0);
+  await expect(page.getByRole("term").filter({ hasText: "Category" })).toBeVisible();
+  await expect(page.locator("dd", { hasText: "Everyday focus" })).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Lighting" }).first(),
   ).toHaveAttribute("href", "/?category=lighting&sort=name#collection");
