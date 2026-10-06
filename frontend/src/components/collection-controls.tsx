@@ -1,5 +1,11 @@
 "use client";
-import { useOptimistic, useState, useTransition } from "react";
+import {
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
@@ -29,6 +35,8 @@ export function CollectionControls({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [searching, setSearching] = useState(false);
+  const submittedQuery = useRef(filters.query);
   // Show a changed checkbox/sort immediately while the server renders the
   // results; it reverts to the URL-owned value if navigation is abandoned.
   const [shown, setShown] = useOptimistic(filters);
@@ -41,6 +49,11 @@ export function CollectionControls({
     setText(filters.query);
   }
   const current = collectionHref(filters);
+  // The transition flag drops before the slow catalog response arrives.
+  // Keep the search button in its waiting state until the applied query matches.
+  useEffect(() => {
+    if (filters.query === submittedQuery.current) setSearching(false);
+  }, [filters.query, searching]);
 
   function go(next: CollectionFilters) {
     const href = collectionHref(next);
@@ -62,7 +75,10 @@ export function CollectionControls({
           className="flex min-w-0 basis-full gap-2 md:flex-1 md:basis-auto"
           onSubmit={(event) => {
             event.preventDefault();
-            go({ ...shown, query: text.trim(), page: 1 });
+            const query = text.trim();
+            submittedQuery.current = query;
+            setSearching(true);
+            go({ ...shown, query, page: 1 });
           }}
         >
           {filters.inStock && <input type="hidden" name="in_stock" value="1" />}
@@ -91,9 +107,9 @@ export function CollectionControls({
             variant="outline"
             size="lg"
             className="min-h-11 shrink-0"
-            disabled={pending}
+            disabled={searching || pending}
           >
-            {pending ? "Searching…" : "Search"}
+            {searching || pending ? "Searching…" : "Search"}
           </Button>
         </form>
         <div className="flex min-h-11 w-28 shrink-0 items-center gap-2">

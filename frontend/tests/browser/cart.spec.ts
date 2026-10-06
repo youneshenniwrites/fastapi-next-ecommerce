@@ -117,24 +117,32 @@ async function openCartLink(
   page: import("@playwright/test").Page,
   project: string,
 ) {
-  if (/mobile|pixel/i.test(project)) {
-    // A tap can land mid-remount and be swallowed, so re-tap until the menu is visible
-    // instead of failing outright.
-    const menu = page.getByRole("navigation", { name: "Mobile navigation" });
-    let opened = false;
-    for (let attempt = 0; attempt < 3 && !opened; attempt++) {
-      await page.getByRole("button", { name: "Open navigation" }).click();
-      opened = await menu.waitFor({ state: "visible", timeout: 3000 }).then(
-        () => true,
-        () => false,
-      );
+  const mobile = /mobile|pixel/i.test(project);
+  // The streamed header is replaced when the cart snapshot arrives, and a click
+  // in that moment does not navigate. Try again on the settled link.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (mobile) {
+      const menu = page.getByRole("navigation", { name: "Mobile navigation" });
+      let opened = false;
+      for (let tap = 0; tap < 3 && !opened; tap++) {
+        await page.getByRole("button", { name: "Open navigation" }).click();
+        opened = await menu.waitFor({ state: "visible", timeout: 3000 }).then(
+          () => true,
+          () => false,
+        );
+      }
+      await menu.getByRole("link", { name: /^Cart/ }).click();
+    } else {
+      await page
+        .getByRole("navigation", { name: "Main navigation" })
+        .getByRole("link", { name: /^Cart/ })
+        .click();
     }
-    await menu.getByRole("link", { name: /^Cart/ }).click();
-  } else {
-    await page
-      .getByRole("navigation", { name: "Main navigation" })
-      .getByRole("link", { name: /^Cart/ })
-      .click();
+    const arrived = await page.waitForURL(/\/cart$/, { timeout: 3000 }).then(
+      () => true,
+      () => false,
+    );
+    if (arrived) return;
   }
   await expect(page).toHaveURL(/\/cart$/);
 }
