@@ -82,8 +82,8 @@ export default async function Home({
         />
         {rejected && (
           <p className="mb-4 text-xs text-muted-foreground">
-            Some options in that link weren’t recognised, so we’ve shown the
-            default view.
+            Some options in that link weren’t recognised, so those options
+            were reset.
           </p>
         )}
         <CollectionControls filters={filters} />
