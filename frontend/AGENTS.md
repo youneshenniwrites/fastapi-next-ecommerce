@@ -21,7 +21,7 @@ Do not hand-edit generated schemas or maintain independent response interfaces.
 
 Preserve loading, empty, error, not-found, out-of-stock and reduced-motion behavior.
 Verify keyboard access, mobile layout and automated accessibility checks. Product
-photography is licensed and stored locally; unknown names use a Lucide placeholder.
+photography is licensed and stored locally; a missing or unknown image key uses a Lucide placeholder.
 Read PHOTO_CREDITS.md before replacing assets. Never create custom SVG artwork.
 
 Server-mediated sessions, registration/login screens, profile/navigation and the signed-in cart storefront are implemented; checkout submission, confirmation and order history are merged in PR #188; verify merge/deployment status in the canonical plan. Development and production demos are deployed.

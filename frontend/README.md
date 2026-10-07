@@ -66,8 +66,8 @@ and src/lib/api/schema.d.ts together. Runtime calls use openapi-fetch and genera
 
 VINDOR uses locally stored, licensed WebP photography, system fonts and Lucide icons.
 See [photo credits](PHOTO_CREDITS.md) for sources and licences. Photographs are
-representative, not exact product specifications or brand endorsements. Unknown
-products use a neutral Lucide placeholder.
+representative, not exact product specifications or brand endorsements. A missing
+or unknown image key uses a neutral Lucide placeholder.
 
 The catalog reads FastAPI's [catalog search endpoint](../docs/api.md#catalog-search-and-pagination-vin-289)
 on the server, so filtering, ordering and counts cover the whole catalog; see
