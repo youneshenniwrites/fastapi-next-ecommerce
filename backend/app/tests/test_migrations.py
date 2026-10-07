@@ -315,6 +315,62 @@ def test_media_migration_assigns_known_photos_without_overwriting_edits(tmp_path
     engine.dispose()
 
 
+def test_media_migration_skips_a_duplicated_demo_name(tmp_path):
+    """Two products with a demo name are ambiguous, so neither receives facts."""
+    from sqlalchemy import create_engine, text
+
+    url = f"sqlite:///{tmp_path / 'duplicate-media.db'}"
+    env = dict(os.environ, DATABASE_URL=url)
+
+    def migrate(*args):
+        subprocess.run(
+            [sys.executable, "-m", "alembic", *args],
+            cwd=BACKEND,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    migrate("upgrade", "0008")
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO products "
+                "(name, description, price, currency, stock, category_id) "
+                "VALUES "
+                "('Task Light', 'Admin copy', 4.00, 'GBP', 2, "
+                "(SELECT id FROM categories WHERE slug = 'lighting')), "
+                "('Task Light', 'Other copy', 9.00, 'GBP', 4, "
+                "(SELECT id FROM categories WHERE slug = 'lighting')), "
+                "('Felt Desk Mat', 'Kept', 29.50, 'GBP', 1, "
+                "(SELECT id FROM categories WHERE slug = 'uncategorized'))"
+            )
+        )
+    migrate("upgrade", "head")
+    with engine.connect() as connection:
+        rows = (
+            connection.execute(
+                text(
+                    "SELECT name, description, image_key, material "
+                    "FROM products ORDER BY id"
+                )
+            )
+            .mappings()
+            .all()
+        )
+    assert [row["image_key"] for row in rows[:2]] == [None, None]
+    assert [row["material"] for row in rows[:2]] == [None, None]
+    assert rows[0]["description"] == "Admin copy"
+    assert rows[1]["description"] == "Other copy"
+    assert rows[2]["name"] == "Felt Desk Mat"
+    assert rows[2]["image_key"] == "mat"
+    assert rows[2]["material"] == "Felt"
+    migrate("downgrade", "base")
+    engine.dispose()
+
+
 def test_media_migration_freezes_its_allowlist():
     """Revision 0009 must not follow later edits to the live catalog constants."""
     source = (BACKEND / "alembic/versions/0009_product_media_and_facts.py").read_text()

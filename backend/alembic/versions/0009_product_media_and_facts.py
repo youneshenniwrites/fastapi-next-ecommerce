@@ -177,9 +177,17 @@ def upgrade():
                 f"{column} IS NULL OR ({column} >= 1 AND {column} <= 10000)",
             )
 
-    # Fill only empty photo slots for the known demo names. Names, prices, stock,
-    # descriptions and ids stay as edited. A renamed product is left without a photo.
+    # Fill an empty photo only when one row has that demo name. Names are not
+    # unique, so a second product with the same name is left untouched. Prices,
+    # stock, descriptions and ids stay as edited. A renamed product has no photo.
+    counts = dict(
+        connection.execute(
+            sa.text("SELECT name, COUNT(*) FROM products GROUP BY name")
+        ).all()
+    )
     for media in _DEMO_MEDIA:
+        if counts.get(media["name"]) != 1:
+            continue
         connection.execute(
             sa.text(
                 "UPDATE products SET image_key = :image_key, image_alt = :image_alt, "
