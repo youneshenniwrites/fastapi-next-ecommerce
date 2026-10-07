@@ -265,6 +265,20 @@ fixtures. VIN-250's separate
 unfinished smoke-retry draft is also preserved and parked; it is not a
 delivered feature either.
 
+VIN-290's category implementation is on main. [PR #316](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/316)
+merged as `4dad3b0` on 6 October 2026. Each product has one category. All is the
+omitted `category` parameter, unknown slugs say the category does not exist, and
+search, stock, sort, share and the product return path keep the category.
+Changing category resets the page. The product page shows the stored category.
+Required CI for that pull request passed before merge. Development release
+`4dad3b0` is on
+[the storefront](https://forme-ecommerce-development.vercel.app) and
+[the API](https://forme-api-development.vercel.app). Public browsing was checked
+there: Lighting shows Task Light, the product page names Lighting, Back to the
+collection keeps `category=lighting`, and an unknown slug says that category
+does not exist. `GET /api/v1/categories/` returns the seven workspace categories.
+VIN-291 is the next story.
+
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
 returns bounded results plus matching totals. Next.js Server Components consume

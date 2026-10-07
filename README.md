@@ -166,10 +166,12 @@ storefront/API trace are verified; production monitoring is not activated. See t
 | POST | `/api/v1/auth/login` | Public form fields `username` (email), `password` |
 | GET | `/api/v1/auth/me` | Active authenticated user |
 | GET | `/api/v1/products/` | Public; `skip` and `limit` pagination |
+| GET | `/api/v1/products/search` | Public; filtered page and matching total |
 | GET | `/api/v1/products/{id}` | Public |
-| POST | `/api/v1/products/` | Active admin |
+| POST | `/api/v1/products/` | Active admin; requires a stored `category` slug |
 | PUT | `/api/v1/products/{id}` | Active admin; partial update semantics |
 | DELETE | `/api/v1/products/{id}` | Active admin; returns 204 |
+| GET | `/api/v1/categories/` | Public; categories and counts |
 
 Product JSON includes an exact decimal string and explicit currency:
 
@@ -180,15 +182,19 @@ Product JSON includes an exact decimal string and explicit currency:
   "description": "Box of tea",
   "price": "19.90",
   "currency": "GBP",
-  "stock": 12
+  "stock": 12,
+  "category": { "slug": "lighting", "name": "Lighting" }
 }
 ```
 
 Prices have at most two decimal places and range from 0.00 to 9999999999.99.
 Stock must be a nonnegative integer. Lists use a stable id order, a limit of 1–100
-(default 10), and skip of 0–100000. Omitted PUT fields retain their values; only
+(default 10), and skip of 0–100000. Every product read includes `category`.
+Create requires a stored slug; a missing, unknown, malformed, or `all` slug
+returns 422. Omitted PUT fields, including `category`, retain their values; only
 description may explicitly be null. Unsupported currencies and unknown fields
-are rejected. See [backend documentation](backend/README.md) for full constraints.
+are rejected. See [the catalog contract](docs/api.md#catalog-search-and-pagination-vin-289)
+and [backend documentation](backend/README.md) for full constraints.
 
 Run `make demo` to populate an empty catalog, then `make admin EMAIL=admin@example.com`
 to create an admin with a hidden password prompt. See the [demo guide](docs/demo.md)
