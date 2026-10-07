@@ -29,8 +29,20 @@ with GitHub sub-issues when available, otherwise explicit parent/child links.
 A story delivers one independently testable behavior, normally in one PR.
 Implementation **subtasks** are a checklist inside that story; create a linked
 issue only when separate ownership or delivery is useful. A **bug** issue records
-reproduction, expected/observed behavior and regression evidence. These are work
-categories, not additional board statuses or a requirement for custom labels.
+reproduction, expected/observed behavior and regression evidence. A **task** is
+bounded maintenance, investigation, documentation or operational work.
+
+Apply exactly one category label to current and new delivery issues: purple
+`type: epic`, blue `type: story`, red `type: bug`, or grey `type: task`.
+Prefix epic titles with `[EPIC]` so parents remain identifiable when labels are
+hidden. An epic may itself belong to a larger epic; link children before their
+implementation, and refine broad unsplit parents rather than treating them as
+single stories. Use the matching issue form to apply the label automatically.
+For issues created through CLI/API or a blank form, apply the category explicitly;
+when reclassifying, remove the previous category and add/remove the epic prefix.
+Keep existing scope labels (`enhancement`, `bug`, `tooling`, etc.), priorities,
+workstreams and delivery statuses independent. Category does not indicate
+implementation readiness or completion, and VIN issue numbers stay unchanged.
 
 Before coding, record the story's outcome, parent (if any), included behavior,
 exclusions, acceptance criteria, dependencies and validation. Split substantial
