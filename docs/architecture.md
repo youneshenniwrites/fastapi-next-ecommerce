@@ -1,8 +1,8 @@
 # Current architecture
 
-FastAPI exposes /health and the /api/v1/auth, /api/v1/products, /api/v1/cart,
-/api/v1/orders and /api/v1/payments contracts. SQLAlchemy models represent users,
-products, customer cart lines, orders and payment attempts/events. PostgreSQL is the development runtime;
+FastAPI exposes /health and the /api/v1/auth, /api/v1/products, /api/v1/categories,
+/api/v1/cart, /api/v1/orders and /api/v1/payments contracts. SQLAlchemy models represent users,
+products, categories, customer cart lines, orders and payment attempts/events. PostgreSQL is the development runtime;
 SQLite is used for isolated unit/API tests. Alembic controls database schema.
 
 The frontend/ directory provides the Next.js catalog and product-detail storefront.
@@ -11,8 +11,10 @@ Server-side calls use generated OpenAPI types and an internal API_BASE_URL; the
 browser receives only the current page of product data. The additive
 [catalog query endpoint](api.md#catalog-search-and-pagination-vin-289) filters and
 orders the full catalog before returning a bounded page and matching count in
-one database statement; the home page reads it on the server for URL-owned
-search, stock, sort and page ([collection URLs](../frontend/README.md#collection-urls-vin-287)). Signed-in cart persistence and the cart storefront are implemented; see [cart API](design/cart-api.md).
+one database statement. `GET /api/v1/categories/` lists the stored workspace
+categories. The home page reads both on the server for URL-owned
+search, stock, category, sort and page ([collection URLs](../frontend/README.md#collection-urls-vin-287)).
+All is the omitted category parameter, not a stored category. Signed-in cart persistence and the cart storefront are implemented; see [cart API](design/cart-api.md).
 Authenticated order drafts preserve GBP snapshots without reserving stock or
 placing purchases. Atomic placement is implemented separately: an owned draft and
 customer-scoped retry key drive one transaction for stock revalidation, inventory
