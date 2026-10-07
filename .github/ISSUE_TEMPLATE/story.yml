@@ -1,20 +1,12 @@
-name: Scoped story or epic
-description: Define one testable outcome, or a parent outcome to refine before coding.
+name: Story
+description: Define one independently testable customer or operator behavior.
+labels: ["type: story"]
 body:
-  - type: dropdown
-    id: kind
-    attributes:
-      label: Work category
-      options:
-        - Story
-        - Epic
-    validations:
-      required: true
   - type: textarea
     id: outcome
     attributes:
       label: Outcome and scope
-      description: Describe the outcome, included behavior and explicit exclusions. Follow docs/delivery.md; refine epics into linked stories before implementation.
+      description: Describe one testable behavior, included scope and explicit exclusions. Follow docs/delivery.md; use the Epic form for a larger outcome.
     validations:
       required: true
   - type: textarea

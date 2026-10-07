@@ -1,0 +1,35 @@
+name: Task
+description: Scope bounded maintenance, investigation, documentation or operations.
+labels: ["type: task"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and scope
+      description: Describe one bounded deliverable and explicit exclusions. Follow docs/delivery.md; use Story for a customer/operator behavior, Bug for a defect, or Epic for a larger outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Parent and dependencies
+      description: Link the parent and prerequisites, or state none.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and validation
+      description: Define observable results, actual checks and any required operational proof. Investigation alone does not claim implementation or deployment.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Handoff
+      value: |
+        - Implementing PR/branch: not started
+        - Completed: none
+        - Remaining/blockers:
+        - Tested revision and results: not tested
+        - Next action:

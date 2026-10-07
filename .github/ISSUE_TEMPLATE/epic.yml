@@ -1,0 +1,35 @@
+name: Epic
+description: Group a larger outcome into independently deliverable child issues.
+title: "[EPIC] "
+labels: ["type: epic"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and boundaries
+      description: Describe the larger outcome, included scope and explicit exclusions. Follow docs/delivery.md; refine children before implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: children
+    attributes:
+      label: Child issues and dependencies
+      description: Link independently testable stories, bugs or tasks using GitHub sub-issues, or explicit links. Record any refinement still needed; a parent can itself have a parent.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Combined acceptance and validation
+      description: Define the overall finish line and combined verification. One merged child does not complete the epic.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Handoff
+      value: |
+        - Delivered children: none
+        - Remaining children/blockers:
+        - Combined verification: not tested
+        - Next action:
