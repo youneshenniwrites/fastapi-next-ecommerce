@@ -174,11 +174,48 @@ test("one activation opens the saved cart during a pending session refresh", asy
       "true",
     );
     await expect(link.getByTestId("cart-count")).toHaveCSS("opacity", "0");
+    const activations: { pending: boolean; concealed: boolean }[] = [];
+    await page.exposeFunction(
+      "recordCartActivation",
+      (state: { pending: boolean; concealed: boolean }) => {
+        activations.push(state);
+      },
+    );
+    await page.evaluate(() => {
+      document.addEventListener(
+        "pointerdown",
+        (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          const cart = target.closest('a[href="/cart"]');
+          if (!cart) return;
+          const nav = cart.closest("nav");
+          const count = cart.querySelector('[data-testid="cart-count"]');
+          // Capture before the target handler starts navigation. A deadline
+          // that already settled the refresh must fail, not silently pass.
+          void (
+            window as unknown as {
+              recordCartActivation: (state: {
+                pending: boolean;
+                concealed: boolean;
+              }) => Promise<void>;
+            }
+          ).recordCartActivation({
+            pending: !!nav?.querySelector('[aria-busy="true"]'),
+            concealed: !!count && getComputedStyle(count).opacity === "0",
+          });
+        },
+        { capture: true },
+      );
+    });
     // Only future reads recover; the in-flight refresh remains delayed. No
     // second activation may rescue a dropped click/tap during the pending state.
     await fault(page, request, {});
     await activateCartLink(link, info.project.name);
     await expect(page).toHaveURL(/\/cart$/, { timeout: 3000 });
+    await expect
+      .poll(() => activations)
+      .toEqual([{ pending: true, concealed: true }]);
     await expect(
       page.getByRole("heading", { name: "Your cart." }),
     ).toBeVisible();
