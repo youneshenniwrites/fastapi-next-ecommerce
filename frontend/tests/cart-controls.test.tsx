@@ -37,6 +37,11 @@ const product: Product = {
   currency: "GBP",
   stock: 10,
   category: { slug: "desk-organization", name: "Desk organization" },
+  image: null,
+  material: null,
+  width_mm: null,
+  depth_mm: null,
+  height_mm: null,
 };
 function ready(owner = "cart@example.test", quantity = 1): CartSnapshot {
   return {

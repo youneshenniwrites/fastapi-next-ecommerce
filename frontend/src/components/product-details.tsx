@@ -11,6 +11,37 @@ import {
   collectionHref as buildCollectionHref,
   type CollectionFilters,
 } from "@/lib/collection-url";
+function ProductFacts({ product }: { product: Product }) {
+  const rows = [
+    product.material ? { term: "Material", detail: product.material } : null,
+    product.width_mm != null
+      ? { term: "Width", detail: `${product.width_mm} mm` }
+      : null,
+    product.depth_mm != null
+      ? { term: "Depth", detail: `${product.depth_mm} mm` }
+      : null,
+    product.height_mm != null
+      ? { term: "Height", detail: `${product.height_mm} mm` }
+      : null,
+  ].filter((row) => row !== null);
+  if (rows.length === 0) return null;
+  return (
+    <section aria-label="Product details" className="mt-8 min-w-0">
+      <p className="text-xs leading-5 text-muted-foreground [overflow-wrap:anywhere]">
+        Stated for this demo item. The photograph is representative and is not a
+        measured picture of it.
+      </p>
+      <dl className="mt-3 text-sm [&_div]:grid [&_div]:grid-cols-[7rem_minmax(0,1fr)] [&_div]:gap-3 [&_div]:border-b [&_div]:border-border [&_div]:py-3">
+        {rows.map((row) => (
+          <div key={row.term}>
+            <dt>{row.term}</dt>
+            <dd className="min-w-0 [overflow-wrap:anywhere]">{row.detail}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
 export function ProductDetails({
   product,
   filters,
@@ -35,7 +66,7 @@ export function ProductDetails({
       </Link>
       <div className="grid items-start gap-8 md:grid-cols-2 lg:gap-16">
         <div className="overflow-hidden bg-muted">
-          <ProductImage name={product.name} priority />
+          <ProductImage image={product.image} priority />
         </div>
         <div className="min-w-0 py-4">
           <CollectionBreadcrumb
@@ -56,6 +87,7 @@ export function ProductDetails({
           <p className="text-sm leading-7 text-muted-foreground [overflow-wrap:anywhere]">
             {product.description}
           </p>
+          <ProductFacts product={product} />
           <Badge variant="secondary" className="mt-6 gap-2 px-3 py-1.5">
             {product.stock ? (
               <Check className="size-3.5" aria-hidden="true" />

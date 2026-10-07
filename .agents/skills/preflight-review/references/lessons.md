@@ -131,3 +131,15 @@ bypass requirement still applies. Stop creation if that access contract changes.
 For pull-request CI, distinguish the raw head tree from GitHub’s synthetic merge
 tree: upload only a tree the checks exercised, and recheck base movement as well
 as the head before creation. [Source findings and verified disposition](history.md#focused-addendum--2-october-2026-pr-264).
+
+## Frozen migrations and SQL checks — PR 320
+
+Copy a revision's allowlist and backfill into the migration. Importing the live
+application constant makes a replay on a new database follow later edits, while
+databases that already applied the revision keep the old result. Do not edit an
+applied revision; ship the change as a new one.
+
+A CHECK expression that becomes NULL does not reject the row. When one side of a
+pair is NULL, require that column `IS NOT NULL` in the branch that needs it, and
+prove the rejection with a direct insert. [Alt text](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/320#discussion_r4212059197)
+and [frozen media](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/320#discussion_r4212059207).

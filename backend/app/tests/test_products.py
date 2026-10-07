@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from app.models.product import Product
 
@@ -81,6 +82,16 @@ def admin_headers(user, token, db):
         {"category": "Not A Slug"},
         {"category": "missing-category"},
         {"category": None},
+        {"image": {"key": "https://evil.example/lamp.webp", "alt": "Remote"}},
+        {"image": {"key": "../lamp", "alt": "Path"}},
+        {"image": {"key": "not-a-photo", "alt": "Missing file"}},
+        {"image": {"key": "lamp", "alt": "<img alt=x>"}},
+        {"image": {"key": "lamp", "alt": ""}},
+        {"image": "lamp"},
+        {"material": "<b>oak</b>"},
+        {"width_mm": 0},
+        {"width_mm": 10001},
+        {"height_mm": True},
     ],
 )
 def test_invalid_product_create(client, admin_headers, db, invalid):
@@ -110,6 +121,10 @@ def test_invalid_product_create(client, admin_headers, db, invalid):
         {"category": None},
         {"category": "all"},
         {"category": "missing-category"},
+        {"image": {"key": "https://evil.example/lamp.webp", "alt": "Remote"}},
+        {"image": {"key": "lamp", "alt": "<script>"}},
+        {"material": "<i>felt</i>"},
+        {"depth_mm": 0},
     ],
 )
 def test_invalid_product_update_preserves_record(client, admin_headers, db, invalid):
@@ -241,3 +256,129 @@ def test_database_required_columns(db, field):
         )
         db.commit()
     db.rollback()
+
+
+def test_rename_keeps_the_photo_and_leaves_history_unchanged(
+    client, db, admin_headers, user, token
+):
+    """A new name keeps the photograph, stock, cart line and order snapshot."""
+    from decimal import Decimal
+
+    from app.models.cart import CartLine
+    from app.models.order import Order, OrderLine
+
+    created = client.post(
+        "/api/v1/products/",
+        headers=admin_headers,
+        json={
+            "name": "Task Light",
+            "price": "65.00",
+            "stock": 8,
+            "category": "lighting",
+            "image": {
+                "key": "lamp",
+                "alt": "Representative photograph of a desk lamp",
+            },
+            "material": "Aluminium",
+            "width_mm": 150,
+            "depth_mm": 150,
+            "height_mm": 420,
+        },
+    )
+    assert created.status_code == 201
+    body = created.json()
+    assert body["image"] == {
+        "key": "lamp",
+        "alt": "Representative photograph of a desk lamp",
+    }
+    assert body["material"] == "Aluminium"
+    assert body["height_mm"] == 420
+    product_id = body["id"]
+    product = db.get(Product, product_id)
+    product.reserved_stock = 1
+    db.add(CartLine(user_id=user.id, product_id=product_id, quantity=1))
+    order = Order(
+        user_id=user.id, status="draft", currency="GBP", total=Decimal("65.00")
+    )
+    order.lines.append(
+        OrderLine(
+            product_id=product_id,
+            product_name="Task Light",
+            unit_price=Decimal("65.00"),
+            quantity=1,
+        )
+    )
+    db.add(order)
+    db.commit()
+
+    user.is_superuser = False
+    db.commit()
+    forbidden = client.put(
+        f"/api/v1/products/{product_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "image": {
+                "key": "mat",
+                "alt": "Representative photograph of a felt desk mat",
+            }
+        },
+    )
+    assert forbidden.status_code == 403
+    user.is_superuser = True
+    db.commit()
+
+    renamed = client.put(
+        f"/api/v1/products/{product_id}",
+        headers=admin_headers,
+        json={"name": "Renamed lamp"},
+    )
+    assert renamed.status_code == 200
+    assert renamed.json()["id"] == product_id
+    assert renamed.json()["name"] == "Renamed lamp"
+    assert renamed.json()["image"]["key"] == "lamp"
+    assert renamed.json()["stock"] == 8
+    assert renamed.json()["material"] == "Aluminium"
+    db.refresh(product)
+    assert product.reserved_stock == 1
+    assert db.get(CartLine, (user.id, product_id)).quantity == 1
+    line = db.query(OrderLine).filter_by(product_id=product_id).one()
+    assert line.product_name == "Task Light"
+    assert line.unit_price == Decimal("65.00")
+
+    cleared = client.put(
+        f"/api/v1/products/{product_id}",
+        headers=admin_headers,
+        json={"image": None, "height_mm": None},
+    )
+    assert cleared.status_code == 200
+    assert cleared.json()["image"] is None
+    assert cleared.json()["height_mm"] is None
+    assert cleared.json()["material"] == "Aluminium"
+    assert cleared.json()["width_mm"] == 150
+    assert cleared.json()["name"] == "Renamed lamp"
+
+
+def test_absent_facts_are_null(client, admin_headers):
+    created = client.post(
+        "/api/v1/products/",
+        headers=admin_headers,
+        json={
+            "name": "Plain object",
+            "price": "1.00",
+            "stock": 1,
+            "category": "uncategorized",
+        },
+    )
+    assert created.status_code == 201
+    body = created.json()
+    assert body["image"] is None
+    assert body["material"] is None
+    assert body["width_mm"] is None
+    assert body["depth_mm"] is None
+    assert body["height_mm"] is None
+
+
+def test_stored_photo_key_requires_alt_text(db):
+    db.add(Product(name="Loose photo", price=1, stock=1, image_key="lamp"))
+    with pytest.raises(IntegrityError):
+        db.commit()

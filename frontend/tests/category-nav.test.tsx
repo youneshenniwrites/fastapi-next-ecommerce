@@ -94,6 +94,14 @@ const product: Product = {
   currency: "GBP",
   stock: 8,
   category: { slug: "lighting", name: "Lighting" },
+  image: {
+    key: "lamp",
+    alt: "Representative photograph of a desk lamp",
+  },
+  material: "Aluminium",
+  width_mm: 150,
+  depth_mm: null,
+  height_mm: 420,
 };
 
 it("shows the product category instead of a fixed collection label", () => {
@@ -121,4 +129,14 @@ it("shows the product category instead of a fixed collection label", () => {
       .getAttribute("href"),
   ).toBe("/?category=desk-organization&q=oak#collection");
   expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toBeTruthy();
+  const details = screen.getByRole("region", { name: "Product details" });
+  expect(details.textContent).toContain("Material");
+  expect(details.textContent).toContain("Aluminium");
+  expect(details.textContent).toContain("420 mm");
+  expect(details.textContent).not.toContain("Depth");
+  expect(
+    screen.getByRole("img", {
+      name: "Representative photograph of a desk lamp",
+    }),
+  ).toBeTruthy();
 });

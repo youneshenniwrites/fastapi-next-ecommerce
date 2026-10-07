@@ -18,7 +18,7 @@ export function ProductCard({
         className="group block"
       >
         <div className="relative overflow-hidden bg-muted">
-          <ProductImage name={product.name} />
+          <ProductImage image={product.image} />
           {product.stock === 0 && (
             <Badge
               variant="outline"

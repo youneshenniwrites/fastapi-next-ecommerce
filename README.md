@@ -183,7 +183,15 @@ Product JSON includes an exact decimal string and explicit currency:
   "price": "19.90",
   "currency": "GBP",
   "stock": 12,
-  "category": { "slug": "lighting", "name": "Lighting" }
+  "category": { "slug": "lighting", "name": "Lighting" },
+  "image": {
+    "key": "lamp",
+    "alt": "Representative photograph of a desk lamp"
+  },
+  "material": "Aluminium",
+  "width_mm": 150,
+  "depth_mm": 150,
+  "height_mm": 420
 }
 ```
 
@@ -191,8 +199,10 @@ Prices have at most two decimal places and range from 0.00 to 9999999999.99.
 Stock must be a nonnegative integer. Lists use a stable id order, a limit of 1–100
 (default 10), and skip of 0–100000. Every product read includes `category`.
 Create requires a stored slug; a missing, unknown, malformed, or `all` slug
-returns 422. Omitted PUT fields, including `category`, retain their values; only
-description may explicitly be null. Unsupported currencies and unknown fields
+returns 422. Omitted PUT fields, including `category`, retain their values. Description, image,
+material and dimensions may be null to clear them. Name, price, currency, stock
+and category may not. An image key is an allowlisted local file, not a remote URL.
+Unsupported currencies, markup and unknown fields
 are rejected. See [the catalog contract](docs/api.md#catalog-search-and-pagination-vin-289)
 and [backend documentation](backend/README.md) for full constraints.
 
