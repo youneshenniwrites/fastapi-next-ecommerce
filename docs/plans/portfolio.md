@@ -28,8 +28,8 @@ priorities, status and acceptance gates. This page describes product direction o
 
 VIN-288 plans a richer workspace/home-office catalog of up to 100 items, useful
 product information and full-catalog discovery. VIN-290 delivered one stored
-category per product and category browsing. Useful product facts, photos that
-survive a rename, and the larger assortment remain open under VIN-291 and
+category per product and category browsing. VIN-291 delivered a stable local
+photograph and optional stated facts. The larger assortment remains open under
 VIN-292. Category and media data stay product-agnostic so a later assortment
 does not require name-based code.
 VIN-295 separately saves owner catalog administration; it is explicitly deferred,
