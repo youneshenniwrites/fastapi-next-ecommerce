@@ -277,7 +277,20 @@ Required CI for that pull request passed before merge. Development release
 there: Lighting shows Task Light, the product page names Lighting, Back to the
 collection keeps `category=lighting`, and an unknown slug says that category
 does not exist. `GET /api/v1/categories/` returns the seven workspace categories.
-VIN-291 is the next story.
+
+VIN-291's product photos and stated facts are on main. [PR #320](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/320)
+merged as `c4b05b3` on 7 October 2026. A product stores one allowlisted local
+photograph, independent of its name, plus optional material and millimetre
+dimensions. Absent facts are omitted. Codex reviewed `b0523c8` with no findings,
+and required CI passed. Development release `c4b05b3` is on
+[the storefront](https://forme-ecommerce-development.vercel.app) and
+[the API](https://forme-api-development.vercel.app), from
+[development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37690437051).
+Public checks there: Lighting shows Task Light with the lamp photograph,
+Aluminium, and 150 × 150 × 420 mm; Felt Desk Mat shows Felt, 800 mm and 400 mm,
+and omits height; the lamp file is a local WebP. The hosted catalog still has
+the original six products. The hosted database was not seeded or renamed.
+VIN-292 is the next story. VIN-288 stays open because that assortment remains.
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
