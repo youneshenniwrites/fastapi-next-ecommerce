@@ -47,8 +47,8 @@ class Product(Base):
         CheckConstraint(image_key_sql(), name="ck_products_image_key"),
         CheckConstraint(
             "(image_key IS NULL AND image_alt IS NULL) OR "
-            "(image_key IS NOT NULL AND length(trim(image_alt)) >= 1 "
-            "AND length(image_alt) <= 200)",
+            "(image_key IS NOT NULL AND image_alt IS NOT NULL "
+            "AND length(trim(image_alt)) >= 1 AND length(image_alt) <= 200)",
             name="ck_products_image_pair",
         ),
         CheckConstraint(

@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from app.models.product import Product
 
@@ -375,3 +376,9 @@ def test_absent_facts_are_null(client, admin_headers):
     assert body["width_mm"] is None
     assert body["depth_mm"] is None
     assert body["height_mm"] is None
+
+
+def test_stored_photo_key_requires_alt_text(db):
+    db.add(Product(name="Loose photo", price=1, stock=1, image_key="lamp"))
+    with pytest.raises(IntegrityError):
+        db.commit()

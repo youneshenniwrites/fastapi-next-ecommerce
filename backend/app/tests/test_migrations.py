@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from sqlalchemy import create_engine, inspect
 
 BACKEND = Path(__file__).resolve().parents[2]
@@ -275,6 +276,28 @@ def test_media_migration_assigns_known_photos_without_overwriting_edits(tmp_path
     assert rows[1]["description"] == "Keep me"
     assert rows[1]["image_key"] is None
     assert rows[1]["material"] is None
+    from sqlalchemy.exc import IntegrityError
+
+    with pytest.raises(IntegrityError):
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO products "
+                    "(name, price, currency, stock, category_id, image_key) "
+                    "VALUES ('Loose photo', 1.00, 'GBP', 1, "
+                    "(SELECT id FROM categories WHERE slug = 'lighting'), 'lamp')"
+                )
+            )
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO products "
+                "(name, price, currency, stock, category_id, image_key, image_alt) "
+                "VALUES ('Paired photo', 1.00, 'GBP', 1, "
+                "(SELECT id FROM categories WHERE slug = 'lighting'), "
+                "'lamp', 'Representative photograph of a desk lamp')"
+            )
+        )
     migrate("downgrade", "0008")
     assert "image_key" not in {
         column["name"] for column in inspect(engine).get_columns("products")
@@ -290,3 +313,12 @@ def test_media_migration_assigns_known_photos_without_overwriting_edits(tmp_path
     assert kept[0]["description"] == "Edited copy"
     migrate("downgrade", "base")
     engine.dispose()
+
+
+def test_media_migration_freezes_its_allowlist():
+    """Revision 0009 must not follow later edits to the live catalog constants."""
+    source = (BACKEND / "alembic/versions/0009_product_media_and_facts.py").read_text()
+    assert "catalog_media" not in source
+    assert "image_alt IS NOT NULL" in source
+    assert '"Task Light"' in source
+    assert '"lamp"' in source

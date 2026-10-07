@@ -2,17 +2,156 @@
 
 Revision ID: 0009
 Revises: 0008
+
+The allowlist and demo backfill below are frozen for this revision. A later
+change to the live catalog media belongs in a new migration.
 """
 
 import sqlalchemy as sa
 
 from alembic import op
-from app.catalog_media import PRODUCT_MEDIA, image_key_sql
 
 revision = "0009"
 down_revision = "0008"
 branch_labels = None
 depends_on = None
+
+# Copied from the catalog at the time this revision was added. Do not replace
+# these with an import of the live application constants.
+_IMAGE_KEYS = (
+    "stand",
+    "mat",
+    "lamp",
+    "tray",
+    "notebooks",
+    "cup",
+    "keyboard",
+    "headphones",
+    "bottle",
+    "planter",
+    "clock",
+    "mouse",
+)
+_IMAGE_KEY_CHECK = (
+    "image_key IS NULL OR image_key IN ("
+    + ", ".join(f"'{key}'" for key in _IMAGE_KEYS)
+    + ")"
+)
+_IMAGE_PAIR_CHECK = (
+    "(image_key IS NULL AND image_alt IS NULL) OR "
+    "(image_key IS NOT NULL AND image_alt IS NOT NULL "
+    "AND length(trim(image_alt)) >= 1 AND length(image_alt) <= 200)"
+)
+_DEMO_MEDIA = (
+    {
+        "name": "Oak Monitor Stand",
+        "image_key": "stand",
+        "image_alt": "Representative photograph of a wooden monitor stand",
+        "material": "Solid oak",
+        "width_mm": 540,
+        "depth_mm": 220,
+        "height_mm": 80,
+    },
+    {
+        "name": "Felt Desk Mat",
+        "image_key": "mat",
+        "image_alt": "Representative photograph of a felt desk mat",
+        "material": "Felt",
+        "width_mm": 800,
+        "depth_mm": 400,
+        "height_mm": None,
+    },
+    {
+        "name": "Task Light",
+        "image_key": "lamp",
+        "image_alt": "Representative photograph of a desk lamp",
+        "material": "Aluminium",
+        "width_mm": 150,
+        "depth_mm": 150,
+        "height_mm": 420,
+    },
+    {
+        "name": "Cable Tray",
+        "image_key": "tray",
+        "image_alt": "Representative photograph of a wooden desk tray",
+        "material": "Wood",
+        "width_mm": 300,
+        "depth_mm": 200,
+        "height_mm": 40,
+    },
+    {
+        "name": "Notebook Set",
+        "image_key": "notebooks",
+        "image_alt": "Representative photograph of two notebooks",
+        "material": "Paper",
+        "width_mm": 140,
+        "depth_mm": 15,
+        "height_mm": 210,
+    },
+    {
+        "name": "Ceramic Pen Cup",
+        "image_key": "cup",
+        "image_alt": "Representative photograph of a ceramic cup holding pencils",
+        "material": "Ceramic",
+        "width_mm": 90,
+        "depth_mm": 90,
+        "height_mm": 100,
+    },
+    {
+        "name": "Compact Keyboard",
+        "image_key": "keyboard",
+        "image_alt": "Representative photograph of a computer keyboard",
+        "material": "Plastic",
+        "width_mm": 310,
+        "depth_mm": 120,
+        "height_mm": 22,
+    },
+    {
+        "name": "Focus Headphones",
+        "image_key": "headphones",
+        "image_alt": "Representative photograph of over-ear headphones",
+        "material": "Plastic",
+        "width_mm": None,
+        "depth_mm": None,
+        "height_mm": None,
+    },
+    {
+        "name": "Insulated Bottle",
+        "image_key": "bottle",
+        "image_alt": "Representative photograph of a steel bottle",
+        "material": "Steel",
+        "width_mm": 75,
+        "depth_mm": 75,
+        "height_mm": 260,
+    },
+    {
+        "name": "Handled Planter",
+        "image_key": "planter",
+        "image_alt": "Representative photograph of a ceramic planter",
+        "material": "Ceramic",
+        "width_mm": 140,
+        "depth_mm": 140,
+        "height_mm": 130,
+    },
+    {
+        "name": "Analogue Desk Clock",
+        "image_key": "clock",
+        "image_alt": "Representative photograph of a round analogue clock",
+        "material": None,
+        "width_mm": None,
+        "depth_mm": None,
+        "height_mm": None,
+    },
+    {
+        "name": "Wireless Mouse",
+        "image_key": "mouse",
+        "image_alt": "Representative photograph of a wireless computer mouse",
+        "material": "Plastic",
+        "width_mm": 110,
+        "depth_mm": 62,
+        "height_mm": 38,
+    },
+)
 
 
 def upgrade():
@@ -26,13 +165,8 @@ def upgrade():
         batch.add_column(sa.Column("width_mm", sa.Integer(), nullable=True))
         batch.add_column(sa.Column("depth_mm", sa.Integer(), nullable=True))
         batch.add_column(sa.Column("height_mm", sa.Integer(), nullable=True))
-        batch.create_check_constraint("ck_products_image_key", image_key_sql())
-        batch.create_check_constraint(
-            "ck_products_image_pair",
-            "(image_key IS NULL AND image_alt IS NULL) OR "
-            "(image_key IS NOT NULL AND length(trim(image_alt)) >= 1 "
-            "AND length(image_alt) <= 200)",
-        )
+        batch.create_check_constraint("ck_products_image_key", _IMAGE_KEY_CHECK)
+        batch.create_check_constraint("ck_products_image_pair", _IMAGE_PAIR_CHECK)
         batch.create_check_constraint(
             "ck_products_material",
             "material IS NULL OR (length(trim(material)) >= 1 AND length(material) <= 80)",
@@ -45,7 +179,7 @@ def upgrade():
 
     # Fill only empty photo slots for the known demo names. Names, prices, stock,
     # descriptions and ids stay as edited. A renamed product is left without a photo.
-    for name, media in PRODUCT_MEDIA.items():
+    for media in _DEMO_MEDIA:
         connection.execute(
             sa.text(
                 "UPDATE products SET image_key = :image_key, image_alt = :image_alt, "
@@ -53,15 +187,7 @@ def upgrade():
                 "height_mm = :height_mm "
                 "WHERE name = :name AND image_key IS NULL"
             ),
-            {
-                "name": name,
-                "image_key": media["image_key"],
-                "image_alt": media["image_alt"],
-                "material": media.get("material"),
-                "width_mm": media.get("width_mm"),
-                "depth_mm": media.get("depth_mm"),
-                "height_mm": media.get("height_mm"),
-            },
+            media,
         )
 
 
