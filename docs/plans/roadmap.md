@@ -66,9 +66,10 @@ Customer features and Technical improvements views.
 
 Azure (#31) and broader enterprise work remain deferred as specified in that plan.
 
-The next planned customer release expands catalog discovery and content up to
-100 workspace/home-office products: server queries, pagination, categories,
-product information and a safe curated import. VIN-287 is delivered in
+The next planned customer release still expands the catalog up to
+100 workspace/home-office products, with useful product information and a safe
+curated import. Server queries, pagination and category browsing are delivered.
+VIN-287 is delivered in
 [PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
 (`e163ee7`). VIN-290's category browsing is merged in
 [PR #316](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/316)

@@ -27,13 +27,16 @@ priorities, status and acceptance gates. This page describes product direction o
 ## After the completed demo
 
 VIN-288 plans a richer workspace/home-office catalog of up to 100 items, useful
-product information and full-catalog discovery. Category and media data should
-remain product-agnostic so a later assortment does not require name-based code.
+product information and full-catalog discovery. VIN-290 delivered one stored
+category per product and category browsing. Useful product facts, photos that
+survive a rename, and the larger assortment remain open under VIN-291 and
+VIN-292. Category and media data stay product-agnostic so a later assortment
+does not require name-based code.
 VIN-295 separately saves owner catalog administration; it is explicitly deferred,
 with store-model discovery still open. New product work remains a fictional,
 sandbox shop unless the owner separately approves a real-business transition.
-The canonical plan owns ordering; these are planned capabilities, not delivered
-features or new VIN-155 completion criteria.
+The canonical plan owns ordering. Remaining VIN-288 work is planned, not
+delivered, and is not a new VIN-155 completion criterion.
 
 ## Success criteria
 
