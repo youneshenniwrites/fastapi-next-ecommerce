@@ -151,8 +151,16 @@ if the services are no longer running.
 ## Catalog search and pagination (VIN-289)
 
 `GET /api/v1/products/search` is a public, additive endpoint for querying the
-complete catalog. Existing `GET /api/v1/products/` consumers still receive a list;
-product details and admin writes keep their existing contracts.
+complete catalog. Existing `GET /api/v1/products/` consumers still receive a list.
+VIN-290 adds `category` to every product read: that list, each search item, and
+`GET /api/v1/products/{id}`. The value is an object with `slug` and `name`.
+
+Admin create requires `category`. Omitting it, or sending `all`, null, a
+malformed slug, or an unknown slug, returns 422 and stores nothing. Admin update
+may omit `category` and keep the current one. A stored slug moves the product.
+Null, `all`, a malformed slug, or an unknown slug returns 422 and leaves the
+product unchanged. Search returns 404 for an unknown slug; create and update
+return 422 for the same slug.
 
 | Parameter | Default | Accepted values |
 | --- | --- | --- |
@@ -187,19 +195,22 @@ exact, two-place GBP strings; reserved inventory is not exposed.
 The page and count share a single database snapshot. With unchanged data, repeated
 pages retain their order. Inserts, deletes, stock changes or edits between requests
 can move results and change totals; offset pagination is not a frozen browsing
-session. No new index or migration is needed for the planned catalog size.
+session. VIN-289 search adds no index or migration. Categories use Alembic
+revision 0008.
 
-The storefront home page calls this endpoint on the server for every page
-(24 products per page) using the URL-owned selection described in the
-[frontend README](../frontend/README.md#collection-urls-vin-287); the browser no
-longer filters a preloaded list. FastAPI and PostgreSQL stay authoritative for
+The storefront home page is the collection. It calls this endpoint on the server
+for every page (24 products per page) using the URL-owned selection described in
+the [frontend README](../frontend/README.md#collection-urls-vin-287); the browser
+no longer filters a preloaded list. FastAPI and PostgreSQL stay authoritative for
 matching, ordering, totals, prices and stock.
 
 `GET /api/v1/categories/` lists the public categories in display order (VIN-290).
 Each count uses the same `q` and `in_stock` filters as the catalog and is not
 limited to one category. Uncategorized is the stored fallback for products the
-migration could not match. Category navigation, breadcrumbs and the product page
-use this list together with the search `category` parameter.
+migration could not match. That same home page loads this list for category
+navigation and breadcrumbs, and passes the selected slug to search. The product
+page does not call this list. It loads `GET /api/v1/products/{id}` and shows the
+embedded `product.category`.
 
 ## Other response contracts
 

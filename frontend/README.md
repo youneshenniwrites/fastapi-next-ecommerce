@@ -125,7 +125,7 @@ shows that the category does not exist. Unknown parameters are ignored. A
 recognised parameter that is duplicated, oversized or invalid falls back to its
 default and shows a short notice. Product links and the product page's "Back to
 the collection" link carry only these parameters, never an external return URL.
-The product page names the product's category. A page past the end shows a
+The product page names the category embedded in the product response. It does not load the category list. A page past the end shows a
 recovery state with a link to the last page. Share results copies the canonical
 absolute URL, or reveals a selectable link when the clipboard is unavailable.
 Offset pages are not a frozen snapshot: edits between requests can move products.
