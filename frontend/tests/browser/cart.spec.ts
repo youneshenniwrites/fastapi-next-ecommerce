@@ -113,39 +113,118 @@ async function submitQuantity(
   }
 }
 
+async function cartNavigationLink(
+  page: import("@playwright/test").Page,
+  project: string,
+) {
+  // The account link appears only after this streamed header has hydrated.
+  await expect(
+    page.getByRole("link", { name: "My account", includeHidden: true }),
+  ).toHaveCount(1);
+  if (/mobile|pixel/i.test(project)) {
+    const menu = page.getByRole("navigation", { name: "Mobile navigation" });
+    await page.getByRole("button", { name: "Open navigation" }).tap();
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    return menu.getByRole("link", { name: /^Cart/ });
+  }
+  return page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: /^Cart/ });
+}
+
+async function activateCartLink(
+  link: import("@playwright/test").Locator,
+  project: string,
+) {
+  if (/mobile|pixel/i.test(project)) await link.tap();
+  else await link.click();
+}
+
 async function openCartLink(
   page: import("@playwright/test").Page,
   project: string,
 ) {
-  const mobile = /mobile|pixel/i.test(project);
-  // The streamed header is replaced when the cart snapshot arrives, and a click
-  // in that moment does not navigate. Try again on the settled link.
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (mobile) {
-      const menu = page.getByRole("navigation", { name: "Mobile navigation" });
-      let opened = false;
-      for (let tap = 0; tap < 3 && !opened; tap++) {
-        await page.getByRole("button", { name: "Open navigation" }).click();
-        opened = await menu.waitFor({ state: "visible", timeout: 3000 }).then(
-          () => true,
-          () => false,
-        );
-      }
-      await menu.getByRole("link", { name: /^Cart/ }).click();
-    } else {
-      await page
-        .getByRole("navigation", { name: "Main navigation" })
-        .getByRole("link", { name: /^Cart/ })
-        .click();
-    }
-    const arrived = await page.waitForURL(/\/cart$/, { timeout: 3000 }).then(
-      () => true,
-      () => false,
-    );
-    if (arrived) return;
-  }
-  await expect(page).toHaveURL(/\/cart$/);
+  const link = await cartNavigationLink(page, project);
+  await activateCartLink(link, project);
+  await expect(page).toHaveURL(/\/cart$/, { timeout: 3000 });
 }
+
+test("one activation opens the saved cart during a pending session refresh", async ({
+  page,
+  request,
+}, info) => {
+  const item = await savedCart(page, request);
+  const link = await cartNavigationLink(page, info.project.name);
+  const nav = page.getByRole("navigation", {
+    name: /mobile|pixel/i.test(info.project.name)
+      ? "Mobile navigation"
+      : "Main navigation",
+  });
+  // The account link proves this header is hydrated before delaying its refresh.
+  await expect(nav.getByRole("link", { name: "My account" })).toBeVisible();
+  await fault(page, request, { identity: "timeout" });
+  try {
+    const sessionRead = page.waitForRequest((request) =>
+      request.url().endsWith("/api/session/me"),
+    );
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await sessionRead;
+    await expect(nav.getByText("Account", { exact: true })).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+    await expect(link.getByTestId("cart-count")).toHaveCSS("opacity", "0");
+    const activations: { pending: boolean; concealed: boolean }[] = [];
+    await page.exposeFunction(
+      "recordCartActivation",
+      (state: { pending: boolean; concealed: boolean }) => {
+        activations.push(state);
+      },
+    );
+    await page.evaluate(() => {
+      document.addEventListener(
+        "pointerdown",
+        (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          const cart = target.closest('a[href="/cart"]');
+          if (!cart) return;
+          const nav = cart.closest("nav");
+          const count = cart.querySelector('[data-testid="cart-count"]');
+          // Capture before the target handler starts navigation. A deadline
+          // that already settled the refresh must fail, not silently pass.
+          void (
+            window as unknown as {
+              recordCartActivation: (state: {
+                pending: boolean;
+                concealed: boolean;
+              }) => Promise<void>;
+            }
+          ).recordCartActivation({
+            pending: !!nav?.querySelector('[aria-busy="true"]'),
+            concealed: !!count && getComputedStyle(count).opacity === "0",
+          });
+        },
+        { capture: true },
+      );
+    });
+    // Only future reads recover; the in-flight refresh remains delayed. No
+    // second activation may rescue a dropped click/tap during the pending state.
+    await fault(page, request, {});
+    await activateCartLink(link, info.project.name);
+    await expect(page).toHaveURL(/\/cart$/, { timeout: 3000 });
+    await expect
+      .poll(() => activations)
+      .toEqual([{ pending: true, concealed: true }]);
+    await expect(
+      page.getByRole("heading", { name: "Your cart." }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: item.name })).toBeVisible();
+    await expect(page.getByTestId("cart-count").first()).toHaveText("1");
+  } finally {
+    await fault(page, request, {});
+  }
+});
 
 test("signed-in cart journey persists across reload and logout/login", async ({
   page,

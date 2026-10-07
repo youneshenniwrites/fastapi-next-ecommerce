@@ -75,6 +75,10 @@ one hidden after mount; do not assume a visibility event always precedes setup.
   page exit so a missing pointerup cannot permanently defeat concealment.
   Triggers inside streaming headers can unmount before click dispatch; capture
   menu intent at press time into state that survives the remount.
+  A pending-state assertion before an interaction can expire while actionability
+  waits run. Observe pending/privacy state at the actual activation event so a
+  navigation after the deadline cannot falsely prove pending-state behavior
+  ([Greptile finding on PR #319](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/319#discussion_r4212006426)).
 - Rendering: slow private reads must not block unrelated route content. Suspending
   a second copy of interactive children can remount forms and discard input/focus.
   Test typing during slow reads and no-JavaScript rendering where promised.
