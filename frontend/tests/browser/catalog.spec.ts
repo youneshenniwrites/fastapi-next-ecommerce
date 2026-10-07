@@ -123,21 +123,18 @@ test("enforced CSP uses fresh nonces on real pages and preserves hydration", asy
   expect(policy).toContain("'strict-dynamic'");
 });
 
-// A tap can land mid-remount and be swallowed, so re-try until the menu is visible
-// instead of failing outright.
 async function openMobileMenu(page: import("@playwright/test").Page) {
   const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
-  for (let attempt = 0; attempt < 3; attempt++) {
-    await page.getByRole("button", { name: "Open navigation" }).click();
-    const opened = await dialog
-      .waitFor({ state: "visible", timeout: 3000 })
-      .then(
-        () => true,
-        () => false,
-      );
-    if (opened) return;
-  }
-  await expect(dialog).toBeVisible();
+  // AccountLink renders this only after the streamed header has hydrated.
+  await expect(
+    page.getByRole("link", {
+      name: "Sign in",
+      exact: true,
+      includeHidden: true,
+    }),
+  ).toHaveCount(1);
+  await page.getByRole("button", { name: "Open navigation" }).tap();
+  await expect(dialog).toBeVisible({ timeout: 3000 });
 }
 test("browse, filter and view the real FastAPI catalog", async ({
   page,
@@ -249,20 +246,16 @@ test("mobile navigation supports keyboard, dismissal and real links", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
   const trigger = page.getByRole("button", { name: "Open navigation" });
   const dialog = page.getByRole("dialog", { name: "Explore VINDOR" });
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // Re-focus every attempt: opening the menu moves focus, and a
-    // background refresh can drop it back to the document.
-    await trigger.focus();
-    await page.keyboard.press("Enter");
-    const opened = await dialog
-      .waitFor({ state: "visible", timeout: 3000 })
-      .then(
-        () => true,
-        () => false,
-      );
-    if (opened) break;
-  }
-  await expect(dialog).toBeVisible();
+  await expect(
+    page.getByRole("link", {
+      name: "Sign in",
+      exact: true,
+      includeHidden: true,
+    }),
+  ).toHaveCount(1);
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeVisible({ timeout: 3000 });
   await page.screenshot({
     path: "test-results/mobile-menu.png",
     fullPage: true,

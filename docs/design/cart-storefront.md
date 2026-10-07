@@ -45,6 +45,12 @@ view, including when JavaScript is disabled. Snapshot delivery does not fetch or
 cache data in the browser.
 The existing session poll also triggers server revalidation when a session ends.
 
+Navigation browser tests wait for the header's account link to prove hydration,
+then require one activation instead of retrying lost clicks or taps. A focused
+desktop/mobile case delays a session refresh, checks that the private count is
+concealed, and opens the saved cart once. It does not establish interactivity of
+the server-only fallback before a delayed initial header has hydrated.
+
 Cart reads use React request memoization so the layout and cart page share one
 private result per server render. This is not persistent caching and does not
 share data across requests or users. The cart page renders recovery inside its
