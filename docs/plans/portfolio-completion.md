@@ -317,7 +317,7 @@ none of that implementation blocks the current catalog release.
 groups later sign-in continuity (VIN-293), account recovery/verification (VIN-127)
 and sandbox refund/void decisions (VIN-128). Reset must invalidate all existing
 sessions; hosted email delivery still needs a sender/provider decision. These
-stories retain their remaining product decisions rather than assuming a launch.
+follow-ups retain their remaining product decisions rather than assuming a launch.
 
 **Technical improvements — VIN-125:** keep security, RUM, Sentry, reliability,
 CI and feature-flag discovery in the technical view. VIN-294 records the earlier
