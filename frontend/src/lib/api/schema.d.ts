@@ -351,7 +351,7 @@ export interface paths {
         get: operations["read_product_api_v1_products__product_id__get"];
         /**
          * Partially update a product
-         * @description Active admin only. Omitted fields retain their values; only description may explicitly be null. This PUT intentionally has partial-update semantics.
+         * @description Active admin only. Omitted fields retain their values. Description, image, material and dimensions may be null to clear them. Name, price, currency, stock and category may not be null. This PUT intentionally has partial-update semantics.
          */
         put: operations["update_existing_product_api_v1_products__product_id__put"];
         post?: never;
@@ -540,14 +540,36 @@ export interface components {
              * @constant
              */
             currency: "GBP";
+            /** Depth Mm */
+            depth_mm?: number | null;
             /** Description */
             description?: string | null;
+            /** Height Mm */
+            height_mm?: number | null;
+            image?: components["schemas"]["ProductImage"] | null;
+            /** Material */
+            material?: string | null;
             /** Name */
             name: string;
             /** Price */
             price: number | string;
             /** Stock */
             stock: number;
+            /** Width Mm */
+            width_mm?: number | null;
+        };
+        /**
+         * ProductImage
+         * @description One allowlisted local photograph and its stored alternative text.
+         */
+        ProductImage: {
+            /** Alt */
+            alt: string;
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "stand" | "mat" | "lamp" | "tray" | "notebooks" | "cup" | "keyboard" | "headphones" | "bottle" | "planter" | "clock" | "mouse";
         };
         /**
          * ProductPageRead
@@ -572,16 +594,25 @@ export interface components {
              * @constant
              */
             currency: "GBP";
+            /** Depth Mm */
+            depth_mm?: number | null;
             /** Description */
             description?: string | null;
+            /** Height Mm */
+            height_mm?: number | null;
             /** Id */
             id: number;
+            image?: components["schemas"]["ProductImage"] | null;
+            /** Material */
+            material?: string | null;
             /** Name */
             name: string;
             /** Price */
             price: string;
             /** Stock */
             stock: number;
+            /** Width Mm */
+            width_mm?: number | null;
         };
         /** ProductUpdate */
         ProductUpdate: {
@@ -589,14 +620,23 @@ export interface components {
             category?: string | null;
             /** Currency */
             currency?: "GBP" | null;
+            /** Depth Mm */
+            depth_mm?: number | null;
             /** Description */
             description?: string | null;
+            /** Height Mm */
+            height_mm?: number | null;
+            image?: components["schemas"]["ProductImage"] | null;
+            /** Material */
+            material?: string | null;
             /** Name */
             name?: string | null;
             /** Price */
             price?: number | string | null;
             /** Stock */
             stock?: number | null;
+            /** Width Mm */
+            width_mm?: number | null;
         };
         /** Token */
         Token: {

@@ -166,7 +166,7 @@ function CartLine({ item }: { item: CartItem }) {
   return (
     <li className="grid gap-4 border border-border bg-background p-4 sm:grid-cols-[112px_1fr_auto] sm:gap-6 sm:p-5">
       <div className="overflow-hidden bg-muted">
-        <ProductImage name={item.product.name} />
+        <ProductImage image={item.product.image} />
       </div>
       <div className="min-w-0">
         <div className="flex flex-wrap items-start justify-between gap-2">

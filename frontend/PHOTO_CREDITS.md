@@ -35,7 +35,8 @@ The six additions below were verified under the same free Unsplash License on
 Files live in public/photos, downloaded as WebP at 1200–1600 pixels wide with
 quality 82–85. CSS controls display crops; originals are not retouched. Next.js
 serves responsive sizes from local assets, without third-party image requests
-from visitors. Unknown catalog names render a Lucide ImageOff placeholder.
+from visitors. A product stores one of these file keys, not its name, so a rename
+keeps the photograph. A missing or unknown key renders a Lucide ImageOff placeholder.
 
 Before changing photos, verify the individual source licence, update this table,
 inspect mobile/desktop crops and ensure the fictional demo wording remains clear.

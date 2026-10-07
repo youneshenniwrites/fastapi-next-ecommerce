@@ -218,3 +218,75 @@ def test_category_migration_assigns_known_products_without_overwriting_edits(tmp
     assert kept[1]["name"] == "Renamed object"
     migrate("downgrade", "base")
     engine.dispose()
+
+
+def test_media_migration_assigns_known_photos_without_overwriting_edits(tmp_path):
+    """A known name receives its photo; a renamed row and prior edits stay put."""
+    from decimal import Decimal
+
+    from sqlalchemy import create_engine, inspect, text
+
+    url = f"sqlite:///{tmp_path / 'media.db'}"
+    env = dict(os.environ, DATABASE_URL=url)
+
+    def migrate(*args):
+        subprocess.run(
+            [sys.executable, "-m", "alembic", *args],
+            cwd=BACKEND,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    migrate("upgrade", "0008")
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO products "
+                "(name, description, price, currency, stock, category_id) "
+                "VALUES "
+                "('Task Light', 'Edited copy', 12.34, 'GBP', 5, "
+                "(SELECT id FROM categories WHERE slug = 'lighting')), "
+                "('Renamed object', 'Keep me', 8.00, 'GBP', 3, "
+                "(SELECT id FROM categories WHERE slug = 'uncategorized'))"
+            )
+        )
+    migrate("upgrade", "head")
+    with engine.connect() as connection:
+        rows = (
+            connection.execute(
+                text(
+                    "SELECT name, description, price, stock, image_key, material "
+                    "FROM products ORDER BY id"
+                )
+            )
+            .mappings()
+            .all()
+        )
+    assert rows[0]["name"] == "Task Light"
+    assert rows[0]["description"] == "Edited copy"
+    assert Decimal(str(rows[0]["price"])) == Decimal("12.34")
+    assert rows[0]["stock"] == 5
+    assert rows[0]["image_key"] == "lamp"
+    assert rows[0]["material"] == "Aluminium"
+    assert rows[1]["name"] == "Renamed object"
+    assert rows[1]["description"] == "Keep me"
+    assert rows[1]["image_key"] is None
+    assert rows[1]["material"] is None
+    migrate("downgrade", "0008")
+    assert "image_key" not in {
+        column["name"] for column in inspect(engine).get_columns("products")
+    }
+    with engine.connect() as connection:
+        kept = (
+            connection.execute(
+                text("SELECT name, description FROM products ORDER BY id")
+            )
+            .mappings()
+            .all()
+        )
+    assert kept[0]["description"] == "Edited copy"
+    migrate("downgrade", "base")
+    engine.dispose()

@@ -11,6 +11,7 @@ def test_seed_preserves_edits_and_does_not_duplicate(db):
     assert bootstrap.seed_demo(db) == 12
     db.commit()
     product = db.scalar(select(Product).order_by(Product.id))
+    assert product.image_key == "stand"
     product.name = "Edited name"
     product.stock = 1
     db.commit()
@@ -18,6 +19,7 @@ def test_seed_preserves_edits_and_does_not_duplicate(db):
     assert db.scalar(select(func.count()).select_from(Product)) == 12
     assert product.stock == 1
     assert product.name == "Edited name"
+    assert product.image_key == "stand"
     assert all(p.currency == "GBP" for p in db.scalars(select(Product)))
 
 

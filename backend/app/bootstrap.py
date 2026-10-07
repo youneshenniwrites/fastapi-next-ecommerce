@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.catalog_media import PRODUCT_MEDIA
 from app.catalog_taxonomy import PRODUCT_CATEGORIES
 from app.core.security import get_password_hash
 from app.crud.product import require_category
@@ -70,6 +71,7 @@ CATALOG_EDITION = "twelve-products"
 def _demo_product(db, name, description, price, stock) -> Product:
     """Build one demo product in its known category without touching other rows."""
     slug = PRODUCT_CATEGORIES[name]
+    media = PRODUCT_MEDIA[name]
     data = ProductCreate(
         name=name,
         description=description,
@@ -77,6 +79,11 @@ def _demo_product(db, name, description, price, stock) -> Product:
         stock=stock,
         currency="GBP",
         category=slug,
+        image={"key": media["image_key"], "alt": media["image_alt"]},
+        material=media.get("material"),
+        width_mm=media.get("width_mm"),
+        depth_mm=media.get("depth_mm"),
+        height_mm=media.get("height_mm"),
     )
     try:
         category = require_category(db, slug)
@@ -84,7 +91,13 @@ def _demo_product(db, name, description, price, stock) -> Product:
         raise ValueError(
             "Catalog categories are missing; apply migrations before seeding."
         ) from exc
-    return Product(**data.model_dump(exclude={"category"}), category=category)
+    image = data.image
+    return Product(
+        **data.model_dump(exclude={"category", "image"}),
+        image_key=None if image is None else image.key,
+        image_alt=None if image is None else image.alt,
+        category=category,
+    )
 
 
 def seed_demo(db):

@@ -390,6 +390,19 @@
             "title": "Currency",
             "type": "string"
           },
+          "depth_mm": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Mm"
+          },
           "description": {
             "anyOf": [
               {
@@ -401,6 +414,42 @@
               }
             ],
             "title": "Description"
+          },
+          "height_mm": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Mm"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductImage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "material": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
           },
           "name": {
             "maxLength": 255,
@@ -427,6 +476,19 @@
             "minimum": 0.0,
             "title": "Stock",
             "type": "integer"
+          },
+          "width_mm": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width Mm"
           }
         },
         "required": [
@@ -436,6 +498,42 @@
           "category"
         ],
         "title": "ProductCreate",
+        "type": "object"
+      },
+      "ProductImage": {
+        "additionalProperties": false,
+        "description": "One allowlisted local photograph and its stored alternative text.",
+        "properties": {
+          "alt": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Alt",
+            "type": "string"
+          },
+          "key": {
+            "enum": [
+              "stand",
+              "mat",
+              "lamp",
+              "tray",
+              "notebooks",
+              "cup",
+              "keyboard",
+              "headphones",
+              "bottle",
+              "planter",
+              "clock",
+              "mouse"
+            ],
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "alt"
+        ],
+        "title": "ProductImage",
         "type": "object"
       },
       "ProductPageRead": {
@@ -482,6 +580,17 @@
             "title": "Currency",
             "type": "string"
           },
+          "depth_mm": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Mm"
+          },
           "description": {
             "anyOf": [
               {
@@ -494,9 +603,41 @@
             ],
             "title": "Description"
           },
+          "height_mm": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Mm"
+          },
           "id": {
             "title": "Id",
             "type": "integer"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductImage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
           },
           "name": {
             "maxLength": 255,
@@ -513,6 +654,17 @@
             "minimum": 0.0,
             "title": "Stock",
             "type": "integer"
+          },
+          "width_mm": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width Mm"
           }
         },
         "required": [
@@ -554,6 +706,19 @@
             ],
             "title": "Currency"
           },
+          "depth_mm": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Mm"
+          },
           "description": {
             "anyOf": [
               {
@@ -565,6 +730,42 @@
               }
             ],
             "title": "Description"
+          },
+          "height_mm": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Mm"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductImage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "material": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
           },
           "name": {
             "anyOf": [
@@ -608,6 +809,19 @@
               }
             ],
             "title": "Stock"
+          },
+          "width_mm": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width Mm"
           }
         },
         "title": "ProductUpdate",
@@ -2533,7 +2747,7 @@
         ]
       },
       "put": {
-        "description": "Active admin only. Omitted fields retain their values; only description may explicitly be null. This PUT intentionally has partial-update semantics.",
+        "description": "Active admin only. Omitted fields retain their values. Description, image, material and dimensions may be null to clear them. Name, price, currency, stock and category may not be null. This PUT intentionally has partial-update semantics.",
         "operationId": "update_existing_product_api_v1_products__product_id__put",
         "parameters": [
           {

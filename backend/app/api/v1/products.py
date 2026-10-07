@@ -134,7 +134,12 @@ def create_new_product(product_in: ProductCreate, db: Session = Depends(get_db))
     response_model=ProductRead,
     dependencies=[Depends(require_admin), Depends(enforce_write_limit)],
     summary="Partially update a product",
-    description="Active admin only. Omitted fields retain their values; only description may explicitly be null. This PUT intentionally has partial-update semantics.",
+    description=(
+        "Active admin only. Omitted fields retain their values. Description, image, "
+        "material and dimensions may be null to clear them. Name, price, currency, "
+        "stock and category may not be null. This PUT intentionally has partial-update "
+        "semantics."
+    ),
     responses={**WRITE_ERRORS, **NOT_FOUND, 409: {"model": ErrorResponse}},
 )
 def update_existing_product(

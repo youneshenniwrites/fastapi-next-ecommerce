@@ -210,14 +210,20 @@ limited to one category. Uncategorized is the stored fallback for products the
 migration could not match. That same home page loads this list for category
 navigation and breadcrumbs, and passes the selected slug to search. The product
 page does not call this list. It loads `GET /api/v1/products/{id}` and shows the
-embedded `product.category`.
+embedded `product.category`. The photograph comes from `product.image`, an
+allowlisted local key and plain-text alternative text. The product page does not
+derive the file from the product name, so a rename keeps the photograph. Absent
+`material`, `width_mm`, `depth_mm` and `height_mm` values are omitted on the page.
+Create and update reject remote URLs, unknown keys and markup with 422. A customer
+cannot change them.
 
 ## Other response contracts
 
 The schema documents request/response models, bearer security requirements,
 pagination bounds, and 400/401/403/404/409 errors where applicable. FastAPI documents
-422 validation errors. Products return prices as exact two-place GBP strings;
-PUT keeps omitted fields and allows null only for description. Health is liveness,
+422 validation errors. Products return prices as exact two-place GBP strings.
+PUT keeps omitted fields. Description, image, material and dimensions may be null
+to clear them; name, price, currency, stock and category may not. Health is liveness,
 not database readiness.
 
 Cart GET/PUT/DELETE operations require an active customer's bearer token. Cart PUT

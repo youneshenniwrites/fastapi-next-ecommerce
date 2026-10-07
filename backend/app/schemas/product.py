@@ -11,6 +11,8 @@ from pydantic import (
     model_validator,
 )
 
+from app.catalog_media import IMAGE_KEYS
+
 ProductName = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)
 ]
@@ -37,6 +39,33 @@ CategorySlug = Annotated[
         pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
     ),
 ]
+ImageKey = Literal[*IMAGE_KEYS]
+PlainText = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)
+]
+MaterialText = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)
+]
+Millimetre = Annotated[int, Field(ge=1, le=10000, strict=True)]
+
+
+def _plain_text(value: str) -> str:
+    if "<" in value or ">" in value or "\x00" in value:
+        raise ValueError("plain text only")
+    return value
+
+
+class ProductImage(BaseModel):
+    """One allowlisted local photograph and its stored alternative text."""
+
+    model_config = ConfigDict(extra="forbid")
+    key: ImageKey
+    alt: PlainText
+
+    @field_validator("alt")
+    @classmethod
+    def alt_is_plain_text(cls, value: str) -> str:
+        return _plain_text(value)
 
 
 class ProductBase(BaseModel):
@@ -56,11 +85,23 @@ def _reject_reserved_category(value: str) -> str:
 
 class ProductCreate(ProductBase):
     category: CategorySlug
+    image: ProductImage | None = None
+    material: MaterialText | None = None
+    width_mm: Millimetre | None = None
+    depth_mm: Millimetre | None = None
+    height_mm: Millimetre | None = None
 
     @field_validator("category")
     @classmethod
     def category_is_assignable(cls, value: str) -> str:
         return _reject_reserved_category(value)
+
+    @field_validator("material")
+    @classmethod
+    def material_is_plain_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return _plain_text(value)
 
 
 class ProductUpdate(BaseModel):
@@ -71,6 +112,11 @@ class ProductUpdate(BaseModel):
     currency: Currency | None = None
     stock: Stock | None = None
     category: CategorySlug | None = None
+    image: ProductImage | None = None
+    material: MaterialText | None = None
+    width_mm: Millimetre | None = None
+    depth_mm: Millimetre | None = None
+    height_mm: Millimetre | None = None
 
     @field_validator("category")
     @classmethod
@@ -78,6 +124,13 @@ class ProductUpdate(BaseModel):
         if value is None:
             return None
         return _reject_reserved_category(value)
+
+    @field_validator("material")
+    @classmethod
+    def material_is_plain_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return _plain_text(value)
 
     @model_validator(mode="after")
     def reject_null_required_fields(self) -> Self:
@@ -100,6 +153,11 @@ class CategoryCount(CategorySummary):
 class ProductRead(ProductBase):
     id: int
     category: CategorySummary
+    image: ProductImage | None = None
+    material: str | None = None
+    width_mm: int | None = None
+    depth_mm: int | None = None
+    height_mm: int | None = None
     model_config = ConfigDict(from_attributes=True)
 
     @field_serializer("price", when_used="json")

@@ -37,6 +37,11 @@ def test_openapi_documents_security_errors_and_money(client):
         schema["components"]["schemas"]["ProductRead"]["properties"]["price"]["type"]
         == "string"
     )
+    image_keys = schema["components"]["schemas"]["ProductImage"]["properties"]["key"][
+        "enum"
+    ]
+    assert "lamp" in image_keys
+    assert all("://" not in key and "/" not in key for key in image_keys)
     assert client.get("/docs").status_code == 200
     assert client.get("/redoc").status_code == 200
 

@@ -54,7 +54,9 @@ uv export --locked --no-dev --no-emit-project --format requirements-txt --output
 The launch currency is GBP. Products return `price` as a two-place decimal string
 (for example `"19.90"`) and `currency: "GBP"`. Every product read also includes
 `category` as an object with `slug` and `name`. Create requests may omit currency;
-other currencies are rejected. Create requires a stored `category` slug of 1–64
+other currencies are rejected. Every product read may include `image` as `{ "key", "alt" }`.
+The key is an allowlisted local file such as `lamp`, never a remote URL. Alternative
+text is plain text of 1–200 characters. Create requires a stored `category` slug of 1–64
 characters matching lowercase letters, digits and single hyphens. `all` is
 reserved. A missing, unknown, malformed, or `all` slug returns 422 and stores
 nothing. Prices range from 0.00 to 9999999999.99 and may have
@@ -64,8 +66,11 @@ trimmed and must contain 1–255 characters; descriptions allow up to 10,000.
 PUT retains its existing partial-update behavior: omitted fields, including
 `category`, are preserved. A stored slug moves the product. Null, `all`, a
 malformed slug, or an unknown slug returns 422 and leaves the product unchanged.
-Search returns 404 for an unknown category slug. Only description may explicitly
-be null. Unknown fields are rejected. Product
+Search returns 404 for an unknown category slug. Description, image, material and
+the millimetre dimensions may be null to clear them. Name, price, currency, stock
+and category may not be null. Optional facts are `material` (plain text, at most
+80 characters) and `width_mm`, `depth_mm`, `height_mm` (integers from 1 to 10000).
+Unknown fields, markup, and unknown image keys are rejected. Product
 lists are ordered by id; skip is 0–100000 and limit is 1–100 (default 10).
 
 Migration 0002 labels existing prices GBP, changes storage to NUMERIC(12, 2), and
@@ -75,6 +80,7 @@ prices that require rounding. Back up existing databases and correct flagged row
 before retrying. Downgrading restores legacy float storage and removes currency;
 it is intended for disposable tests, not as a substitute for a production rollback
 and backup plan. Revision 0008 adds one required category on each product.
+Revision 0009 adds the optional photo and stated facts.
 
 CI runs the tests against both SQLite and PostgreSQL. TEST_DATABASE_URL and
 TEST_MIGRATION_DATABASE_URL are test-only overrides that must name two distinct,

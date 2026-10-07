@@ -627,6 +627,19 @@ test("product details name the category and the return link keeps it", async ({
     page.getByRole("heading", { name: "Task Light", exact: true }),
   ).toBeVisible();
   await expect(
+    page.getByRole("img", {
+      name: "Representative photograph of a desk lamp",
+    }),
+  ).toBeVisible();
+  const details = page.getByRole("region", { name: "Product details" });
+  await expect(details.getByText("Aluminium")).toBeVisible();
+  await expect(details.getByText("420 mm")).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 740 });
+  const box = await details.boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await expect(
     page.getByRole("term").filter({ hasText: "Category" }),
   ).toBeVisible();
   await expect(page.locator("dd", { hasText: "Everyday focus" })).toHaveCount(

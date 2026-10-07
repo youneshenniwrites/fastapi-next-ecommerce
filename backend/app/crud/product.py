@@ -127,10 +127,20 @@ def get_product(db: Session, product_id: int) -> Optional[Product]:
     )
 
 
+def _product_columns(obj_in: ProductCreate | ProductUpdate, *, partial: bool) -> dict:
+    """Map the API image object onto the stored key and alternative text."""
+    data = obj_in.model_dump(exclude={"category", "image"}, exclude_unset=partial)
+    if (not partial) or ("image" in obj_in.model_fields_set):
+        image = obj_in.image
+        data["image_key"] = None if image is None else image.key
+        data["image_alt"] = None if image is None else image.alt
+    return data
+
+
 def create_product(db: Session, obj_in: ProductCreate) -> Product:
     """Persist a new product in an existing category and return it."""
     category = require_category(db, obj_in.category)
-    db_obj = Product(**obj_in.model_dump(exclude={"category"}), category=category)
+    db_obj = Product(**_product_columns(obj_in, partial=False), category=category)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
@@ -147,7 +157,7 @@ def update_product(db: Session, db_obj: Product, obj_in: ProductUpdate) -> Produ
     )
     if db_obj is None:
         raise HTTPException(404, "Product not found")
-    update_data = obj_in.model_dump(exclude_unset=True, exclude={"category"})
+    update_data = _product_columns(obj_in, partial=True)
     if "category" in obj_in.model_fields_set:
         if obj_in.category is None:
             raise HTTPException(422, "category cannot be null")

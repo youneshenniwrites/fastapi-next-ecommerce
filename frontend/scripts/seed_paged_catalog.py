@@ -37,5 +37,10 @@ if __name__ == "__main__":
     with SessionLocal() as db:
         for data in fixture_products():
             category = require_category(db, data.category)
-            db.add(Product(**data.model_dump(exclude={"category"}), category=category))
+            db.add(
+                Product(
+                    **data.model_dump(exclude={"category", "image"}),
+                    category=category,
+                )
+            )
         db.commit()

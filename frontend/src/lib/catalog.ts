@@ -8,22 +8,22 @@ export function money(value: string): string {
   const pence = priceInPence(value);
   return `£${(pence / 100n).toLocaleString("en-GB")}.${(pence % 100n).toString().padStart(2, "0")}`;
 }
-const artwork: Record<string, string> = {
-  "Oak Monitor Stand": "stand",
-  "Felt Desk Mat": "mat",
-  "Task Light": "lamp",
-  "Cable Tray": "tray",
-  "Notebook Set": "notebooks",
-  "Ceramic Pen Cup": "cup",
-  "Compact Keyboard": "keyboard",
-  "Focus Headphones": "headphones",
-  "Insulated Bottle": "bottle",
-  "Handled Planter": "planter",
-  "Analogue Desk Clock": "clock",
-  "Wireless Mouse": "mouse",
-};
-export function productArt(name: string) {
-  return Object.hasOwn(artwork, name)
-    ? `/photos/${artwork[name]}.webp`
-    : undefined;
+/** Keep in step with backend/app/catalog_media.py IMAGE_KEYS. */
+export const imageKeys = [
+  "stand",
+  "mat",
+  "lamp",
+  "tray",
+  "notebooks",
+  "cup",
+  "keyboard",
+  "headphones",
+  "bottle",
+  "planter",
+  "clock",
+  "mouse",
+] as const;
+const allowlisted = new Set<string>(imageKeys);
+export function productArt(key: string | null | undefined) {
+  return key && allowlisted.has(key) ? `/photos/${key}.webp` : undefined;
 }
