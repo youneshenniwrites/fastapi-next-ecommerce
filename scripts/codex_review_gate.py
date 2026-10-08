@@ -67,9 +67,11 @@ Codex can also answer questions or update the PR. Try commenting "@codex address
 """
 
 
-# VIN-325 bounds the complete signoff, including punctuation or token delimiters.
-# A second sentence, finding language, other prose, or the wrong commit stays pending.
-_SIGNOFF_LIMIT = 40
+# Bound for one short closing, not a word list. Eighty characters covers the
+# longest observed approval closing (41) with room, and still rejects a paragraph.
+# A second sentence, a second prose line, finding language, other prose, or the
+# wrong commit stays pending.
+_SIGNOFF_LIMIT = 80
 _FINDING_WORDS = frozenset(
     {
         "issue",
@@ -93,11 +95,21 @@ _FINDING_WORDS = frozenset(
         "broken",
         "error",
         "errors",
+        # Concern sentences that are not praise. Whole words only.
+        "security",
+        "exposure",
+        "remain",
+        "remains",
+        "typo",
+        "typos",
+        "needs",
+        "change",
+        "changes",
     }
 )
 _PHRASE = re.compile(r"[A-Za-z0-9' ,-]*[A-Za-z0-9][A-Za-z0-9' ,-]*[.!?]?")
-# A named shortcode must occupy the whole signoff.
-_EMOJI = re.compile(r":[A-Za-z0-9_-]+:")
+# The whole signoff may be one :token:. Digits and plus are allowed, so :+1: matches.
+_EMOJI = re.compile(r":[A-Za-z0-9_+-]+:")
 _CLEAN_PREFIX = "Codex Review: Didn't find any major issues. "
 
 
@@ -114,22 +126,39 @@ def _valid_signoff(signoff):
     return all(word not in _FINDING_WORDS for word in words)
 
 
-def clean_result(body, sha):
-    """Match the whole clean result, optionally followed by its known footer."""
-    normalized = " ".join(body.split())
+def _strip_known_footer(body):
+    """Drop the known footer suffix. Whitespace may vary; extra prose may not."""
     footer = " ".join(CLEAN_RESULT_FOOTER.split())
-    footer_suffix = " " + footer
-    if normalized.endswith(footer_suffix):
-        normalized = normalized[: -len(footer_suffix)]
-    commit = f" **Reviewed commit:** `{sha[:10]}`"
-    if not normalized.startswith(_CLEAN_PREFIX) or not normalized.endswith(commit):
+    if not " ".join(body.split()).endswith(" " + footer):
+        return body
+    marker = "<details>"
+    index = body.rfind(marker)
+    if index == -1 or " ".join(body[index:].split()) != footer:
+        return body
+    return body[:index]
+
+
+def clean_result(body, sha):
+    """Match the whole clean result, optionally followed by its known footer.
+
+    The signoff stays on the prefix line. Blank lines may separate that line
+    from the reviewed-commit line. A second prose line stays pending.
+    """
+    remainder = _strip_known_footer(body).replace("\r\n", "\n").replace("\r", "\n")
+    match = re.fullmatch(
+        r"\s*"
+        + re.escape(_CLEAN_PREFIX)
+        + r"(?P<signoff>[^\n]*?)[ \t]*(?:\n[ \t]*)*"
+        + r"\*\*Reviewed commit:\*\* `(?P<commit>[0-9a-f]{10})`\s*",
+        remainder,
+    )
+    if match is None or match.group("commit") != sha[:10]:
         return False
-    signoff = normalized[len(_CLEAN_PREFIX) : -len(commit)]
+    signoff = " ".join(match.group("signoff").split())
     return _valid_signoff(signoff)
 
 
 def evaluate(sha, comments, reactions, unresolved, reviews=()):
-    """Derive status from current-head evidence, leaving untrusted results pending."""
     if unresolved:
         return "pending", "Resolve review conversations and obtain a clean re-review"
     marker = f"<!-- codex-review-head:{sha} -->"

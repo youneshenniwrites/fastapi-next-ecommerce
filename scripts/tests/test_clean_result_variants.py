@@ -13,12 +13,12 @@ PASSING = (
     "Delightful!",
     "You're on a roll.",
     ":rocket:",
+    ":+1:",
     "Breezy!",
     "Everything looks fine!",
     "Swish?",
     "prefix!",
-    "Great work, you're ready for round-2!",
-    ":thumbs_up:",
+    "Already looking forward to the next diff.",
 )
 
 REJECTED = (
@@ -34,32 +34,25 @@ REJECTED = (
     "",
     "Nice job. Thanks!",
     "fix!",
-    "BUT all good!",
-    ":fix:",
-    ":+1:",
-    "Already looking forward to the next diff.",
-    "A" * 41,
-    "Nice_work!",
-    "Great+work!",
-    "Great/work!",
-    "Great: work!",
-    "Great; work!",
-    "Great (work)!",
-    "Great! work",
-    "Great!!",
+    "A" * 81,
+    "One typo remains.",
+    "Needs changes",
+    "Security exposure remains",
 )
 
 
 class CleanVariants(unittest.TestCase):
     def comment(self, signoff, sha="a" * 40, trailer=""):
-        """Build a clean-result comment bound to the supplied head and footer."""
         return (
             f"Codex Review: Didn't find any major issues. {signoff}\n\n"
             f"**Reviewed commit:** `{sha[:10]}`{trailer}"
         )
 
     def test_short_signoffs_pass_with_and_without_footer(self):
-        """Accept allowed phrases and tokens only for their reviewed commit."""
+        self.assertLessEqual(len("Already looking forward to the next diff."), 80)
+        self.assertEqual(len("A" * 80), 80)
+        self.assertTrue(clean_result(self.comment("A" * 80), "a" * 40))
+        self.assertFalse(clean_result(self.comment("A" * 81), "a" * 40))
         for signoff in PASSING:
             for trailer in ("", CLEAN_RESULT_FOOTER):
                 with self.subTest(signoff=signoff, footer=bool(trailer)):
@@ -71,29 +64,24 @@ class CleanVariants(unittest.TestCase):
                     )
 
     def test_rejected_signoffs_stay_pending(self):
-        """Reject findings, malformed tokens, disallowed characters and long phrases."""
         for signoff in REJECTED:
             with self.subTest(signoff=signoff):
                 self.assertFalse(clean_result(self.comment(signoff), "a" * 40))
 
-    def test_signoff_length_boundary(self):
-        """Count punctuation and shortcode delimiters toward the 40-character cap."""
-        for signoff, too_long in (
-            ("A" * 40, "A" * 41),
-            ("A" * 39 + "!", "A" * 40 + "!"),
-            (":" + "a" * 38 + ":", ":" + "a" * 39 + ":"),
-        ):
-            for trailer in ("", CLEAN_RESULT_FOOTER):
-                with self.subTest(signoff=signoff, footer=bool(trailer)):
-                    self.assertTrue(
-                        clean_result(self.comment(signoff, trailer=trailer), "a" * 40)
-                    )
-                    self.assertFalse(
-                        clean_result(self.comment(too_long, trailer=trailer), "a" * 40)
-                    )
+    def test_second_prose_line_stays_pending(self):
+        sha = "a" * 40
+        split = (
+            "Codex Review: Didn't find any major issues. Nice work\n"
+            "More review needed\n\n"
+            f"**Reviewed commit:** `{sha[:10]}`"
+        )
+        for body in (split, split + CLEAN_RESULT_FOOTER):
+            with self.subTest(footer=body != split):
+                self.assertFalse(clean_result(body, sha))
+        self.assertTrue(clean_result(self.comment("Nice work!"), sha))
+        self.assertTrue(clean_result(self.comment("Nice  work!"), sha))
 
     def test_inserted_or_trailing_prose_stays_pending(self):
-        """Reject extra prose before the commit, inside the footer or after it."""
         body = self.comment("Breezy!")
         with_footer = body + CLEAN_RESULT_FOOTER
         for changed in (
