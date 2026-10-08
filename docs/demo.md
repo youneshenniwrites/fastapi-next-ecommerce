@@ -237,6 +237,24 @@ or hosted database. Do not point this command at hosted data. A hosted import
 is a separate authorized step and needs a named revision plus backup or
 recovery evidence.
 
+### Hosted development import — 8 October 2026
+
+This step was run once against the development database after
+[development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37822533454)
+of `9653a91`. Alembic revision was `0010`. The catalog was the six original
+demo names, ids 1–6, with no `twelve-products` marker. Notebook Set stock was
+26 and Ceramic Pen Cup stock was 0. Schema `backup_vin292_20261008T183008Z`
+was created first and holds 6 products, 7 categories, 1 cart line, 7 orders
+and 7 order lines. Expansion appended six products. The import inserted 48.
+The public API then reported 60 products, pages of 24, all seven categories,
+one match for "Mixed Hardware Tin", two out-of-stock products, and no image
+on Unmarked Sample Box. The development storefront showed pages 1–3, Lighting,
+that search, and those product pages. Fictional sandbox order #8 paid £8.50
+for one Dotted Pocket Notebook. After that payment the product's public
+stock was 39, one below the imported 40. The import itself left 17 users,
+7 orders and 1 cart line unchanged. Production was not used. Do not rerun
+this against development to refresh stock or names.
+
 `make admin` creates a new active admin, or leaves an existing active admin and
 its password unchanged. Existing customers require explicit promotion:
 
