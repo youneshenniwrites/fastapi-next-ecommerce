@@ -43,8 +43,10 @@ at most 80 characters, or the entire signoff is one `:token:` such as `:+1:`.
 Letters, digits, spaces, apostrophes, commas and hyphens are allowed, with at
 most one `.`, `!` or `?`, and only as the last character. A finding word used as
 a whole word stays pending. A second sentence, a second prose line, any other
-prose, and the wrong commit stay pending. The reviewed-commit line must contain
-the first 10 hex characters of the current head. The known footer may follow
+prose, and the wrong commit stay pending. The reviewed-commit field must be
+exactly `**Reviewed commit:**` followed by the first 10 lowercase hex characters
+of the current head inside backticks. A longer value, including the full
+40-character SHA, does not match. The known footer may follow
 only as a suffix. This is not a fixed list of closing words. VIN-325 merged in
 [PR #326](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/326)
 (`6d7444bc8788d9d088afcd8957273f1d495b8848`). Enforced status remains
