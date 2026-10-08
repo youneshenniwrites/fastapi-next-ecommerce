@@ -26,6 +26,9 @@ When adapting clean-result wording, match the complete observed message and know
 footer; a trusted prefix plus a commit anywhere in the body can admit contradictory
 prose. Preserve actual protocol fixtures and reject inserted/trailing findings
 ([PR #93](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/93#discussion_r3997324325)).
+VIN-325 parses that signoff instead of an exact phrase list: one phrase of at
+most 80 characters, or one whole `:token:`. A new short praise word in that
+shape is not a protocol change. Finding language still fails.
 
 Deduplicate every accepted authoritative review-request form before applying a
 per-head retry budget. A bare manual request may be awaiting a summary even when

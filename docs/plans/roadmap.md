@@ -109,6 +109,8 @@ published with typed-model and revalidation changes merged (#132/#133). The
 19 September correction distinguishes maintainability work from the invalid
 refresh-import finding; #84’s remaining guidance slice is now verified in
 AGENTS.md, scoped skills and framework documentation, with closeout on the ticket.
+The Codex review gate parses one short clean-result signoff (VIN-325, [PR #326](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/326), `6d7444b`). A new closing in that shape can pass. Finding language, a second sentence, and the wrong commit stay pending. Enforced status remains VIN-38.
+
 Scoped static checking for order/payment services and their payment interfaces is
 implemented under VIN-261; [tooling scope](../tooling.md#scoped-backend-service-types-vin-261) records its limits. Repository-wide typing, code scanning and remaining
 review/coverage required-check rules are further controls. Consult their source
