@@ -212,6 +212,20 @@ def test_import_refuses_when_categories_are_missing(db):
     assert db.scalar(select(func.count()).select_from(Product)) == 0
 
 
+def test_import_refuses_to_recreate_a_deleted_demo_edition(db):
+    assert bootstrap.seed_demo(db) == 12
+    db.commit()
+    for product in list(db.scalars(select(Product))):
+        db.delete(product)
+    db.commit()
+    with pytest.raises(ValueError, match="twelve-product edition"):
+        import_catalog(db)
+    db.rollback()
+    assert db.scalar(select(func.count()).select_from(Product)) == 0
+    assert db.get(DemoCatalog, bootstrap.CATALOG_EDITION) is not None
+    assert db.scalar(select(func.count()).select_from(ImportedCatalogItem)) == 0
+
+
 def test_deleted_import_is_not_recreated(db):
     assert import_catalog(db) == 60
     db.commit()

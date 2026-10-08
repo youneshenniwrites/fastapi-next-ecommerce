@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.catalog_manifest import WORKSPACE_CATALOG, CatalogItem, validate_manifest
 from app.models.category import Category
+from app.models.demo_catalog import DemoCatalog
 from app.models.imported_catalog import ImportedCatalogItem
 from app.models.product import Product
 
@@ -41,6 +42,11 @@ def import_catalog(db: Session, items=None, *, photo_root: Path | None = None) -
             "Catalog categories are missing; apply migrations before importing."
         )
     products = list(db.scalars(select(Product)))
+    if not products and _seeded_edition_remains(db):
+        raise ValueError(
+            "The twelve-product edition remains after its products were deleted; "
+            "import refused."
+        )
     by_id = {product.id: product for product in products}
     by_key = {
         product.catalog_key: product
@@ -55,6 +61,13 @@ def import_catalog(db: Session, items=None, *, photo_root: Path | None = None) -
     if errors:
         raise ValueError("; ".join(errors))
     return _apply(db, planned, categories)
+
+
+def _seeded_edition_remains(db: Session) -> bool:
+    """The edition marker is the guard against recreating a deleted demo."""
+    from app.bootstrap import CATALOG_EDITION
+
+    return db.get(DemoCatalog, CATALOG_EDITION) is not None
 
 
 def _plan(catalog, products, by_id, by_key, by_name, ledgers):

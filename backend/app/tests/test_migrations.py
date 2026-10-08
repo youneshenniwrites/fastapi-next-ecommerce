@@ -452,3 +452,79 @@ def test_catalog_identity_migration_adds_schema_only(tmp_path):
     assert "imported_catalog_items" not in inspect(engine).get_table_names()
     migrate("downgrade", "base")
     engine.dispose()
+
+
+def test_catalog_identity_migration_preserves_cart_lines(tmp_path):
+    """Rebuilding products for the catalog key must not cascade-delete carts."""
+    from sqlalchemy import create_engine, text
+
+    url = f"sqlite:///{tmp_path / 'catalog-carts.db'}"
+    env = dict(os.environ, DATABASE_URL=url)
+
+    def migrate(*args):
+        completed = subprocess.run(
+            [sys.executable, "-m", "alembic", *args],
+            cwd=BACKEND,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return completed
+
+    migrate("upgrade", "0009")
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.execute(text("PRAGMA foreign_keys=ON"))
+        connection.execute(
+            text(
+                "INSERT INTO users (email, hashed_password, is_active, is_superuser) "
+                "VALUES ('cart@example.com', 'hash', 1, 0)"
+            )
+        )
+        connection.execute(
+            text(
+                "INSERT INTO products "
+                "(name, description, price, currency, stock, category_id) "
+                "VALUES ('Kept', 'Kept copy', 4.50, 'GBP', 2, "
+                "(SELECT id FROM categories WHERE slug = 'lighting'))"
+            )
+        )
+        connection.execute(
+            text(
+                "INSERT INTO cart_lines (user_id, product_id, quantity) "
+                "VALUES ("
+                "(SELECT id FROM users WHERE email = 'cart@example.com'), "
+                "(SELECT id FROM products WHERE name = 'Kept'), 2)"
+            )
+        )
+    migrate("upgrade", "head")
+    with engine.connect() as connection:
+        cart = (
+            connection.execute(
+                text(
+                    "SELECT cart_lines.quantity, products.name, products.catalog_key "
+                    "FROM cart_lines JOIN products ON products.id = cart_lines.product_id"
+                )
+            )
+            .mappings()
+            .one()
+        )
+        parked = connection.execute(
+            text(
+                "SELECT COUNT(*) FROM sqlite_master "
+                "WHERE name = 'cart_lines_import_park'"
+            )
+        ).scalar_one()
+    assert cart["quantity"] == 2
+    assert cart["name"] == "Kept"
+    assert cart["catalog_key"] is None
+    assert parked == 0
+    migrate("downgrade", "0009")
+    with engine.connect() as connection:
+        quantity = connection.execute(
+            text("SELECT quantity FROM cart_lines")
+        ).scalar_one()
+    assert quantity == 2
+    migrate("downgrade", "base")
+    engine.dispose()
