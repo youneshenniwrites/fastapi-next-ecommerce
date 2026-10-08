@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.codex_review_gate import BOT_ID, details_url, evaluate
+from scripts.codex_review_gate import BOT_ID, clean_result, details_url, evaluate
 
 
 class StatusLinks(unittest.TestCase):
@@ -272,6 +272,8 @@ class EditedReviews(unittest.TestCase):
 class SwishCleanEvidence(ReviewEvidence, EditedReviews):
     """Replay all clean-result trust checks with the observed PR #91 wording."""
 
+    signoff_token = "Swish!"
+
     def clean_comment(self):
         comment = super().clean_comment()
         comment["body"] = comment["body"].replace(
@@ -279,21 +281,28 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
         )
         return comment
 
-    def test_unrecognized_clean_wording_stays_pending(self):
-        for suffix in (
-            "Swish! But there are issues.",
-            "Swish?",
-            "Everything looks fine!",
-            "",
-        ):
-            with self.subTest(suffix=suffix):
+    def test_second_sentence_and_empty_signoff_stay_pending(self):
+        for signoff in (f"{self.signoff_token} But there are issues.", ""):
+            with self.subTest(signoff=signoff):
                 comment = self.clean_comment()
-                comment["body"] = comment["body"].replace("Swish!", suffix)
+                comment["body"] = comment["body"].replace(self.signoff_token, signoff)
                 self.assertEqual(
                     evaluate(
                         self.sha, [self.request, self.summary, comment], {}, False
                     )[0],
                     "pending",
+                )
+
+    def test_short_single_sentence_signoff_passes(self):
+        for signoff in ("Breezy!", "Everything looks fine!", "Swish?"):
+            with self.subTest(signoff=signoff):
+                comment = self.clean_comment()
+                comment["body"] = comment["body"].replace(self.signoff_token, signoff)
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [self.request, self.summary, comment], {}, False
+                    )[0],
+                    "success",
                 )
 
     def test_edited_clean_comment_stays_pending(self):
@@ -442,6 +451,8 @@ class DependabotReviewPolicy(unittest.TestCase):
 class RocketCleanEvidence(SwishCleanEvidence):
     """Replay the exact PR #308 response and all inherited evidence checks."""
 
+    signoff_token = ":rocket:"
+
     def clean_comment(self):
         comment = ReviewEvidence.clean_comment(self)
         comment["body"] = (
@@ -459,7 +470,7 @@ class RocketCleanEvidence(SwishCleanEvidence):
             "success",
         )
 
-    def test_unrecognized_clean_wording_stays_pending(self):
+    def test_malformed_signoff_stays_pending(self):
         for signoff in (":rocket: But fix this.", ":rocket", "🚀", ""):
             with self.subTest(signoff=signoff):
                 comment = self.clean_comment()
@@ -479,6 +490,61 @@ class RocketCleanEvidence(SwishCleanEvidence):
             ),
             body + "But I found an issue",
             body.replace("</details>", "But I found an issue</details>"),
+        ):
+            with self.subTest(body=changed):
+                comment = self.clean_comment() | {"body": changed}
+                self.assertEqual(
+                    evaluate(
+                        self.sha, [self.request, self.summary, comment], {}, False
+                    )[0],
+                    "pending",
+                )
+
+
+class BreezyCleanEvidence(SwishCleanEvidence):
+    """Replay the exact PR #324 response and all inherited evidence checks."""
+
+    signoff_token = "Breezy!"
+
+    def clean_comment(self):
+        comment = ReviewEvidence.clean_comment(self)
+        comment["body"] = (
+            (Path(__file__).with_name("fixtures") / "codex-clean-breezy.txt")
+            .read_text()
+            .replace("da05ad826a", self.sha[:10])
+        )
+        return comment
+
+    def test_observed_full_comment(self):
+        raw = (
+            Path(__file__).with_name("fixtures") / "codex-clean-breezy.txt"
+        ).read_text()
+        self.assertTrue(clean_result(raw, "da05ad826a" + "0" * 30))
+        self.assertFalse(clean_result(raw, "b" * 40))
+        self.assertEqual(
+            evaluate(
+                self.sha, [self.request, self.summary, self.clean_comment()], {}, False
+            )[0],
+            "success",
+        )
+
+    def test_wrong_head_stays_pending(self):
+        comment = self.clean_comment()
+        comment["body"] = comment["body"].replace(self.sha[:10], "b" * 10)
+        self.assertEqual(
+            evaluate(self.sha, [self.request, self.summary, comment], {}, False)[0],
+            "pending",
+        )
+
+    def test_inserted_or_trailing_prose_stays_pending(self):
+        body = self.clean_comment()["body"]
+        for changed in (
+            body.replace(
+                "**Reviewed commit:**",
+                "But I found a blocking issue\n\n**Reviewed commit:**",
+            ),
+            body + "But I found a blocking issue",
+            body.replace("</details>", "But I found a blocking issue</details>"),
         ):
             with self.subTest(body=changed):
                 comment = self.clean_comment() | {"body": changed}
