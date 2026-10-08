@@ -211,6 +211,32 @@ additions, so verify the target database before confirming. Rolling back migrati
 0004 preserves products/carts but loses the expansion marker; do not rerun expansion
 after that rollback without manually checking the data.
 
+`make import-catalog` loads the reviewed 60-product workspace catalog. It is
+repeatable and atomic: the manifest and local photo files are checked before
+any write, and the database transaction commits the whole import or rolls it
+back. Reruns do not duplicate items, replenish stock, overwrite names, prices,
+photos or descriptions, or recreate a product that was imported and later
+deleted. An empty database receives the full catalog. A database that already
+has the twelve original demo names, each exactly once, keeps those rows and
+their ids, and receives only the additional products. Edited prices, stock,
+reservations, carts and order snapshots stay as they are. The
+`twelve-products` edition marker is left in place.
+
+The command refuses the whole import when an original demo name matches more
+than one row, or is missing while any products already exist. That avoids
+guessing whether a product was renamed or deleted. Apply migrations first,
+including revision 0010. Confirm the target before running it:
+
+```sh
+cd backend
+uv run python -m app.bootstrap import-catalog --confirm-import
+```
+
+The flag acknowledges fictional catalog data. It does not detect a production
+or hosted database. Do not point this command at hosted data. A hosted import
+is a separate authorized step and needs a named revision plus backup or
+recovery evidence.
+
 `make admin` creates a new active admin, or leaves an existing active admin and
 its password unchanged. Existing customers require explicit promotion:
 

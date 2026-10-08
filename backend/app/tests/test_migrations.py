@@ -39,6 +39,7 @@ def test_migration_upgrade_downgrade_and_metadata(tmp_path):
         "orders",
         "order_lines",
         "categories",
+        "imported_catalog_items",
     } <= set(inspect(engine).get_table_names())
     schema = inspect(engine)
     assert schema.get_pk_constraint("cart_lines")["constrained_columns"] == [
@@ -378,3 +379,178 @@ def test_media_migration_freezes_its_allowlist():
     assert "image_alt IS NOT NULL" in source
     assert '"Task Light"' in source
     assert '"lamp"' in source
+
+
+def test_catalog_identity_migration_adds_schema_only(tmp_path):
+    """Revision 0010 must not copy, edit, or delete product rows."""
+    from sqlalchemy import create_engine, text
+    from sqlalchemy.exc import IntegrityError
+
+    source = (BACKEND / "alembic/versions/0010_catalog_import_identity.py").read_text()
+    assert "catalog_manifest" not in source
+    assert "catalog_media" not in source
+    assert "UPDATE" not in source.upper()
+    assert "catalog_key IS NULL OR" in source
+    url = f"sqlite:///{tmp_path / 'catalog-identity.db'}"
+    env = dict(os.environ, DATABASE_URL=url)
+
+    def migrate(*args):
+        subprocess.run(
+            [sys.executable, "-m", "alembic", *args],
+            cwd=BACKEND,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    migrate("upgrade", "0009")
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO products "
+                "(name, description, price, currency, stock, category_id) "
+                "VALUES ('Kept name', 'Kept copy', 4.50, 'GBP', 2, "
+                "(SELECT id FROM categories WHERE slug = 'lighting'))"
+            )
+        )
+    migrate("upgrade", "head")
+    migrate("check")
+    with engine.connect() as connection:
+        row = (
+            connection.execute(
+                text(
+                    "SELECT name, description, price, stock, catalog_key FROM products"
+                )
+            )
+            .mappings()
+            .one()
+        )
+        ledger = connection.execute(
+            text("SELECT COUNT(*) FROM imported_catalog_items")
+        ).scalar_one()
+    assert row["name"] == "Kept name"
+    assert row["description"] == "Kept copy"
+    assert row["stock"] == 2
+    assert row["catalog_key"] is None
+    assert ledger == 0
+    with pytest.raises(IntegrityError):
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO products "
+                    "(name, price, currency, stock, category_id, catalog_key) "
+                    "VALUES ('Blank key', 1.00, 'GBP', 1, "
+                    "(SELECT id FROM categories WHERE slug = 'lighting'), '')"
+                )
+            )
+    migrate("downgrade", "0009")
+    assert "catalog_key" not in {
+        column["name"] for column in inspect(engine).get_columns("products")
+    }
+    assert "imported_catalog_items" not in inspect(engine).get_table_names()
+    migrate("downgrade", "base")
+    engine.dispose()
+
+
+def _alembic(url, *args, foreign_keys=False):
+    env = dict(os.environ, DATABASE_URL=url)
+    if foreign_keys:
+        env["ALEMBIC_SQLITE_FOREIGN_KEYS"] = "on"
+    else:
+        env.pop("ALEMBIC_SQLITE_FOREIGN_KEYS", None)
+    subprocess.run(
+        [sys.executable, "-m", "alembic", *args],
+        cwd=BACKEND,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _insert_saved_cart(url):
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(url)
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO users (email, hashed_password, is_active, is_superuser) "
+                "VALUES ('cart@example.com', 'hash', 1, 0)"
+            )
+        )
+        connection.execute(
+            text(
+                "INSERT INTO products "
+                "(name, description, price, currency, stock, category_id) "
+                "VALUES ('Kept', 'Kept copy', 4.50, 'GBP', 2, "
+                "(SELECT id FROM categories WHERE slug = 'lighting'))"
+            )
+        )
+        connection.execute(
+            text(
+                "INSERT INTO cart_lines (user_id, product_id, quantity) "
+                "VALUES ("
+                "(SELECT id FROM users WHERE email = 'cart@example.com'), "
+                "(SELECT id FROM products WHERE name = 'Kept'), 2)"
+            )
+        )
+    engine.dispose()
+
+
+def _cart_quantity(url):
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(url)
+    with engine.connect() as connection:
+        quantity = connection.execute(
+            text("SELECT quantity FROM cart_lines")
+        ).scalar_one()
+    engine.dispose()
+    return quantity
+
+
+def test_upgrade_from_before_photo_revision_keeps_the_cart(tmp_path):
+    """Revision 0009 runs with foreign keys off, so an older cart survives."""
+    url = f"sqlite:///{tmp_path / 'catalog-carts.db'}"
+    _alembic(url, "upgrade", "0008")
+    _insert_saved_cart(url)
+    _alembic(url, "upgrade", "head")
+    assert _cart_quantity(url) == 2
+    _alembic(url, "downgrade", "0008")
+    assert _cart_quantity(url) == 2
+    _alembic(url, "downgrade", "base")
+
+
+def test_catalog_key_migration_keeps_carts_when_foreign_keys_are_on(tmp_path):
+    """Revision 0010 parks cart lines before its own product rebuild."""
+    from sqlalchemy import create_engine, text
+
+    url = f"sqlite:///{tmp_path / 'catalog-carts-fk.db'}"
+    _alembic(url, "upgrade", "0009")
+    _insert_saved_cart(url)
+    _alembic(url, "upgrade", "head", foreign_keys=True)
+    engine = create_engine(url)
+    with engine.connect() as connection:
+        row = connection.execute(
+            text(
+                "SELECT cart_lines.quantity, products.catalog_key "
+                "FROM cart_lines JOIN products "
+                "ON products.id = cart_lines.product_id"
+            )
+        ).one()
+        parked = connection.execute(
+            text(
+                "SELECT COUNT(*) FROM sqlite_master "
+                "WHERE name = 'cart_lines_import_park'"
+            )
+        ).scalar_one()
+    engine.dispose()
+    assert row.quantity == 2
+    assert row.catalog_key is None
+    assert parked == 0
+    _alembic(url, "downgrade", "0009", foreign_keys=True)
+    assert _cart_quantity(url) == 2
+    _alembic(url, "downgrade", "base", foreign_keys=True)

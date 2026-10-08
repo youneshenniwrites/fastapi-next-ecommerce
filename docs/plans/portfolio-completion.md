@@ -290,7 +290,11 @@ Public checks there: Lighting shows Task Light with the lamp photograph,
 Aluminium, and 150 × 150 × 420 mm; Felt Desk Mat shows Felt, 800 mm and 400 mm,
 and omits height; the lamp file is a local WebP. The hosted catalog still has
 the original six products. The hosted database was not seeded or renamed.
-VIN-292 is the next story. VIN-288 stays open because that assortment remains.
+VIN-292's reviewed 60-product import is prepared for review in
+[PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324).
+It uses original
+fictional copy and the existing licensed local photographs, and it has not been
+run against hosted data. VIN-288 stays open because that assortment remains.
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
@@ -302,11 +306,11 @@ media references and bounded product facts should be product-agnostic data;
 that does not require a dynamic schema builder or multi-tenant architecture.
 
 The initial content remains within the existing clearly labelled fictional-demo
-boundary. No supplier feed was selected. VIN-292 must review representative
-products, category names, factual copy and image rights before bulk preparation
-or import. Preserve existing product IDs, admin edits, edition guards, carts,
-order snapshots and reserved inventory. The release-content cap is not a global
-limit on future admin-created records.
+boundary. No supplier feed was selected. VIN-292's reviewed set uses original
+fictional copy and the existing licensed local photographs. The import preserves
+existing product IDs, admin edits, edition guards, carts, order snapshots and
+reserved inventory. Hosted import remains a separate authorized step. The
+release-content cap is not a global limit on future admin-created records.
 
 **Later customer roadmaps:** [VIN-295](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/295)
 saves catalog administration as a separate, explicitly deferred epic: product
