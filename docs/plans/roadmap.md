@@ -77,7 +77,9 @@ VIN-287 is delivered in
 photos and stated facts are merged in
 [PR #320](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/320)
 (`c4b05b3`) and checked on the development storefront. The larger assortment
-is in review and has not been imported to the hosted catalog. Follow the
+is in review in
+[PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324)
+and has not been imported to the hosted catalog. Follow the
 canonical plan for the dependency order.
 
 Catalog administration (VIN-295) is a separate deferred roadmap. VIN-300 groups

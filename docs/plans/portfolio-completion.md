@@ -290,7 +290,9 @@ Public checks there: Lighting shows Task Light with the lamp photograph,
 Aluminium, and 150 × 150 × 420 mm; Felt Desk Mat shows Felt, 800 mm and 400 mm,
 and omits height; the lamp file is a local WebP. The hosted catalog still has
 the original six products. The hosted database was not seeded or renamed.
-VIN-292's reviewed 60-product import is prepared for review. It uses original
+VIN-292's reviewed 60-product import is prepared for review in
+[PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324).
+It uses original
 fictional copy and the existing licensed local photographs, and it has not been
 run against hosted data. VIN-288 stays open because that assortment remains.
 
