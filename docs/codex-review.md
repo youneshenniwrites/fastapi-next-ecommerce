@@ -38,8 +38,9 @@ comment identifying the current commit), and no unresolved review threads. The
 explicit-result path also supports existing unedited review requests.
 
 A clean-result comment is the whole unedited trusted comment. It starts with
-`Codex Review: Didn't find any major issues.` The signoff is one short phrase of
-at most 80 characters, or the entire signoff is one `:token:` such as `:+1:`.
+`Codex Review: Didn't find any major issues.` The signoff is one short phrase, or
+the entire signoff is one `:token:` such as `:+1:`. The 80-character limit is
+applied after internal whitespace is collapsed to single spaces.
 Letters, digits, spaces, apostrophes, commas and hyphens are allowed, with at
 most one `.`, `!` or `?`, and only as the last character. A finding word used as
 a whole word stays pending. A second sentence, a second prose line, any other

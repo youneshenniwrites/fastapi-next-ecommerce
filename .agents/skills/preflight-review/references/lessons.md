@@ -26,9 +26,10 @@ When adapting clean-result wording, match the complete observed message and know
 footer; a trusted prefix plus a commit anywhere in the body can admit contradictory
 prose. Preserve actual protocol fixtures and reject inserted/trailing findings
 ([PR #93](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/93#discussion_r3997324325)).
-VIN-325 parses that signoff instead of an exact phrase list: one phrase of at
-most 80 characters, or one whole `:token:`. A new short praise word in that
-shape is not a protocol change. Finding language still fails. The reviewed
+VIN-325 parses that signoff instead of an exact phrase list: one phrase, or one
+whole `:token:`. The 80-character limit applies after internal whitespace is
+collapsed to single spaces. A new short praise word in that shape is not a
+protocol change. Finding language still fails. The reviewed
 commit field is exactly 10 lowercase hex characters; a full 40-character SHA
 stays pending
 ([PR #329](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/329#discussion_r4223177890)).

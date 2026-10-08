@@ -93,8 +93,9 @@ reviewed commit. Do not assume the integration bot is a requestable GitHub user.
 For these Codex-reviewed PRs, external review is required before merge. Follow docs/codex-review.md:
 post a fresh commit-bound request, verify the trusted bot's clean result for the
 current head and all resolved threads, and require CI. The clean result is the
-trusted whole comment: the fixed opening sentence, one short signoff of at most
-80 characters or one `:token:` such as `:+1:`, and the reviewed commit. It is
+trusted whole comment: the fixed opening sentence, one short signoff or one
+`:token:` such as `:+1:`, and the reviewed commit. The 80-character limit applies
+after internal whitespace is collapsed to single spaces. The signoff is
 not a fixed word list. Finding words, a second sentence, and the wrong commit
 stay pending. The Codex review status
 is informational pending #38; any owner-approved exception must be explicitly
