@@ -288,13 +288,33 @@ and required CI passed. Development release `c4b05b3` is on
 [development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37690437051).
 Public checks there: Lighting shows Task Light with the lamp photograph,
 Aluminium, and 150 × 150 × 420 mm; Felt Desk Mat shows Felt, 800 mm and 400 mm,
-and omits height; the lamp file is a local WebP. The hosted catalog still has
-the original six products. The hosted database was not seeded or renamed.
-VIN-292's reviewed 60-product import is prepared for review in
-[PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324).
-It uses original
-fictional copy and the existing licensed local photographs, and it has not been
-run against hosted data. VIN-288 stays open because that assortment remains.
+and omits height; the lamp file is a local WebP.
+
+VIN-292 is delivered. [PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324)
+merged as `9653a91` on 8 October 2026. The reviewed import uses original
+fictional copy and the existing licensed local photographs. Development release
+`9653a91` is on
+[the storefront](https://forme-ecommerce-development.vercel.app) and
+[the API](https://forme-api-development.vercel.app), from
+[development delivery](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37822533454).
+The development database was at Alembic revision `0010`. Before the import it
+held the six original demo products, ids 1–6, with no `twelve-products` edition
+marker. Notebook Set stock was 26 and Ceramic Pen Cup stock was 0. A schema
+backup, `backup_vin292_20261008T183008Z`, copied those 6 products, 7 categories,
+1 cart line, 7 orders and 7 order lines before any catalog write.
+`expand-demo` appended the other six original names and kept ids 1–6.
+`import-catalog` then inserted 48 products. The result is 60 products, the
+`twelve-products` edition marker, and the same 17 users, 7 orders and 1 cart
+line. Public search returns total 60 in pages of 24. All seven categories are
+present. "Mixed Hardware Tin" matches one product. Ceramic Pen Cup and Unmarked
+Sample Box are out of stock, and Unmarked Sample Box has no image. The
+storefront showed pages 1–3 (1–24, 25–48 and 49–60), Lighting, that search, and
+both of those product pages. A fictional development account paid sandbox order
+#8 for one Dotted Pocket Notebook at £8.50; the server showed **Paid — sandbox
+only**, and that product's public stock then read 39. Production was not
+changed. VIN-288 stays in progress as the parent
+release. The import run is
+[37824723189](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37824723189).
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
 FastAPI filters and orders before paging, owns authoritative prices/stock and
@@ -309,8 +329,9 @@ The initial content remains within the existing clearly labelled fictional-demo
 boundary. No supplier feed was selected. VIN-292's reviewed set uses original
 fictional copy and the existing licensed local photographs. The import preserves
 existing product IDs, admin edits, edition guards, carts, order snapshots and
-reserved inventory. Hosted import remains a separate authorized step. The
-release-content cap is not a global limit on future admin-created records.
+reserved inventory. The hosted development import described above is the
+authorized step for that database. The release-content cap is not a global
+limit on future admin-created records.
 
 **Later customer roadmaps:** [VIN-295](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/295)
 saves catalog administration as a separate, explicitly deferred epic: product
