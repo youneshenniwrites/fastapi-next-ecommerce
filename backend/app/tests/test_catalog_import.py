@@ -21,6 +21,8 @@ from app.catalog_manifest import (
 from app.catalog_media import PRODUCT_MEDIA
 from app.catalog_taxonomy import CATEGORIES, PRODUCT_CATEGORIES
 from app.core.security import create_access_token, get_password_hash
+from app.db.session import create_db_engine
+from app.models.base import Base
 from app.models.cart import CartLine
 from app.models.category import Category
 from app.models.demo_catalog import DemoCatalog
@@ -210,6 +212,40 @@ def test_import_refuses_when_categories_are_missing(db):
     with pytest.raises(ValueError, match="apply migrations"):
         import_catalog(db)
     assert db.scalar(select(func.count()).select_from(Product)) == 0
+
+
+def test_application_sqlite_engine_records_a_deleted_import(tmp_path):
+    """A product delete must clear the ledger, and the next import must skip it."""
+    engine = create_db_engine(f"sqlite:///{tmp_path / 'application.db'}")
+    try:
+        with engine.connect() as connection:
+            assert connection.scalar(text("PRAGMA foreign_keys")) == 1
+        Base.metadata.create_all(engine)
+        with Session(engine) as session:
+            session.add_all(
+                Category(slug=slug, name=name, position=position)
+                for slug, name, position in CATEGORIES
+            )
+            session.commit()
+            assert import_catalog(session) == 60
+            session.commit()
+            product = session.scalar(
+                select(Product).where(Product.catalog_key == "task-light")
+            )
+            session.delete(product)
+            session.commit()
+            session.expire_all()
+            assert session.get(ImportedCatalogItem, "task-light").product_id is None
+            assert import_catalog(session) == 0
+            session.commit()
+            assert (
+                session.scalar(
+                    select(Product).where(Product.catalog_key == "task-light")
+                )
+                is None
+            )
+    finally:
+        engine.dispose()
 
 
 def test_import_refuses_to_recreate_a_deleted_demo_edition(db):

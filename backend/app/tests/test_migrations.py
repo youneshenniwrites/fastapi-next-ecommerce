@@ -454,28 +454,27 @@ def test_catalog_identity_migration_adds_schema_only(tmp_path):
     engine.dispose()
 
 
-def test_catalog_identity_migration_preserves_cart_lines(tmp_path):
-    """Rebuilding products for the catalog key must not cascade-delete carts."""
+def _alembic(url, *args, foreign_keys=False):
+    env = dict(os.environ, DATABASE_URL=url)
+    if foreign_keys:
+        env["ALEMBIC_SQLITE_FOREIGN_KEYS"] = "on"
+    else:
+        env.pop("ALEMBIC_SQLITE_FOREIGN_KEYS", None)
+    subprocess.run(
+        [sys.executable, "-m", "alembic", *args],
+        cwd=BACKEND,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _insert_saved_cart(url):
     from sqlalchemy import create_engine, text
 
-    url = f"sqlite:///{tmp_path / 'catalog-carts.db'}"
-    env = dict(os.environ, DATABASE_URL=url)
-
-    def migrate(*args):
-        completed = subprocess.run(
-            [sys.executable, "-m", "alembic", *args],
-            cwd=BACKEND,
-            env=env,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return completed
-
-    migrate("upgrade", "0009")
     engine = create_engine(url)
     with engine.begin() as connection:
-        connection.execute(text("PRAGMA foreign_keys=ON"))
         connection.execute(
             text(
                 "INSERT INTO users (email, hashed_password, is_active, is_superuser) "
@@ -498,33 +497,60 @@ def test_catalog_identity_migration_preserves_cart_lines(tmp_path):
                 "(SELECT id FROM products WHERE name = 'Kept'), 2)"
             )
         )
-    migrate("upgrade", "head")
+    engine.dispose()
+
+
+def _cart_quantity(url):
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(url)
     with engine.connect() as connection:
-        cart = (
-            connection.execute(
-                text(
-                    "SELECT cart_lines.quantity, products.name, products.catalog_key "
-                    "FROM cart_lines JOIN products ON products.id = cart_lines.product_id"
-                )
+        quantity = connection.execute(
+            text("SELECT quantity FROM cart_lines")
+        ).scalar_one()
+    engine.dispose()
+    return quantity
+
+
+def test_upgrade_from_before_photo_revision_keeps_the_cart(tmp_path):
+    """Revision 0009 runs with foreign keys off, so an older cart survives."""
+    url = f"sqlite:///{tmp_path / 'catalog-carts.db'}"
+    _alembic(url, "upgrade", "0008")
+    _insert_saved_cart(url)
+    _alembic(url, "upgrade", "head")
+    assert _cart_quantity(url) == 2
+    _alembic(url, "downgrade", "0008")
+    assert _cart_quantity(url) == 2
+    _alembic(url, "downgrade", "base")
+
+
+def test_catalog_key_migration_keeps_carts_when_foreign_keys_are_on(tmp_path):
+    """Revision 0010 parks cart lines before its own product rebuild."""
+    from sqlalchemy import create_engine, text
+
+    url = f"sqlite:///{tmp_path / 'catalog-carts-fk.db'}"
+    _alembic(url, "upgrade", "0009")
+    _insert_saved_cart(url)
+    _alembic(url, "upgrade", "head", foreign_keys=True)
+    engine = create_engine(url)
+    with engine.connect() as connection:
+        row = connection.execute(
+            text(
+                "SELECT cart_lines.quantity, products.catalog_key "
+                "FROM cart_lines JOIN products "
+                "ON products.id = cart_lines.product_id"
             )
-            .mappings()
-            .one()
-        )
+        ).one()
         parked = connection.execute(
             text(
                 "SELECT COUNT(*) FROM sqlite_master "
                 "WHERE name = 'cart_lines_import_park'"
             )
         ).scalar_one()
-    assert cart["quantity"] == 2
-    assert cart["name"] == "Kept"
-    assert cart["catalog_key"] is None
-    assert parked == 0
-    migrate("downgrade", "0009")
-    with engine.connect() as connection:
-        quantity = connection.execute(
-            text("SELECT quantity FROM cart_lines")
-        ).scalar_one()
-    assert quantity == 2
-    migrate("downgrade", "base")
     engine.dispose()
+    assert row.quantity == 2
+    assert row.catalog_key is None
+    assert parked == 0
+    _alembic(url, "downgrade", "0009", foreign_keys=True)
+    assert _cart_quantity(url) == 2
+    _alembic(url, "downgrade", "base", foreign_keys=True)
