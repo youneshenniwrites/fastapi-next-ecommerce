@@ -1,0 +1,112 @@
+# Extra Codex clean-result signoffs for the existing parser.
+# GitHub issue-comment listing was paginated (12 pages, 1198 comments).
+# Inline pull-review comments were paginated (5 pages). Review bodies were
+# scanned with GraphQL. Search for the exact opening returned 0 because the
+# apostrophe is not indexed; commenter search was paginated (2 pages, 144).
+#
+# Omitted real signoffs the current parser rejects, so they are not fixtures:
+# :+1: has no letter in the :name: token
+# https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#issuecomment-5588642618
+# Already looking forward to the next diff. is 41 characters
+# https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/52#issuecomment-5590060595
+#
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/66#issuecomment-5623229661
+Another round soon, please!
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/91#issuecomment-5648289034
+Bravo.
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/61#issuecomment-5607605381
+More of your lovely PRs please.
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/101#issuecomment-5652480833
+Nice work!
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/49#issuecomment-5589707421
+What shall we delve into next?
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/64#issuecomment-5607957182
+:tada:
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/47#issuecomment-5589206806
+Chef's kiss.
+# source: style
+Lovely!
+# source: style
+Splendid!
+# source: style
+Wonderful!
+# source: style
+Excellent!
+# source: style
+Superb!
+# source: style
+Fantastic!
+# source: style
+Great job!
+# source: style
+Well done!
+# source: style
+So good!
+# source: style
+Very clean.
+# source: style
+Looks great!
+# source: style
+Nice one!
+# source: style
+Love this.
+# source: style
+Beautiful!
+# source: style
+Outstanding!
+# source: style
+Impressive!
+# source: style
+Solid work.
+# source: style
+Crisp!
+# source: style
+Smooth!
+# source: style
+Elegant!
+# source: style
+Polished!
+# source: style
+Very nice!
+# source: style
+Good stuff!
+# source: style
+Love it!
+# source: style
+Well played.
+# source: style
+Peachy!
+# source: style
+Sharp!
+# source: style
+Neat!
+# source: style
+Sweet!
+# source: style
+Brilliant!
+# source: style
+Marvelous!
+# source: style
+Stellar!
+# source: style
+Prime work.
+# source: style
+All good!
+# source: style
+Looks lovely.
+# source: style
+Fine work.
+# source: style
+So tidy!
+# source: style
+Quite nice.
+# source: style
+Happy days!
+# source: style
+Yes please!
+# source: style
+More please!
+# source: style
+Onward!
+# source: style
+Gorgeous!
