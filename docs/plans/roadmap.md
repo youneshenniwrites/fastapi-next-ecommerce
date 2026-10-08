@@ -76,11 +76,13 @@ VIN-287 is delivered in
 (`4dad3b0`) and checked on the development storefront. VIN-291's stable
 photos and stated facts are merged in
 [PR #320](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/320)
-(`c4b05b3`) and checked on the development storefront. The larger assortment
-is in review in
+(`c4b05b3`) and checked on the development storefront. VIN-292's reviewed
+60-product import merged in
 [PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324)
-and has not been imported to the hosted catalog. Follow the
-canonical plan for the dependency order.
+(`9653a91`). The development database, at revision `0010`, was imported on
+8 October 2026 after schema backup `backup_vin292_20261008T183008Z`: 60
+products in pages of 24, and one paid sandbox order. Production was not
+imported. Follow the canonical plan for the dependency order.
 
 Catalog administration (VIN-295) is a separate deferred roadmap. VIN-300 groups
 later sign-in continuity, account recovery and purchase support.

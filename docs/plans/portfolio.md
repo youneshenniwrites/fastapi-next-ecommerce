@@ -29,10 +29,11 @@ priorities, status and acceptance gates. This page describes product direction o
 VIN-288 plans a richer workspace/home-office catalog of up to 100 items, useful
 product information and full-catalog discovery. VIN-290 delivered one stored
 category per product and category browsing. VIN-291 delivered a stable local
-photograph and optional stated facts. The larger assortment remains open under
-VIN-292: a reviewed local import is in
-[PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324),
-and hosted data is unchanged.
+photograph and optional stated facts. VIN-292 delivered the reviewed
+60-product import in
+[PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324)
+(`9653a91`). The development catalog was imported at revision `0010` on
+8 October 2026; production data was not changed.
 Category and media data stay product-agnostic so a later assortment
 does not require name-based code.
 VIN-295 separately saves owner catalog administration; it is explicitly deferred,
