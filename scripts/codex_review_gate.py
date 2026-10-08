@@ -67,10 +67,9 @@ Codex can also answer questions or update the PR. Try commenting "@codex address
 """
 
 
-# Bound for one short closing, not a word list. Eighty characters covers the
-# longest observed approval closing (41) with room, and still rejects a paragraph.
+# VIN-325 bounds the complete signoff, including punctuation or token delimiters.
 # A second sentence, finding language, other prose, or the wrong commit stays pending.
-_SIGNOFF_LIMIT = 80
+_SIGNOFF_LIMIT = 40
 _FINDING_WORDS = frozenset(
     {
         "issue",
@@ -97,8 +96,8 @@ _FINDING_WORDS = frozenset(
     }
 )
 _PHRASE = re.compile(r"[A-Za-z0-9' ,-]*[A-Za-z0-9][A-Za-z0-9' ,-]*[.!?]?")
-# The whole signoff may be one :token:. Digits and plus are allowed, so :+1: matches.
-_EMOJI = re.compile(r":[A-Za-z0-9_+-]+:")
+# A named shortcode must occupy the whole signoff.
+_EMOJI = re.compile(r":[A-Za-z0-9_-]+:")
 _CLEAN_PREFIX = "Codex Review: Didn't find any major issues. "
 
 
@@ -130,6 +129,7 @@ def clean_result(body, sha):
 
 
 def evaluate(sha, comments, reactions, unresolved, reviews=()):
+    """Derive status from current-head evidence, leaving untrusted results pending."""
     if unresolved:
         return "pending", "Resolve review conversations and obtain a clean re-review"
     marker = f"<!-- codex-review-head:{sha} -->"

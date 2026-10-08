@@ -1,4 +1,4 @@
-"""Extra signoffs pass for the reviewed head and fail for a different head."""
+"""Observed signoffs must satisfy VIN-325's grammar and match the reviewed head."""
 
 import unittest
 from pathlib import Path
@@ -6,6 +6,7 @@ from pathlib import Path
 from scripts.codex_review_gate import clean_result
 
 FIXTURE = Path(__file__).with_name("fixtures") / "codex-signoff-phrases.txt"
+REJECTED_OBSERVED = {":+1:", "Already looking forward to the next diff."}
 
 
 def load_phrases(path=FIXTURE):
@@ -28,7 +29,8 @@ def load_phrases(path=FIXTURE):
 
 
 class ExtraSignoffPhrases(unittest.TestCase):
-    def test_every_fixture_phrase_matches_only_its_head(self):
+    def test_every_fixture_phrase_obeys_parser_and_head_rules(self):
+        """Accept valid fixtures only on their head; reject out-of-scope closings."""
         entries = load_phrases()
         phrases = [phrase for _, phrase in entries]
         self.assertEqual(len(entries), 52)
@@ -43,10 +45,11 @@ class ExtraSignoffPhrases(unittest.TestCase):
                 f"{phrase}\n\n**Reviewed commit:** `{sha[:10]}`"
             )
             with self.subTest(phrase=phrase):
-                self.assertLessEqual(len(phrase), 80)
+                if phrase not in REJECTED_OBSERVED:
+                    self.assertLessEqual(len(phrase), 40)
                 if source == "style":
                     self.assertLess(len(phrase), 40)
                     self.assertLessEqual(len(phrase.split()), 4)
                     self.assertTrue(phrase.endswith(("!", ".")))
-                self.assertTrue(clean_result(body, sha))
+                self.assertEqual(clean_result(body, sha), phrase not in REJECTED_OBSERVED)
                 self.assertFalse(clean_result(body, other))

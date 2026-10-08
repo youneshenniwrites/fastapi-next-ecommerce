@@ -275,6 +275,7 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
     signoff_token = "Swish!"
 
     def clean_comment(self):
+        """Build trusted clean evidence with this class's observed signoff."""
         comment = super().clean_comment()
         comment["body"] = comment["body"].replace(
             "Can't wait for the next one!", "Swish!"
@@ -282,6 +283,7 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
         return comment
 
     def test_second_sentence_and_empty_signoff_stay_pending(self):
+        """Reject an empty closing or a second sentence in otherwise valid evidence."""
         for signoff in (f"{self.signoff_token} But there are issues.", ""):
             with self.subTest(signoff=signoff):
                 comment = self.clean_comment()
@@ -294,6 +296,7 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
                 )
 
     def test_short_single_sentence_signoff_passes(self):
+        """Accept valid new closings without extending a phrase allowlist."""
         for signoff in ("Breezy!", "Everything looks fine!", "Swish?"):
             with self.subTest(signoff=signoff):
                 comment = self.clean_comment()
@@ -306,6 +309,7 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
                 )
 
     def test_edited_clean_comment_stays_pending(self):
+        """Reject edited clean comments even when their wording is valid."""
         comment = self.clean_comment()
         comment["updated_at"] = "2026-09-08T10:02:00Z"
         self.assertEqual(
@@ -346,6 +350,7 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
         )
 
     def test_observed_full_comment(self):
+        """Accept the saved bot response only with matching reviewed-head evidence."""
         comment = self.clean_comment()
         comment["body"] = (
             (Path(__file__).with_name("fixtures") / "codex-clean-swish.txt")
@@ -358,6 +363,7 @@ class SwishCleanEvidence(ReviewEvidence, EditedReviews):
         )
 
     def test_inserted_or_trailing_prose_stays_pending(self):
+        """Reject additional prose around the reviewed commit and known footer."""
         for body in (
             self.clean_comment()["body"].replace(
                 "**Reviewed commit:**",
@@ -454,6 +460,7 @@ class RocketCleanEvidence(SwishCleanEvidence):
     signoff_token = ":rocket:"
 
     def clean_comment(self):
+        """Build trusted clean evidence with this class's observed signoff."""
         comment = ReviewEvidence.clean_comment(self)
         comment["body"] = (
             (Path(__file__).with_name("fixtures") / "codex-clean-rocket.txt")
@@ -463,6 +470,7 @@ class RocketCleanEvidence(SwishCleanEvidence):
         return comment
 
     def test_observed_full_comment(self):
+        """Accept the saved bot response only with matching reviewed-head evidence."""
         self.assertEqual(
             evaluate(
                 self.sha, [self.request, self.summary, self.clean_comment()], {}, False
@@ -471,6 +479,7 @@ class RocketCleanEvidence(SwishCleanEvidence):
         )
 
     def test_malformed_signoff_stays_pending(self):
+        """Keep malformed shortcodes, literal emoji and finding prose pending."""
         for signoff in (":rocket: But fix this.", ":rocket", "🚀", ""):
             with self.subTest(signoff=signoff):
                 comment = self.clean_comment()
@@ -483,6 +492,7 @@ class RocketCleanEvidence(SwishCleanEvidence):
                 )
 
     def test_inserted_or_trailing_prose_stays_pending(self):
+        """Reject additional prose around the reviewed commit and known footer."""
         body = self.clean_comment()["body"]
         for changed in (
             body.replace(
@@ -507,6 +517,7 @@ class BreezyCleanEvidence(SwishCleanEvidence):
     signoff_token = "Breezy!"
 
     def clean_comment(self):
+        """Build trusted clean evidence with this class's observed signoff."""
         comment = ReviewEvidence.clean_comment(self)
         comment["body"] = (
             (Path(__file__).with_name("fixtures") / "codex-clean-breezy.txt")
@@ -516,6 +527,7 @@ class BreezyCleanEvidence(SwishCleanEvidence):
         return comment
 
     def test_observed_full_comment(self):
+        """Accept the saved bot response only with matching reviewed-head evidence."""
         raw = (
             Path(__file__).with_name("fixtures") / "codex-clean-breezy.txt"
         ).read_text()
@@ -529,6 +541,7 @@ class BreezyCleanEvidence(SwishCleanEvidence):
         )
 
     def test_wrong_head_stays_pending(self):
+        """Reject a clean response bound to a different commit."""
         comment = self.clean_comment()
         comment["body"] = comment["body"].replace(self.sha[:10], "b" * 10)
         self.assertEqual(
@@ -537,6 +550,7 @@ class BreezyCleanEvidence(SwishCleanEvidence):
         )
 
     def test_inserted_or_trailing_prose_stays_pending(self):
+        """Reject additional prose around the reviewed commit and known footer."""
         body = self.clean_comment()["body"]
         for changed in (
             body.replace(

@@ -1,4 +1,5 @@
-# Extra Codex clean-result signoffs for the existing parser.
+# Recorded Codex clean-result signoffs, including out-of-scope closings.
+# VIN-325 rejects :+1: and the 41-character "Already looking forward" phrase.
 # GitHub issue-comment listing was paginated (13 pages). Inline pull-review
 # comments were paginated (5 pages). The distinct approval closings use letters,
 # spaces, apostrophes, commas, periods, exclamation marks, question marks, and
