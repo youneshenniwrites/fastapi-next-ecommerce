@@ -23,7 +23,7 @@ Local credentials are generated into an ignored file and excluded from Docker bu
 
 CI audits locked Python and frontend dependencies, validates code/tests, and checks
 PostgreSQL migrations. The owner-approved, development-only VIN-269 audit exception
-is [bounded and expires on 10 October 2026](docs/tooling.md#temporary-vin-269-tooling-exception--expires-10-october-2026); it is accepted risk, not remediation.
+is [bounded and expires on 17 October 2026](docs/tooling.md#temporary-vin-269-tooling-exception--expires-17-october-2026); it is accepted risk, not remediation.
 Rate limiting is implemented with process-local counters; it is not a distributed
 limit across serverless instances. Password recovery, full security scanning and
 production hardening remain roadmap work. These checks do not prove production

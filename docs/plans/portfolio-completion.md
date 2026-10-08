@@ -347,8 +347,8 @@ follow-ups retain their remaining product decisions rather than assuming a launc
 **Technical improvements — VIN-125:** keep security, RUM, Sentry, reliability,
 CI and feature-flag discovery in the technical view. VIN-294 records the earlier
 feature-flag research request as discovery, with no tool selected or installed.
-VIN-269's approved advisory-specific exception expires **10 October 2026 at
-23:59 UTC**; no extension or verified remediation is claimed. That deadline stays
+VIN-269's approved advisory-specific exception was extended once on 8 October and
+now expires **17 October 2026 at 23:59 UTC**; no remediation is claimed. That deadline stays
 urgent while independent customer work proceeds. VIN-172's recorded credential
 expiry (28 October) and VIN-38's recorded trigger-policy deadline (2 November)
 must be revalidated before action. Routine tooling cannot displace customer
@@ -373,7 +373,7 @@ VIN-45's same-preview hosted proof and cleanup are verified. Development monitor
 (VIN-121) and joined-trace proof (VIN-223) are also complete. VIN-262's final
 package is verified; the scoped portfolio finish line has no remaining dependency.
 Keep future customer-feature and maintenance blockers on their source issues. VIN-269 retains an explicitly approved, expiring development-only
-audit exception through 10 October at 23:59 UTC; upstream remediation remains open. An unresolved outcome stays unchecked at portfolio acceptance.
+audit exception through 17 October at 23:59 UTC; upstream remediation remains open. An unresolved outcome stays unchecked at portfolio acceptance.
 
 ### Delivery checklist
 

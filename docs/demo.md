@@ -108,7 +108,7 @@ Keep these boundaries visible during the presentation:
   [hosting limits and rollback](../deploy/environments/README.md#runtime-limits).
 
 Maintenance stays separate from the demo: [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
-owns the dependency exception expiring **10 October 2026 at 23:59 UTC**;
+owns the dependency exception expiring **17 October 2026 at 23:59 UTC**;
 [VIN-147](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/147)
 owns remaining workflow overhead; [VIN-279](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/279)
 owns temporary framework patches. [VIN-38](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/38)
