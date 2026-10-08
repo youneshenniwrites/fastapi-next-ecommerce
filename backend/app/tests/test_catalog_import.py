@@ -1,10 +1,12 @@
 import os
+import threading
+import time
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-from sqlalchemy import create_engine, event, func, select
+from sqlalchemy import create_engine, event, func, select, text
 from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -295,6 +297,64 @@ def test_overlapping_import_cannot_duplicate_the_catalog(tmp_path):
         session.commit()
         assert session.scalar(select(func.count()).select_from(Product)) == 60
     engine.dispose()
+
+
+def test_overlapping_postgresql_import_waits_and_adds_nothing(db):
+    """The second import must see the first commit, not insert a second copy."""
+    if db.get_bind().dialect.name != "postgresql":
+        pytest.skip("Requires disposable PostgreSQL TEST_DATABASE_URL")
+    engine = db.get_bind()
+    outcome = {}
+    committed = False
+
+    def second_import():
+        with Session(engine) as second:
+            second.begin()
+            second.execute(text("SET lock_timeout = '5s'"))
+            try:
+                outcome["count"] = import_catalog(second)
+                second.commit()
+            except Exception as exc:
+                outcome["error"] = exc
+                second.rollback()
+
+    worker = threading.Thread(target=second_import)
+    try:
+        assert import_catalog(db) == 60
+        worker.start()
+        deadline = time.monotonic() + 5
+        waiting = 0
+        while time.monotonic() < deadline:
+            waiting = db.scalar(
+                text(
+                    "SELECT COUNT(*) FROM pg_locks "
+                    "WHERE NOT granted AND relation = 'products'::regclass"
+                )
+            )
+            if waiting:
+                break
+            time.sleep(0.05)
+        assert waiting, "second import did not wait for the product lock"
+        db.commit()
+        committed = True
+    finally:
+        if not committed:
+            db.rollback()
+        worker.join(timeout=5)
+    assert not worker.is_alive()
+    assert outcome.get("error") is None
+    assert outcome["count"] == 0
+    db.expire_all()
+    products = list(db.scalars(select(Product)))
+    ledgers = list(db.scalars(select(ImportedCatalogItem)))
+    assert len(products) == 60
+    assert len({product.catalog_key for product in products}) == 60
+    assert {ledger.catalog_key for ledger in ledgers} == {
+        product.catalog_key for product in products
+    }
+    assert {ledger.product_id for ledger in ledgers} == {
+        product.id for product in products
+    }
 
 
 def test_imported_catalog_pages_every_category_and_hides_the_key(client, db):
