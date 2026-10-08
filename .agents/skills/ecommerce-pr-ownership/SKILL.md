@@ -94,9 +94,10 @@ For these Codex-reviewed PRs, external review is required before merge. Follow d
 post a fresh commit-bound request, verify the trusted bot's clean result for the
 current head and all resolved threads, and require CI. The clean result is the
 trusted whole comment: the fixed opening sentence, one short signoff or one
-`:token:` such as `:+1:`, and the reviewed commit. The 80-character limit applies
-after internal whitespace is collapsed to single spaces. The signoff is
-not a fixed word list. Finding words, a second sentence, and the wrong commit
+`:token:` such as `:+1:`, and exactly `**Reviewed commit:**` plus the first 10
+lowercase hex characters of the head inside backticks. A full SHA does not
+match. The 80-character limit applies after internal whitespace is collapsed
+to single spaces. The signoff is not a fixed word list. Finding words, a second sentence, and the wrong commit
 stay pending. The Codex review status
 is informational pending #38; any owner-approved exception must be explicitly
 recorded and linked to deferred work. Verify ticket acceptance separately. No human Approve review is required.
