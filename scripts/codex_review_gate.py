@@ -67,9 +67,10 @@ Codex can also answer questions or update the PR. Try commenting "@codex address
 """
 
 
-# One short closing phrase. A second sentence, finding language, other prose, or
-# the wrong commit stays pending. Length 40 covers the longest observed phrase.
-_SIGNOFF_LIMIT = 40
+# Bound for one short closing, not a word list. Eighty characters covers the
+# longest observed approval closing (41) with room, and still rejects a paragraph.
+# A second sentence, finding language, other prose, or the wrong commit stays pending.
+_SIGNOFF_LIMIT = 80
 _FINDING_WORDS = frozenset(
     {
         "issue",
@@ -96,7 +97,8 @@ _FINDING_WORDS = frozenset(
     }
 )
 _PHRASE = re.compile(r"[A-Za-z0-9' ,-]*[A-Za-z0-9][A-Za-z0-9' ,-]*[.!?]?")
-_EMOJI = re.compile(r":[A-Za-z0-9_+-]*[A-Za-z][A-Za-z0-9_+-]*:")
+# The whole signoff may be one :token:. Digits and plus are allowed, so :+1: matches.
+_EMOJI = re.compile(r":[A-Za-z0-9_+-]+:")
 _CLEAN_PREFIX = "Codex Review: Didn't find any major issues. "
 
 

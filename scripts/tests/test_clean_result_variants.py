@@ -13,10 +13,12 @@ PASSING = (
     "Delightful!",
     "You're on a roll.",
     ":rocket:",
+    ":+1:",
     "Breezy!",
     "Everything looks fine!",
     "Swish?",
     "prefix!",
+    "Already looking forward to the next diff.",
 )
 
 REJECTED = (
@@ -25,12 +27,14 @@ REJECTED = (
     "Delightful! But fix this.",
     "You're on a roll. But fix this.",
     ":rocket: But fix this.",
+    ":+1: But there are issues.",
+    "Nice :+1:",
     ":rocket",
     "🚀",
     "",
     "Nice job. Thanks!",
     "fix!",
-    "A" * 41,
+    "A" * 81,
 )
 
 
@@ -42,9 +46,10 @@ class CleanVariants(unittest.TestCase):
         )
 
     def test_short_signoffs_pass_with_and_without_footer(self):
-        self.assertLessEqual(len("Can't wait for the next one!"), 40)
-        self.assertEqual(len("A" * 40), 40)
-        self.assertTrue(clean_result(self.comment("A" * 40), "a" * 40))
+        self.assertLessEqual(len("Already looking forward to the next diff."), 80)
+        self.assertEqual(len("A" * 80), 80)
+        self.assertTrue(clean_result(self.comment("A" * 80), "a" * 40))
+        self.assertFalse(clean_result(self.comment("A" * 81), "a" * 40))
         for signoff in PASSING:
             for trailer in ("", CLEAN_RESULT_FOOTER):
                 with self.subTest(signoff=signoff, footer=bool(trailer)):

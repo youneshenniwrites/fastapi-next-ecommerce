@@ -1,15 +1,14 @@
 # Extra Codex clean-result signoffs for the existing parser.
-# GitHub issue-comment listing was paginated (12 pages, 1198 comments).
-# Inline pull-review comments were paginated (5 pages). Review bodies were
-# scanned with GraphQL. Search for the exact opening returned 0 because the
-# apostrophe is not indexed; commenter search was paginated (2 pages, 144).
+# GitHub issue-comment listing was paginated (13 pages). Inline pull-review
+# comments were paginated (5 pages). The distinct approval closings use letters,
+# spaces, apostrophes, commas, periods, exclamation marks, question marks, and
+# the shortcodes :rocket:, :tada:, and :+1:. No :thumbsup: or :-1: approval
+# appeared.
 #
-# Omitted real signoffs the current parser rejects, so they are not fixtures:
-# :+1: has no letter in the :name: token
-# https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#issuecomment-5588642618
-# Already looking forward to the next diff. is 41 characters
-# https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/52#issuecomment-5590060595
-#
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/41#issuecomment-5588642618
+:+1:
+# source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/52#issuecomment-5590060595
+Already looking forward to the next diff.
 # source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/66#issuecomment-5623229661
 Another round soon, please!
 # source: copied https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/91#issuecomment-5648289034

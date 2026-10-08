@@ -31,9 +31,9 @@ class ExtraSignoffPhrases(unittest.TestCase):
     def test_every_fixture_phrase_matches_only_its_head(self):
         entries = load_phrases()
         phrases = [phrase for _, phrase in entries]
-        self.assertEqual(len(entries), 50)
+        self.assertEqual(len(entries), 52)
         self.assertEqual(len(phrases), len(set(phrases)))
-        self.assertEqual(sum(source == "copied" for source, _ in entries), 7)
+        self.assertEqual(sum(source == "copied" for source, _ in entries), 9)
         self.assertEqual(sum(source == "style" for source, _ in entries), 43)
         sha = "c" * 40
         other = "d" * 40
@@ -43,7 +43,7 @@ class ExtraSignoffPhrases(unittest.TestCase):
                 f"{phrase}\n\n**Reviewed commit:** `{sha[:10]}`"
             )
             with self.subTest(phrase=phrase):
-                self.assertLessEqual(len(phrase), 40)
+                self.assertLessEqual(len(phrase), 80)
                 if source == "style":
                     self.assertLess(len(phrase), 40)
                     self.assertLessEqual(len(phrase.split()), 4)
