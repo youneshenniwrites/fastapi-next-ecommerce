@@ -79,7 +79,8 @@ mobile-menu cases intentionally skipped. Existing coverage passed: 99.06%
 statements, 97.69% branches, 100% functions and 99.74% lines. Local runtime was
 Node 24.20.0/npm 11.19.0; CI must additionally verify the pinned npm 11.19.1.
 VIN-269 subsequently received an owner-approved, narrowly bounded development-dependency
-audit exception through 10 October 2026 at 23:59 UTC. It does not waive other
+audit exception through 10 October 2026, extended once on 8 October to
+17 October 2026 at 23:59 UTC. It does not waive other
 findings or represent an upstream vulnerability repair.
 
 ### Hydration repair verification — 4 October

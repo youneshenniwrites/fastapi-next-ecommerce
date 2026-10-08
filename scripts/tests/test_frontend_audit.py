@@ -47,11 +47,15 @@ class FrontendAuditTests(unittest.TestCase):
         self.assertIn("ACCEPTED RISK (not remediated)", self.evaluate())
 
     def test_clean_full_report_requires_no_exception_even_after_expiry(self):
-        self.now = datetime(2026, 10, 11, tzinfo=timezone.utc)
+        self.now = datetime(2026, 10, 18, tzinfo=timezone.utc)
         self.assertIn("no exception used", self.evaluate(self.clean(), 0))
 
+    def test_extension_accepts_until_just_before_expiry(self):
+        self.now = datetime(2026, 10, 17, 23, 58, 59, tzinfo=timezone.utc)
+        self.assertIn("Expires 2026-10-17T23:59:00+00:00", self.evaluate())
+
     def test_expiry_boundary_fails(self):
-        self.now = datetime(2026, 10, 10, 23, 59, tzinfo=timezone.utc)
+        self.now = datetime(2026, 10, 17, 23, 59, tzinfo=timezone.utc)
         with self.assertRaisesRegex(ValueError, "expired"):
             self.evaluate()
 

@@ -31,12 +31,13 @@ It audits development dependencies too. A failure must be investigated: dependen
 vulnerabilities and an unavailable advisory service both produce unsuccessful runs.
 Do not bypass or globally suppress failures to make CI green.
 
-### Temporary VIN-269 tooling exception — expires 10 October 2026
+### Temporary VIN-269 tooling exception — expires 17 October 2026
 
 On 3 October the owner approved accepting only
 [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
-on the verified development-only `braces` dependency paths until
-**10 October 2026, 23:59 UTC**. This accepts the risk; it does not fix the package.
+on the verified development-only `braces` dependency paths until 10 October.
+On 8 October the owner extended that same exception once, to
+**17 October 2026, 23:59 UTC**. This accepts the risk; it does not fix the package.
 The current full audit reports seven dependent entries from this one advisory.
 Runtime-only auditing is clean. The exposure is development glob processing in
 Next ESLint/shadcn tooling; arbitrary untrusted patterns can exhaust its stack.
@@ -69,6 +70,16 @@ PR #309 reassessment (6 October): locked updates within existing ranges move
 and the same seven development-only `braces` entries, paths and advisory. Only
 the lockfile hash was renewed. The 10 October expiry is unchanged. This removes
 the new advisories; the `braces` exception remains accepted risk, not remediation.
+
+Extension reassessment (8 October): the registry still publishes latest
+`braces@3.0.3`, the advisory still lists no patched version, and upstream has
+merged no fix. Current Next ESLint (16.4.0 and 16.5.0 canary) still pins
+`fast-glob` 3.3.1. Only `expiresAt` changed; the advisory, the seven-entry graph,
+the file hashes and every guard are unchanged. With Node's default stack, the
+deepest pattern under `braces`' 10,000-character limit (4,999 levels) did not
+crash `braces` or `micromatch`. A 400 KB stack failed at 3,500 levels and a
+200 KB stack at 1,000 levels. The patterns here come only from our own tooling
+configuration, so the residual risk is a crashed local lint run.
 
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
