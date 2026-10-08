@@ -662,7 +662,11 @@ PRs [#254](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/254)
 deliver staging, the guarded hosted nonce correction and enforcement. The owner
 merged PR #256's reviewed head after green applicable CI; Codex's trusted unedited
 clean result identifies `59a17db2ae`. Its new closing phrase was not recognized by
-the informational adapter; the bounded format follow-up remains deferred in
+the informational adapter at that date. That recognition gap is historical.
+[VIN-325](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/325),
+merged in [PR #326](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/326)
+as `6d7444b` on 8 October 2026, parses one short signoff instead of an exact
+phrase list. Enforced review status remains deferred in
 [VIN-38](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/38#issuecomment-5960004944).
 No success was fabricated or extra review requested.
 

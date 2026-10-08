@@ -35,8 +35,25 @@ The gate requires this commit-bound request, a fresh completed Code Review summa
 from the verified Codex bot (GitHub user ID 199175422), the matching summary commit,
 a +1 reaction from that bot on the request (or its explicit, unedited clean-result
 comment identifying the current commit), and no unresolved review threads. The
-explicit-result path also supports existing unedited review requests. Later
-requests or findings invalidate an older clean result. Review edits use GraphQL
+explicit-result path also supports existing unedited review requests.
+
+A clean-result comment is the whole unedited trusted comment. It starts with
+`Codex Review: Didn't find any major issues.` The signoff is one short phrase, or
+the entire signoff is one `:token:` such as `:+1:`. The 80-character limit is
+applied after internal whitespace is collapsed to single spaces.
+Letters, digits, spaces, apostrophes, commas and hyphens are allowed, with at
+most one `.`, `!` or `?`, and only as the last character. A finding word used as
+a whole word stays pending. A second sentence, a second prose line, any other
+prose, and the wrong commit stay pending. The reviewed-commit field must be
+exactly `**Reviewed commit:**` followed by the first 10 lowercase hex characters
+of the current head inside backticks. A longer value, including the full
+40-character SHA, does not match. The known footer may follow
+only as a suffix. This is not a fixed list of closing words. VIN-325 merged in
+[PR #326](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/326)
+(`6d7444bc8788d9d088afcd8957273f1d495b8848`). Enforced status remains
+[VIN-38](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/38).
+
+Later requests or findings invalidate an older clean result. Review edits use GraphQL
 update timestamps; inline comments are checked separately, including resolved
 threads whose comments were later edited.
 An old clean review, edited request, human reaction, unknown summary format or
