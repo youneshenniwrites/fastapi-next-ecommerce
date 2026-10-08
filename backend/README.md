@@ -81,6 +81,8 @@ before retrying. Downgrading restores legacy float storage and removes currency;
 it is intended for disposable tests, not as a substitute for a production rollback
 and backup plan. Revision 0008 adds one required category on each product.
 Revision 0009 adds the optional photo and stated facts.
+Revision 0010 adds an optional catalog key and an import ledger. It does not
+insert, edit, or delete products.
 
 CI runs the tests against both SQLite and PostgreSQL. TEST_DATABASE_URL and
 TEST_MIGRATION_DATABASE_URL are test-only overrides that must name two distinct,

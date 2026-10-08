@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.catalog_import import import_catalog
 from app.catalog_media import PRODUCT_MEDIA
 from app.catalog_taxonomy import PRODUCT_CATEGORIES
 from app.core.security import get_password_hash
@@ -169,6 +170,8 @@ def main(argv=None):
     seed.add_argument("--confirm-demo", action="store_true", required=True)
     expand = commands.add_parser("expand-demo")
     expand.add_argument("--confirm-demo", action="store_true", required=True)
+    catalog = commands.add_parser("import-catalog")
+    catalog.add_argument("--confirm-import", action="store_true", required=True)
     admin = commands.add_parser("admin")
     admin.add_argument("--email", required=True)
     admin.add_argument("--promote-existing", action="store_true")
@@ -181,6 +184,11 @@ def main(argv=None):
                 )
                 message = (
                     f"Created {count} demo products; existing catalogs are preserved."
+                )
+            elif args.command == "import-catalog":
+                count = import_catalog(db)
+                message = (
+                    f"Imported {count} catalog products; existing rows were preserved."
                 )
             else:
                 email = str(UserBase(email=args.email).email)
@@ -195,6 +203,8 @@ def main(argv=None):
                 )
         print(message)
     except ValidationError:
+        if getattr(args, "command", None) == "import-catalog":
+            parser.exit(1, "Catalog manifest is invalid.\n")
         parser.exit(1, "Invalid email or password (must be 8–128 characters).\n")
     except (ValueError, EOFError) as exc:
         parser.exit(1, f"Bootstrap refused: {exc}\n")

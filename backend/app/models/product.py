@@ -11,6 +11,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -67,6 +68,12 @@ class Product(Base):
             "height_mm IS NULL OR (height_mm >= 1 AND height_mm <= 10000)",
             name="ck_products_height_mm",
         ),
+        CheckConstraint(
+            "catalog_key IS NULL OR "
+            "(length(catalog_key) >= 1 AND length(catalog_key) <= 64)",
+            name="ck_products_catalog_key",
+        ),
+        UniqueConstraint("catalog_key", name="uq_products_catalog_key"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -95,6 +102,7 @@ class Product(Base):
     width_mm: Mapped[int | None] = mapped_column()
     depth_mm: Mapped[int | None] = mapped_column()
     height_mm: Mapped[int | None] = mapped_column()
+    catalog_key: Mapped[str | None] = mapped_column(String(64))
 
     @property
     def image(self) -> dict[str, str] | None:

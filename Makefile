@@ -41,9 +41,12 @@ hooks-check:
 requirements-check:
 	python3 backend/scripts/check_requirements.py
 
-.PHONY: demo admin
+.PHONY: demo admin import-catalog
 demo:
 	cd backend && uv run python -m app.bootstrap seed-demo --confirm-demo
+
+import-catalog:
+	cd backend && uv run python -m app.bootstrap import-catalog --confirm-import
 
 admin:
 	cd backend && uv run python -m app.bootstrap admin --email "$(EMAIL)"
