@@ -16,6 +16,7 @@ def request(repo, number):
     if not routine:
         return
     sha = pr["head"]["sha"]
+    base_ref = pr["base"]["ref"]
     marker = f"<!-- docs-coderabbit-head:{sha} -->"
     actor = api("user")["login"]
     comments = pages(f"repos/{repo}/issues/{number}/comments")
@@ -25,7 +26,12 @@ def request(repo, number):
     ):
         return
     current = api(f"repos/{repo}/pulls/{number}")
-    if current["head"]["sha"] != sha or current["state"] != "open" or current["draft"]:
+    if (
+        current["head"]["sha"] != sha
+        or current["base"]["ref"] != base_ref
+        or current["state"] != "open"
+        or current["draft"]
+    ):
         return
     api(
         f"repos/{repo}/issues/{number}/comments",

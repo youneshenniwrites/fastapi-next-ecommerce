@@ -356,8 +356,9 @@ are not exempt. Agent instructions, delivery/review policy, workflows and script
 retain Codex review, even if written in Markdown. PR #224 changed agent guidance
 and therefore would not qualify under this narrow rule.
 
-The trusted documentation-review workflow requests CodeRabbit once per head using
-the existing scoped review credential. CodeRabbit reported skipping #224 because
+The trusted documentation-review workflow requests CodeRabbit once per head, after
+rechecking that the pull request still targets the classified base, using the
+existing scoped review credential. CodeRabbit reported skipping #224 because
 the repository has fewer than 10 stars despite automatic review being enabled.
 A request is not approval: require current-head CodeRabbit approval, resolved
 findings and applicable CI before merging. No automatic merge is added here.
