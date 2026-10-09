@@ -42,7 +42,12 @@ class RequestDeduplication(unittest.TestCase):
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from scripts import request_docs_review as module
 
-        pr = {"head": {"sha": "abc"}, "state": "open", "draft": False}
+        pr = {
+            "head": {"sha": "abc"},
+            "base": {"ref": "main"},
+            "state": "open",
+            "draft": False,
+        }
         with (
             patch.object(module, "inspect_routine", return_value=(True, pr)),
             patch.object(module, "api", return_value={"login": "owner"}) as api,
@@ -67,17 +72,87 @@ class RequestDeduplication(unittest.TestCase):
 
         with (
             patch.object(
-                module, "inspect_routine", return_value=(True, {"head": {"sha": "abc"}})
+                module,
+                "inspect_routine",
+                return_value=(
+                    True,
+                    {
+                        "head": {"sha": "abc"},
+                        "base": {"ref": "main"},
+                        "state": "open",
+                        "draft": False,
+                    },
+                ),
             ),
             patch.object(
                 module,
                 "api",
-                side_effect=[{"login": "owner"}, {"head": {"sha": "def"}}],
+                side_effect=[
+                    {"login": "owner"},
+                    {
+                        "head": {"sha": "def"},
+                        "base": {"ref": "main"},
+                        "state": "open",
+                        "draft": False,
+                    },
+                ],
             ) as api,
             patch.object(module, "pages", return_value=[]),
         ):
             module.request("o/r", 1)
             self.assertEqual(api.call_count, 2)
+
+    def test_retargeted_base_with_same_head_does_not_post(self):
+        from unittest.mock import patch
+
+        from scripts import request_docs_review as module
+
+        classified = {
+            "head": {"sha": "abc"},
+            "base": {"ref": "main"},
+            "state": "open",
+            "draft": False,
+        }
+        retargeted = {
+            "head": {"sha": "abc"},
+            "base": {"ref": "develop"},
+            "state": "open",
+            "draft": False,
+        }
+        with (
+            patch.object(module, "inspect_routine", return_value=(True, classified)),
+            patch.object(
+                module, "api", side_effect=[{"login": "owner"}, retargeted]
+            ) as api,
+            patch.object(module, "pages", return_value=[]),
+        ):
+            module.request("o/r", 1)
+            self.assertEqual(api.call_count, 2)
+
+    def test_unchanged_main_base_posts_once(self):
+        from unittest.mock import patch
+
+        from scripts import request_docs_review as module
+
+        pr = {
+            "head": {"sha": "abc"},
+            "base": {"ref": "main"},
+            "state": "open",
+            "draft": False,
+        }
+        with (
+            patch.object(module, "inspect_routine", return_value=(True, pr)),
+            patch.object(
+                module, "api", side_effect=[{"login": "owner"}, pr, {"id": 1}]
+            ) as api,
+            patch.object(module, "pages", return_value=[]),
+        ):
+            module.request("o/r", 1)
+            self.assertEqual(api.call_count, 3)
+            self.assertIn(
+                "@coderabbitai review\n<!-- docs-coderabbit-head:abc -->",
+                api.call_args.args[1]["body"],
+            )
 
 
 class CodexSkip(unittest.TestCase):
