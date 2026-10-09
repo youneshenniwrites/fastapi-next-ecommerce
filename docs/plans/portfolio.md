@@ -26,8 +26,8 @@ priorities, status and acceptance gates. This page describes product direction o
 
 ## After the completed demo
 
-VIN-288 plans a richer workspace/home-office catalog of up to 100 items, useful
-product information and full-catalog discovery. VIN-290 delivered one stored
+VIN-288 delivered a richer workspace/home-office catalog, within a planning cap
+of 100 items, with useful product information and full-catalog discovery. VIN-290 delivered one stored
 category per product and category browsing. VIN-291 delivered a stable local
 photograph and optional stated facts. VIN-292 delivered the reviewed
 60-product import in
@@ -39,8 +39,8 @@ does not require name-based code.
 VIN-295 separately saves owner catalog administration; it is explicitly deferred,
 with store-model discovery still open. New product work remains a fictional,
 sandbox shop unless the owner separately approves a real-business transition.
-The canonical plan owns ordering. Remaining VIN-288 work is planned, not
-delivered, and is not a new VIN-155 completion criterion.
+The canonical plan owns ordering. VIN-288 is delivered, and it is not a new
+VIN-155 completion criterion.
 
 ## Success criteria
 
