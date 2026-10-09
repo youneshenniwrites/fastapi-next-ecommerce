@@ -7,8 +7,13 @@ from pathlib import Path
 
 
 def pattern(issue: int, terms: list[str]) -> re.Pattern:
-    """Match complete issue identifiers and literal, case-insensitive feature terms."""
-    parts = [rf"\bVIN-{issue}\b", rf"(?<!\w)#{issue}\b", rf"/issues/{issue}(?!\d)"]
+    """Match complete issue identifiers and literal, case-insensitive feature terms.
+
+    An issue URL matches when the number ends the text or the next character is
+    not a word character. ``/issues/119.`` and ``/issues/119)`` match;
+    ``/issues/119draft`` does not.
+    """
+    parts = [rf"\bVIN-{issue}\b", rf"(?<!\w)#{issue}\b", rf"/issues/{issue}(?!\w)"]
     parts.extend(re.escape(term) for term in terms)
     return re.compile("|".join(parts), re.IGNORECASE)
 
