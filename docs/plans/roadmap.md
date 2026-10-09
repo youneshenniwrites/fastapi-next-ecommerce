@@ -3,7 +3,7 @@
 Purpose: [senior SWE portfolio plan](portfolio.md).
 The [canonical portfolio completion plan](portfolio-completion.md) owns progress,
 priorities and acceptance gates; [VIN-155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
-owns completed-demo handoffs and evidence; new catalog work lives in [VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288). This roadmap indexes capabilities.
+owns completed-demo handoffs and evidence; the delivered catalog release is [VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288). This roadmap indexes capabilities.
 
 ## Landed foundation
 
@@ -60,15 +60,15 @@ canonical plan for evidence and retained limitations.
 
 Use the [single portfolio completion plan and checklist](portfolio-completion.md)
 for current work, dependencies, blockers and acceptance gates. This roadmap is an
-index of delivered capabilities, not a second ordered plan. Issue #155 retains completed-demo evidence; VIN-288 and its children hold the
-new customer-release handoffs. The board holds workflow state in separate
+index of delivered capabilities, not a second ordered plan. Issue #155 retains completed-demo evidence. VIN-288 and its children are the delivered
+catalog release. The board holds workflow state in separate
 Customer features and Technical improvements views.
 
 Azure (#31) and broader enterprise work remain deferred as specified in that plan.
 
-The next planned customer release still expands the catalog up to
-100 workspace/home-office products, with useful product information and a safe
-curated import. Server queries, pagination and category browsing are delivered.
+VIN-288, the catalog release, is delivered. It covers server queries, pagination,
+category browsing, product information and a reviewed import of 60 development
+products. The planning cap was 100.
 VIN-287 is delivered in
 [PR #309](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/309)
 (`e163ee7`). VIN-290's category browsing is merged in

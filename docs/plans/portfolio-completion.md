@@ -7,9 +7,12 @@ checklist into issues, the Wiki or separate dashboards. Visuals are views of thi
 plan, not additional sources of truth.
 
 [Tracking issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
-contains the completed demo handoff and evidence. New customer work is tracked
-in [VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288)
-and its child stories. The board owns workflow state. Record scope/sequence changes here and link
+contains the completed demo handoff and evidence. The delivered catalog release is
+[VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288)
+and its child stories. Later customer work is
+[VIN-295](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/295)
+and [VIN-300](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/300).
+The board owns workflow state. Record scope/sequence changes here and link
 them from the relevant epic. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
 
@@ -241,7 +244,7 @@ and [Technical improvements](https://github.com/users/youneshenniwrites/projects
 Source issues own acceptance, dependencies, decisions and handoffs. The original
 Delivery board remains available as the combined overview.
 
-**Current customer release — VIN-288:** catalog expansion and discovery, in order:
+**Delivered catalog release — VIN-288:** catalog expansion and discovery, in order:
 
 | Story | Customer or contract outcome | Dependency |
 | --- | --- | --- |
@@ -312,8 +315,8 @@ storefront showed pages 1–3 (1–24, 25–48 and 49–60), Lighting, that sear
 both of those product pages. A fictional development account paid sandbox order
 #8 for one Dotted Pocket Notebook at £8.50; the server showed **Paid — sandbox
 only**, and that product's public stock then read 39. Production was not
-changed. VIN-288 stays in progress as the parent
-release. The import run is
+changed. VIN-288 is delivered: its five children are closed and the parent
+is Done. The import run is
 [37824723189](https://github.com/youneshenniwrites/fastapi-next-ecommerce/actions/runs/37824723189).
 
 **Architecture direction:** retain PostgreSQL/FastAPI and Next.js/shadcn.
@@ -336,8 +339,8 @@ limit on future admin-created records.
 **Later customer roadmaps:** [VIN-295](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/295)
 saves catalog administration as a separate, explicitly deferred epic: product
 editing, category management, safe publishing and limited merchandising controls
-(VIN-296–299). The owner deferred single-shop versus separate-shop discovery;
-none of that implementation blocks the current catalog release.
+(VIN-296–299). The owner deferred single-shop versus separate-shop discovery.
+The catalog release is delivered, so this admin work does not change it.
 [VIN-300](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/300)
 groups later sign-in continuity (VIN-293), account recovery/verification (VIN-127)
 and sandbox refund/void decisions (VIN-128). Reset must invalidate all existing
