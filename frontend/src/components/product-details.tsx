@@ -9,6 +9,7 @@ import { money, type Product } from "@/lib/catalog";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import {
   collectionHref as buildCollectionHref,
+  collectionQuery,
   type CollectionFilters,
 } from "@/lib/collection-url";
 function ProductFacts({ product }: { product: Product }) {
@@ -97,7 +98,10 @@ export function ProductDetails({
             {product.stock ? "In stock" : "Out of stock"}
           </Badge>
           <div className="mt-8">
-            <AddToCartButton product={product} />
+            <AddToCartButton
+              product={product}
+              returnQuery={collectionQuery(filters)}
+            />
           </div>
           <div className="mt-8 border border-border p-5 text-sm [&_p]:mt-2 [&_p]:text-muted-foreground">
             <strong>Saved to your account.</strong>

@@ -99,8 +99,10 @@ return no bearer token in JSON and use bounded upstream requests. See
 [session design](../docs/design/customer-sessions.md) for errors, expiry and
 stateless logout limitations. Visit `/register` to create a demo account and
 `/login` to sign in. Registration uses the same-origin `/api/session/register`
-handler; a successful login always returns to the collection. Profile/navigation
-and sign-out are implemented in `/account`. Desktop/mobile tests cover the complete
+handler. A successful login returns to the collection. Sign in to add instead
+returns to that product when the link carried a validated product id and
+recognised collection filters. Profile/navigation and sign-out are implemented
+in `/account`. Desktop/mobile tests cover the complete
 registration → login → profile → logout journey. See the [account verification
 guide](../docs/account-journey.md) for a manual walkthrough, test evidence and limits.
 
@@ -125,6 +127,11 @@ shows that the category does not exist. Unknown parameters are ignored. A
 recognised parameter that is duplicated, oversized or invalid falls back to its
 default and shows a short notice. Product links and the product page's "Back to
 the collection" link carry only these parameters, never an external return URL.
+Sign in to add uses `/login?product=<id>` plus those same parameters. Registration
+keeps the query so the following sign-in can open `/products/<id>` with that
+context. The id must be a positive integer up to 2147483647, without leading
+zeroes. `next`, other destinations, credentials and unrecognised parameters are
+ignored. A failed sign-in stays on the same page and does not add the product.
 The product page names the category embedded in the product response. It does not load the category list. A page past the end shows a
 recovery state with a link to the last page. Share results copies the canonical
 absolute URL, or reveals a selectable link when the clipboard is unavailable.

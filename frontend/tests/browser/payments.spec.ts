@@ -291,7 +291,10 @@ test("keyboard demo journey keeps catalog, login, cart and sandbox return access
     page,
     page.getByRole("button", { name: "Sign in", exact: true }),
   );
-  await expect(page).toHaveURL(/\/#collection$/);
+  await expect(page).toHaveURL(/\/products\/1$/);
+  await expect(
+    page.getByRole("button", { name: "Add to cart", exact: true }),
+  ).toBeVisible();
   await page.goto("/products/1");
   await keyboardActivate(
     page,

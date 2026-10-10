@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { AccountForm } from "../src/components/account-form";
+import type { AccountIntent } from "../src/lib/account-return";
 
 afterEach(() => {
   cleanup();
@@ -148,6 +149,113 @@ describe("account form feedback", () => {
       await waitFor(() => expect(request).toHaveBeenCalledTimes(2));
     },
   );
+});
+
+function withReplace(replace: ReturnType<typeof vi.fn>) {
+  const location = window.location;
+  Object.defineProperty(window, "location", {
+    configurable: true,
+    value: { replace },
+  });
+  return () => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: location,
+    });
+  };
+}
+
+it("returns to the selected product and carries that intent into registration", async () => {
+  const intent: AccountIntent = {
+    destination: "/products/7?category=lighting&q=lamp",
+    query: "?product=7&category=lighting&q=lamp",
+  };
+  const replace = vi.fn();
+  const restore = withReplace(replace);
+  try {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ detail: "no" }), { status: 401 }),
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ authenticated: true }), {
+            status: 200,
+          }),
+        ),
+    );
+    const rendered = render(<AccountForm mode="login" intent={intent} />);
+    expect(
+      screen
+        .getByRole("link", { name: "Create an account" })
+        .getAttribute("href"),
+    ).toBe("/register?product=7&category=lighting&q=lamp");
+    fillAndSubmit();
+    await screen.findByRole("alert");
+    expect(replace).not.toHaveBeenCalled();
+    fillAndSubmit();
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledExactlyOnceWith(
+        "/products/7?category=lighting&q=lamp",
+      ),
+    );
+    rendered.unmount();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ registered: true }), { status: 201 }),
+      ),
+    );
+    render(<AccountForm mode="register" intent={intent} />);
+    fillAndSubmit("register");
+    await screen.findByText("Your account is ready. Sign in to continue.");
+    expect(
+      screen
+        .getByRole("link", { name: "Continue to sign in" })
+        .getAttribute("href"),
+    ).toBe("/login?product=7&category=lighting&q=lamp");
+  } finally {
+    restore();
+  }
+});
+
+it("ignores an open redirect supplied as the sign-in destination", async () => {
+  const replace = vi.fn();
+  const restore = withReplace(replace);
+  try {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ authenticated: true }), {
+            status: 200,
+          }),
+        ),
+    );
+    render(
+      <AccountForm
+        mode="login"
+        intent={{
+          destination: "https://attacker.example/products/1",
+          query: "?next=https://attacker.example",
+        }}
+      />,
+    );
+    expect(
+      screen
+        .getByRole("link", { name: "Create an account" })
+        .getAttribute("href"),
+    ).toBe("/register");
+    fillAndSubmit();
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledExactlyOnceWith("/#collection"),
+    );
+  } finally {
+    restore();
+  }
 });
 
 it.each(["login", "register"] as const)(
