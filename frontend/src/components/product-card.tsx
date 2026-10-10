@@ -44,7 +44,7 @@ export function ProductCard({
         </p>
       </Link>
       <div className="mt-3">
-        <AddToCartButton product={product} compact />
+        <AddToCartButton product={product} compact returnQuery={returnQuery} />
       </div>
     </article>
   );

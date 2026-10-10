@@ -639,3 +639,191 @@ test("rate limits explain waiting and allow deliberate account retries", async (
     await page.unroute(`**/api/session/${mode}`);
   }
 });
+
+async function registerAccount(
+  request: import("@playwright/test").APIRequestContext,
+  email: string,
+) {
+  expect(
+    (
+      await request.post("http://127.0.0.1:18300/api/v1/auth/register", {
+        data: { email, password: "disposable-return-password" },
+      })
+    ).status(),
+  ).toBe(201);
+}
+
+async function signOut(page: import("@playwright/test").Page) {
+  if (test.info().project.name.includes("Pixel")) await openMobileMenu(page);
+  await page.getByRole("link", { name: "My account", exact: true }).click();
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(/\/login$/);
+}
+
+test("sign in to add returns to the product with collection context", async ({
+  page,
+  request,
+}) => {
+  const email = `return-${crypto.randomUUID()}@example.com`;
+  await registerAccount(request, email);
+  await page.goto("/?category=lighting&sort=price-asc");
+  const signIn = page
+    .getByRole("article")
+    .filter({ hasText: "Task Light" })
+    .getByRole("link", { name: "Sign in to add" });
+  await expect(signIn).toHaveAttribute(
+    "href",
+    /\/login\?product=\d+&category=lighting&sort=price-asc$/,
+  );
+  const productId = (await signIn.getAttribute("href"))!.match(
+    /product=(\d+)/,
+  )![1];
+  await signIn.click();
+  const loginUrl = new RegExp(
+    `/login\\?product=${productId}&category=lighting&sort=price-asc$`,
+  );
+  await expect(page).toHaveURL(loginUrl);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill("wrong-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "incorrect",
+  );
+  await expect(page).toHaveURL(loginUrl);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByLabel("Password", { exact: true }).press("Enter");
+  await expect(page).toHaveURL(
+    new RegExp(`/products/${productId}\\?category=lighting&sort=price-asc$`),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Task Light", level: 1 }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Add to cart", exact: true }),
+  ).toBeVisible();
+  expect(page.url()).not.toContain(email);
+  await page.goto("/cart");
+  await expect(
+    page.getByRole("heading", { name: "Your cart is empty" }),
+  ).toBeVisible();
+
+  await signOut(page);
+  await page.goto(`/products/${productId}?category=lighting&q=lamp`);
+  const detail = page.getByRole("main").getByRole("link", {
+    name: "Sign in to add",
+  });
+  await expect(detail).toHaveAttribute(
+    "href",
+    `/login?product=${productId}&category=lighting&q=lamp`,
+  );
+  await detail.click();
+  await page.getByLabel("Email address").fill(email);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/products/${productId}\\?category=lighting&q=lamp$`),
+  );
+});
+
+test("registration carries the product into the following sign-in", async ({
+  page,
+}) => {
+  const email = `return-reg-${crypto.randomUUID()}@example.com`;
+  await page.goto("/?category=lighting");
+  await page
+    .getByRole("article")
+    .filter({ hasText: "Task Light" })
+    .getByRole("link", { name: "Sign in to add" })
+    .click();
+  await page.getByRole("link", { name: "Create an account" }).click();
+  await expect(page).toHaveURL(/\/register\?product=\d+&category=lighting$/);
+  const productId = new URL(page.url()).searchParams.get("product")!;
+  await page.getByLabel("Email address").fill(email);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page
+    .getByRole("button", { name: "Create account", exact: true })
+    .click();
+  const continueLink = page.getByRole("link", { name: "Continue to sign in" });
+  await expect(continueLink).toHaveAttribute(
+    "href",
+    `/login?product=${productId}&category=lighting`,
+  );
+  await continueLink.click();
+  await expect(page).toHaveURL(
+    new RegExp(`/login\\?product=${productId}&category=lighting$`),
+  );
+  await page.getByLabel("Email address").fill(email);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/products/${productId}\\?category=lighting$`),
+  );
+  await expect(
+    page.getByRole("heading", { name: "Task Light", level: 1 }),
+  ).toBeVisible();
+});
+
+test("hostile and missing destinations stay local to the signed-in shopper", async ({
+  page,
+  request,
+}) => {
+  const first = `return-a-${crypto.randomUUID()}@example.com`;
+  const second = `return-b-${crypto.randomUUID()}@example.com`;
+  await registerAccount(request, first);
+  await registerAccount(request, second);
+  await page.goto(
+    `/login?product=${encodeURIComponent("https://attacker.example")}&next=https://attacker.example&email=${encodeURIComponent(first)}`,
+  );
+  await page.getByLabel("Email address").fill(first);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/#collection$/);
+  expect(page.url()).not.toContain("attacker.example");
+  expect(page.url()).not.toContain(first);
+
+  await signOut(page);
+  await page.goto("/login?product=999999&product=1");
+  await page.getByLabel("Email address").fill(first);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/#collection$/);
+
+  await signOut(page);
+  await page.goto("/login?product=999999");
+  await page.getByLabel("Email address").fill(first);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/products\/999999$/);
+  await expect(
+    page.getByRole("heading", { name: "This object has moved on." }),
+  ).toBeVisible();
+
+  await page.goto("/login");
+  await page.getByLabel("Email address").fill(second);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("disposable-return-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/#collection$/);
+  if (test.info().project.name.includes("Pixel")) await openMobileMenu(page);
+  await page.getByRole("link", { name: "My account", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Customer profile" }),
+  ).toContainText(second);
+  await expect(page.getByText(first, { exact: true })).toHaveCount(0);
+});

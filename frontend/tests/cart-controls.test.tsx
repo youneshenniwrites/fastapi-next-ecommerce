@@ -67,10 +67,19 @@ function Count() {
   const cart = useCart();
   return <output aria-label="Published quantity">{cart.count}</output>;
 }
-function view(snapshot: CartSnapshot, compact = false, stock = 10) {
+function view(
+  snapshot: CartSnapshot,
+  compact = false,
+  stock = 10,
+  returnQuery = "",
+) {
   return (
     <CartProvider snapshot={snapshot}>
-      <AddToCartButton product={{ ...product, stock }} compact={compact} />
+      <AddToCartButton
+        product={{ ...product, stock }}
+        compact={compact}
+        returnQuery={returnQuery}
+      />
       <Count />
     </CartProvider>
   );
@@ -189,9 +198,10 @@ it.each(["Stock changed.", "Your session changed. Sign in again."])(
     render(view(ready()));
     await clickAdd();
     expect((await screen.findByRole("alert")).textContent).toContain(error);
-    expect(Boolean(screen.queryByRole("link", { name: "Sign in" }))).toBe(
-      error.includes("session"),
-    );
+    expect(
+      screen.queryByRole("link", { name: "Sign in" })?.getAttribute("href") ??
+        null,
+    ).toBe(error.includes("session") ? "/login?product=7" : null);
     expect(boundary.refresh).not.toHaveBeenCalled();
     await clickAdd();
     expect(screen.queryByRole("alert")).toBeNull();
@@ -210,7 +220,7 @@ it.each([false, true])(
     rendered.rerender(view({ status: "guest", owner: null }, compact));
     expect(
       screen.getByRole("link", { name: "Sign in to add" }).getAttribute("href"),
-    ).toBe("/login");
+    ).toBe("/login?product=7");
     rendered.rerender(view({ status: "error", owner: null }, compact));
     boundary.refreshSession.mockClear();
     boundary.refresh.mockClear();

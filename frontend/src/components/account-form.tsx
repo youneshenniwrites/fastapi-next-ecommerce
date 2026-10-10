@@ -5,6 +5,12 @@ import { retryAfterSeconds, rateLimitMessage } from "@/lib/rate-limit";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { accountSchema, type AccountValues } from "@/lib/account-validation";
+import {
+  accountHref,
+  collectionIntent,
+  loginDestination,
+  type AccountIntent,
+} from "@/lib/account-return";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
@@ -20,8 +26,16 @@ import { Input } from "@/components/ui/input";
 // Server HTML must not accept credentials before React attaches submit handling.
 const subscribe = () => () => {};
 
-export function AccountForm({ mode }: { mode: "login" | "register" }) {
+export function AccountForm({
+  mode,
+  intent = collectionIntent,
+}: {
+  mode: "login" | "register";
+  intent?: AccountIntent;
+}) {
   const registering = mode === "register";
+  const signInHref = accountHref("login", intent);
+  const registerHref = accountHref("register", intent);
   const {
     register,
     handleSubmit,
@@ -82,7 +96,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
         if (registering) setRegistered(true);
         else {
           // Discard cached account/navigation state after authentication.
-          window.location.replace("/#collection");
+          window.location.replace(loginDestination(intent.destination));
         }
       } else if (!registering && response.status === 401) {
         setError("Email or password is incorrect. Please try again.");
@@ -142,7 +156,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
             Your account is ready. Sign in to continue.
           </p>
           <Button asChild className="mt-5">
-            <Link href="/login">Continue to sign in</Link>
+            <Link href={signInHref}>Continue to sign in</Link>
           </Button>
         </div>
       ) : (
@@ -288,7 +302,7 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {registering ? "Already have an account?" : "New to VINDOR?"}{" "}
           <Link
-            href={registering ? "/login" : "/register"}
+            href={registering ? signInHref : registerHref}
             className="font-medium text-foreground underline underline-offset-4"
           >
             {registering ? "Sign in" : "Create an account"}

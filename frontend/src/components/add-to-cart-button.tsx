@@ -6,11 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import { Check, LoaderCircle, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { Button } from "@/components/ui/button";
+import { signInToAddHref } from "@/lib/account-return";
 import type { Product } from "@/lib/catalog";
 
 export function AddToCartButton(props: {
   product: Product;
   compact?: boolean;
+  returnQuery?: string;
 }) {
   const cart = useCart();
   return (
@@ -24,9 +26,11 @@ export function AddToCartButton(props: {
 function AddToCartControl({
   product,
   compact = false,
+  returnQuery = "",
 }: {
   product: Product;
   compact?: boolean;
+  returnQuery?: string;
 }) {
   const cart = useCart();
   const [added, setAdded] = useState(false);
@@ -40,6 +44,7 @@ function AddToCartControl({
   const pending = Boolean(cart.pending[product.id]);
   const error = cart.errors[product.id];
   const outOfStock = product.stock === 0;
+  const signInHref = signInToAddHref(product.id, returnQuery);
 
   if (cart.state.status === "loading") {
     return (
@@ -67,7 +72,7 @@ function AddToCartControl({
             : "h-12 w-full"
         }
       >
-        <Link href="/login" prefetch={false}>
+        <Link href={signInHref} prefetch={false}>
           <ShoppingCart aria-hidden="true" />
           Sign in to add
         </Link>
@@ -149,7 +154,7 @@ function AddToCartControl({
         <p role="alert" className="text-xs text-destructive">
           {error}{" "}
           {error.includes("session") ? (
-            <Link href="/login" className="underline underline-offset-4">
+            <Link href={signInHref} className="underline underline-offset-4">
               Sign in
             </Link>
           ) : null}
