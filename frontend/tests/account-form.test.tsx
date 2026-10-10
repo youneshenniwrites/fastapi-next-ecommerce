@@ -204,9 +204,11 @@ it("returns to the selected product and carries that intent into registration", 
     rendered.unmount();
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ registered: true }), { status: 201 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ registered: true }), { status: 201 }),
+        ),
     );
     render(<AccountForm mode="register" intent={intent} />);
     fillAndSubmit("register");
@@ -227,13 +229,11 @@ it("ignores an open redirect supplied as the sign-in destination", async () => {
   try {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify({ authenticated: true }), {
-            status: 200,
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ authenticated: true }), {
+          status: 200,
+        }),
+      ),
     );
     render(
       <AccountForm
