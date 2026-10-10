@@ -15,12 +15,12 @@ elsewhere; development and production have separate accounts and databases.
 | --- | --- | --- |
 | Register | Open `/register`, enter a fictional email and an 8–128 character password, then select Create account. | Confirmation and Continue to sign in; registration does not sign in automatically. |
 | Sign in | Follow Continue to sign in and submit the same credentials. | Return to the collection; navigation shows My account. On mobile, open the navigation menu to find it. |
+| View profile | Select My account. | Only the signed-in customer's email and membership date appear. |
+| Sign out | Select Sign out on the account page. | Return to `/login`; opening `/account` now shows the sign-in prompt. |
 
 That sign-in has no selected product, so it opens the collection. Sign in to add
 on a product returns to that product and keeps the recognised collection
-filters. Login does not add the product.
-| View profile | Select My account. | Only the signed-in customer's email and membership date appear. |
-| Sign out | Select Sign out on the account page. | Return to `/login`; opening `/account` now shows the sign-in prompt. |
+filters. Login does not add the product. |
 
 On first load the form waits for its scripts before accepting input. Empty or
 incomplete submissions focus the invalid field without sending a login request.
