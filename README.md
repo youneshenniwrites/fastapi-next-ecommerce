@@ -292,7 +292,9 @@ Use fictional details and test cards only. Production payments remain disabled.
 Use the hosted [registration page](https://vindor-ecommerce.vercel.app/register)
 and [sign-in page](https://vindor-ecommerce.vercel.app/login) with fictional demo
 details and a password you do not use elsewhere. Registration does not sign you
-in automatically. Successful login returns to the catalog; choose My account in
+in automatically. A sign-in with no selected product returns to the catalog.
+Sign in to add on a product returns to that product and keeps the recognised
+collection filters. Choose My account in
 the navigation to view your profile and sign out. The [account page](https://vindor-ecommerce.vercel.app/account)
 requires a valid session. Session tokens stay in HttpOnly cookies.
 Follow the [account walkthrough and verification guide](docs/account-journey.md)
