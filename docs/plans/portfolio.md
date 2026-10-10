@@ -34,6 +34,9 @@ photograph and optional stated facts. VIN-292 delivered the reviewed
 [PR #324](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/324)
 (`9653a91`). The development catalog was imported at revision `0010` on
 8 October 2026; production data was not changed.
+VIN-293 is delivered in
+[PR #334](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/334)
+(`7958b0e`): Sign in to add returns to that product with its collection filters.
 Category and media data stay product-agnostic so a later assortment
 does not require name-based code.
 VIN-295 separately saves owner catalog administration; it is explicitly deferred,

@@ -18,6 +18,10 @@ elsewhere; development and production have separate accounts and databases.
 | View profile | Select My account. | Only the signed-in customer's email and membership date appear. |
 | Sign out | Select Sign out on the account page. | Return to `/login`; opening `/account` now shows the sign-in prompt. |
 
+That sign-in has no selected product, so it opens the collection. Sign in to add
+on a product returns to that product and keeps the recognised collection
+filters. Login does not add the product.
+
 On first load the form waits for its scripts before accepting input. Empty or
 incomplete submissions focus the invalid field without sending a login request.
 Guest sign-in links use client navigation; successful login/logout and

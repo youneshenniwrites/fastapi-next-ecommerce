@@ -84,8 +84,11 @@ photos and stated facts are merged in
 products in pages of 24, and one paid sandbox order. Production was not
 imported. Follow the canonical plan for the dependency order.
 
-Catalog administration (VIN-295) is a separate deferred roadmap. VIN-300 groups
-later sign-in continuity, account recovery and purchase support.
+Catalog administration (VIN-295) is a separate deferred roadmap. VIN-293 is
+delivered in
+[PR #334](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/334)
+(`7958b0e`): sign-in from a product returns to that product. VIN-300 still groups
+account recovery and purchase support.
 
 Beyond the shopping journey, the [technical readiness epic](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/125)
 sequences security hardening, reliability, and scale/compliance work, with scoped
