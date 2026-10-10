@@ -9,9 +9,11 @@ plan, not additional sources of truth.
 [Tracking issue #155](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/155)
 contains the completed demo handoff and evidence. The delivered catalog release is
 [VIN-288](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/288)
-and its child stories. Later customer work is
+and its child stories. [VIN-293](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/293),
+return after sign-in, is delivered. Later customer work is
 [VIN-295](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/295)
-and [VIN-300](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/300).
+and the remaining follow-ups in
+[VIN-300](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/300).
 The board owns workflow state. Record scope/sequence changes here and link
 them from the relevant epic. Preserve historical evidence. Keep one implementation story active
 at a time; external blockers must not prevent independent work.
@@ -341,9 +343,13 @@ saves catalog administration as a separate, explicitly deferred epic: product
 editing, category management, safe publishing and limited merchandising controls
 (VIN-296–299). The owner deferred single-shop versus separate-shop discovery.
 The catalog release is delivered, so this admin work does not change it.
+[VIN-293](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/293)
+is delivered in [PR #334](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/334)
+(`7958b0e`). Sign in to add returns to that product with its collection filters.
+The development storefront journey was checked on release `7958b0e`.
 [VIN-300](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/300)
-groups later sign-in continuity (VIN-293), account recovery/verification (VIN-127)
-and sandbox refund/void decisions (VIN-128). Reset must invalidate all existing
+still groups account recovery/verification (VIN-127) and sandbox refund/void
+decisions (VIN-128). Reset must invalidate all existing
 sessions; hosted email delivery still needs a sender/provider decision. These
 follow-ups retain their remaining product decisions rather than assuming a launch.
 
