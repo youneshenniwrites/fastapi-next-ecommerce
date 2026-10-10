@@ -20,7 +20,7 @@ elsewhere; development and production have separate accounts and databases.
 
 That sign-in has no selected product, so it opens the collection. Sign in to add
 on a product returns to that product and keeps the recognised collection
-filters. Login does not add the product. |
+filters. Login does not add the product.
 
 On first load the form waits for its scripts before accepting input. Empty or
 incomplete submissions focus the invalid field without sending a login request.
