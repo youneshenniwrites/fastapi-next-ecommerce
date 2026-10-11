@@ -166,7 +166,7 @@ test("browse, filter and view the real FastAPI catalog", async ({
     page.getByRole("heading", { name: "Oak Monitor Stand", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".detail-price")).toContainText("£79.00");
-  await expect(page.getByText("In stock", { exact: true })).toBeVisible();
+  await expect(page.getByText("12 in stock", { exact: true })).toBeVisible();
   await expect(
     page.getByText(
       /Demo orders can be placed at checkout\. Payments, when enabled, use a sandbox; no real money is charged\./,

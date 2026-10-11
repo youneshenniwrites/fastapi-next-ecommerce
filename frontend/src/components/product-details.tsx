@@ -6,6 +6,7 @@ import { CollectionBreadcrumb } from "@/components/collection-breadcrumb";
 import { container, eyebrow } from "@/components/storefront-layout";
 import { cn } from "@/lib/utils";
 import { money, type Product } from "@/lib/catalog";
+import { stockLabel } from "@/lib/stock-label";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import {
   collectionHref as buildCollectionHref,
@@ -95,7 +96,7 @@ export function ProductDetails({
             ) : (
               <Minus className="size-3.5" aria-hidden="true" />
             )}
-            {product.stock ? "In stock" : "Out of stock"}
+            {stockLabel(product.stock)}
           </Badge>
           <div className="mt-8">
             <AddToCartButton
