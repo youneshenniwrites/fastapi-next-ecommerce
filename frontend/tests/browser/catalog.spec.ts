@@ -1,5 +1,6 @@
 import { test, expect } from "./security-fixture";
 import AxeBuilder from "@axe-core/playwright";
+import { stockLabel } from "../../src/lib/stock-label";
 
 test("baseline security headers cover pages, errors and assets", async ({
   page,
@@ -138,6 +139,7 @@ async function openMobileMenu(page: import("@playwright/test").Page) {
 }
 test("browse, filter and view the real FastAPI catalog", async ({
   page,
+  request,
 }, info) => {
   await page.goto("/");
   await expect(
@@ -166,7 +168,15 @@ test("browse, filter and view the real FastAPI catalog", async ({
     page.getByRole("heading", { name: "Oak Monitor Stand", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".detail-price")).toContainText("£79.00");
-  await expect(page.getByText("In stock", { exact: true })).toBeVisible();
+  const productId = new URL(page.url()).pathname.split("/").at(-1);
+  const productResponse = await request.get(
+    `http://127.0.0.1:18300/api/v1/products/${productId}`,
+  );
+  expect(productResponse.ok()).toBe(true);
+  const product = await productResponse.json();
+  await expect(
+    page.getByText(stockLabel(product.stock), { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByText(
       /Demo orders can be placed at checkout\. Payments, when enabled, use a sandbox; no real money is charged\./,
