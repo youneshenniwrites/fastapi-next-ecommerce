@@ -177,6 +177,7 @@ test("browse, filter and view the real FastAPI catalog", async ({
   await expect(
     page.getByText(stockLabel(product.stock), { exact: true }),
   ).toBeVisible();
+  await expect(page).toHaveTitle(`${product.name} | VINDOR`);
   await expect(
     page.getByText(
       /Demo orders can be placed at checkout\. Payments, when enabled, use a sandbox; no real money is charged\./,
@@ -212,10 +213,12 @@ test("out-of-stock, missing products and responsive keyboard navigation", async 
   await expect(
     page.getByRole("heading", { name: "This object has moved on." }),
   ).toBeVisible();
+  await expect(page).toHaveTitle("Not found | VINDOR");
   await page.goto("/products/not-an-id");
   await expect(
     page.getByRole("heading", { name: "This object has moved on." }),
   ).toBeVisible();
+  await expect(page).toHaveTitle("Not found | VINDOR");
 });
 
 test("shared action and stock badge use the VINDOR theme", async ({ page }) => {
