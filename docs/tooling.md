@@ -101,11 +101,16 @@ its fixture/guard in the same reviewed change. Do not silently extend expiry or
 refresh hashes to accommodate dependency changes. No branch protection is disabled.
 
 Dependabot checks Python/uv, GitHub Actions, and backend Docker dependencies weekly.
-Python patch updates are grouped; open PR counts are limited. Applicable CI and
+Minor and patch updates are grouped into one weekly PR per ecosystem (Python,
+GitHub Actions and npm), so each group needs a single Codex review within the
+included allowance. Major updates still arrive as separate PRs. Open PR counts
+are limited. Applicable CI and
 verified clean current-head Codex review remain mandatory. The [dependency continuation](dependabot.md)
 repairs eligible stale requirements exports using trusted, offline tooling. Unsafe
 inputs and genuine test failures remain blocked for investigation.
 Frontend npm dependency updates are enabled weekly, with at most two open PRs.
+A grouped update that fails CI holds back every package in that group until it
+is repaired.
 
 CI actions are pinned to reviewed commit SHAs, with version comments for readers.
 Dependabot can propose updated pins. Jobs have time limits and read-only repository
