@@ -1,4 +1,6 @@
 version: 2
+# Minor and patch updates share one weekly PR per ecosystem so each needs one
+# Codex review; majors stay separate because they need individual attention.
 updates:
   - package-ecosystem: uv
     directory: /backend
@@ -8,15 +10,19 @@ updates:
       interval: weekly
     open-pull-requests-limit: 3
     groups:
-      python-patches:
+      python-minor-patch:
         patterns: ["*"]
-        update-types: ["patch"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: github-actions
     directory: /
     assignees: [youneshenniwrites]
     schedule:
       interval: weekly
     open-pull-requests-limit: 2
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: docker
     directory: /backend
     assignees: [youneshenniwrites]
@@ -30,5 +36,6 @@ updates:
       interval: weekly
     open-pull-requests-limit: 2
     groups:
-      frontend-patches:
-        update-types: ["patch"]
+      frontend-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
