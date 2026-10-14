@@ -266,9 +266,8 @@ was checked there: search submits from the address bar, an unknown search is
 empty, a product link keeps the query on the way back, Share copied the link,
 page 2 of the six-product catalog shows the out-of-range recovery, and the cart
 page opens. Multi-page results beyond page one were proved by the CI browser
-fixtures. VIN-250's separate
-unfinished smoke-retry draft is also preserved and parked; it is not a
-delivered feature either.
+fixtures. VIN-250's smoke-retry draft was parked at this checkpoint and is
+not part of the VIN-287 delivery.
 
 VIN-290's category implementation is on main. [PR #316](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/316)
 merged as `4dad3b0` on 6 October 2026. Each product has one category. All is the
