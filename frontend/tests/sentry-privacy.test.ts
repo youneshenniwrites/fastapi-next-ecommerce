@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { NodeClient, defaultStackParser } from "@sentry/node";
 import { BrowserClient, browserTracingIntegration } from "@sentry/browser";
-import { serializeEnvelope, withScope, startSpan } from "@sentry/core";
+import {
+  serializeEnvelope,
+  startInactiveSpan,
+  startSpan,
+  withScope,
+} from "@sentry/core";
 import {
   serverSentryOptions,
   clientSentryOptions,
@@ -10,6 +15,7 @@ import {
 import {
   scrubError,
   scrubLog,
+  samplingTransactionLabel,
   scrubSamplingTransaction,
   scrubStreamedSpan,
   scrubTransaction,
@@ -101,6 +107,50 @@ describe("Sentry payload privacy", () => {
     expect(scrubSamplingTransaction("fictional-secret", { broken: true })).toBe(
       "Application operation",
     );
+    expect(samplingTransactionLabel("nope")).toBe("Application operation");
+    expect(samplingTransactionLabel(null)).toBe("Application operation");
+    expect(
+      samplingTransactionLabel({
+        attributes: { "sentry.op": "http.client", "http.method": "POST" },
+      }),
+    ).toBe("POST · API request");
+    expect(samplingTransactionLabel({ "sentry.op": "ui.render" })).toBe(
+      "Component render",
+    );
+    const span = startInactiveSpan({
+      name: "fictional-secret",
+      op: "http.server",
+      attributes: { "sentry.op": "http.server" },
+    });
+    expect(span).toBeTruthy();
+    expect(scrubSamplingTransaction("fictional-secret", span)).toBe(
+      "Application operation",
+    );
+    const invalid = scrubStreamedSpan({
+      name: "fictional-secret",
+      span_id: "not-hex",
+      trace_id: "a".repeat(32),
+      start_timestamp: 1,
+      status: "ok",
+      is_segment: false,
+      attributes: {
+        "sentry.op": "http.client",
+        "sentry.segment.name": "FOO · Storefront request",
+        "sentry.origin": "Bad_Origin",
+        "sentry.trace_lifecycle": "static",
+        "sentry.segment.name.source": "nope",
+        "sentry.sdk.name": "bad name",
+        "sentry.sample_rate": -1,
+      },
+    } as never);
+    expect(invalid.span_id).toBe("0".repeat(16));
+    expect(invalid.end_timestamp).toBeUndefined();
+    expect(invalid.attributes["sentry.trace_lifecycle"]).toBe("static");
+    expect(invalid.attributes["sentry.origin"]).toBeUndefined();
+    expect(invalid.attributes["sentry.segment.name"]).toBe(
+      "Application operation",
+    );
+    expect(JSON.stringify(invalid)).not.toContain("fictional-secret");
   });
   it("drops arbitrary contexts but retains code identifiers", () => {
     const event = {
