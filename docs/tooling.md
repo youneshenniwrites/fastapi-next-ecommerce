@@ -38,7 +38,7 @@ On 3 October the owner approved accepting only
 on the verified development-only `braces` dependency paths until 10 October.
 On 8 October the owner extended that same exception once, to
 **17 October 2026, 23:59 UTC**. This accepts the risk; it does not fix the package.
-The current full audit reports seven dependent entries from this one advisory.
+The current full audit reports eight dependent entries from this one advisory.
 Runtime-only auditing is clean. The exposure is development glob processing in
 Next ESLint/shadcn tooling; arbitrary untrusted patterns can exhaust its stack.
 No published patched release was verified; unsafe downgrades/forks were rejected.
@@ -80,6 +80,13 @@ deepest pattern under `braces`' 10,000-character limit (4,999 levels) did not
 crash `braces` or `micromatch`. A 400 KB stack failed at 3,500 levels and a
 200 KB stack at 1,000 levels. The patterns here come only from our own tooling
 configuration, so the residual risk is a crashed local lint run.
+
+PR #340 reassessment (14 October): shadcn 4.21.4 pulls `@shadcn/registry`,
+which adds that package and one extra `fast-glob` path. Both are development-only
+and still trace only to GHSA-vfj7-8cjw-p6xm. The full audit reports eight
+development-only entries and zero runtime findings. The accepted graph and file
+hashes were renewed for that exact lockfile. The advisory URL and 17 October
+2026 23:59 UTC expiry are unchanged. This is accepted risk, not remediation.
 
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
