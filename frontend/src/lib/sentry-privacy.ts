@@ -251,7 +251,9 @@ function hexId(value: unknown, length: number): string | undefined {
 }
 
 function seconds(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function plain(value: unknown): string | undefined {
@@ -275,7 +277,9 @@ export function scrubSamplingTransaction(
 ): string | undefined {
   if (typeof transaction !== "string") return transaction;
   try {
-    return samplingTransactionLabel(span ? spanToJSON(span as Span) : undefined);
+    return samplingTransactionLabel(
+      span ? spanToJSON(span as Span) : undefined,
+    );
   } catch {
     return "Application operation";
   }

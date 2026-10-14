@@ -81,7 +81,9 @@ export function clientSentryOptions(
     // Release-health sessions are outside our monitoring scope; retain all
     // other defaults, including Next.js tracing and error integrations.
     integrations: (defaults) => [
-      ...defaults.filter((integration) => integration.name !== "BrowserSession"),
+      ...defaults.filter(
+        (integration) => integration.name !== "BrowserSession",
+      ),
       vindorPrivacyIntegration(),
     ],
   };
