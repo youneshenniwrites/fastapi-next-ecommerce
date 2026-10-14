@@ -436,9 +436,9 @@ starlette==1.7.0 \
     --hash=sha256:67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e \
     --hash=sha256:c79f74ea63cff761804fbbfb182f1e0b440c2d07b164d24700c5a1bab5d6ff5d
     # via fastapi
-stripe==15.6.1 \
-    --hash=sha256:9f3986aa960419041aba9c76191746bdf2c342c95892acfbf6edb500ab006d31 \
-    --hash=sha256:b33e1ea76462d7289e5fe755a1132b82099151bfb31e961021655471e6d216bf
+stripe==16.0.0 \
+    --hash=sha256:5016068d54aebb43e61b3c377ef45bede4e0b4eb1817d7a12af81630c55a23d2 \
+    --hash=sha256:6a401baf2fc19c59ccb59005e674f8da8fa256e8db319ad8c50292f4cddf8c26
     # via fastapi-next-ecommerce-backend
 structlog==26.1.0 \
     --hash=sha256:e081a26d6c373e6d201eca24eede26d8ffab07f88f477822e679183428d3d91e \
