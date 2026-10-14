@@ -62,7 +62,7 @@ it("keeps default error/tracing capture without emitting identity-bearing sessio
     await client.flush();
     const serialized = payloads.join("\n");
     expect(serialized).toContain('"type":"event"');
-    expect(serialized).toContain('"type":"transaction"');
+    expect(serialized).toContain('"type":"span"');
     expect(serialized).toContain("TypeError");
     expect(serialized).toContain("demo@session-test");
     expect(serialized).not.toContain('"type":"session"');

@@ -1,4 +1,11 @@
-import type { ErrorEvent, TransactionEvent, Log } from "@sentry/core";
+import {
+  spanToJSON,
+  type ErrorEvent,
+  type Log,
+  type Span,
+  type StreamedSpanJSON,
+  type TransactionEvent,
+} from "@sentry/core";
 
 export const FILTERED = "[Filtered]";
 type RecordValue = Record<string, unknown>;
@@ -199,6 +206,141 @@ export function scrubTransaction(event: TransactionEvent): TransactionEvent {
     event as unknown as RecordValue,
   ) as unknown as TransactionEvent;
 }
+const labelValues = new Set(Object.values(operationLabels));
+const segmentSources = new Set([
+  "custom",
+  "url",
+  "route",
+  "view",
+  "component",
+  "task",
+]);
+
+function attributeValue(value: unknown): unknown {
+  return value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "value" in value
+    ? (value as { value: unknown }).value
+    : value;
+}
+
+function flatAttributes(value: unknown): RecordValue {
+  return Object.fromEntries(
+    Object.entries(record(value)).map(([key, item]) => [
+      key,
+      attributeValue(item),
+    ]),
+  );
+}
+
+function knownOperationLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") return;
+  if (labelValues.has(value)) return value;
+  const match = /^((?:[A-Z]+)|_OTHER) · (.+)$/.exec(value);
+  if (!match || !labelValues.has(match[2])) return;
+  if (match[1] !== "_OTHER" && !httpMethods.has(match[1])) return;
+  return value;
+}
+
+function hexId(value: unknown, length: number): string | undefined {
+  return typeof value === "string" &&
+    new RegExp(`^[0-9a-f]{${length}}$`).test(value)
+    ? value
+    : undefined;
+}
+
+function seconds(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function plain(value: unknown): string | undefined {
+  return typeof value === "string" && /^[\w.@+:/-]{1,80}$/.test(value)
+    ? value
+    : undefined;
+}
+
+/** Envelope trace headers copy the raw span name. Replace that with the operation label. */
+export function samplingTransactionLabel(span: unknown): string {
+  if (!span || typeof span !== "object") return "Application operation";
+  const flat = flatAttributes(
+    "attributes" in span ? (span as { attributes?: unknown }).attributes : span,
+  );
+  return operationLabel(flat["sentry.op"], httpData({ data: flat }));
+}
+
+export function scrubSamplingTransaction(
+  transaction: string | undefined,
+  span: unknown,
+): string | undefined {
+  if (typeof transaction !== "string") return transaction;
+  try {
+    return samplingTransactionLabel(span ? spanToJSON(span as Span) : undefined);
+  } catch {
+    return "Application operation";
+  }
+}
+
+/** Sentry 11 streams spans outside beforeSendTransaction. Keep the same allowlist. */
+export function scrubStreamedSpan(span: StreamedSpanJSON): StreamedSpanJSON {
+  const flat = flatAttributes(span.attributes);
+  const http = httpData({ data: flat });
+  const label = operationLabel(flat["sentry.op"], http);
+  const attributes: RecordValue = {
+    "sentry.op":
+      typeof flat["sentry.op"] === "string" &&
+      Object.hasOwn(operationLabels, flat["sentry.op"])
+        ? flat["sentry.op"]
+        : "app.operation",
+    "sentry.segment.name": span.is_segment
+      ? label
+      : (knownOperationLabel(flat["sentry.segment.name"]) ??
+        "Application operation"),
+    ...http,
+  };
+  const origin = plain(flat["sentry.origin"]);
+  if (origin && /^[a-z]+(?:\.[a-z0-9]+){0,5}$/i.test(origin))
+    attributes["sentry.origin"] = origin;
+  const segmentId = hexId(flat["sentry.segment.id"], 16);
+  if (segmentId) attributes["sentry.segment.id"] = segmentId;
+  if (
+    flat["sentry.trace_lifecycle"] === "stream" ||
+    flat["sentry.trace_lifecycle"] === "static"
+  )
+    attributes["sentry.trace_lifecycle"] = flat["sentry.trace_lifecycle"];
+  for (const key of [
+    "sentry.sdk.name",
+    "sentry.sdk.version",
+    "sentry.release",
+    "sentry.environment",
+  ]) {
+    const item = plain(flat[key]);
+    if (item) attributes[key] = item;
+  }
+  const sample = flat["sentry.sample_rate"];
+  if (typeof sample === "number" && sample >= 0 && sample <= 1)
+    attributes["sentry.sample_rate"] = sample;
+  if (
+    typeof flat["sentry.segment.name.source"] === "string" &&
+    segmentSources.has(flat["sentry.segment.name.source"])
+  )
+    attributes["sentry.segment.name.source"] =
+      flat["sentry.segment.name.source"];
+  const parent = hexId(span.parent_span_id, 16);
+  const end = seconds(span.end_timestamp);
+  return {
+    name: label,
+    span_id: hexId(span.span_id, 16) ?? "0".repeat(16),
+    trace_id: hexId(span.trace_id, 32) ?? "0".repeat(32),
+    ...(parent ? { parent_span_id: parent } : {}),
+    start_timestamp: seconds(span.start_timestamp) ?? 0,
+    ...(end !== undefined ? { end_timestamp: end } : {}),
+    status: span.status === "error" ? "error" : "ok",
+    is_segment: span.is_segment === true,
+    attributes: attributes as StreamedSpanJSON["attributes"],
+  };
+}
+
 /** Logs remain disabled; the defensive hook retains only SDK correlation metadata. */
 export function scrubLog(log: Log): Log {
   return {

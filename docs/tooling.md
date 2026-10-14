@@ -81,6 +81,13 @@ crash `braces` or `micromatch`. A 400 KB stack failed at 3,500 levels and a
 200 KB stack at 1,000 levels. The patterns here come only from our own tooling
 configuration, so the residual risk is a crashed local lint run.
 
+PR #341 reassessment (14 October): `@sentry/nextjs` 11.6.0 changes the lockfile
+and does not change the braces graph. Fresh audits still report the same seven
+development-only entries, the same paths, and zero runtime findings. Only the
+file hashes were renewed. The advisory and 17 October 2026 23:59 UTC expiry are
+unchanged. `withSentryConfig` now comes from `@sentry/nextjs/config`. This is
+accepted risk, not remediation.
+
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
 available, confirm the complete audit is clean, then remove the exception and

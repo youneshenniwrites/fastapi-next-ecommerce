@@ -1,6 +1,27 @@
-import { scrubError, scrubTransaction, scrubLog } from "./sentry-privacy";
-import type { Integration } from "@sentry/core";
+import type { Client, Integration } from "@sentry/core";
+import {
+  scrubError,
+  scrubLog,
+  scrubSamplingTransaction,
+  scrubStreamedSpan,
+  scrubTransaction,
+} from "./sentry-privacy";
 export const SENTRY_TUNNEL_ROUTE = "/sentry-tunnel";
+
+/** The stream envelope header is not passed through beforeSendSpan. */
+export function vindorPrivacyIntegration(): Integration {
+  return {
+    name: "VindorPrivacy",
+    setup(client: Client) {
+      client.on(
+        "createDsc",
+        (dsc: { transaction?: string }, span?: unknown) => {
+          dsc.transaction = scrubSamplingTransaction(dsc.transaction, span);
+        },
+      );
+    },
+  };
+}
 
 export interface SentryRuntimeEnv {
   dsn?: string;
@@ -17,6 +38,7 @@ interface BaseSentryOptions {
   tracesSampleRate: number;
   sendDefaultPii: false;
   beforeSend: typeof scrubError;
+  beforeSendSpan: typeof scrubStreamedSpan;
   beforeSendTransaction: typeof scrubTransaction;
   beforeSendLog: typeof scrubLog;
 }
@@ -43,6 +65,7 @@ function baseSentryOptions(env: SentryRuntimeEnv): BaseSentryOptions {
     tracesSampleRate: sampleRateFor(env),
     sendDefaultPii: false,
     beforeSend: scrubError,
+    beforeSendSpan: scrubStreamedSpan,
     beforeSendTransaction: scrubTransaction,
     beforeSendLog: scrubLog,
   };
@@ -57,15 +80,22 @@ export function clientSentryOptions(
     // Session envelopes bypass beforeSend and can include SDK user identity.
     // Release-health sessions are outside our monitoring scope; retain all
     // other defaults, including Next.js tracing and error integrations.
-    integrations: (defaults) =>
-      defaults.filter((integration) => integration.name !== "BrowserSession"),
+    integrations: (defaults) => [
+      ...defaults.filter((integration) => integration.name !== "BrowserSession"),
+      vindorPrivacyIntegration(),
+    ],
   };
 }
 
 export function serverSentryOptions(
   env: SentryRuntimeEnv,
-): ServerSentryOptions {
-  return baseSentryOptions(env);
+): ServerSentryOptions & {
+  integrations: (defaults: Integration[]) => Integration[];
+} {
+  return {
+    ...baseSentryOptions(env),
+    integrations: (defaults) => [...defaults, vindorPrivacyIntegration()],
+  };
 }
 
 /** Upload only with a complete server-side configuration; never require secrets. */
