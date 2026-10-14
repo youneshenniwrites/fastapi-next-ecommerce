@@ -88,6 +88,12 @@ development-only entries and zero runtime findings. The accepted graph and file
 hashes were renewed for that exact lockfile. The advisory URL and 17 October
 2026 23:59 UTC expiry are unchanged. This is accepted risk, not remediation.
 
+PR #341 reassessment (14 October): `@sentry/nextjs` 11.6.0 changes the lockfile
+after that graph. Fresh audits still report those eight development-only entries
+and zero runtime findings. Only the file hashes were renewed. The advisory and
+17 October 2026 23:59 UTC expiry are unchanged. `withSentryConfig` now comes
+from `@sentry/nextjs/config`. This is accepted risk, not remediation.
+
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
 available, confirm the complete audit is clean, then remove the exception and

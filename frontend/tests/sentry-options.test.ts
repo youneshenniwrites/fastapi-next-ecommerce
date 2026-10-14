@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Integration } from "@sentry/core";
 import {
   SENTRY_TUNNEL_ROUTE,
   sourceMapUploadEnabled,
@@ -20,6 +21,15 @@ describe("sentry options", () => {
       sendDefaultPii: false,
       tunnel: SENTRY_TUNNEL_ROUTE,
     });
+  });
+
+  it("keeps server defaults and adds the privacy integration", () => {
+    const existing = { name: "Existing" } as Integration;
+    const integrations = serverSentryOptions({}).integrations([existing]);
+    expect(integrations.map((item) => item.name)).toEqual([
+      "Existing",
+      "VindorPrivacy",
+    ]);
   });
 
   it("builds server options without tunnel", () => {

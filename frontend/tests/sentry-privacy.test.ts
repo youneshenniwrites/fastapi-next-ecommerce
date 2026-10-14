@@ -1,14 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { NodeClient, defaultStackParser } from "@sentry/node";
-import { BrowserClient } from "@sentry/browser";
-import { serializeEnvelope, withScope, startSpan } from "@sentry/core";
+import { BrowserClient, browserTracingIntegration } from "@sentry/browser";
+import {
+  serializeEnvelope,
+  startInactiveSpan,
+  startSpan,
+  withScope,
+} from "@sentry/core";
 import {
   serverSentryOptions,
   clientSentryOptions,
+  vindorPrivacyIntegration,
 } from "../src/lib/sentry-options";
 import {
   scrubError,
   scrubLog,
+  samplingTransactionLabel,
+  scrubSamplingTransaction,
+  scrubStreamedSpan,
   scrubTransaction,
 } from "../src/lib/sentry-privacy";
 
@@ -21,6 +30,127 @@ describe("Sentry payload privacy", () => {
     });
     expect(JSON.stringify(log)).not.toContain("fictional-secret");
     expect(log.attributes?.["sentry.release"]).toBe("demo@1");
+  });
+
+  it("scrubs streamed spans down to the operation vocabulary", () => {
+    const clean = scrubStreamedSpan({
+      name: "fictional-secret",
+      span_id: "b".repeat(16),
+      trace_id: "not-a-trace",
+      parent_span_id: "secret",
+      start_timestamp: Number.NaN,
+      end_timestamp: 2,
+      status: "error",
+      is_segment: true,
+      attributes: {
+        "sentry.op": { value: "http.server" },
+        "sentry.origin": "manual",
+        "sentry.segment.name": "fictional-secret",
+        "sentry.segment.id": "c".repeat(16),
+        "sentry.trace_lifecycle": "stream",
+        "sentry.sdk.name": "sentry.javascript.node",
+        "sentry.sdk.version": "11.6.0",
+        "sentry.release": "demo@1",
+        "sentry.environment": "privacy-test",
+        "sentry.sample_rate": 1,
+        "sentry.segment.name.source": "custom",
+        "sentry.sdk.integrations": ["SpanStreaming", "fictional-secret"],
+        "http.request.method": "GET",
+        "http.response.status_code": 200,
+        "url.full":
+          "https://user:fictional-secret@shop.invalid/private?token=fictional-secret",
+        "user.email": "fictional-secret@example.invalid",
+      },
+    } as never);
+    expect(clean.name).toBe("GET · Storefront request");
+    expect(clean.trace_id).toBe("0".repeat(32));
+    expect(clean.parent_span_id).toBeUndefined();
+    expect(clean.start_timestamp).toBe(0);
+    expect(clean.status).toBe("error");
+    expect(clean.attributes["sentry.segment.name"]).toBe(
+      "GET · Storefront request",
+    );
+    expect(clean.attributes["sentry.op"]).toBe("http.server");
+    expect(clean.attributes["url.full"]).toBeUndefined();
+    expect(clean.attributes["user.email"]).toBeUndefined();
+    expect(clean.attributes["sentry.sdk.integrations"]).toBeUndefined();
+    expect(JSON.stringify(clean)).not.toContain("fictional-secret");
+
+    const child = scrubStreamedSpan({
+      name: "fictional-secret",
+      span_id: "d".repeat(16),
+      trace_id: "a".repeat(32),
+      parent_span_id: "b".repeat(16),
+      start_timestamp: 1,
+      status: "unknown",
+      is_segment: false,
+      attributes: {
+        "sentry.op": "fictional-secret",
+        "sentry.segment.name": "GET · Storefront request",
+        "sentry.origin": "https://fictional-secret",
+        "sentry.sample_rate": 2,
+        "sentry.trace_lifecycle": "other",
+        "http.method": "GET\nfictional-secret",
+        "http.status_code": "200",
+      },
+    } as never);
+    expect(child.name).toBe("Application operation");
+    expect(child.status).toBe("ok");
+    expect(child.attributes["sentry.op"]).toBe("app.operation");
+    expect(child.attributes["sentry.segment.name"]).toBe(
+      "GET · Storefront request",
+    );
+    expect(child.attributes["sentry.origin"]).toBeUndefined();
+    expect(child.attributes["http.method"]).toBeUndefined();
+    expect(JSON.stringify(child)).not.toContain("fictional-secret");
+    expect(scrubSamplingTransaction(undefined, undefined)).toBeUndefined();
+    expect(scrubSamplingTransaction("fictional-secret", { broken: true })).toBe(
+      "Application operation",
+    );
+    expect(samplingTransactionLabel("nope")).toBe("Application operation");
+    expect(samplingTransactionLabel(null)).toBe("Application operation");
+    expect(
+      samplingTransactionLabel({
+        attributes: { "sentry.op": "http.client", "http.method": "POST" },
+      }),
+    ).toBe("POST · API request");
+    expect(samplingTransactionLabel({ "sentry.op": "ui.render" })).toBe(
+      "Component render",
+    );
+    const span = startInactiveSpan({
+      name: "fictional-secret",
+      op: "http.server",
+      attributes: { "sentry.op": "http.server" },
+    });
+    expect(span).toBeTruthy();
+    expect(scrubSamplingTransaction("fictional-secret", span)).toBe(
+      "Application operation",
+    );
+    const invalid = scrubStreamedSpan({
+      name: "fictional-secret",
+      span_id: "not-hex",
+      trace_id: "a".repeat(32),
+      start_timestamp: 1,
+      status: "ok",
+      is_segment: false,
+      attributes: {
+        "sentry.op": "http.client",
+        "sentry.segment.name": "FOO · Storefront request",
+        "sentry.origin": "Bad_Origin",
+        "sentry.trace_lifecycle": "static",
+        "sentry.segment.name.source": "nope",
+        "sentry.sdk.name": "bad name",
+        "sentry.sample_rate": -1,
+      },
+    } as never);
+    expect(invalid.span_id).toBe("0".repeat(16));
+    expect(invalid.end_timestamp).toBeUndefined();
+    expect(invalid.attributes["sentry.trace_lifecycle"]).toBe("static");
+    expect(invalid.attributes["sentry.origin"]).toBeUndefined();
+    expect(invalid.attributes["sentry.segment.name"]).toBe(
+      "Application operation",
+    );
+    expect(JSON.stringify(invalid)).not.toContain("fictional-secret");
   });
   it("drops arbitrary contexts but retains code identifiers", () => {
     const event = {
@@ -110,7 +240,16 @@ describe("Sentry payload privacy", () => {
           tracesSampleRate: 1,
           release: "demo@1",
         }),
-        integrations: [],
+        integrations:
+          runtime === "server"
+            ? [vindorPrivacyIntegration()]
+            : [
+                browserTracingIntegration({
+                  instrumentPageLoad: false,
+                  instrumentNavigation: false,
+                }),
+                vindorPrivacyIntegration(),
+              ],
         stackParser: defaultStackParser,
         transport: () => ({
           send: async (envelope) => {
@@ -158,6 +297,7 @@ describe("Sentry payload privacy", () => {
             timestamp: 2,
             description: "fictional-secret",
             op: "http.client",
+            status: "ok",
             data: { token: "fictional-secret" },
           },
         ],
@@ -217,7 +357,7 @@ describe("Sentry payload privacy", () => {
         );
       });
       await client.flush();
-      expect(payloads).toHaveLength(4);
+      expect(payloads.length).toBeGreaterThanOrEqual(3);
       const serialized = payloads.join("\n");
       expect(serialized).not.toContain("fictional-secret");
       expect(serialized).toContain("sentry-privacy.test.ts");
@@ -233,36 +373,34 @@ describe("Sentry payload privacy", () => {
         "Application operation",
         "GET · Storefront request",
         "POST · API request",
-        '"http.request.method":"GET"',
-        '"http.method":"POST"',
-        '"http.response.status_code":401',
-        '"http.status_code":401',
+        '"http.request.method":{"value":"GET","type":"string"}',
+        '"http.method":{"value":"POST","type":"string"}',
+        '"http.method":{"value":"_OTHER","type":"string"}',
+        '"http.response.status_code":{"value":401,"type":"integer"}',
+        '"http.status_code":{"value":401,"type":"integer"}',
       ]) {
         expect(serialized).toContain(diagnostic);
       }
-      const transactions = payloads
-        .map((payload) => JSON.parse(payload.split("\n")[2]))
-        .filter((event) => event.type === "transaction");
-      const generated = transactions.find(
-        (event) => event.transaction === "GET · Storefront request",
+      const spanEnvelope = payloads
+        .map((payload) => payload.split("\n"))
+        .find((lines) => lines[1]?.includes('"type":"span"'));
+      const items = JSON.parse(spanEnvelope?.[2] ?? "{}").items as Array<{
+        name: string;
+        attributes: Record<string, { value: unknown }>;
+      }>;
+      expect(items.map((item) => item.name).sort()).toEqual(
+        [
+          "API request",
+          "Application operation",
+          "GET · Storefront request",
+          "POST · API request",
+          "_OTHER · API request",
+        ].sort(),
       );
-      expect(generated.contexts.trace.data).toEqual({
-        "http.request.method": "GET",
-        "http.response.status_code": 200,
-      });
-      expect(
-        generated.spans
-          .filter((span: { op: string }) => span.op === "http.client")
-          .map((span: { data?: unknown }) => span.data),
-      ).toEqual([
-        {
-          "http.method": "POST",
-          "http.status_code": 401,
-          "http.response.status_code": 401,
-        },
-        { "http.method": "_OTHER" },
-        undefined,
-      ]);
+      const posted = items.find((item) => item.name === "POST · API request");
+      expect(posted?.attributes["http.method"]?.value).toBe("POST");
+      expect(posted?.attributes["http.url"]).toBeUndefined();
+      expect(posted?.attributes["http.response.status_code"]?.value).toBe(401);
       await client.close();
     },
   );

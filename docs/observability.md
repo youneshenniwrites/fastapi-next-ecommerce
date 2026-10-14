@@ -114,7 +114,10 @@ are derived from a closed operation vocabulary (for example `Storefront request`
 `API request`, `Next.js function`, `Database query`); unknown operations become
 `Application operation`. Existing backend commerce route-template labels remain.
 Raw names, URLs, SQL and identifiers never become labels. Unknown span operations
-are normalized to `app.operation`. This covers OAuth `username` bodies, credential headers and nested
+are normalized to `app.operation`. Sentry 11 sends spans on its default stream
+lifecycle, which does not call `beforeSendTransaction`. `beforeSendSpan` applies
+this same allowlist to that payload, including the span name and
+`sentry.segment.name`. This covers OAuth `username` bodies, credential headers and nested
 arrays by removing their containing data, rather than guessing every sensitive key.
 Backend exception local-variable capture is explicitly disabled.
 

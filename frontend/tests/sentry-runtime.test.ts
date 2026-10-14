@@ -4,6 +4,8 @@ const init = vi.hoisted(() => vi.fn());
 vi.mock("@sentry/nextjs", () => ({
   init,
   captureRouterTransitionStart: vi.fn(),
+}));
+vi.mock("@sentry/nextjs/config", () => ({
   withSentryConfig: (config: unknown) => config,
 }));
 
