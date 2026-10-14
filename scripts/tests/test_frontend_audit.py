@@ -117,7 +117,7 @@ class FrontendAuditTests(unittest.TestCase):
 
     def test_increased_severity_rejected(self):
         self.report["vulnerabilities"]["braces"]["severity"] = "critical"
-        self.report["metadata"]["vulnerabilities"].update(high=6, critical=1)
+        self.report["metadata"]["vulnerabilities"].update(high=7, critical=1)
         with self.assertRaisesRegex(ValueError, "severity"):
             self.evaluate()
 
