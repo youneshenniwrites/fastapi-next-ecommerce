@@ -3,7 +3,7 @@ name = "fastapi-next-ecommerce-backend"
 version = "0.1.0"
 requires-python = ">=3.12,<3.14"
 dependencies = [
-  "fastapi>=0.142.2,<0.143",
+  "fastapi>=0.143.0,<0.144",
   "uvicorn[standard]>=0.54.0,<1",
   "sqlalchemy>=2.1.4,<2.2",
   "alembic>=1.20.0,<2",
@@ -14,7 +14,7 @@ dependencies = [
   "pyjwt>=2.14.0,<3",
   "pwdlib[argon2,bcrypt]>=0.3.1,<1",
   "structlog>=24.4.0,<27",
-  "sentry-sdk>=2.69.2,<3",
+  "sentry-sdk>=2.71.0,<3",
   "stripe>=16.0.0,<17",
 ]
 
@@ -22,7 +22,7 @@ dependencies = [
 dev = [
     "pytest>=8.3.3,<10",
     "httpx>=0.28,<1",
-    "ruff>=0.16.10,<1",
+    "ruff>=0.17.0,<1",
     "pip-audit>=2.9,<3",
     "pytest-cov>=6,<8",
     "pre-commit>=4,<5",
