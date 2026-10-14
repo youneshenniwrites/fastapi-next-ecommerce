@@ -3,12 +3,16 @@
   "advisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
   "expiresAt": "2026-10-17T23:59:00+00:00",
   "files": {
-    "package.json": "ef7786d0f62ad3f6e686034db3f63b98ed16f379f6685d768a23a4184af03aa1",
-    "package-lock.json": "573f7c9702da4947358ee895257f464d38b4eb137e3b4329ad42a7a1d6de382d"
+    "package.json": "faa9070aeb1eb32799f25037501adc58f885a236ccab5d8c5c7cd3318f1ebb9d",
+    "package-lock.json": "d7a102af83fcdeac4ec3686eaaa3a8f96b5448dbc90d80b4ec5a4b1abb5cbcfc"
   },
   "packages": {
     "@next/eslint-plugin-next": {
       "nodes": ["node_modules/@next/eslint-plugin-next"],
+      "via": ["fast-glob"]
+    },
+    "@shadcn/registry": {
+      "nodes": ["node_modules/@shadcn/registry"],
       "via": ["fast-glob"]
     },
     "@ts-morph/common": {
@@ -21,6 +25,7 @@
     },
     "fast-glob": {
       "nodes": [
+        "node_modules/@shadcn/registry/node_modules/fast-glob",
         "node_modules/@ts-morph/common/node_modules/fast-glob",
         "node_modules/fast-glob",
         "node_modules/shadcn/node_modules/fast-glob"
@@ -33,7 +38,7 @@
     },
     "shadcn": {
       "nodes": ["node_modules/shadcn"],
-      "via": ["fast-glob", "ts-morph"]
+      "via": ["@shadcn/registry", "fast-glob", "ts-morph"]
     },
     "ts-morph": {
       "nodes": ["node_modules/ts-morph"],

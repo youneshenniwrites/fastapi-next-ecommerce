@@ -19,6 +19,26 @@
         "isSemVerMajor": true
       }
     },
+    "@shadcn/registry": {
+      "name": "@shadcn/registry",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "fast-glob"
+      ],
+      "effects": [
+        "shadcn"
+      ],
+      "range": "<=0.0.0-rc-20261007105214 || >=0.1.0",
+      "nodes": [
+        "node_modules/@shadcn/registry"
+      ],
+      "fixAvailable": {
+        "name": "shadcn",
+        "version": "1.0.0",
+        "isSemVerMajor": true
+      }
+    },
     "@ts-morph/common": {
       "name": "@ts-morph/common",
       "severity": "high",
@@ -83,11 +103,13 @@
       ],
       "effects": [
         "@next/eslint-plugin-next",
+        "@shadcn/registry",
         "@ts-morph/common",
         "shadcn"
       ],
       "range": "*",
       "nodes": [
+        "node_modules/@shadcn/registry/node_modules/fast-glob",
         "node_modules/@ts-morph/common/node_modules/fast-glob",
         "node_modules/fast-glob",
         "node_modules/shadcn/node_modules/fast-glob"
@@ -123,11 +145,12 @@
       "severity": "high",
       "isDirect": true,
       "via": [
+        "@shadcn/registry",
         "fast-glob",
         "ts-morph"
       ],
       "effects": [],
-      "range": "<=0.0.0-beta-20261001093212 || >=2.0.0",
+      "range": "<=0.0.0-rc-20261007105214 || >=2.0.0",
       "nodes": [
         "node_modules/shadcn"
       ],
@@ -163,17 +186,17 @@
       "info": 0,
       "low": 0,
       "moderate": 0,
-      "high": 7,
+      "high": 8,
       "critical": 0,
-      "total": 7
+      "total": 8
     },
     "dependencies": {
       "prod": 236,
-      "dev": 501,
+      "dev": 494,
       "optional": 127,
       "peer": 76,
       "peerOptional": 0,
-      "total": 842
+      "total": 835
     }
   }
 }
