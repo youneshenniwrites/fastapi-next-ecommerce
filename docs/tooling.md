@@ -31,13 +31,15 @@ It audits development dependencies too. A failure must be investigated: dependen
 vulnerabilities and an unavailable advisory service both produce unsuccessful runs.
 Do not bypass or globally suppress failures to make CI green.
 
-### Temporary VIN-269 tooling exception — expires 17 October 2026
+### Temporary VIN-269 tooling exception — expires 29 October 2026
 
 On 3 October the owner approved accepting only
 [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
 on the verified development-only `braces` dependency paths until 10 October.
-On 8 October the owner extended that same exception once, to
-**17 October 2026, 23:59 UTC**. This accepts the risk; it does not fix the package.
+On 8 October the owner extended that same exception to
+**17 October 2026, 23:59 UTC**. On 22 October the owner directed the open
+pull-request queue to merge and extended that same exception again, to
+**29 October 2026, 23:59 UTC**. This accepts the risk; it does not fix the package.
 The current full audit reports eight dependent entries from this one advisory.
 Runtime-only auditing is clean. The exposure is development glob processing in
 Next ESLint/shadcn tooling; arbitrary untrusted patterns can exhaust its stack.
@@ -93,6 +95,18 @@ after that graph. Fresh audits still report those eight development-only entries
 and zero runtime findings. Only the file hashes were renewed. The advisory and
 17 October 2026 23:59 UTC expiry are unchanged. `withSentryConfig` now comes
 from `@sentry/nextjs/config`. This is accepted risk, not remediation.
+
+Extension reassessment (22 October): the registry still publishes latest
+`braces@3.0.3`, and the advisory still lists no patched version. Fresh full
+and runtime audits report the same eight development-only entries, paths and
+advisory, and zero runtime findings. Locked updates within existing ranges
+move `hono` to 4.13.13 and `vite` to 8.3.5 (with the locked `rolldown` 1.2.15,
+`nanoid` 3.3.20 and `postcss` 8.5.31 that release pulls in), removing
+GHSA-5r4p-p66f-jhc7 and the Vite 8.3.0–8.3.2 advisories. `expiresAt` and the lockfile hash changed.
+The advisory and accepted graph did not. In the same change, `certifi`
+2026.10.19 and `virtualenv` 21.14.12 clear the Python advisories that were
+failing `pip-audit` on main. This is accepted risk for `braces`, not
+remediation.
 
 [VIN-269](https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269)
 remains open for remediation. Install a verified compatible upstream fix when
