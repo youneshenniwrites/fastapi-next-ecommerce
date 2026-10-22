@@ -1,10 +1,10 @@
 {
   "issue": "https://github.com/youneshenniwrites/fastapi-next-ecommerce/issues/269",
   "advisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
-  "expiresAt": "2026-10-17T23:59:00+00:00",
+  "expiresAt": "2026-10-29T23:59:00+00:00",
   "files": {
     "package.json": "faa9070aeb1eb32799f25037501adc58f885a236ccab5d8c5c7cd3318f1ebb9d",
-    "package-lock.json": "d7a102af83fcdeac4ec3686eaaa3a8f96b5448dbc90d80b4ec5a4b1abb5cbcfc"
+    "package-lock.json": "b2102be9c65566dd204e6d9c1b77680d60b02965815d5d3544664c69d4c19e13"
   },
   "packages": {
     "@next/eslint-plugin-next": {
