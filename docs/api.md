@@ -19,9 +19,13 @@ or query string. These headers cover API docs, redirects, handled errors and the
 API's default unexpected-error response, plus storefront pages and static assets.
 Unexpected API exceptions still propagate to the server and error monitoring.
 Normal development delivery verifies these values on the API and storefront
-smoke responses, including deliberate 401s. A protection bypass is sent only
-when explicitly configured for a protected deployment; the current stable
-development alias responds without it (see the environment runbook).
+smoke responses, including deliberate 401s. Safe GET checks also require the
+expected content type and selected page content, and retry a mismatch inside
+one finite time budget. The only followed redirect is the API root's same-origin
+`/docs` redirect; every other redirect is refused without sending a protection
+bypass to the target. Authentication writes are not replayed. A protection bypass
+is sent only when explicitly configured for a protected deployment; the current
+stable development alias responds without it (see the environment runbook).
 Next.js's automatic trailing-slash normalization runs before configured headers;
 its empty same-origin 308 responses are excluded. Tests retain their canonical
 URL and query behavior. Hosting-provider responses outside either application
