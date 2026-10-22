@@ -266,9 +266,8 @@ was checked there: search submits from the address bar, an unknown search is
 empty, a product link keeps the query on the way back, Share copied the link,
 page 2 of the six-product catalog shows the out-of-range recovery, and the cart
 page opens. Multi-page results beyond page one were proved by the CI browser
-fixtures. VIN-250's separate
-unfinished smoke-retry draft is also preserved and parked; it is not a
-delivered feature either.
+fixtures. VIN-250's smoke-retry draft was parked at this checkpoint and is
+not part of the VIN-287 delivery.
 
 VIN-290's category implementation is on main. [PR #316](https://github.com/youneshenniwrites/fastapi-next-ecommerce/pull/316)
 merged as `4dad3b0` on 6 October 2026. Each product has one category. All is the
@@ -356,8 +355,9 @@ follow-ups retain their remaining product decisions rather than assuming a launc
 **Technical improvements — VIN-125:** keep security, RUM, Sentry, reliability,
 CI and feature-flag discovery in the technical view. VIN-294 records the earlier
 feature-flag research request as discovery, with no tool selected or installed.
-VIN-269's approved advisory-specific exception was extended once on 8 October and
-now expires **17 October 2026 at 23:59 UTC**; no remediation is claimed. That deadline stays
+VIN-269's approved advisory-specific exception was extended on 8 October and
+again on 22 October. It now expires **29 October 2026 at 23:59 UTC**; no
+remediation is claimed. That deadline stays
 urgent while independent customer work proceeds. VIN-172's recorded credential
 expiry (28 October) and VIN-38's recorded trigger-policy deadline (2 November)
 must be revalidated before action. Routine tooling cannot displace customer
@@ -382,7 +382,7 @@ VIN-45's same-preview hosted proof and cleanup are verified. Development monitor
 (VIN-121) and joined-trace proof (VIN-223) are also complete. VIN-262's final
 package is verified; the scoped portfolio finish line has no remaining dependency.
 Keep future customer-feature and maintenance blockers on their source issues. VIN-269 retains an explicitly approved, expiring development-only
-audit exception through 17 October at 23:59 UTC; upstream remediation remains open. An unresolved outcome stays unchecked at portfolio acceptance.
+audit exception through 29 October at 23:59 UTC; upstream remediation remains open. An unresolved outcome stays unchecked at portfolio acceptance.
 
 ### Delivery checklist
 
